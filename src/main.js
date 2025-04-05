@@ -3,7 +3,7 @@ const utils  = require('./utils.js');
 const log    = utils.getLog('MAIN');
 
 let context, globalMarks;
-
+ 
 function init(contextIn) { 
   context = contextIn;
   context.workspaceState.update('globalMarks', {}); // DEBUG
@@ -26,18 +26,59 @@ function addToGlobalMarks(data, token) {
   return token;
 }
 
+function tokenRegEx(lang, commLft, commRgt) {
+  return new RegExp(
+    (commLft + '.*?@([0-9a-z]{4})@.*?' + commRgt)
+          .replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+}
+
 function toggle() {
   log('toggle called');
   const editor = vscode.window.activeTextEditor;
   if (!editor) { log('toggle, No active editor'); return; }
   const document   = editor.document;
-  const languageId = document.languageId;
   const relPath    = vscode.workspace.asRelativePath(document.uri);
   const lineNumber = editor.selection.active.line;
   const token      = addToGlobalMarks({languageId, relPath, lineNumber});
   const line       = document.lineAt(lineNumber);
-  editor.edit(builder => {builder.insert(line.range.end, ` // ${token}`)});
-  log('toggle globalMarks:', globalMarks);
+  const lineText   = line.text;
+  const languageId = document.languageId;
+  const [commLft, commRgt] = utils.commentString(languageId);
+  const tokenRegx  = tokenRegEx(languageId, commLft, commRgt); 
+  if(tokenRegx.test(lineText)) {
+    const newLine = lineText.replace(tokenRegx, '');
+    editor.edit(builder => {
+      builder.replace(line.range, newLine);
+    });
+  }
+  else {
+    editor.edit(builder => {builder.insert(line.range.end, 
+                            ` ${commLft+token+commRgt}`)});
+  }
+  log('toggle, new line:', document.lineAt(lineNumber).text);
 }
 
-module.exports = { init, toggle };
+function clearFile() {
+  log('clearFile called');
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) { log('toggle, No active editor'); return; }
+  const document   = editor.document;
+  const relPath    = vscode.workspace.asRelativePath(document.uri);
+  const languageId = document.languageId;
+  const [commLft, commRgt] = utils.commentString(languageId);
+  const tokenRegx  = tokenRegEx(languageId, commLft, commRgt); 
+  let newContent = document.getText().replaceAll(tokenRegx, '');
+  editor.edit(builder => {
+    builder.replace(new vscode.Range(
+      new vscode.Position(0, 0),
+      new vscode.Position(document.lineCount, 0)
+    ), newContent);
+  });
+  Object.keys(globalMarks).forEach(token => {
+    if(globalMarks[token].relPath === relPath) delete globalMarks[token];
+  });
+  context.workspaceState.update('globalMarks', globalMarks);
+  log('clearFile globalMarks:', globalMarks);
+} 
+
+module.exports = { init, toggle, clearFile };

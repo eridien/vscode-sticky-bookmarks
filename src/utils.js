@@ -167,8 +167,28 @@ function numToPx(num) {
   return `${num.toFixed(2)}px`;
 }
 
+function commentStr(langId) {
+  return {
+    python       : ['#',  ''], 
+    ruby         : ['#',  ''],
+    shellscript  : ['#',  ''], 
+    coffeescript : ['#',  ''],
+    haskell      : ['--', ''],
+    lua          : ['--', ''],
+    ada          : ['--', ''],
+    sql          : ['--', ''],
+    erlang       : ['%',  ''],
+    matlab       : ['%',  ''],
+    octave       : ['%',  ''],
+    prolog       : ['%',  ''],
+    ocaml        : ['(*',    '*)'],
+    reasonml     : ['(*',    '*)'],
+    html         : ['<!--', '-->']
+  }[langId] ?? ['//', ''];
+}
+
 module.exports = { 
-  init, getLog, getTextFromDoc, fixDriveLetter, sleep, getProjectIdx,
+  init, getLog, getTextFromDoc, fixDriveLetter, sleep, getProjectIdx, commentStr,
   containsRange, containsLocation, locationIsEntireFile, getRangeSize, readTxt,
   blkIdFromId, tailFromId, readDirByRelPath, pxToNum, numToPx
 };

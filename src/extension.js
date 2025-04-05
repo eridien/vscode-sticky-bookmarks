@@ -10,7 +10,11 @@ function activate(context) {
                         'sticky-bookmarks.toggle', function () {
 		main.toggle();
 	});
-	context.subscriptions.push(toggleCmd);
+	const clearFileCmd = vscode.commands.registerCommand(
+                        'sticky-bookmarks.clearFile', function () {
+		main.clearFile();
+	});
+	context.subscriptions.push(toggleCmd, clearFileCmd);
   log('activated');
 }
 

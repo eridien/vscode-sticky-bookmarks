@@ -15,6 +15,10 @@
     "commands": [{
       "command": "sticky-bookmarks.toggle",
       "title": "Sticky Bookmarks: Toggle Bookmark"
+    },
+    {
+      "command": "sticky-bookmarks.clearFile",
+      "title": "Sticky Bookmarks: Remove Bookmarks in File"
     }]
   },
   "scripts": {

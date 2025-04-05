@@ -1,7 +1,7 @@
 {
   "name": "sticky-bookmarks",
   "displayName": "Sticky Bookmarks",
-  "description": "Lock bookmarks to code with inline tokens.",
+  "description": "Lock bookmarks to code using inline tokens.",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.99.0"
@@ -10,11 +10,11 @@
     "Other"
   ],
   "activationEvents": [],
-  "main": "./extension.js",
+  "main": "./src/extension.js",
   "contributes": {
     "commands": [{
-      "command": "sticky-bookmarks.helloWorld",
-      "title": "Hello World"
+      "command": "sticky-bookmarks.toggle",
+      "title": "Sticky Bookmarks: Toggle Bookmark"
     }]
   },
   "scripts": {

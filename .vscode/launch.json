@@ -10,7 +10,10 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}"
+        "--disable-gpu-sandbox",
+        "--extensionDevelopmentPath=${workspaceFolder}",
+         "--folder-uri",
+         "file:///mnt/c/Users/mark/apps/test-app"
 			]
 		}
 	]

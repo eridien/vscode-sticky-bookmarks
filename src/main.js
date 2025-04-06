@@ -28,37 +28,56 @@ function addToGlobalMarks(data, token) {
 
 function tokenRegEx(lang, commLft, commRgt) {
   return new RegExp(
-    (commLft + '.*?@[0-9a-z]{4}@.*?' + commRgt), 'g');
-          // .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+    ('\\s*' + commLft + '\\s*?@[0-9a-z]{4}@\\s*' + commRgt), 'g');
 }
 
-function toggle() {
+async function addToLine(editor, document, languageId, 
+                         lineNumber, line, lineText, 
+                         commLft, commRgt, tokenRegx) {
+  const relPath  = vscode.workspace.asRelativePath(document.uri);
+  const token    = addToGlobalMarks({languageId, relPath, lineNumber});
+  let maxLineLen = 0;
+  const strtLnNum = Math.max(0, lineNumber-10);
+  const endLnNum  = Math.min(document.lineCount, lineNumber+10); 
+  for(let lineNum = strtLnNum; lineNum < endLnNum; lineNum++) {
+    const line = document.lineAt(lineNum).text.trimEnd().replace(tokenRegx, '');
+    maxLineLen = Math.max(maxLineLen, line.length);
+  }
+  const padLen = maxLineLen - lineText.length;
+  const newLine = lineText +
+            `${' '.repeat(padLen)} ${commLft} ${token} ${commRgt}`;
+  await editor.edit(builder => {
+    builder.replace(line.range, newLine)}
+  );
+}
+
+async function clrLine(editor, line, lineText, tokenRegx) {
+  const newLine = lineText.replace(tokenRegx, '');
+  await editor.edit(builder => {
+    builder.replace(line.range, newLine);
+  });
+}
+
+async function toggle() {
   log('toggle called');
   const editor = vscode.window.activeTextEditor;
   if (!editor) { log('toggle, No active editor'); return; }
   const document   = editor.document;
-  const relPath    = vscode.workspace.asRelativePath(document.uri);
-  const lineNumber = editor.selection.active.line;
   const languageId = document.languageId;
-  const token      = addToGlobalMarks({languageId, relPath, lineNumber});
-  const line       = document.lineAt(lineNumber);
-  const lineText   = line.text;
+  const lineNumber = editor.selection.active.line;
   const [commLft, commRgt] = utils.commentStr(languageId);
   const tokenRegx  = tokenRegEx(languageId, commLft, commRgt); 
-  if(tokenRegx.test(lineText)) {
-    const newLine = lineText.replace(tokenRegx, '');
-    editor.edit(builder => {
-      builder.replace(line.range, newLine);
-    });
-  }
-  else {
-    editor.edit(builder => {builder.insert(line.range.end, 
-                            ` ${commLft} ${token} ${commRgt}`)});
-  }
-  log('toggle, new line:', document.lineAt(lineNumber).text);
+  const line       = document.lineAt(lineNumber);
+  const lineText   = line.text.trimEnd();
+  if(tokenRegx.test(lineText)) 
+       await clrLine(editor, line, lineText, tokenRegx);
+  else await addToLine(editor, document, languageId, 
+                       lineNumber, line, lineText, 
+                       commLft, commRgt, tokenRegx);
+  log('toggle, new line:', lineNumber, document.lineAt(lineNumber).text);
 }
 
-function clearFile() {
+async function clearFile() {
   log('clearFile called');
   const editor = vscode.window.activeTextEditor;
   if (!editor) { log('toggle, No active editor'); return; }
@@ -68,7 +87,7 @@ function clearFile() {
   const [commLft, commRgt] = utils.commentStr(languageId);
   const tokenRegx  = tokenRegEx(languageId, commLft, commRgt); 
   let newContent = document.getText().replaceAll(tokenRegx, '');
-  editor.edit(builder => {
+  await editor.edit(builder => {
     builder.replace(new vscode.Range(
       new vscode.Position(0, 0),
       new vscode.Position(document.lineCount, 0)

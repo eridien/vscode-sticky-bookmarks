@@ -28,8 +28,8 @@ function addToGlobalMarks(data, token) {
 
 function tokenRegEx(lang, commLft, commRgt) {
   return new RegExp(
-    (commLft + '.*?@([0-9a-z]{4})@.*?' + commRgt)
-          .replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+    (commLft + '.*?@[0-9a-z]{4}@.*?' + commRgt), 'g');
+          // .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
 }
 
 function toggle() {
@@ -53,7 +53,7 @@ function toggle() {
   }
   else {
     editor.edit(builder => {builder.insert(line.range.end, 
-                            ` ${commLft+token+commRgt}`)});
+                            ` ${commLft} ${token} ${commRgt}`)});
   }
   log('toggle, new line:', document.lineAt(lineNumber).text);
 }
@@ -65,7 +65,7 @@ function clearFile() {
   const document   = editor.document;
   const relPath    = vscode.workspace.asRelativePath(document.uri);
   const languageId = document.languageId;
-  const [commLft, commRgt] = utils.commentString(languageId);
+  const [commLft, commRgt] = utils.commentStr(languageId);
   const tokenRegx  = tokenRegEx(languageId, commLft, commRgt); 
   let newContent = document.getText().replaceAll(tokenRegx, '');
   editor.edit(builder => {

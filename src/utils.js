@@ -181,8 +181,8 @@ function commentStr(langId) {
     matlab       : ['%',  ''],
     octave       : ['%',  ''],
     prolog       : ['%',  ''],
-    ocaml        : ['(*',    '*)'],
-    reasonml     : ['(*',    '*)'],
+    ocaml        : ['\\(\\*',    '\\*\\)'],
+    reasonml     : ['\\(\\*',    '\\*\\)'],
     html         : ['<!--', '-->']
   }[langId] ?? ['//', ''];
 }

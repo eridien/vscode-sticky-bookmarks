@@ -46,15 +46,16 @@ function commentRegExp(languageId) {
   }
 }
 
-async function addToLine(editor, lineNumber, line, lineText) {
+async function addToLine(editor, lineNumber, 
+                         line, lineText, commentRegEx) {
   const document  = editor.document;
   let maxLineLen  = 0;
   const strtLnNum = Math.max(0, lineNumber-10);
   const endLnNum  = Math.min(document.lineCount, lineNumber+10); 
   for(let lineNum = strtLnNum; lineNum < endLnNum; lineNum++) {
-    const line = document.lineAt(lineNum)
-                         .text.replace(tokenRegExp, '').trimEnd();
-    maxLineLen = Math.max(maxLineLen, line.length);
+    const strippedLn = document.lineAt(lineNum).text
+           .replace(tokenRegExp, '').replaceAll(commentRegEx, '')
+    maxLineLen = Math.max(maxLineLen, strippedLn.length);
   }
   const padLen    = maxLineLen - lineText.length;
   const relPath   = vscode.workspace.asRelativePath(document.uri);
@@ -66,7 +67,7 @@ async function addToLine(editor, lineNumber, line, lineText) {
   await editor.edit(builder => { builder.replace(line.range, newLine)} );
 }
 
-async function clrLine(editor, line, languageId, commentRegEx) {
+function clrLine(editor, line, languageId, commentRegEx) {
   const lineText = line.text.trimEnd();
   const match    = lineText.match(tokenRegExp);
   if(match === null) return lineText; 
@@ -80,23 +81,22 @@ async function toggle() {
   log('toggle called');
   const editor = vscode.window.activeTextEditor;
   if (!editor) { log('toggle, No active editor'); return; }
-  const document   = editor.document;
-  const lineNumber = editor.selection.active.line;
-  const line       = document.lineAt(lineNumber);
-  const lineText   = line.text.trimEnd();
+  const document     = editor.document;
+  const lineNumber   = editor.selection.active.line;
+  const line         = document.lineAt(lineNumber);
+  const lineText     = line.text.trimEnd();
+  const languageId   = document.languageId;
+  const commentRegEx = commentRegExp(languageId);
   if(tokenRegExp.test(lineText)) {
-    const languageId   = document.languageId;
-    const commentRegEx = commentRegExp(languageId);
-    const newLine = await clrLine(
-                            editor, line, languageId, commentRegEx);
+    const newLine = clrLine(
+            editor, line, languageId, commentRegEx);
     await editor.edit(builder => {
       builder.replace(line.range, newLine);
     });
   }
-  else {
-    await addToLine(editor, lineNumber, line, lineText);
-  }
-  log('toggle, new line:', lineNumber, document.lineAt(lineNumber).text);
+  else 
+    await addToLine(editor, lineNumber, 
+                    line, lineText, commentRegEx);
 }
 
 async function clearFile() {

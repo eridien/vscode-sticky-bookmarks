@@ -39,11 +39,11 @@ function toggle() {
   const document   = editor.document;
   const relPath    = vscode.workspace.asRelativePath(document.uri);
   const lineNumber = editor.selection.active.line;
+  const languageId = document.languageId;
   const token      = addToGlobalMarks({languageId, relPath, lineNumber});
   const line       = document.lineAt(lineNumber);
   const lineText   = line.text;
-  const languageId = document.languageId;
-  const [commLft, commRgt] = utils.commentString(languageId);
+  const [commLft, commRgt] = utils.commentStr(languageId);
   const tokenRegx  = tokenRegEx(languageId, commLft, commRgt); 
   if(tokenRegx.test(lineText)) {
     const newLine = lineText.replace(tokenRegx, '');

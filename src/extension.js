@@ -4,6 +4,8 @@ const utils  = require('./utils.js');
 const log    = utils.getLog('EXTN');
 
 function activate(context) {
+  log('activate');
+
   main.init(context);
   utils.init(context);
 	const toggleCmd = vscode.commands.registerCommand(
@@ -14,6 +16,7 @@ function activate(context) {
                         'sticky-bookmarks.clearFile', function () {
 		main.clearFile();
 	});
+  console.log(typeof toggleCmd.dispose);
 	context.subscriptions.push(toggleCmd, clearFileCmd);
   log('activated');
 }

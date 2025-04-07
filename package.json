@@ -13,17 +13,26 @@
   "main": "./src/extension.js",
   "contributes": {
     "commands": [{
-      "command": "sticky-bookmarks.toggle",
-      "title": "Sticky Bookmarks: Toggle Bookmark"
-    },
-    {
-      "command": "sticky-bookmarks.clearFile",
-      "title": "Sticky Bookmarks: Remove Bookmarks From File"
-    },
-    {
-      "command": "sticky-bookmarks.clearAllFiles",
-      "title": "Sticky Bookmarks: Remove Bookmarks From All Files"
-    }]
+        "command": "sticky-bookmarks.toggle",
+        "title": "Sticky Bookmarks: Toggle Bookmark"
+      },
+      {
+        "command": "sticky-bookmarks.clearFile",
+        "title": "Sticky Bookmarks: Remove Bookmarks From File"
+      },
+      {
+        "command": "sticky-bookmarks.clearAllFiles",
+        "title": "Sticky Bookmarks: Remove Bookmarks From All Files"
+      },
+      {
+        "command": "sticky-bookmarks.cleanFile",
+        "title": "Sticky Bookmarks: Clean File"
+      },
+      {
+        "command": "sticky-bookmarks.cleanAllFiles",
+        "title": "Sticky Bookmarks: Clean All Files"
+      }
+    ]
   },
   "scripts": {
     "lint": "eslint .",

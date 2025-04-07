@@ -32,9 +32,11 @@ function addGlobalMark(data, token = getRandomToken()) {
 function delGlobalMark(token) {
   delete globalMarks[token];
   context.workspaceState.update('globalMarks', globalMarks);
+  return '';
 }
 
-const tokenRegExp = new RegExp('\\:[0-9a-z]{4};', 'g');
+const tokenRegEx  = new RegExp('\\:[0-9a-z]{4};');
+const tokenRegExG = new RegExp('\\:[0-9a-z]{4};', 'g');
 
 function commentRegExp(languageId) {
   const [commLft, commRgt] = utils.commentStr(languageId);
@@ -64,7 +66,7 @@ function getMaxLineLen(document, relPath, commentRegEx, update = false) {
     for(let lineNum = 0; lineNum < document.lineCount; lineNum++) {
       const testLine = document.lineAt(lineNum);
       const testStripLn = testLine.text
-            .replaceAll(tokenRegExp, '').replaceAll(commentRegEx, '');
+            .replaceAll(tokenRegExG, '').replaceAll(commentRegEx, '');
       maxLineLen = Math.max(maxLineLen, testStripLn.length);
     }
     maxLineLenByPath[relPath] = maxLineLen;
@@ -90,11 +92,9 @@ async function updateDocument(document) {
 }
 
 function cleanLine(line, commentRegEx) {
-  let lineText  = line.text.trimEnd();
-  const matches = lineText.matchAll(tokenRegExp);
-  if(matches.length == 0) return lineText;
-  for (const match of matches) delGlobalMark(match[0]);
-  lineText = lineText.replaceAll(tokenRegExp, '');
+  let lineText = line.text.trimEnd();
+  lineText = lineText.replace(tokenRegExG, 
+    (token) => delGlobalMark(token));
   let lineLen;
   do {
     lineLen  = lineText.length;
@@ -113,7 +113,7 @@ async function toggle() {
   const lineText     = line.text.trimEnd();
   const languageId   = document.languageId;
   const commentRegEx = commentRegExp(languageId);
-  if(tokenRegExp.test(lineText)) {
+  if(tokenRegEx.test(lineText)) {
     const newLine = cleanLine(line, commentRegEx);
     await editor.edit(builder => {
       builder.replace(line.range, newLine);
@@ -166,7 +166,7 @@ async function clearAllFiles() {
   for (const uri of uris) {
     try {
       const document = await vscode.workspace.openTextDocument(uri);
-      if(tokenRegExp.test(document.getText())) {
+      if(tokenRegEx.test(document.getText())) {
         await clearFile(document); 
       }
     }

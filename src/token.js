@@ -1,9 +1,11 @@
 const vscode = require('vscode');
+const labels = require('./labels.js');
 const utils  = require('./utils.js');
 const log    = utils.getLog('TOKE');
 
 let context, globalMarks;
- 
+const maxLineLenByPath = {}; 
+
 function init(contextIn) { 
   context = contextIn;
 
@@ -41,25 +43,44 @@ function commentRegExp(languageId) {
   }
 }
 
-async function addToLine(editor, lineNumber, 
-                         line, lineText, commentRegEx) {
-  const document  = editor.document;
-  let maxLineLen  = 0;
-  const strtLnNum = Math.max(0, lineNumber-10);
-  const endLnNum  = Math.min(document.lineCount, lineNumber+10); 
-  for(let lineNum = strtLnNum; lineNum < endLnNum; lineNum++) {
-    const strippedLn = document.lineAt(lineNum).text
-           .replace(tokenRegExp, '').replaceAll(commentRegEx, '')
-    maxLineLen = Math.max(maxLineLen, strippedLn.length);
+async function setGlobalMark(document, relPath, 
+                             line, lineNumber, languageId, token) {
+  const uri          = document.uri;
+  const symbol       = await labels.getSurroundingSymbol(uri, line.range);
+  const symName      = symbol?.name;
+  const symRange     = symbol?.location.range; 
+  const label        = await labels.getLabel(document, symName, symRange, lineNumber);
+  return addToGlobalMarks( {uri, relPath, lineNumber, languageId, label} , token);
+}
+
+function getMaxLineLen(document, relPath, commentRegEx, update = false) {
+  if(update || maxLineLenByPath[relPath] === undefined) {
+    let maxLineLen = 0;
+    for(let lineNum = 0; lineNum < document.lineCount; lineNum++) {
+      const testLine = document.lineAt(lineNum);
+      const testStripLn = testLine.text
+            .replaceAll(tokenRegExp, '').replaceAll(commentRegEx, '');
+      maxLineLen = Math.max(maxLineLen, testStripLn.length);
+    }
   }
-  const padLen    = maxLineLen - lineText.length;
-  const relPath   = vscode.workspace.asRelativePath(document.uri);
-  const languageId = document.languageId;
+  return maxLineLenByPath[relPath];
+}
+
+async function addTokenToLine(document, relPath, line, lineNumber, languageId, 
+                              commentRegEx, token) {
+  const maxLineLen   = getMaxLineLen(document, relPath, commentRegEx);
+  const strippedLine = clrLine(line, commentRegEx);
+  const padLen = maxLineLen - strippedLine.length;
   const [commLft, commRgt] = utils.commentStr(languageId);
-  const token   = addToGlobalMarks({languageId, relPath, lineNumber});
-  const newLine = lineText +
+  const newLine = strippedLine +
             `${' '.repeat(padLen)} ${commLft} ${token} ${commRgt}`;
-  await editor.edit(builder => { builder.replace(line.range, newLine)} );
+  const edit = new vscode.WorkspaceEdit();
+  edit.replace(document.uri, line.range, newLine);
+  await vscode.workspace.applyEdit(edit);
+}
+
+async function updateDocument(document) {
+
 }
 
 function clrLine(line, commentRegEx) {
@@ -73,7 +94,7 @@ function clrLine(line, commentRegEx) {
 }
 
 async function toggle() {
-  log('toggle called');
+  log('toggle command called');
   const editor = vscode.window.activeTextEditor;
   if (!editor) { log('info', 'No active editor'); return; }
   const document     = editor.document;
@@ -88,14 +109,19 @@ async function toggle() {
       builder.replace(line.range, newLine);
     });
   }
-  else 
-    await addToLine(editor, lineNumber, 
-                    line, lineText, commentRegEx);
+  else {
+    const relPath = vscode.workspace.asRelativePath(document.uri);
+    const token = await setGlobalMark(
+      document, relPath, line, lineNumber, languageId);
+    await addTokenToLine(
+      document, relPath, line, lineNumber, languageId, commentRegEx, token);
+  }
+  log('globalMarks', Object.keys(globalMarks));
 }
 
 async function clearFile(document) {
-  log('clearFile called');
   if(!document) {
+    log('clearFile command called');
     const editor = vscode.window.activeTextEditor;
     if (!editor) { log('info', 'No active editor'); return; }
     document = editor.document;
@@ -118,7 +144,7 @@ async function clearFile(document) {
 }     
 
 async function clearAllFiles() {
-  log('clearAllFiles called');
+  log('clearAllFiles command called');
   const editor = vscode.window.activeTextEditor;
   if (!editor) { log('info', 'No active editor'); return; }
   const document = editor.document;

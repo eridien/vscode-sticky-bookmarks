@@ -1,0 +1,25 @@
+{
+  "name": "srchTvdbData",
+  "kind": "Variable",
+  "location": {
+    "uri": {
+      "$mid": 1,
+      "fsPath": "c:\\Users\\mark\\apps\\test-app\\src\\tvdb.js",
+      "_sep": 1,
+      "external": "file:///c%3A/Users/mark/apps/test-app/src/tvdb.js",
+      "path": "/c:/Users/mark/apps/test-app/src/tvdb.js",
+      "scheme": "file"
+    },
+    "range": [
+      {
+        "line": 35,
+        "character": 13
+      },
+      {
+        "line": 53,
+        "character": 1
+      }
+    ]
+  },
+  "containerName": ""
+}

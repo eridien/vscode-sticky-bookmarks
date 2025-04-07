@@ -27,11 +27,6 @@ function addToGlobalMarks(data, token = getRandomToken()) {
   return token;
 }
 
-function removeFromGlobalMarks(token) {
-  delete globalMarks[token];
-  context.workspaceState.update('globalMarks', globalMarks);
-}
-
 const tokenRegExp = new RegExp('\\:[0-9a-z]{4};', 'g');
 
 function commentRegExp(languageId) {
@@ -67,7 +62,7 @@ async function addToLine(editor, lineNumber,
   await editor.edit(builder => { builder.replace(line.range, newLine)} );
 }
 
-function clrLine(editor, line, languageId, commentRegEx) {
+function clrLine(line, commentRegEx) {
   const lineText = line.text.trimEnd();
   const match    = lineText.match(tokenRegExp);
   if(match === null) return lineText; 
@@ -80,7 +75,7 @@ function clrLine(editor, line, languageId, commentRegEx) {
 async function toggle() {
   log('toggle called');
   const editor = vscode.window.activeTextEditor;
-  if (!editor) { log('toggle, No active editor'); return; }
+  if (!editor) { log('info', 'No active editor'); return; }
   const document     = editor.document;
   const lineNumber   = editor.selection.active.line;
   const line         = document.lineAt(lineNumber);
@@ -88,8 +83,7 @@ async function toggle() {
   const languageId   = document.languageId;
   const commentRegEx = commentRegExp(languageId);
   if(tokenRegExp.test(lineText)) {
-    const newLine = clrLine(
-            editor, line, languageId, commentRegEx);
+    const newLine = clrLine(line, commentRegEx);
     await editor.edit(builder => {
       builder.replace(line.range, newLine);
     });
@@ -99,26 +93,49 @@ async function toggle() {
                     line, lineText, commentRegEx);
 }
 
-async function clearFile() {
+async function clearFile(document) {
   log('clearFile called');
-  const editor = vscode.window.activeTextEditor;
-  if (!editor) { log('toggle, No active editor'); return; }
-  const document     = editor.document;
+  if(!document) {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) { log('info', 'No active editor'); return; }
+    document = editor.document;
+  }
   const languageId   = document.languageId;
   const commentRegEx = commentRegExp(languageId);
   let newFileText = '';
   for(let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);
-    newFileText += await clrLine(
-          editor, line, languageId, commentRegEx) + '\n';
+    newFileText += await clrLine(line, commentRegEx) + '\n';
   }
-  await editor.edit(builder => {
-    builder.replace(new vscode.Range(
+  const uri  = document.uri;
+  const edit = new vscode.WorkspaceEdit();
+  edit.replace(uri, new vscode.Range(
       new vscode.Position(0, 0),
       new vscode.Position(document.lineCount, 0)
-    ), newFileText);
-  });
+  ), newFileText);
+  await vscode.workspace.applyEdit(edit);
   context.workspaceState.update('globalMarks', globalMarks);
+}     
+
+async function clearAllFiles() {
+  log('clearAllFiles called');
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) { log('info', 'No active editor'); return; }
+  const document = editor.document;
+  const folder   = vscode.workspace.getWorkspaceFolder(document.uri);
+  const pattern  = new vscode.RelativePattern(folder, '**/*');
+  const uris     = await vscode.workspace.findFiles(
+                               pattern, '**/node_modules/**');
+  for (const uri of uris) {
+    try {
+      const document = await vscode.workspace.openTextDocument(uri);
+      const fullText = document.getText();
+      if(tokenRegExp.test(fullText)) {
+        await clearFile(document); 
+      }
+    }
+    catch(e) {if(e){}};
+  }
 } 
 
-module.exports = { init, toggle, clearFile };
+module.exports = { init, toggle, clearFile, clearAllFiles };

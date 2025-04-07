@@ -16,8 +16,12 @@ function activate(context) {
                         'sticky-bookmarks.clearFile', function () {
 		token.clearFile();
 	});
+	const clearAllFilesCmd = vscode.commands.registerCommand(
+                        'sticky-bookmarks.clearAllFiles', function () {
+		token.clearAllFiles();
+	});
   console.log(typeof toggleCmd.dispose);
-	context.subscriptions.push(toggleCmd, clearFileCmd);
+	context.subscriptions.push(toggleCmd, clearFileCmd, clearAllFilesCmd);
   log('activated');
 }
 

@@ -9,7 +9,7 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": ["*"],
+  "activationEvents": [],
   "main": "./src/extension.js",
   "contributes": {
     "commands": [{
@@ -18,7 +18,11 @@
     },
     {
       "command": "sticky-bookmarks.clearFile",
-      "title": "Sticky Bookmarks: Remove Bookmarks in File"
+      "title": "Sticky Bookmarks: Remove Bookmarks From File"
+    },
+    {
+      "command": "sticky-bookmarks.clearAllFiles",
+      "title": "Sticky Bookmarks: Remove Bookmarks From All Files"
     }]
   },
   "scripts": {

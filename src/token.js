@@ -77,7 +77,7 @@ function getMaxLineLen(document, relPath, commentRegEx, update = false) {
 async function addTokenToLine(document, relPath, line, lineNumber, languageId, 
                               commentRegEx, token) {
   const maxLineLen   = getMaxLineLen(document, relPath, commentRegEx);
-  const strippedLine = cleanLine(line, commentRegEx);
+  const strippedLine = cleanLine(line, commentRegEx, true);
   const padLen = maxLineLen - strippedLine.length;
   const [commLft, commRgt] = utils.commentStr(languageId);
   const newLine = strippedLine +
@@ -94,12 +94,8 @@ async function updateDocument(document) {
 function cleanLine(line, commentRegEx) {
   let lineText = line.text.trimEnd();
   lineText = lineText.replace(tokenRegExG, 
-    (token) => delGlobalMark(token));
-  let lineLen;
-  do {
-    lineLen  = lineText.length;
-    lineText = lineText.replaceAll(commentRegEx, '');
-  } while(lineText.length < lineLen);
+                (token) => delGlobalMark(token));
+  lineText = lineText.replaceAll(commentRegEx, '');
   return lineText.trimEnd();
 }
 
@@ -122,7 +118,7 @@ async function toggle() {
   else {
     const relPath = vscode.workspace.asRelativePath(document.uri);
     const token = await setGlobalMark(
-      document, relPath, line, lineNumber, languageId);
+                           document, relPath, line, lineNumber, languageId);
     await addTokenToLine(
       document, relPath, line, lineNumber, languageId, commentRegEx, token);
   }

@@ -150,6 +150,10 @@ async function clearFile(document) {
       new vscode.Position(document.lineCount, 0)
   ), newFileText);
   await vscode.workspace.applyEdit(edit);
+  const relPath = vscode.workspace.asRelativePath(uri);
+  for(const [token, val] of Object.entries(globalMarks)) {
+    if(val.relPath === relPath) delete globalMarks[token];
+  }
   context.workspaceState.update('globalMarks', globalMarks);
   log('globalMarks', Object.keys(globalMarks));
 }     
@@ -167,6 +171,7 @@ async function clearAllFiles() {
     try {
       const document = await vscode.workspace.openTextDocument(uri);
       if(tokenRegEx.test(document.getText())) {
+        log('calling clearFile');
         await clearFile(document); 
       }
     }

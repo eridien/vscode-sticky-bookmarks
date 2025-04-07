@@ -23,10 +23,15 @@ function getRandomToken() {
   return `:${randHash};`;
 }
 
-function addToGlobalMarks(data, token = getRandomToken()) {
+function addGlobalMark(data, token = getRandomToken()) {
   globalMarks[token] = data;
   context.workspaceState.update('globalMarks', globalMarks);
   return token;
+}
+
+function delGlobalMark(token) {
+  delete globalMarks[token];
+  context.workspaceState.update('globalMarks', globalMarks);
 }
 
 const tokenRegExp = new RegExp('\\:[0-9a-z]{4};', 'g');
@@ -50,7 +55,7 @@ async function setGlobalMark(document, relPath,
   const symName      = symbol?.name;
   const symRange     = symbol?.location.range; 
   const label        = await labels.getLabel(document, symName, symRange, lineNumber);
-  return addToGlobalMarks( {uri, relPath, lineNumber, languageId, label} , token);
+  return addGlobalMark( {uri, relPath, lineNumber, languageId, label} , token);
 }
 
 function getMaxLineLen(document, relPath, commentRegEx, update = false) {
@@ -70,7 +75,7 @@ function getMaxLineLen(document, relPath, commentRegEx, update = false) {
 async function addTokenToLine(document, relPath, line, lineNumber, languageId, 
                               commentRegEx, token) {
   const maxLineLen   = getMaxLineLen(document, relPath, commentRegEx);
-  const strippedLine = clrLine(line, commentRegEx);
+  const strippedLine = cleanLine(line, commentRegEx);
   const padLen = maxLineLen - strippedLine.length;
   const [commLft, commRgt] = utils.commentStr(languageId);
   const newLine = strippedLine +
@@ -84,14 +89,18 @@ async function updateDocument(document) {
 
 }
 
-function clrLine(line, commentRegEx) {
-  const lineText = line.text.trimEnd();
-  const match    = lineText.match(tokenRegExp);
-  if(match === null) return lineText; 
-  delete globalMarks[match[0]];
-  const noTokenText = lineText.replaceAll(tokenRegExp, '');
-  const newLine     = noTokenText.replaceAll(commentRegEx, '');
-  return newLine;
+function cleanLine(line, commentRegEx) {
+  let lineText  = line.text.trimEnd();
+  const matches = lineText.matchAll(tokenRegExp);
+  if(matches.length == 0) return lineText;
+  for (const match of matches) delGlobalMark(match[0]);
+  lineText = lineText.replaceAll(tokenRegExp, '');
+  let lineLen;
+  do {
+    lineLen  = lineText.length;
+    lineText = lineText.replaceAll(commentRegEx, '');
+  } while(lineText.length < lineLen);
+  return lineText.trimEnd();
 }
 
 async function toggle() {
@@ -105,7 +114,7 @@ async function toggle() {
   const languageId   = document.languageId;
   const commentRegEx = commentRegExp(languageId);
   if(tokenRegExp.test(lineText)) {
-    const newLine = clrLine(line, commentRegEx);
+    const newLine = cleanLine(line, commentRegEx);
     await editor.edit(builder => {
       builder.replace(line.range, newLine);
     });
@@ -132,7 +141,7 @@ async function clearFile(document) {
   let newFileText = '';
   for(let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);
-    newFileText += await clrLine(line, commentRegEx) + '\n';
+    newFileText += await cleanLine(line, commentRegEx) + '\n';
   }
   const uri  = document.uri;
   const edit = new vscode.WorkspaceEdit();
@@ -142,6 +151,7 @@ async function clearFile(document) {
   ), newFileText);
   await vscode.workspace.applyEdit(edit);
   context.workspaceState.update('globalMarks', globalMarks);
+  log('globalMarks', Object.keys(globalMarks));
 }     
 
 async function clearAllFiles() {
@@ -162,6 +172,7 @@ async function clearAllFiles() {
     }
     catch(e) {if(e){}};
   }
+  log('globalMarks', Object.keys(globalMarks));
 } 
 
 module.exports = { init, toggle, clearFile, clearAllFiles };

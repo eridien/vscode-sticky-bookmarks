@@ -129,8 +129,7 @@ async function clearAllFiles() {
   for (const uri of uris) {
     try {
       const document = await vscode.workspace.openTextDocument(uri);
-      const fullText = document.getText();
-      if(tokenRegExp.test(fullText)) {
+      if(tokenRegExp.test(document.getText())) {
         await clearFile(document); 
       }
     }

@@ -62,6 +62,7 @@ function getMaxLineLen(document, relPath, commentRegEx, update = false) {
             .replaceAll(tokenRegExp, '').replaceAll(commentRegEx, '');
       maxLineLen = Math.max(maxLineLen, testStripLn.length);
     }
+    maxLineLenByPath[relPath] = maxLineLen;
   }
   return maxLineLenByPath[relPath];
 }
@@ -73,7 +74,7 @@ async function addTokenToLine(document, relPath, line, lineNumber, languageId,
   const padLen = maxLineLen - strippedLine.length;
   const [commLft, commRgt] = utils.commentStr(languageId);
   const newLine = strippedLine +
-            `${' '.repeat(padLen)} ${commLft} ${token} ${commRgt}`;
+            `${' '.repeat(padLen)} ${commLft}${token} ${commRgt}`;
   const edit = new vscode.WorkspaceEdit();
   edit.replace(document.uri, line.range, newLine);
   await vscode.workspace.applyEdit(edit);

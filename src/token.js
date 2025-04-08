@@ -56,8 +56,9 @@ async function setGlobalMark(document, relPath,
   const symbol       = await labels.getSurroundingSymbol(uri, line.range);
   const symName      = symbol?.name;
   const symRange     = symbol?.location.range; 
-  const label        = await labels.getLabel(document, symName, symRange, lineNumber);
-  return addGlobalMark( {uri, relPath, lineNumber, languageId, label} , token);
+  const label        = await labels.getLabel(document, languageId, line);
+  return addGlobalMark( {
+        uri, relPath, lineNumber, languageId, label} , token);
 }
 
 function getMaxLineLen(document, relPath, commentRegEx, update = false) {

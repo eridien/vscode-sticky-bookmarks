@@ -1,6 +1,7 @@
-const vscode = require('vscode');
-const utils  = require('./utils.js');
-const log    = utils.getLog('LABL');
+const vscode   = require('vscode');
+const keyWords = require('./keywords.js');
+const utils    = require('./utils.js');
+const log      = utils.getLog('LABL');
 
 function getSymbols(range, symbols) {
   const parent = symbols[symbols.length - 1];
@@ -40,8 +41,54 @@ async function getSurroundingSymbol(uri, range) {
   }
 }
 
-async function getLabel(document, symName, symRange, lineNumber) {
-
+async function getLabel(document, languageId, line) {
+  let  lineNumber = line.lineNumber;
+  const uri        = document.uri;
+  const relPath    = vscode.workspace.asRelativePath(uri);
+  const symbol     = await getSurroundingSymbol(uri, line.range);
+  let symName, symOfs;
+  if(symbol) {
+    symName  = symbol.name;
+    const symRange = symbol.location.range; 
+    symOfs   = lineNumber - symRange.start.line;
+  }
+  else symName, symOfs = null;
+  let compText = '';
+  while(compText.length < 30 && 
+        lineNumber < document.lineCount - 1) {
+    // const addFunc  =  async function add(xFunc yFunc) {
+    //   return (await xFunc() + await yFunc());
+    // };
+    let lineText = document.lineAt(lineNumber)
+                   .text.trim().replaceAll(/\s+/g, ' ');
+    // const addFunc = async function add(xFunc yFunc) {
+    // return (await xFunc() + await yFunc());
+    // };
+    const matches = lineText.matchAll(/\b.*?\b/g);
+    for(const match of matches) {
+      const word = match[0];
+      // 'const'  'addFunc' 'async' 'function' 'add' 'xFunc' 'yFunc'
+      if(word in keyWords.keywords[languageId]) {
+        lineText = lineText.replaceAll(word, '')
+                           .replaceAll(/\s+/g, ' ').trim();
+      }
+      // addFunc = add(xFunc yFunc) {
+      // ( xFunc() + yFunc());
+      // };
+      // lineText = lineText.replaceAll( /(?!\b\s+\b)\s+/g, '');
+      lineText = lineText.replaceAll(/\B\s+\B/g, '');
+      // addFunc=add(xFunc yFunc){
+      // (xFunc()+yFunc());
+      // };
+    }
+    compText += ' ' + lineText;
+    // addFunc=add(xFunc yFunc){ (xFunc()+yFunc()); };
+    lineNumber++;
+  }
+  compText = compText.replaceAll(/\B\s+\B/g, '')
+  // addFunc=add(xFunc yFunc){(xFunc()+yFunc());};
+  // addFunc=add(xFunc yFunc){(xFun
+  return {relPath, symName, symOfs, compText};
 }
 
 module.exports = { getSurroundingSymbol, getLabel };

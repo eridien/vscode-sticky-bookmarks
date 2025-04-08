@@ -7,16 +7,6 @@
     "vol"
     ],
 
-  "bibtex":[
-  "article", "book", "booklet", "conference", "inbook", "incollection",
-  "inproceedings", "manual", "mastersthesis", "misc", "phdthesis",
-  "proceedings", "techreport", "unpublished",
-  "address", "annote", "author", "booktitle", "chapter", "crossref", "edition",
-  "editor", "howpublished", "institution", "journal", "key", "month", "note",
-  "number", "organization", "pages", "publisher", "school", "series", "title",
-  "type", "volume", "year"
-  ],
-
   "c":[
   "auto", "break", "case", "char", "const", "continue", "default", "do", "double",
   "else", "enum", "extern", "float", "for", "goto", "if", "inline", "int", "long",
@@ -36,26 +26,6 @@
   "alter", "ref", "dosync", "commute", "await", "await-for", "promise", "deliver"
   ],
 
-  "cmake":[
-  "add_executable", "add_library", "add_custom_command", "add_custom_target",
-  "add_definitions", "add_dependencies", "add_subdirectory", "aux_source_directory",
-  "break", "build_command", "cmake_minimum_required", "cmake_policy",
-  "configure_file", "create_test_sourcelist", "define_property", "else", "elseif",
-  "enable_language", "enable_testing", "endforeach", "endfunction", "endif",
-  "endmacro", "endwhile", "execute_process", "export", "file", "find_file",
-  "find_library", "find_package", "find_path", "find_program", "foreach",
-  "function", "get_cmake_property", "get_directory_property",
-  "get_filename_component", "get_property", "get_source_file_property",
-  "get_target_property", "get_test_property", "if", "include", "include_directories",
-  "include_external_msproject", "include_regular_expression", "install", "link_directories",
-  "list", "load_cache", "macro", "mark_as_advanced", "message", "option", "project",
-  "return", "separate_arguments", "set", "set_directory_properties", "set_property",
-  "set_source_files_properties", "set_target_properties", "set_tests_properties",
-  "site_name", "source_group", "string", "target_compile_definitions", "target_compile_options",
-  "target_include_directories", "target_link_directories", "target_link_libraries",
-  "target_sources", "try_compile", "try_run", "unset", "variable_watch", "while"
-  ],
-
   "code-referencing":["definition","declaration","reference","symbol","scope","usage","identifier","tag","xref","location","navigation","index","rename","highlight","outline","workspaceSymbol","documentSymbol","hover","signatureHelp","completion","referencesProvider","definitionProvider","diagnostic","semanticTokens"  ],
 
   "code-text-binary":["ascii","binary","buffer","byte","char","character","code","compile","decode","encoding","hex","memory","parse","read","serialize","stream","string","text","token","unicode","utf8","write"  ],
@@ -64,7 +34,7 @@
 
   "cpp":["alignas","alignof","and","and_eq","asm","atomic_cancel","atomic_commit","atomic_noexcept","auto","bitand","bitor","bool","break","case","catch","char","char8_t","char16_t","char32_t","class","compl","concept","const","consteval","constexpr","constinit","const_cast","continue","co_await","co_return","co_yield","decltype","default","delete","do","double","dynamic_cast","else","enum","explicit","export","extern","false","float","for","friend","goto","if","inline","int","long","mutable","namespace","new","noexcept","not","not_eq","nullptr","operator","or","or_eq","private","protected","public","reflexpr","register","reinterpret_cast","requires","return","short","signed","sizeof","static","static_assert","static_cast","struct","switch","synchronized","template","this","thread_local","throw","true","try","typedef","typeid","typename","union","unsigned","using","virtual","void","volatile","wchar_t","while","xor","xor_eq"  ],
 
-  "cpp_embedded_latex":["alpha","beta","gamma","delta","epsilon","zeta","eta","theta","iota","kappa","lambda","mu","nu","xi","pi","rho","sigma","tau","upsilon","phi","chi","psi","omega","sum","int","frac","sqrt","begin","end","documentclass","usepackage","textbf","textit","underline","mathrm","mathbb","left","right","cdot","times","leq","geq","neq","infty","approx","rightarrow","leftarrow","partial","nabla"  ],
+  "cpp_embedded_latex":["alpha","beta","gamma","delta","epsilon","zeta","eta","theta","iota","kappa","lambda","mu","nu","xi","pi","rho","sigma","tau","upsilon","phi","chi","psi","omega","sum","int","frac","sqrt","begin","end","documentclass","usepackage","textbf","textit","underline","mathrm","mathbb","left","right","cdot","times","leq","geq","neq","infty","approx","rightarrow","leftarrow","partial","nabla","alignas","alignof","and","and_eq","asm","atomic_cancel","atomic_commit","atomic_noexcept","auto","bitand","bitor","bool","break","case","catch","char","char8_t","char16_t","char32_t","class","compl","concept","const","consteval","constexpr","constinit","const_cast","continue","co_await","co_return","co_yield","decltype","default","delete","do","double","dynamic_cast","else","enum","explicit","export","extern","false","float","for","friend","goto","if","inline","int","long","mutable","namespace","new","noexcept","not","not_eq","nullptr","operator","or","or_eq","private","protected","public","reflexpr","register","reinterpret_cast","requires","return","short","signed","sizeof","static","static_assert","static_cast","struct","switch","synchronized","template","this","thread_local","throw","true","try","typedef","typeid","typename","union","unsigned","using","virtual","void","volatile","wchar_t","while","xor","xor_eq"  ],
 
   "csharp":["abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char",
   "checked", "class", "const", "continue", "decimal", "default", "delegate", "do",
@@ -165,7 +135,7 @@
   ],
 
   "javascript":[
-  "await","break","case","catch","class","const","continue","debugger","default",
+  "await","async","break","case","catch","class","const","continue","debugger","default",
   "delete","do","else","enum","export","extends","false","finally","for","function",
   "if","import","in","instanceof","let","new","null","return","super","switch",
   "this","throw","true","try","typeof","var","void","while","with","yield"
@@ -266,6 +236,7 @@
   "is","does","but","with","without","and","or","xor","not","div","mod","xx","leg",
   "eq","ne","lt","le","gt","ge","cmp","~~","!~~","defined","say","print","put"
   ],
+
   "ruby":[
   "BEGIN","END","alias","and","begin","break","case","class","def","defined?",
   "do","else","elsif","end","ensure","false","for","if","in","module","next",
@@ -281,26 +252,6 @@
   "try","typeof","unsized","virtual","yield"
   ],
 
-  "shellscript":[
-  "if","then","else","elif","fi","case","esac","for","select","while","until","do","done",
-  "in","function","time","coproc","break","continue","return","exit","declare","typeset",
-  "readonly","local","export","eval","exec","set","unset","shift","getopts","source",
-  "alias","unalias","test","true","false","read","printf","echo","let","type","hash",
-  "command","builtin","trap","wait","kill","jobs","fg","bg","disown"
-  ],
-
-  "sql":[
-  "select","from","where","insert","into","values","update","set","delete","create",
-  "table","alter","drop","primary","key","foreign","constraint","index","view",
-  "distinct","join","inner","left","right","full","on","group","by","having",
-  "order","asc","desc","limit","offset","union","all","null","not","and","or",
-  "in","exists","between","like","is","as","case","when","then","else","end",
-  "database","schema","grant","revoke","use","commit","rollback","savepoint",
-  "transaction","with","default","unique","check","if","begin","procedure","function",
-  "trigger","cursor","declare","open","fetch","close","loop","while","repeat",
-  "exit","continue","return","do"
-  ],
-
   "swift":[
   "associatedtype","class","deinit","enum","extension","fileprivate","func","import",
   "init","inout","internal","let","open","operator","private","protocol","public",
@@ -312,8 +263,8 @@
   "#imageLiteral","#keyPath","#line","#selector","#sourceLocation"
   ],
 
-  "typescript":[
-  "abstract","any","as","asserts","bigint","boolean","break","case","catch","class",
+  "typescript":[ "abstract","any",
+  "as","async","await","asserts","bigint","boolean","break","case","catch","class",
   "const","continue","debugger","declare","default","delete","do","else","enum","export",
   "extends","false","finally","for","from","function","get","if","implements","import",
   "in","infer","instanceof","interface","is","keyof","let","module","namespace","never",
@@ -323,7 +274,7 @@
   "while","with","yield"
   ],
 
-  "typescriptreact":[
+  "typescriptreact":["async","await",
   "abstract","any","as","asserts","bigint","boolean","break","case","catch","class",
   "const","continue","debugger","declare","default","delete","do","else","enum","export",
   "extends","false","finally","for","from","function","get","if","implements","import",
@@ -359,12 +310,10 @@
   ],
 
   "vue":[
-  "v-bind","v-model","v-if","v-else","v-else-if","v-for","v-show","v-text","v-html",
-  "v-on","v-slot","v-pre","v-cloak","v-once","ref","key","is","slot","name","props",
-  "emits","setup","data","methods","computed","watch","components","template","script",
-  "style","created","mounted","updated","unmounted","beforeMount","beforeUpdate",
-  "beforeUnmount","provide","inject","defineComponent","defineProps","defineEmits",
-  "defineExpose","withDefaults","reactive","ref","computed","watchEffect","toRefs"
+  "await","async","break","case","catch","class","const","continue","debugger","default",
+  "delete","do","else","enum","export","extends","false","finally","for","function",
+  "if","import","in","instanceof","let","new","null","return","super","switch",
+  "this","throw","true","try","typeof","var","void","while","with","yield"
   ],
 
   "wat":[

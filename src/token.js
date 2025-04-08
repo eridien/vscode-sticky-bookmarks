@@ -77,8 +77,8 @@ function getMaxLineLen(document, relPath, commentRegEx, update = false) {
 async function addTokenToLine(document, relPath, line, lineNumber, languageId, 
                               commentRegEx, token) {
   const maxLineLen   = getMaxLineLen(document, relPath, commentRegEx);
-  const strippedLine = cleanLine(line, commentRegEx, true);
-  const padLen = maxLineLen - strippedLine.length;
+  const strippedLine = stripLine(line, commentRegEx, true);
+  const padLen       = Math.max(maxLineLen - strippedLine.length, 0);
   const [commLft, commRgt] = utils.commentStr(languageId);
   const newLine = strippedLine +
             `${' '.repeat(padLen)} ${commLft}${token} ${commRgt}`;
@@ -87,7 +87,7 @@ async function addTokenToLine(document, relPath, line, lineNumber, languageId,
   await vscode.workspace.applyEdit(edit);
 }
 
-function cleanLine(line, commentRegEx) {
+function stripLine(line, commentRegEx) {
   const marks = [];
   let lineText = line.text.trimEnd();
   lineText = lineText.replace(tokenRegExG, 
@@ -108,7 +108,7 @@ async function toggle() {
   const languageId   = document.languageId;
   const commentRegEx = commentRegExp(languageId);
   if(tokenRegEx.test(lineText)) {
-    const newLine = cleanLine(line, commentRegEx);
+    const newLine = stripLine(line, commentRegEx);
     await editor.edit(builder => {
       builder.replace(line.range, newLine);
     });
@@ -136,7 +136,7 @@ async function clearFile(document) {
   let newFileText = '';
   for(let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);
-    newFileText += await cleanLine(line, commentRegEx) + '\n';
+    newFileText += await stripLine(line, commentRegEx) + '\n';
   }
   const uri  = document.uri;
   const edit = new vscode.WorkspaceEdit();
@@ -181,7 +181,7 @@ async function cleanFile(document) {
   log('globalMarks', Object.keys(globalMarks));
 }
 
-async function processAllFiles(func) {
+async function runOnAllFiles(func) {
   const editor = vscode.window.activeTextEditor;
   if (!editor) { log('info', 'No active editor'); return; }
   const document = editor.document;
@@ -192,7 +192,6 @@ async function processAllFiles(func) {
   for (const uri of uris) {
     try {
       const document = await vscode.workspace.openTextDocument(uri);
-      log('calling func');
       await func(document); 
     }
     catch(e) {if(e){}};
@@ -202,12 +201,12 @@ async function processAllFiles(func) {
 
 async function clearAllFiles() {
   log('clearAllFiles command called');
-  await processAllFiles(clearFile);
+  await runOnAllFiles(clearFile);
 }
 
 async function cleanAllFiles() {
   log('cleanAllFiles command called');
-  await processAllFiles(cleanFile);
+  await runOnAllFiles(cleanFile);
 }
 
 module.exports = { init, toggle, clearFile, clearAllFiles,

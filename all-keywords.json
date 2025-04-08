@@ -1,0 +1,380 @@
+{
+  "bat":[
+    "call", "cd", "chcp", "cls", "color", "copy", "date", "del", "dir", "echo",
+    "endlocal", "erase", "exit", "for", "goto", "if", "md", "mkdir", "move",
+    "pause", "popd", "pushd", "rd", "rem", "ren", "rename", "rmdir", "set",
+    "setlocal", "shift", "start", "time", "title", "type", "ver", "verify",
+    "vol"
+    ],
+
+  "bibtex":[
+  "article", "book", "booklet", "conference", "inbook", "incollection",
+  "inproceedings", "manual", "mastersthesis", "misc", "phdthesis",
+  "proceedings", "techreport", "unpublished",
+  "address", "annote", "author", "booktitle", "chapter", "crossref", "edition",
+  "editor", "howpublished", "institution", "journal", "key", "month", "note",
+  "number", "organization", "pages", "publisher", "school", "series", "title",
+  "type", "volume", "year"
+  ],
+
+  "c":[
+  "auto", "break", "case", "char", "const", "continue", "default", "do", "double",
+  "else", "enum", "extern", "float", "for", "goto", "if", "inline", "int", "long",
+  "register", "restrict", "return", "short", "signed", "sizeof", "static", "struct",
+  "switch", "typedef", "union", "unsigned", "void", "volatile", "while", "_Alignas",
+  "_Alignof", "_Atomic", "_Bool", "_Complex", "_Generic", "_Imaginary", "_Noreturn",
+  "_Static_assert", "_Thread_local"
+  ],
+
+  "clojure":[
+  "def", "defn", "defmacro", "defmulti", "defmethod", "defstruct", "defonce", "definline",
+  "let", "letfn", "loop", "recur", "if", "if-let", "if-not", "when", "when-let", "when-not",
+  "case", "cond", "condp", "do", "fn", "fn*", "quote", "var", "try", "catch", "finally",
+  "throw", "new", "set!", "monitor-enter", "monitor-exit", "ns", "require", "use", "import",
+  "in-ns", "refer", "this", "->", "->>", "some->", "some->>", "as->", "doto", "with-open",
+  "with-local-vars", "binding", "delay", "force", "future", "atom", "deref", "reset!", "swap!",
+  "alter", "ref", "dosync", "commute", "await", "await-for", "promise", "deliver"
+  ],
+
+  "cmake":[
+  "add_executable", "add_library", "add_custom_command", "add_custom_target",
+  "add_definitions", "add_dependencies", "add_subdirectory", "aux_source_directory",
+  "break", "build_command", "cmake_minimum_required", "cmake_policy",
+  "configure_file", "create_test_sourcelist", "define_property", "else", "elseif",
+  "enable_language", "enable_testing", "endforeach", "endfunction", "endif",
+  "endmacro", "endwhile", "execute_process", "export", "file", "find_file",
+  "find_library", "find_package", "find_path", "find_program", "foreach",
+  "function", "get_cmake_property", "get_directory_property",
+  "get_filename_component", "get_property", "get_source_file_property",
+  "get_target_property", "get_test_property", "if", "include", "include_directories",
+  "include_external_msproject", "include_regular_expression", "install", "link_directories",
+  "list", "load_cache", "macro", "mark_as_advanced", "message", "option", "project",
+  "return", "separate_arguments", "set", "set_directory_properties", "set_property",
+  "set_source_files_properties", "set_target_properties", "set_tests_properties",
+  "site_name", "source_group", "string", "target_compile_definitions", "target_compile_options",
+  "target_include_directories", "target_link_directories", "target_link_libraries",
+  "target_sources", "try_compile", "try_run", "unset", "variable_watch", "while"
+  ],
+
+  "code-referencing":["definition","declaration","reference","symbol","scope","usage","identifier","tag","xref","location","navigation","index","rename","highlight","outline","workspaceSymbol","documentSymbol","hover","signatureHelp","completion","referencesProvider","definitionProvider","diagnostic","semanticTokens"  ],
+
+  "code-text-binary":["ascii","binary","buffer","byte","char","character","code","compile","decode","encoding","hex","memory","parse","read","serialize","stream","string","text","token","unicode","utf8","write"  ],
+
+  "coffeescript":["and","break","by","catch","class","continue","delete","do","else","extends","false","finally","for","if","in","instanceof","is","isnt","loop","new","not","null","of","off","on","or","return","super","switch","then","this","throw","true","try","typeof","undefined","unless","until","when","while","yes","no"  ],
+
+  "cpp":["alignas","alignof","and","and_eq","asm","atomic_cancel","atomic_commit","atomic_noexcept","auto","bitand","bitor","bool","break","case","catch","char","char8_t","char16_t","char32_t","class","compl","concept","const","consteval","constexpr","constinit","const_cast","continue","co_await","co_return","co_yield","decltype","default","delete","do","double","dynamic_cast","else","enum","explicit","export","extern","false","float","for","friend","goto","if","inline","int","long","mutable","namespace","new","noexcept","not","not_eq","nullptr","operator","or","or_eq","private","protected","public","reflexpr","register","reinterpret_cast","requires","return","short","signed","sizeof","static","static_assert","static_cast","struct","switch","synchronized","template","this","thread_local","throw","true","try","typedef","typeid","typename","union","unsigned","using","virtual","void","volatile","wchar_t","while","xor","xor_eq"  ],
+
+  "cpp_embedded_latex":["alpha","beta","gamma","delta","epsilon","zeta","eta","theta","iota","kappa","lambda","mu","nu","xi","pi","rho","sigma","tau","upsilon","phi","chi","psi","omega","sum","int","frac","sqrt","begin","end","documentclass","usepackage","textbf","textit","underline","mathrm","mathbb","left","right","cdot","times","leq","geq","neq","infty","approx","rightarrow","leftarrow","partial","nabla"  ],
+
+  "csharp":["abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char",
+  "checked", "class", "const", "continue", "decimal", "default", "delegate", "do",
+  "double", "else", "enum", "event", "explicit", "extern", "false", "finally",
+  "fixed", "float", "for", "foreach", "goto", "if", "implicit", "in", "int",
+  "interface", "internal", "is", "lock", "long", "namespace", "new", "null",
+  "object", "operator", "out", "override", "params", "private", "protected",
+  "public", "readonly", "ref", "return", "sbyte", "sealed", "short", "sizeof",
+  "stackalloc", "static", "string", "struct", "switch", "this", "throw", "true",
+  "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort", "using",
+  "virtual", "void", "volatile", "while"  ],
+
+  "cuda-cpp":[
+  "__global__","__device__","__host__","__shared__","__constant__","__managed__",
+  "__restrict__","__forceinline__","__noinline__","__launch_bounds__","__syncthreads",
+  "__threadfence","__threadfence_block","__threadfence_system","__ldg","__ballot",
+  "__shfl","__shfl_up","__shfl_down","__shfl_xor","__any","__all","__popc",
+  "__clz","__brev","__funnelshift_l","__funnelshift_r","__activemask","__match_any_sync",
+  "__match_all_sync","__syncthreads_count","__syncthreads_and","__syncthreads_or",
+  "__nanosleep","atomicAdd","atomicSub","atomicExch","atomicMin","atomicMax",
+  "atomicInc","atomicDec","atomicCAS","atomicAnd","atomicOr","atomicXor",
+  "threadIdx","blockIdx","blockDim","gridDim","warpSize","gridSync","cudaMalloc",
+  "cudaFree","cudaMemcpy","cudaMemcpyAsync","cudaMemcpyKind","cudaMemset","cudaStream_t",
+  "cudaError_t","cudaGetErrorString","cudaGetLastError","cudaDeviceSynchronize",
+  "cudaSetDevice","cudaDeviceReset"
+  ],
+
+  "dart":[
+  "abstract","as","assert","async","await","break","case","catch","class","const",
+  "continue","covariant","default","deferred","do","dynamic","else","enum","export",
+  "extension","external","factory","false","final","finally","for","function","get",
+  "hide","if","implements","import","in","interface","is","late","library","mixin",
+  "new","null","on","operator","part","required","rethrow","return","set","show",
+  "static","super","switch","sync","this","throw","true","try","typedef","var",
+  "void","while","with","yield"
+  ],
+
+  "fsharp":[
+  "abstract","and","as","assert","base","begin","class","default","delegate","do",
+  "done","downcast","downto","elif","else","end","exception","extern","false","finally",
+  "for","fun","function","global","if","in","inherit","inline","interface","internal",
+  "lazy","let","match","member","module","mutable","namespace","new","null","of","open",
+  "or","override","private","public","rec","return","select","static","struct","then",
+  "to","true","try","type","upcast","use","val","void","when","while","with","yield"
+  ],
+
+  "go":[
+  "break","case","chan","const","continue","default","defer","else","fallthrough",
+  "for","func","go","goto","if","import","interface","map","package","range",
+  "return","select","struct","switch","type","var"
+  ],
+
+  "groovy":[
+  "abstract","as","assert","boolean","break","byte","case","catch","char","class",
+  "const","continue","def","default","do","double","else","enum","extends","false",
+  "final","finally","float","for","goto","if","implements","import","in","instanceof",
+  "int","interface","long","native","new","null","package","private","protected",
+  "public","return","short","static","strictfp","super","switch","synchronized",
+  "this","throw","throws","transient","true","try","void","volatile","while"
+  ],
+
+  "hlsl":[
+  "appendstructuredbuffer","asm","asm_fragment","blendstate","bool","break","buffer",
+  "case","cbuffer","centroid","class","column_major","compile","compile_fragment",
+  "compileshader","const","continue","compute_shader","consume_structuredbuffer",
+  "default","discard","do","double","domain_shader","dword","else","export","extern",
+  "false","float","for","fxgroup","geometry_shader","groupshared","half","if",
+  "in","inline","inout","inputpatch","int","interface","line","lineadj","linear",
+  "matrix","min16float","min10float","min16int","min12int","min16uint","namespace",
+  "nointerpolation","noperspective","out","outputpatch","packoffset","pass","pixelfragment",
+  "pixel_shader","point","precise","RasterizerState","return","register","row_major",
+  "RWBuffer","RWByteAddressBuffer","RWStructuredBuffer","RWTexture1D","RWTexture1DArray",
+  "RWTexture2D","RWTexture2DArray","RWTexture3D","sample","sampler","sampler1D",
+  "sampler2D","sampler3D","samplerCUBE","sampler_state","shared","snorm","stateblock",
+  "stateblock_state","static","string","struct","switch","tbuffer","technique",
+  "technique10","technique11","texture","Texture1D","Texture1DArray","Texture2D",
+  "Texture2DArray","Texture2DMS","Texture2DMSArray","Texture3D","TextureCube",
+  "TextureCubeArray","true","typedef","triangle","triangleadj","uniform","unorm",
+  "unsigned","vector","vertexfragment","vertex_shader","void","volatile","while"
+  ],
+
+  "jade":[
+  "doctype","html","head","body","title","meta","link","script","style","div","span",
+  "h1","h2","h3","h4","h5","h6","p","a","img","ul","ol","li","table","thead","tbody",
+  "tfoot","tr","td","th","form","input","button","label","select","option","textarea",
+  "block","extends","include","mixin","case","when","default","each","for","in","if",
+  "else","while","unless","yield","class","id","type","name","value","href","src",
+  "alt","disabled","checked","selected","method","action","placeholder","required"
+  ],
+
+  "java":[
+  "abstract","assert","boolean","break","byte","case","catch","char","class","const",
+  "continue","default","do","double","else","enum","extends","final","finally","float",
+  "for","goto","if","implements","import","instanceof","int","interface","long","native",
+  "new","null","package","private","protected","public","return","short","static",
+  "strictfp","super","switch","synchronized","this","throw","throws","transient","true",
+  "try","void","volatile","while"
+  ],
+
+  "javascript":[
+  "await","break","case","catch","class","const","continue","debugger","default",
+  "delete","do","else","enum","export","extends","false","finally","for","function",
+  "if","import","in","instanceof","let","new","null","return","super","switch",
+  "this","throw","true","try","typeof","var","void","while","with","yield"
+  ],
+
+  "javascriptreact":[
+  "await","break","case","catch","class","const","continue","debugger","default",
+  "delete","do","else","enum","export","extends","false","finally","for","function",
+  "if","import","in","instanceof","let","new","null","return","super","switch","this",
+  "throw","true","try","typeof","var","void","while","with","yield","async","static",
+  "props","state","setState","useState","useEffect","useContext","useReducer","useCallback",
+  "useMemo","useRef","useLayoutEffect","useImperativeHandle","useDebugValue","React",
+  "Fragment","StrictMode","Suspense","memo","lazy","forwardRef","createContext","cloneElement",
+  "createElement","isValidElement","Children","componentDidMount","componentDidUpdate",
+  "componentWillUnmount","render","shouldComponentUpdate","getDerivedStateFromProps",
+  "getSnapshotBeforeUpdate"
+  ],
+
+  "julia":[
+  "baremodule","begin","break","catch","ccall","const","continue","do","else","elseif",
+  "end","export","finally","for","function","global","if","import","let","local",
+  "macro","module","quote","return","struct","try","using","while","where","mutable",
+  "primitive","abstract","type","isa","in","bitstype","typealias","true","false","nothing","undef"
+  ],
+
+  "lua":[
+  "and","break","do","else","elseif","end","false","for","function","goto","if",
+  "in","local","nil","not","or","repeat","return","then","true","until","while"
+  ],
+
+
+  "objective-c":[
+  "@interface","@implementation","@end","@protocol","@class","@public","@private",
+  "@protected","@property","@synthesize","@dynamic","@selector","@encode","@defs",
+  "@try","@catch","@finally","@throw","@autoreleasepool","@import","@package",
+  "id","self","super","nil","YES","NO","BOOL","if","else","switch","case","default",
+  "for","do","while","break","continue","return","void","int","float","double",
+  "char","short","long","unsigned","signed","const","static","extern","sizeof",
+  "typedef","enum","struct","union","goto"
+  ],
+
+  "objective-cpp":[
+  "@interface","@implementation","@end","@protocol","@class","@public","@private",
+  "@protected","@property","@synthesize","@dynamic","@selector","@encode","@defs",
+  "@try","@catch","@finally","@throw","@autoreleasepool","@import","@package",
+  "id","self","super","nil","YES","NO","BOOL","if","else","switch","case","default",
+  "for","do","while","break","continue","return","void","int","float","double",
+  "char","short","long","unsigned","signed","const","static","extern","sizeof",
+  "typedef","enum","struct","union","goto","new","delete","class","namespace",
+  "template","typename","using","this","operator","public","private","protected",
+  "mutable","virtual","explicit","inline","friend","throw","try","catch","const_cast",
+  "static_cast","dynamic_cast","reinterpret_cast","typeid","nullptr"
+  ],
+
+  "perl":[
+  "and","cmp","continue","default","do","else","elsif","eq","for","foreach","given",
+  "goto","grep","if","last","local","my","ne","next","no","or","our","package","redo",
+  "require","return","scalar","sub","unless","until","use","when","while","xor",
+  "__FILE__","__LINE__","__PACKAGE__","BEGIN","END","INIT","CHECK","UNITCHECK"
+  ],
+
+  "php":[
+  "abstract","and","array","as","break","callable","case","catch","class","clone",
+  "const","continue","declare","default","do","echo","else","elseif","empty","enddeclare",
+  "endfor","endforeach","endif","endswitch","endwhile","eval","exit","extends","final",
+  "finally","fn","for","foreach","function","global","goto","if","implements","include",
+  "include_once","instanceof","insteadof","interface","isset","list","match","namespace",
+  "new","or","print","private","protected","public","readonly","require","require_once",
+  "return","static","switch","throw","trait","try","unset","use","var","while","xor",
+  "yield","__CLASS__","__DIR__","__FILE__","__FUNCTION__","__LINE__","__METHOD__",
+  "__NAMESPACE__","__TRAIT__"
+  ],
+
+  "powershell":[
+  "begin","break","catch","class","continue","data","define","do","dynamicparam","else",
+  "elseif","end","exit","filter","finally","for","foreach","from","function","if",
+  "in","param","process","return","switch","throw","trap","try","until","using","var",
+  "while","workflow","parallel","sequence","true","false","null"
+  ],
+
+  "python":[
+  "False","None","True","and","as","assert","async","await","break","class","continue",
+  "def","del","elif","else","except","finally","for","from","global","if","import",
+  "in","is","lambda","nonlocal","not","or","pass","raise","return","try","while","with","yield","match","case"
+  ],
+
+  "r":[
+  "if","else","repeat","while","function","for","in","next","break","TRUE","FALSE",
+  "NULL","NA","NaN","Inf"
+  ],
+
+  "raku":[
+  "my","our","has","state","constant","sub","method","multi","proto","only","module",
+  "class","role","grammar","subset","enum","package","if","elsif","else","unless",
+  "when","given","default","while","until","for","loop","repeat","do","next","last",
+  "redo","return","take","leave","goto","try","CATCH","CONTROL","KEEP","UNDO","START",
+  "TEMP","LET","INIT","END","BEGIN","UNIT","use","need","require","import","export",
+  "is","does","but","with","without","and","or","xor","not","div","mod","xx","leg",
+  "eq","ne","lt","le","gt","ge","cmp","~~","!~~","defined","say","print","put"
+  ],
+  "ruby":[
+  "BEGIN","END","alias","and","begin","break","case","class","def","defined?",
+  "do","else","elsif","end","ensure","false","for","if","in","module","next",
+  "nil","not","or","redo","rescue","retry","return","self","super","then",
+  "true","undef","unless","until","when","while","yield"
+  ],
+
+  "rust":[
+  "as","break","const","continue","crate","else","enum","extern","false","fn","for",
+  "if","impl","in","let","loop","match","mod","move","mut","pub","ref","return","self",
+  "Self","static","struct","super","trait","true","type","unsafe","use","where","while",
+  "async","await","dyn","abstract","become","box","do","final","macro","override","priv",
+  "try","typeof","unsized","virtual","yield"
+  ],
+
+  "shellscript":[
+  "if","then","else","elif","fi","case","esac","for","select","while","until","do","done",
+  "in","function","time","coproc","break","continue","return","exit","declare","typeset",
+  "readonly","local","export","eval","exec","set","unset","shift","getopts","source",
+  "alias","unalias","test","true","false","read","printf","echo","let","type","hash",
+  "command","builtin","trap","wait","kill","jobs","fg","bg","disown"
+  ],
+
+  "sql":[
+  "select","from","where","insert","into","values","update","set","delete","create",
+  "table","alter","drop","primary","key","foreign","constraint","index","view",
+  "distinct","join","inner","left","right","full","on","group","by","having",
+  "order","asc","desc","limit","offset","union","all","null","not","and","or",
+  "in","exists","between","like","is","as","case","when","then","else","end",
+  "database","schema","grant","revoke","use","commit","rollback","savepoint",
+  "transaction","with","default","unique","check","if","begin","procedure","function",
+  "trigger","cursor","declare","open","fetch","close","loop","while","repeat",
+  "exit","continue","return","do"
+  ],
+
+  "swift":[
+  "associatedtype","class","deinit","enum","extension","fileprivate","func","import",
+  "init","inout","internal","let","open","operator","private","protocol","public",
+  "rethrows","static","struct","subscript","typealias","var","break","case","continue",
+  "default","defer","do","else","fallthrough","for","guard","if","in","repeat","return",
+  "switch","where","while","as","Any","catch","false","is","nil","super","self","Self",
+  "throw","throws","true","try","_","#available","#colorLiteral","#column","#else",
+  "#elseif","#endif","#file","#fileID","#fileLiteral","#filePath","#function","#if",
+  "#imageLiteral","#keyPath","#line","#selector","#sourceLocation"
+  ],
+
+  "typescript":[
+  "abstract","any","as","asserts","bigint","boolean","break","case","catch","class",
+  "const","continue","debugger","declare","default","delete","do","else","enum","export",
+  "extends","false","finally","for","from","function","get","if","implements","import",
+  "in","infer","instanceof","interface","is","keyof","let","module","namespace","never",
+  "new","null","number","object","package","private","protected","public","readonly",
+  "require","global","return","set","static","string","super","switch","symbol","this",
+  "throw","true","try","type","typeof","undefined","unique","unknown","var","void",
+  "while","with","yield"
+  ],
+
+  "typescriptreact":[
+  "abstract","any","as","asserts","bigint","boolean","break","case","catch","class",
+  "const","continue","debugger","declare","default","delete","do","else","enum","export",
+  "extends","false","finally","for","from","function","get","if","implements","import",
+  "in","infer","instanceof","interface","is","keyof","let","module","namespace","never",
+  "new","null","number","object","package","private","protected","public","readonly",
+  "require","global","return","set","static","string","super","switch","symbol","this",
+  "throw","true","try","type","typeof","undefined","unique","unknown","var","void",
+  "while","with","yield",
+  "React","JSX","props","state","useState","useEffect","useContext","useRef",
+  "useCallback","useMemo","useReducer","useLayoutEffect","useImperativeHandle",
+  "Fragment","StrictMode","Suspense","lazy","memo","forwardRef","Children",
+  "createContext","createElement","cloneElement","isValidElement","componentDidMount",
+  "componentDidUpdate","componentWillUnmount","render","setState"
+  ],
+
+  "vb":[
+  "AddHandler","AddressOf","Alias","And","AndAlso","As","Boolean","ByRef","Byte",
+  "ByVal","Call","Case","Catch","CBool","CByte","CChar","CDate","CDec","CDbl","Char",
+  "CInt","Class","CLng","CObj","Const","Continue","CSByte","CShort","CSng","CStr",
+  "CType","CUInt","CULng","CUShort","Date","Decimal","Declare","Default","Delegate",
+  "Dim","DirectCast","Do","Double","Each","Else","ElseIf","End","Enum","Erase","Error",
+  "Event","Exit","False","Finally","For","Friend","Function","Get","GetType","GetXMLNamespace",
+  "Global","GoSub","GoTo","Handles","If","Implements","Imports","In","Inherits","Integer",
+  "Interface","Is","IsNot","Let","Lib","Like","Long","Loop","Me","Mod","Module","MustInherit",
+  "MustOverride","MyBase","MyClass","Namespace","Narrowing","New","Next","Not","Nothing",
+  "NotInheritable","NotOverridable","Object","Of","On","Operator","Option","Optional",
+  "Or","OrElse","Out","Overloads","Overridable","Overrides","ParamArray","Partial",
+  "Private","Property","Protected","Public","RaiseEvent","ReadOnly","ReDim","REM","RemoveHandler",
+  "Resume","Return","SByte","Select","Set","Shadows","Shared","Short","Single","Static",
+  "Step","Stop","String","Structure","Sub","SyncLock","Then","Throw","To","True","Try",
+  "TryCast","TypeOf","UInteger","ULong","UShort","Using","Variant","Wend","When","While",
+  "Widening","With","WithEvents","WriteOnly","Xor"
+  ],
+
+  "vue":[
+  "v-bind","v-model","v-if","v-else","v-else-if","v-for","v-show","v-text","v-html",
+  "v-on","v-slot","v-pre","v-cloak","v-once","ref","key","is","slot","name","props",
+  "emits","setup","data","methods","computed","watch","components","template","script",
+  "style","created","mounted","updated","unmounted","beforeMount","beforeUpdate",
+  "beforeUnmount","provide","inject","defineComponent","defineProps","defineEmits",
+  "defineExpose","withDefaults","reactive","ref","computed","watchEffect","toRefs"
+  ],
+
+  "wat":[
+  "module","func","param","result","local","global","export","import","memory","data",
+  "table","elem","type","start","offset","i32","i64","f32","f64","i32.const","i64.const",
+  "f32.const","f64.const","i32.add","i32.sub","i32.mul","i32.div_s","i32.div_u",
+  "i32.and","i32.or","i32.xor","i32.shl","i32.shr_s","i32.shr_u","i32.eq","i32.ne",
+  "i32.lt_s","i32.lt_u","i32.gt_s","i32.gt_u","i32.le_s","i32.le_u","i32.ge_s","i32.ge_u",
+  "drop","block","loop","br","br_if","br_table","if","then","else","end","call","call_indirect",
+  "local.get","local.set","local.tee","global.get","global.set","memory.grow","memory.size",
+  "unreachable","nop","return"
+  ]
+}

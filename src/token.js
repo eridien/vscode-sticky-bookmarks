@@ -39,7 +39,7 @@ const tokenRegEx  = new RegExp('\\:[0-9a-z]{4};');
 const tokenRegExG = new RegExp('\\:[0-9a-z]{4};', 'g');
 
 function commentRegExp(languageId) {
-  const [commLft, commRgt] = utils.commentStr(languageId);
+  const [commLft, commRgt] = utils.commentsByLang(languageId);
   if(commRgt !== '') {
     return new RegExp(
       `\\s*${commLft}(?!.*${commLft}).*?${commRgt}\\s*?$`, 'g');
@@ -79,7 +79,7 @@ async function addTokenToLine(document, relPath, line, lineNumber, languageId,
   const maxLineLen   = getMaxLineLen(document, relPath, commentRegEx);
   const strippedLine = stripLine(line, commentRegEx, true);
   const padLen       = Math.max(maxLineLen - strippedLine.length, 0);
-  const [commLft, commRgt] = utils.commentStr(languageId);
+  const [commLft, commRgt] = utils.commentsByLang(languageId);
   const newLine = strippedLine +
             `${' '.repeat(padLen)} ${commLft}${token} ${commRgt}`;
   const edit = new vscode.WorkspaceEdit();

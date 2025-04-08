@@ -167,28 +167,30 @@ function numToPx(num) {
   return `${num.toFixed(2)}px`;
 }
 
-function commentStr(langId) {
-  return {
-    python       : ['#',  ''], 
-    ruby         : ['#',  ''],
-    shellscript  : ['#',  ''], 
-    coffeescript : ['#',  ''],
-    haskell      : ['--', ''],
-    lua          : ['--', ''],
-    ada          : ['--', ''],
-    sql          : ['--', ''],
-    erlang       : ['%',  ''],
-    matlab       : ['%',  ''],
-    octave       : ['%',  ''],
-    prolog       : ['%',  ''],
-    ocaml        : ['\\(\\*',    '\\*\\)'],
-    reasonml     : ['\\(\\*',    '\\*\\)'],
-    html         : ['<!--', '-->']
-  }[langId] ?? ['//', ''];
+const commentsByLangs = [
+  [['python', 'ruby', 'perl', 'shell (bash, zsh, sh)', 'makefile', 'r', 
+    'julia', 'yaml', 'toml', 'elixir', 'nim', 'crystal', 'coffeescript', 
+    'dockerfile', 'gnuplot', 'matlab', 'octave'],
+                                      ['#',  '']],
+  [['haskell', 'lua', 'ada', 'sql'],  ['--', '']],
+  [['matlab', 'tex', 'latex', 'erlang', 'prolog', 'lilypond', 'gap'],
+                                      ['%',  '']],
+  [['ocaml', 'f#', 'pascal', 'delphi', 'sml', 'reasonml', 'mathematica'],
+                                      ['\\(\\*', '\\*\\)']],
+  [['html'],                          ['<!--', '-->']],
+]
+
+const comsByLang = {};
+for(const [langs, comments] of commentsByLangs) {
+  for(const lang of langs) {
+    comsByLang[lang] = comments;
+  }
 }
 
+function commentsByLang(langId) {return comsByLang[langId] ?? ['//', '']}
+
 module.exports = { 
-  init, getLog, getTextFromDoc, fixDriveLetter, sleep, getProjectIdx, commentStr,
+  init, getLog, getTextFromDoc, fixDriveLetter, sleep, getProjectIdx, commentsByLang,
   containsRange, containsLocation, locationIsEntireFile, getRangeSize, readTxt,
   blkIdFromId, tailFromId, readDirByRelPath, pxToNum, numToPx
 };

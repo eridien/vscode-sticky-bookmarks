@@ -1,13 +1,16 @@
-const vscode = require('vscode');
-const token  = require('./token.js');
-const utils  = require('./utils.js');
-const log    = utils.getLog('EXTN');
+const vscode    = require('vscode');
+const token     = require('./token.js');
+const keywords  = require('./keywords.js');
+const utils     = require('./utils.js');
+const log       = utils.getLog('EXTN');
 
 function activate(context) {
   log('activate');
 
   token.init(context);
   utils.init(context);
+  keywords.init(context);
+
 	const toggleCmd = vscode.commands.registerCommand(
                         'sticky-bookmarks.toggle', function () {
 		token.toggle();

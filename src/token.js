@@ -52,11 +52,8 @@ function commentRegExp(languageId) {
 
 async function setGlobalMark(document, relPath, 
                              line, lineNumber, languageId, token) {
-  const uri          = document.uri;
-  const symbol       = await labels.getSurroundingSymbol(uri, line.range);
-  const symName      = symbol?.name;
-  const symRange     = symbol?.location.range; 
-  const label        = await labels.getLabel(document, languageId, line);
+  const uri   = document.uri;
+  const label = await labels.getLabel(document, languageId, line);
   return addGlobalMark( {
         uri, relPath, lineNumber, languageId, label} , token);
 }

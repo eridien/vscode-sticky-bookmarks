@@ -18,7 +18,7 @@ async function getSurroundingSymbol(uri, range) {
     const topSymbols = await vscode.commands.executeCommand(
                       'vscode.executeDocumentSymbolProvider', uri);
     if (!topSymbols || !topSymbols.length) {
-      log('err', 'No topSymbols found.');
+      log('No topSymbols found.');
       return null;
     }
     const symbols = [{children: topSymbols}];
@@ -52,7 +52,7 @@ async function getLabel(document, languageId, line) {
     const symRange = symbol.location.range; 
     symOfs   = lineNumber - symRange.start.line;
   }
-  else symName, symOfs = null;
+  else symName = symOfs = null;
   let compText = '';
   while(compText.length < 30 && 
         lineNumber < document.lineCount - 1) {
@@ -64,11 +64,15 @@ async function getLabel(document, languageId, line) {
     // const addFunc = async function add(xFunc yFunc) {
     // return (await xFunc() + await yFunc());
     // };
-    const matches = lineText.matchAll(/\b.*?\b/g);
+    const matches = lineText.matchAll(/\b\w+?\b/g);
+    if(matches.length == 0) {
+      compText = lineText;
+      break;
+    }
     for(const match of matches) {
       const word = match[0];
       // 'const'  'addFunc' 'async' 'function' 'add' 'xFunc' 'yFunc'
-      if(word in keyWords.keywords[languageId]) {
+      if(keyWords.isKeyWord(languageId, word)) {
         lineText = lineText.replaceAll(word, '')
                            .replaceAll(/\s+/g, ' ').trim();
       }
@@ -85,7 +89,7 @@ async function getLabel(document, languageId, line) {
     // addFunc=add(xFunc yFunc){ (xFunc()+yFunc()); };
     lineNumber++;
   }
-  compText = compText.replaceAll(/\B\s+\B/g, '')
+  compText = compText.replaceAll(/\B\s+?|\s+?\B/g, '')
   // addFunc=add(xFunc yFunc){(xFunc()+yFunc());};
   // addFunc=add(xFunc yFunc){(xFun
   return {relPath, symName, symOfs, compText};

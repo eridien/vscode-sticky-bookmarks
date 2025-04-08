@@ -1,6 +1,7 @@
 const vscode    = require('vscode');
 const token     = require('./token.js');
 const keywords  = require('./keywords.js');
+const sidebar   = require('./sidebar.js');
 const utils     = require('./utils.js');
 const log       = utils.getLog('EXTN');
 
@@ -33,6 +34,12 @@ function activate(context) {
 	});
 	context.subscriptions.push(toggleCmd, clearFileCmd, clearAllFilesCmd,
                              cleanFileCmd, cleanAllFilesCmd);
+
+  vscode.window.registerTreeDataProvider(
+    'sidebarView',
+     new sidebar.SidebarProvider()
+  );
+
   log('activated');
 }
 

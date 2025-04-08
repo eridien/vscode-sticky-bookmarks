@@ -1,18 +1,17 @@
 {
-  "name": "sticky-bookmarks",
+  "name":        "sticky-bookmarks",
   "displayName": "Sticky Bookmarks",
+  "publisher":   "eridien",
   "description": "Lock bookmarks to code using inline tokens.",
-  "version": "0.0.1",
-  "engines": {
-    "vscode": "^1.99.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [],
+  "version":     "0.0.1",
+  "engines": { "vscode": "^1.99.0" },
+  "categories": [ "Other" ],
+  "activationEvents": ["onView:sidebarView"],
   "main": "./src/extension.js",
   "contributes": {
-    "commands": [{
+    "commands": 
+    [
+      {
         "command": "sticky-bookmarks.toggle",
         "title": "Sticky Bookmarks: Toggle Bookmark"
       },
@@ -32,7 +31,23 @@
         "command": "sticky-bookmarks.cleanAllFiles",
         "title": "Sticky Bookmarks: Clean All Files"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [ {
+          "id": "activityBar",
+          "title": "Sicky Bookmarks View",
+          "icon": "images/activity-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "activityBar": [ {
+          "id": "sidebarView",
+          "name": "Sicky Bookmarks View",
+          "icon": "images/activity-icon.svg"
+        }
+      ]
+    }
   },
   "scripts": {
     "lint": "eslint .",

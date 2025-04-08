@@ -56,14 +56,8 @@ async function getLabel(document, languageId, line) {
   let compText = '';
   while(compText.length < 30 && 
         lineNumber < document.lineCount - 1) {
-    // const addFunc  =  async function add(xFunc yFunc) {
-    //   return (await xFunc() + await yFunc());
-    // };
     let lineText = document.lineAt(lineNumber)
                    .text.trim().replaceAll(/\s+/g, ' ');
-    // const addFunc = async function add(xFunc yFunc) {
-    // return (await xFunc() + await yFunc());
-    // };
     const matches = lineText.matchAll(/\b\w+?\b/g);
     if(matches.length == 0) {
       compText = lineText;
@@ -71,27 +65,16 @@ async function getLabel(document, languageId, line) {
     }
     for(const match of matches) {
       const word = match[0];
-      // 'const'  'addFunc' 'async' 'function' 'add' 'xFunc' 'yFunc'
       if(keyWords.isKeyWord(languageId, word)) {
         lineText = lineText.replaceAll(word, '')
                            .replaceAll(/\s+/g, ' ').trim();
       }
-      // addFunc = add(xFunc yFunc) {
-      // ( xFunc() + yFunc());
-      // };
-      // lineText = lineText.replaceAll( /(?!\b\s+\b)\s+/g, '');
       lineText = lineText.replaceAll(/\B\s+\B/g, '');
-      // addFunc=add(xFunc yFunc){
-      // (xFunc()+yFunc());
-      // };
     }
     compText += ' ' + lineText;
-    // addFunc=add(xFunc yFunc){ (xFunc()+yFunc()); };
     lineNumber++;
   }
   compText = compText.replaceAll(/\B\s+?|\s+?\B/g, '')
-  // addFunc=add(xFunc yFunc){(xFunc()+yFunc());};
-  // addFunc=add(xFunc yFunc){(xFun
   return {relPath, symName, symOfs, compText};
 }
 

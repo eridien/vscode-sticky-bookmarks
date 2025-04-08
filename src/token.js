@@ -165,12 +165,18 @@ async function cleanFile(document) {
   const languageId   = document.languageId;
   const commentRegEx = commentRegExp(languageId);
   const relPath = vscode.workspace.asRelativePath(document.uri);
+  for(const [token, val] of Object.entries(globalMarks)) {
+    if(val.relPath === relPath) delete globalMarks[token];
+  }
+  context.workspaceState.update('globalMarks', globalMarks);
   getMaxLineLen(document, relPath, commentRegEx, true)
   for(let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);
     if(!tokenRegEx.test(line.text)) continue;
+    const token = await setGlobalMark(
+        document, relPath, line, i, languageId);
     await addTokenToLine(
-      document, relPath, line, i, languageId, commentRegEx);
+        document, relPath, line, i, languageId, commentRegEx, token);
   }
   log('globalMarks', Object.keys(globalMarks));
 }

@@ -32,14 +32,20 @@ function activate(context) {
                         'sticky-bookmarks.cleanAllFiles', function () {
 		token.cleanAllFiles();
 	});
-	context.subscriptions.push(toggleCmd, clearFileCmd, clearAllFilesCmd,
-                             cleanFileCmd, cleanAllFilesCmd);
+  
+  const itemClickCmd = vscode.commands.registerCommand(
+    'sticky-bookmarks.itemClick', (item) => {
+        vscode.window.showInformationMessage(`You clicked: ${item.label}`);
+    }
+  );
 
   vscode.window.registerTreeDataProvider(
     'sidebarView',
      new sidebar.SidebarProvider()
   );
 
+	context.subscriptions.push(toggleCmd, clearFileCmd, clearAllFilesCmd,
+                             cleanFileCmd, cleanAllFilesCmd, itemClickCmd);
   log('activated');
 }
 

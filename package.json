@@ -6,11 +6,9 @@
   "version":     "0.0.1",
   "engines": { "vscode": "^1.99.0" },
   "categories": [ "Other" ],
-  "activationEvents": ["onView:sidebarView"],
   "main": "./src/extension.js",
   "contributes": {
-    "commands": 
-    [
+    "commands": [
       {
         "command": "sticky-bookmarks.toggle",
         "title": "Sticky Bookmarks: Toggle Bookmark"
@@ -33,18 +31,18 @@
       }
     ],
     "viewsContainers": {
-      "activitybar": [ {
+      "activitybar": [{
           "id": "activityBar",
-          "title": "Sicky Bookmarks View",
-          "icon": "images/activity-icon.svg"
+          "title": "Sticky Bookmarks",
+          "icon": "images/activity-icon.png"
         }
       ]
     },
     "views": {
       "activityBar": [ {
           "id": "sidebarView",
-          "name": "Sicky Bookmarks View",
-          "icon": "images/activity-icon.svg"
+          "name": "Sticky Bookmarks",
+          "icon": "images/activity-icon.png"
         }
       ]
     }

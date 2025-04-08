@@ -1,0 +1,14 @@
+
+check language ids
+add keywords
+check languages without symbol providers
+
+settings
+  min line len
+  max line len
+  files to ignore
+  show marks in scrollbar, with color
+  show marks in gutter, with color
+  comments by langs
+  keywords
+  

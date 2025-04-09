@@ -45,58 +45,70 @@ function delGlobalMarksForFile(relPath) {
   log('delGlobalMarksForFile:', relPath);
 }
 
-// folderPath, fileRelPath, lineNumber, languageId, label
-// label: symName, symOfs, compText
-
-const delChar  = String.fromCharCode(127);
-const nullChar = String.fromCharCode(1);
-
-function getMarksArrayTree() {
+function getMarksTree() {
   const marksArray = Object.values(globalMarks);
-
   marksArray.sort((a, b) => {
-    const aSymName = a.label.symName ?? nullChar;
-    const bSymName = b.label.symName ?? nullChar;
-    const aKey = a.folderPath   .toLowerCase() + delChar +
-                 a.fileRelPath  .toLowerCase() + delChar +
-                 aSymName       .toLowerCase() + delChar +
-                 a.lineNumber   .toString().padStart(6, '0');
-    const bKey = b.folderPath   .toLowerCase() + delChar +
-                 b.fileRelPath  .toLowerCase() + delChar +
-                 bSymName       .toLowerCase() + delChar +
-                 b.lineNumber   .toString().padStart(6, '0');
-    if (aKey === bKey) return 0;
-    return (aKey > bKey) ? 1 : -1;
+    if(a.folderPath .toLowerCase() > 
+       b.folderPath .toLowerCase()) return +1;
+    if(a.folderPath .toLowerCase() < 
+       b.folderPath .toLowerCase()) return -1;
+    if(a.fileRelPath.toLowerCase() > 
+       b.fileRelPath.toLowerCase()) return +1;
+    if(a.fileRelPath.toLowerCase() <
+       b.fileRelPath.toLowerCase()) return -1;
+    return (a.lineNumber - b.lineNumber);
   });
-
-  const rootFolders = [];
-  let files, symbols, marksSorted;
+  let folders=[], files=[], syms=[], marksInSym=[];
+  function cleanLastSym() {
+    if(syms.length > 0) {
+      const lastSym1 = syms[syms.length-1][1];
+      if(Array.isArray(lastSym1) && 
+          lastSym1.length === 0) syms.pop();
+    }
+  }
   let lastFolderPath = null;
-  let lastFileRelPath, lastSymbolName;
+  let lastFileRelPath, lastSymName;
   for(const mark of marksArray) {
     if(mark.folderPath !== lastFolderPath) {
-      files = [];
-      rootFolders.push([mark.folderPath, files]);
-      lastFileRelPath = null;
       lastFolderPath = mark.folderPath;
+      cleanLastSym();
+      files = [];
+      folders.push([mark.folderPath, files]);
+      lastFileRelPath = null;
     }
     if(mark.fileRelPath !== lastFileRelPath) {
-      symbols = [];
-      files.push([mark.fileRelPath, symbols]);
-      lastSymbolName = null;
       lastFileRelPath = mark.fileRelPath;
+      cleanLastSym();
+      syms = [];
+      files.push([mark.fileRelPath, syms]);
+      lastSymName = null;
     }
-    const symName = mark.label.symName ?? nullChar;
-    if(symName !== lastSymbolName) {
-      marksSorted = [];
-      symbols.push([symName, marksSorted]);
-      lastSymbolName = symName;
+    const symName = mark.label.symName;
+    if(symName === null) {
+      cleanLastSym();
+      lastSymName = null;
+      syms.push([null, mark]);
+      continue;
     }
-    marksSorted.push(mark);
+    let addedSymMark = false;
+    if(symName !== lastSymName) {
+      cleanLastSym();
+      lastSymName = symName;
+      const linenumber = mark.label.symLineNum;
+      if(mark.lineNumber !== linenumber) {
+        const symMark = Object.assign({}, mark, {linenumber});
+        syms.push([symName, symMark]);
+        addedSymMark = true;
+      }
+      marksInSym = [];
+      syms.push([symName, marksInSym]);
+    }
+    if(!addedSymMark) marksInSym.push(mark);
   }
-  return rootFolders;
+  cleanLastSym();
+  return folders;
 }
 
-module.exports = {init, dumpGlobalMarks, getMarksArrayTree,
+module.exports = {init, dumpGlobalMarks, getMarksTree,
                   addGlobalMark, delGlobalMark, delGlobalMarksForFile}
 

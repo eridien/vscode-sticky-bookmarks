@@ -45,20 +45,15 @@ async function getSurroundingSymbol(document, lineNumber) {
   }
 }
 
-const nullChar = String.fromCharCode(1);
-
 async function getLabel(document, languageId, line) {
   let lineNumber = line.lineNumber;
   const symbol   = await getSurroundingSymbol(document, lineNumber);
-  let symName, symOfs;
+  let symName, symLineNum;
   if(symbol) {
-    symName = symbol.name;
-    symOfs = lineNumber - symbol.location.range.start.line;
+    symName    = symbol.name;
+    symLineNum = symbol.location.range.start.line;
   }
-  else {
-    symName = nullChar;
-    symOfs  = 0;
-  }
+  else symName = symLineNum = null;
   let compText = '';
   while(compText.length < 60 && 
         lineNumber < document.lineCount - 1) {
@@ -81,9 +76,16 @@ async function getLabel(document, languageId, line) {
     lineNumber++;
   }
   compText = compText.replaceAll(/\B\s+?|\s+?\B/g, '')
-                     .replaceAll(/:[0-9a-z]{4};/g, '')
-                     .replaceAll(/\/\/\s*?\/\//g, '\/\/');
-  return {symName, symOfs, compText};
+                     .replaceAll(/:[0-9a-z]{4};/g, '');
+  const [commLft, commRgt] = utils.commentsByLang(languageId);
+  let regxEmptyComm;
+  if(commRgt !== '') regxEmptyComm = new RegExp(
+        `\\s*${commLft}\\s*?${commRgt}\\s*`, 'g');
+  else regxEmptyComm = new RegExp(
+        `\\s*${commLft}\\s*?$`, 'g');
+  compText = compText.replaceAll(regxEmptyComm, '')
+                     .replaceAll(/\s+/g, ' ').trim();
+  return {symName, symLineNum, compText};
 }
 
 module.exports = { getLabel };

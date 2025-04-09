@@ -1,7 +1,4 @@
 const vscode = require('vscode');
-const marks  = require('./marks.js');
-
-let context;
 
 function init(contextIn) { 
   context = contextIn;

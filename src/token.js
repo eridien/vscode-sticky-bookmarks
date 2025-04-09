@@ -20,11 +20,10 @@ function commentRegExp(languageId) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
   if(commRgt !== '') {
     return new RegExp(
-      `\\s*${commLft}(?!.*${commLft}).*?${commRgt}\\s*?$`, 'g');
+      `\\s*${commLft}.*?${commRgt}\\s*?$`, 'g');
   }
   else {
-    return new RegExp(
-      `\\s*${commLft}(?!.*${commLft})\\s*?$`, 'g');
+    return new RegExp(`\\s*${commLft}\\s*?$`, 'g');
   }
 }
 
@@ -147,7 +146,7 @@ async function cleanFile(document) {
         document, relPath, line, i, languageId, commentRegEx, token);
   }
   marks.dumpGlobalMarks();
-  log(marks.getMarksArrayTree());
+  log(marks.getMarksTree());
 }
 
 async function runOnAllFiles(func) {

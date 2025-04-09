@@ -13,6 +13,7 @@ async function init() {
 }
 
 function isKeyWord(languageId, word) {
+  if(!keywordSetsByLang[languageId]) return false;
   return keywordSetsByLang[languageId].has(word);
 }
 

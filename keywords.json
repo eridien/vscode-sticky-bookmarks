@@ -134,7 +134,7 @@
   "try","void","volatile","while"
   ],
 
-  "javascript":[
+  "javascript":["console",
   "await","async","break","case","catch","class","const","continue","debugger","default",
   "delete","do","else","enum","export","extends","false","finally","for","function",
   "if","import","in","instanceof","let","new","null","return","super","switch",

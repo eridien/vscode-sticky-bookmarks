@@ -99,6 +99,19 @@ function containsRange(outerRange, innerRange) {
   return true;
 }
 
+function rangeContainsPos(range, pos) {
+  if((pos.line < range.start.line) ||
+     (pos.line > range.end.line)) 
+    return false;
+  if((pos.line == range.start.line) &&
+     (pos.character < range.start.character))
+    return false;
+  if((pos.line == range.end.line) &&
+     (pos.character > range.end.character))
+    return false;
+  return true;
+}
+
 async function locationIsEntireFile(location) {
   const document = 
           await vscode.workspace.openTextDocument(location.uri);
@@ -191,6 +204,6 @@ function commentsByLang(langId) {return comsByLang[langId] ?? ['//', '']}
 
 module.exports = { 
   init, getLog, getTextFromDoc, fixDriveLetter, sleep, getProjectIdx, commentsByLang,
-  containsRange, containsLocation, locationIsEntireFile, getRangeSize, readTxt,
-  blkIdFromId, tailFromId, readDirByRelPath, pxToNum, numToPx
+  rangeContainsPos, containsRange, containsLocation, locationIsEntireFile, getRangeSize, 
+  readTxt, blkIdFromId, tailFromId, readDirByRelPath, pxToNum, numToPx
 };

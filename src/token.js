@@ -1,43 +1,16 @@
 const vscode = require('vscode');
+const marks  = require('./marks.js');
 const labels = require('./labels.js');
 const utils  = require('./utils.js');
 const log    = utils.getLog('TOKE');
 
-let context, globalMarks;
+let context;
+
 const maxLineLenByPath = {}; 
 
 function init(contextIn) { 
   context = contextIn;
-
-  context.workspaceState.update('globalMarks', {});   // DEBUG
-
-  globalMarks = context.workspaceState.get('globalMarks', {});
-  log('main initialized'); 
-}
-
-function getGlobalMarksAsArray() {
-  return Object.values(globalMarks);
-}
-
-function getRandomToken() {
-  const hashDigit = () => Math.floor(Math.random()*36).toString(36);
-  let randHash;
-  do {  randHash = ''; for(let i = 0; i < 4; i++) randHash += hashDigit()}
-  while(randHash in globalMarks);
-  return `:${randHash};`;
-}
-
-function addGlobalMark(data) {
-  data.token = getRandomToken();
-  globalMarks[data.token] = data;
-  context.workspaceState.update('globalMarks', globalMarks);
-  return data.token;
-}
-
-function delGlobalMark(token) {
-  delete globalMarks[token];
-  context.workspaceState.update('globalMarks', globalMarks);
-  return '';
+  log('token initialized'); 
 }
 
 const tokenRegEx  = new RegExp('\\:[0-9a-z]{4};');
@@ -57,10 +30,10 @@ function commentRegExp(languageId) {
 
 async function setGlobalMark(document, fileRelPath, 
                              line, lineNumber, languageId) {
-  const fileUri    = document.uri;
-  const folderPath = vscode.workspace.getWorkspaceFolder(fileUri).path;
-  const label      = await labels.getLabel(document, languageId, line);
-  return addGlobalMark( {
+  const folderPath = vscode.workspace
+                           .getWorkspaceFolder(document.uri).uri.path;
+  const label = await labels.getLabel(document, languageId, line);
+  return marks.addGlobalMark( {
           folderPath, fileRelPath, lineNumber, languageId, label});
 }
 
@@ -92,11 +65,9 @@ async function addTokenToLine(document, relPath, line, lineNumber, languageId,
 }
 
 function stripLine(line, commentRegEx) {
-  const marks = [];
   let lineText = line.text.trimEnd();
-  lineText = lineText.replace(tokenRegExG, 
-    (token) => { marks.push(token);
-                 return delGlobalMark(token)});
+  lineText = lineText.replaceAll(tokenRegExG, 
+               (token) => marks.delGlobalMark(token));
   lineText = lineText.replaceAll(commentRegEx, '');
   return lineText.trimEnd();
 }
@@ -124,7 +95,7 @@ async function toggle() {
     await addTokenToLine(
       document, relPath, line, lineNumber, languageId, commentRegEx, token);
   }
-  log('globalMarks', Object.keys(globalMarks));
+  marks.dumpGlobalMarks();
 }
 
 async function clearFile(document) {
@@ -150,12 +121,8 @@ async function clearFile(document) {
   ), newFileText);
   await vscode.workspace.applyEdit(edit);
   const relPath = vscode.workspace.asRelativePath(uri);
-  for(const [token, val] of Object.entries(globalMarks)) {
-    if(val.fileRelPath === relPath) delete globalMarks[token];
-  }
-  context.workspaceState.update('globalMarks', globalMarks);
-  log('file cleared', relPath);
-  log('globalMarks', Object.keys(globalMarks));
+  marks.delGlobalMarksForFile(relPath);
+  marks.dumpGlobalMarks();
 }     
 
 async function cleanFile(document) {
@@ -169,10 +136,7 @@ async function cleanFile(document) {
   const languageId   = document.languageId;
   const commentRegEx = commentRegExp(languageId);
   const relPath = vscode.workspace.asRelativePath(document.uri);
-  for(const [token, val] of Object.entries(globalMarks)) {
-    if(val.fileRelPath === relPath) delete globalMarks[token];
-  }
-  context.workspaceState.update('globalMarks', globalMarks);
+  marks.delGlobalMarksForFile(relPath);
   getMaxLineLen(document, relPath, commentRegEx, true)
   for(let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);
@@ -182,7 +146,8 @@ async function cleanFile(document) {
     await addTokenToLine(
         document, relPath, line, i, languageId, commentRegEx, token);
   }
-  log('globalMarks', Object.keys(globalMarks));
+  marks.dumpGlobalMarks();
+  log(marks.getMarksArrayTree());
 }
 
 async function runOnAllFiles(func) {
@@ -200,7 +165,7 @@ async function runOnAllFiles(func) {
     }
     catch(e) {if(e){}};
   }
-  log('globalMarks', Object.keys(globalMarks));
+  marks.dumpGlobalMarks();
 } 
 
 async function clearAllFiles() {
@@ -213,7 +178,4 @@ async function cleanAllFiles() {
   await runOnAllFiles(cleanFile);
 }
 
-module.exports = { init, getGlobalMarksAsArray, 
-                   toggle,
-                   clearFile, clearAllFiles,
-                   cleanFile, cleanAllFiles };
+module.exports = { init, toggle, clearFile, clearAllFiles, cleanFile, cleanAllFiles };

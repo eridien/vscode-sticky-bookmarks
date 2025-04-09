@@ -3,18 +3,19 @@ const keyWords = require('./keywords.js');
 const utils    = require('./utils.js');
 const log      = utils.getLog('LABL');
 
-function getSymbols(range, symbols) {
+function getSymbols(pos, symbols) {
   const parent = symbols[symbols.length - 1];
   for(const child of parent.children) {
-    if(utils.containsRange(child.range, range)) {
+    if(utils.rangeContainsPos(child.range, pos)) {
       symbols.push(child);
-      return getSymbols(range, symbols);
+      return getSymbols(pos, symbols);
     }
   }
 }
 
-async function getSurroundingSymbol(uri, range) {
+async function getSurroundingSymbol(document, lineNumber) {
   try {
+    const uri = document.uri;
     const topSymbols = await vscode.commands.executeCommand(
                       'vscode.executeDocumentSymbolProvider', uri);
     if (!topSymbols || !topSymbols.length) {
@@ -22,10 +23,13 @@ async function getSurroundingSymbol(uri, range) {
       return null;
     }
     const symbols = [{children: topSymbols}];
-    getSymbols(range, symbols);
+    const lineLen = document.lineAt(lineNumber).text.length;
+    const pos = new vscode.Position(
+                      lineNumber, Math.max(lineLen-1, 0));
+    getSymbols(pos, symbols);
     symbols.shift();
     if (!symbols.length) {
-      log('getSurroundingSymbol, No symbol found', {uri, range});
+      log('getSurroundingSymbol, No symbol found', uri.path);
       return null;
     }
     if(symbols.length > 1 && 
@@ -41,17 +45,20 @@ async function getSurroundingSymbol(uri, range) {
   }
 }
 
+const nullChar = String.fromCharCode(1);
+
 async function getLabel(document, languageId, line) {
-  let  lineNumber = line.lineNumber;
-  const uri        = document.uri;
-  const symbol     = await getSurroundingSymbol(uri, line.range);
+  let lineNumber = line.lineNumber;
+  const symbol   = await getSurroundingSymbol(document, lineNumber);
   let symName, symOfs;
   if(symbol) {
-    symName  = symbol.name;
-    const symRange = symbol.location.range; 
-    symOfs   = lineNumber - symRange.start.line;
+    symName = symbol.name;
+    symOfs = lineNumber - symbol.location.range.start.line;
   }
-  else symName = symOfs = null;
+  else {
+    symName = nullChar;
+    symOfs  = 0;
+  }
   let compText = '';
   while(compText.length < 60 && 
         lineNumber < document.lineCount - 1) {
@@ -74,7 +81,9 @@ async function getLabel(document, languageId, line) {
     lineNumber++;
   }
   compText = compText.replaceAll(/\B\s+?|\s+?\B/g, '')
+                     .replaceAll(/:[0-9a-z]{4};/g, '')
+                     .replaceAll(/\/\/\s*?\/\//g, '\/\/');
   return {symName, symOfs, compText};
 }
 
-module.exports = { getSurroundingSymbol, getLabel };
+module.exports = { getLabel };

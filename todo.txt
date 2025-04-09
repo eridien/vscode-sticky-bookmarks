@@ -12,3 +12,8 @@ settings
   comments by langs
   keywords
   
+  in marksTree
+    languageId wrong "js => vue",
+
+  label
+    console not removed

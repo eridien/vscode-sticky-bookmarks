@@ -141,7 +141,7 @@
   "this","throw","true","try","typeof","var","void","while","with","yield"
   ],
 
-  "javascriptreact":[
+  "javascriptreact":["console",
   "await","break","case","catch","class","const","continue","debugger","default",
   "delete","do","else","enum","export","extends","false","finally","for","function",
   "if","import","in","instanceof","let","new","null","return","super","switch","this",
@@ -263,7 +263,7 @@
   "#imageLiteral","#keyPath","#line","#selector","#sourceLocation"
   ],
 
-  "typescript":[ "abstract","any",
+  "typescript":[ "abstract","any","console",
   "as","async","await","asserts","bigint","boolean","break","case","catch","class",
   "const","continue","debugger","declare","default","delete","do","else","enum","export",
   "extends","false","finally","for","from","function","get","if","implements","import",
@@ -274,7 +274,7 @@
   "while","with","yield"
   ],
 
-  "typescriptreact":["async","await",
+  "typescriptreact":["async","await","console",
   "abstract","any","as","asserts","bigint","boolean","break","case","catch","class",
   "const","continue","debugger","declare","default","delete","do","else","enum","export",
   "extends","false","finally","for","from","function","get","if","implements","import",

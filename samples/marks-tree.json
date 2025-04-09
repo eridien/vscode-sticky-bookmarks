@@ -1,0 +1,123 @@
+ [
+    "/c:/Users/mark/apps/test-app",
+    [
+      [
+        "src/srvr.js",
+        [
+          [
+            null,
+            {
+              "folderPath": "/c:/Users/mark/apps/test-app",
+              "fileRelPath": "src/srvr.js",
+              "lineNumber": 17,
+              "languageId": "vue",
+              "label": {
+                "symName": null,
+                "symLineNum": null,
+                "compText": "ws.onmessage=(event)=>{//console.log(\"onmessage:\"+event.data);"
+              },
+              "token": ":fa25;"
+            }
+          ],
+          [
+            "onmessage",
+            [
+              {
+                "folderPath": "/c:/Users/mark/apps/test-app",
+                "fileRelPath": "src/srvr.js",
+                "lineNumber": 18,
+                "languageId": "vue",
+                "label": {
+                  "symName": "onmessage",
+                  "symLineNum": 18,
+                  "compText": "ws.onmessage=(event)=>{//console.log(\"onmessage:\"+event.data);"
+                },
+                "token": ":ifj0;"
+              }
+            ]
+          ],
+          [
+            null,
+            {
+              "folderPath": "/c:/Users/mark/apps/test-app",
+              "fileRelPath": "src/srvr.js",
+              "lineNumber": 22,
+              "languageId": "vue",
+              "label": {
+                "symName": null,
+                "symLineNum": null,
+                "compText": "ws.onopen=()=>{console.log(\"opened websocket\");haveSocket=;"
+              },
+              "token": ":vtvl;"
+            }
+          ],
+          [
+            "onopen",
+            [
+              {
+                "folderPath": "/c:/Users/mark/apps/test-app",
+                "fileRelPath": "src/srvr.js",
+                "lineNumber": 23,
+                "languageId": "vue",
+                "label": {
+                  "symName": "onopen",
+                  "symLineNum": 23,
+                  "compText": "ws.onopen=()=>{console.log(\"opened websocket\");haveSocket=;"
+                },
+                "token": ":0s4f;"
+              },
+              {
+                "folderPath": "/c:/Users/mark/apps/test-app",
+                "fileRelPath": "src/srvr.js",
+                "lineNumber": 24,
+                "languageId": "vue",
+                "label": {
+                  "symName": "onopen",
+                  "symLineNum": 23,
+                  "compText": "console.log(\"opened websocket\");haveSocket=;(msg of waitingSends)ws.send(msg);"
+                },
+                "token": ":ssce;"
+              }
+            ]
+          ],
+          [
+            "onclose",
+            {
+              "folderPath": "/c:/Users/mark/apps/test-app",
+              "fileRelPath": "src/srvr.js",
+              "lineNumber": 30,
+              "languageId": "vue",
+              "label": {
+                "symName": "onclose",
+                "symLineNum": 30,
+                "compText": "console.log(\"websocket closed,tryg open 2 secs\");haveSocket=;"
+              },
+              "token": ":kg1z;"
+            }
+          ]
+        ]
+      ],
+      [
+        "src/tvdb.js",
+        [
+          [
+            "getToken",
+            [
+              {
+                "folderPath": "/c:/Users/mark/apps/test-app",
+                "fileRelPath": "src/tvdb.js",
+                "lineNumber": 13,
+                "languageId": "javascript",
+                "label": {
+                  "symName": "getToken",
+                  "symLineNum": 13,
+                  "compText": "getToken=()=>{//loginResp=fetch('https://api4.thetvdb.com/v4/login',"
+                },
+                "token": ":tkxt;"
+              }
+            ]
+          ]
+        ]
+      ]
+    ]
+  ]

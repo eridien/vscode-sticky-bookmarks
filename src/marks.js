@@ -90,20 +90,21 @@ function getMarksTree() {
       syms.push([null, mark]);
       continue;
     }
-    let addedSymMark = false;
     if(symName !== lastSymName) {
       cleanLastSym();
       lastSymName = symName;
-      const linenumber = mark.label.symLineNum;
-      if(mark.lineNumber !== linenumber) {
-        const symMark = Object.assign({}, mark, {linenumber});
+      const lineNumber = mark.label.symLineNum;
+      if(mark.lineNumber !== lineNumber) {
+        const symMark = Object.assign({}, mark, 
+                           {lineNumber, token:null});
+        symMark.label.compText = null;
         syms.push([symName, symMark]);
-        addedSymMark = true;
       }
+      else mark.label.compText = null;
       marksInSym = [];
       syms.push([symName, marksInSym]);
     }
-    if(!addedSymMark) marksInSym.push(mark);
+    marksInSym.push(mark);
   }
   cleanLastSym();
   return folders;

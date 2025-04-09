@@ -1,3 +1,5 @@
+const vscode = require('vscode');
+const labels = require('./labels.js');
 const utils  = require('./utils.js');
 const log    = utils.getLog('MARK');
 
@@ -24,11 +26,16 @@ function getRandomToken() {
   return `:${randHash};`;
 }
 
-function addGlobalMark(data) {
-  data.token = getRandomToken();
-  globalMarks[data.token] = data;
+async function addGlobalMark(
+                document, fileRelPath, line, lineNumber, languageId) {
+  const folderPath = vscode.workspace
+                           .getWorkspaceFolder(document.uri).uri.path;
+  const label = await labels.getLabel(document, languageId, line);
+  const token = getRandomToken();
+  globalMarks[token] = {
+                folderPath, fileRelPath, lineNumber, languageId, label};
   context.workspaceState.update('globalMarks', globalMarks);
-  return data.token;
+  return token;
 }
 
 function delGlobalMark(token) {
@@ -110,6 +117,6 @@ function getMarksTree() {
   return folders;
 }
 
-module.exports = {init, dumpGlobalMarks, getMarksTree,
+module.exports = {init, dumpGlobalMarks, getMarksTree, 
                   addGlobalMark, delGlobalMark, delGlobalMarksForFile}
 

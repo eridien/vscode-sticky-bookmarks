@@ -1,6 +1,5 @@
 const vscode = require('vscode');
 const marks  = require('./marks.js');
-const labels = require('./labels.js');
 const utils  = require('./utils.js');
 const log    = utils.getLog('TOKE');
 
@@ -25,15 +24,6 @@ function commentRegExp(languageId) {
   else {
     return new RegExp(`\\s*${commLft}\\s*?$`, 'g');
   }
-}
-
-async function setGlobalMark(document, fileRelPath, 
-                             line, lineNumber, languageId) {
-  const folderPath = vscode.workspace
-                           .getWorkspaceFolder(document.uri).uri.path;
-  const label = await labels.getLabel(document, languageId, line);
-  return marks.addGlobalMark( {
-          folderPath, fileRelPath, lineNumber, languageId, label});
 }
 
 function getMaxLineLen(document, relPath, commentRegEx, update = false) {
@@ -89,8 +79,8 @@ async function toggle() {
   }
   else {
     const relPath = vscode.workspace.asRelativePath(document.uri);
-    const token = await setGlobalMark(
-                           document, relPath, line, lineNumber, languageId);
+    const token = await marks.addGlobalMark(
+      document, relPath, line, lineNumber, languageId);
     await addTokenToLine(
       document, relPath, line, lineNumber, languageId, commentRegEx, token);
   }
@@ -140,7 +130,7 @@ async function cleanFile(document) {
   for(let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);
     if(!tokenRegEx.test(line.text)) continue;
-    const token = await setGlobalMark(
+    const token = await marks.addGlobalMark(
         document, relPath, line, i, languageId);
     await addTokenToLine(
         document, relPath, line, i, languageId, commentRegEx, token);

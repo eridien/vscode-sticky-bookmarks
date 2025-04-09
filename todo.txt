@@ -1,7 +1,7 @@
+bugs
+  toggle eats trailing comments
 
-check language ids
-add keywords
-check languages without symbol providers
+todo
 
 settings
   min line len

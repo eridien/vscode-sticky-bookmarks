@@ -44,7 +44,6 @@ async function getSurroundingSymbol(uri, range) {
 async function getLabel(document, languageId, line) {
   let  lineNumber = line.lineNumber;
   const uri        = document.uri;
-  const relPath    = vscode.workspace.asRelativePath(uri);
   const symbol     = await getSurroundingSymbol(uri, line.range);
   let symName, symOfs;
   if(symbol) {
@@ -54,7 +53,7 @@ async function getLabel(document, languageId, line) {
   }
   else symName = symOfs = null;
   let compText = '';
-  while(compText.length < 30 && 
+  while(compText.length < 60 && 
         lineNumber < document.lineCount - 1) {
     let lineText = document.lineAt(lineNumber)
                    .text.trim().replaceAll(/\s+/g, ' ');
@@ -75,7 +74,7 @@ async function getLabel(document, languageId, line) {
     lineNumber++;
   }
   compText = compText.replaceAll(/\B\s+?|\s+?\B/g, '')
-  return {relPath, symName, symOfs, compText};
+  return {symName, symOfs, compText};
 }
 
 module.exports = { getSurroundingSymbol, getLabel };

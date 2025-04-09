@@ -15,6 +15,10 @@ function init(contextIn) {
   log('main initialized'); 
 }
 
+function getGlobalMarksAsArray() {
+  return Object.values(globalMarks);
+}
+
 function getRandomToken() {
   const hashDigit = () => Math.floor(Math.random()*36).toString(36);
   let randHash;
@@ -23,10 +27,11 @@ function getRandomToken() {
   return `:${randHash};`;
 }
 
-function addGlobalMark(data, token = getRandomToken()) {
-  globalMarks[token] = data;
+function addGlobalMark(data) {
+  data.token = getRandomToken();
+  globalMarks[data.token] = data;
   context.workspaceState.update('globalMarks', globalMarks);
-  return token;
+  return data.token;
 }
 
 function delGlobalMark(token) {
@@ -50,12 +55,13 @@ function commentRegExp(languageId) {
   }
 }
 
-async function setGlobalMark(document, relPath, 
-                             line, lineNumber, languageId, token) {
-  const uri   = document.uri;
-  const label = await labels.getLabel(document, languageId, line);
+async function setGlobalMark(document, fileRelPath, 
+                             line, lineNumber, languageId) {
+  const fileUri    = document.uri;
+  const folderPath = vscode.workspace.getWorkspaceFolder(fileUri).path;
+  const label      = await labels.getLabel(document, languageId, line);
   return addGlobalMark( {
-        uri, relPath, lineNumber, languageId, label} , token);
+          folderPath, fileRelPath, lineNumber, languageId, label});
 }
 
 function getMaxLineLen(document, relPath, commentRegEx, update = false) {
@@ -145,7 +151,7 @@ async function clearFile(document) {
   await vscode.workspace.applyEdit(edit);
   const relPath = vscode.workspace.asRelativePath(uri);
   for(const [token, val] of Object.entries(globalMarks)) {
-    if(val.relPath === relPath) delete globalMarks[token];
+    if(val.fileRelPath === relPath) delete globalMarks[token];
   }
   context.workspaceState.update('globalMarks', globalMarks);
   log('file cleared', relPath);
@@ -164,7 +170,7 @@ async function cleanFile(document) {
   const commentRegEx = commentRegExp(languageId);
   const relPath = vscode.workspace.asRelativePath(document.uri);
   for(const [token, val] of Object.entries(globalMarks)) {
-    if(val.relPath === relPath) delete globalMarks[token];
+    if(val.fileRelPath === relPath) delete globalMarks[token];
   }
   context.workspaceState.update('globalMarks', globalMarks);
   getMaxLineLen(document, relPath, commentRegEx, true)
@@ -207,5 +213,7 @@ async function cleanAllFiles() {
   await runOnAllFiles(cleanFile);
 }
 
-module.exports = { init, toggle, clearFile, clearAllFiles,
-                                 cleanFile, cleanAllFiles};
+module.exports = { init, getGlobalMarksAsArray, 
+                   toggle,
+                   clearFile, clearAllFiles,
+                   cleanFile, cleanAllFiles };

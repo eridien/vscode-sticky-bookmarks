@@ -54,37 +54,44 @@ async function getLabel(document, languageId, line) {
     symLineNum = symbol.location.range.start.line;
   }
   else symName = symLineNum = null;
-  let compText = '';
-  while(compText.length < 60 && 
-        lineNumber < document.lineCount - 1) {
-    let lineText = document.lineAt(lineNumber)
-                   .text.trim().replaceAll(/\s+/g, ' ');
-    const matches = lineText.matchAll(/\b\w+?\b/g);
-    if(matches.length == 0) {
-      compText = lineText;
-      break;
-    }
-    for(const match of matches) {
-      const word = match[0];
-      if(keyWords.isKeyWord(languageId, word)) {
-        lineText = lineText.replaceAll(word, '')
-                           .replaceAll(/\s+/g, ' ').trim();
-      }
-      lineText = lineText.replaceAll(/\B\s+\B/g, '');
-    }
-    compText += ' ' + lineText;
-    lineNumber++;
-  }
-  compText = compText.replaceAll(/\B\s+?|\s+?\B/g, '')
-                     .replaceAll(/:[0-9a-z]{4};/g, '');
+
   const [commLft, commRgt] = utils.commentsByLang(languageId);
   let regxEmptyComm;
   if(commRgt !== '') regxEmptyComm = new RegExp(
         `\\s*${commLft}\\s*?${commRgt}\\s*`, 'g');
   else regxEmptyComm = new RegExp(
         `\\s*${commLft}\\s*?$`, 'g');
-  compText = compText.replaceAll(regxEmptyComm, '')
-                     .replaceAll(/\s+/g, ' ').trim();
+
+  let compText = '';
+  do {
+    let lineText = document.lineAt(lineNumber).text
+                           .trim().replaceAll(/\s+/g, ' ');
+    const matches = lineText.matchAll(/\b\w+?\b/g);
+    if(matches.length != 0) {
+      for(const match of matches) {
+        const word = match[0];
+        if(keyWords.isKeyWord(languageId, word)) {
+          lineText = lineText.replaceAll(word, '')
+                             .replaceAll(/\s+/g, ' ').trim();
+        }
+        lineText = lineText.replaceAll(/\B\s+\B/g, '');
+      }
+    }
+    lineText = lineText.replaceAll(/\B\s+?|\s+?\B/g, '')
+                       .replaceAll(/:[0-9a-z]{4};/g, '');
+    let lastLen;
+    do {
+      lastLen = lineText.length;
+      lineText = lineText.replaceAll(regxEmptyComm, ' ')
+                        .replaceAll(/\s+/g, ' ').trim();
+    }
+    while(lineText.length != lastLen);
+
+    compText += ' ' + lineText;
+    lineNumber++;
+  }
+  while(compText.length < 60 && lineNumber < document.lineCount);
+  
   return {symName, symLineNum, compText};
 }
 

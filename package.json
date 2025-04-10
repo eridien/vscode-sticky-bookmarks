@@ -11,31 +11,46 @@
     "commands": [
       {
         "command": "sticky-bookmarks.toggle",
-        "title": "Sticky Bookmarks: Toggle Bookmark"
-      },
-      {
+        "title": "Toggle Bookmark",
+        "category": "Sticky Bookmarks"
+      }, {
         "command": "sticky-bookmarks.prev",
-        "title": "Sticky Bookmarks: Previous Bookmark"
-      },
-      {
+        "title": "Previous Bookmark",
+        "category": "Sticky Bookmarks"
+      }, {
         "command": "sticky-bookmarks.next",
-        "title": "Sticky Bookmarks: Next Bookmark"
-      },
-      {
+        "title": "Next Bookmark",
+        "category": "Sticky Bookmarks"
+      }, {
         "command": "sticky-bookmarks.clearFile",
-        "title": "Sticky Bookmarks: Remove Bookmarks From File"
-      },
-      {
+        "title": "Remove Marks From File",
+        "category": "Sticky Bookmarks"
+      }, {
         "command": "sticky-bookmarks.clearAllFiles",
-        "title": "Sticky Bookmarks: Remove Bookmarks From All Files"
-      },
-      {
+        "title": "Remove Marks From All Files",
+        "category": "Sticky Bookmarks"
+      }, {
         "command": "sticky-bookmarks.cleanFile",
-        "title": "Sticky Bookmarks: Clean File"
+        "title": "Clean Marks In File",
+        "category": "Sticky Bookmarks"
+      }, {
+        "command": "sticky-bookmarks.cleanAllFiles",
+        "title": "Clean Marks In All Files",
+        "category": "Sticky Bookmarks"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "sticky-bookmarks.toggle",
+        "key": "ctrl+shift+alt+/",
+        "mac": "cmd+shift+alt+/",
+        "when": "editorTextFocus" 
       },
       {
-        "command": "sticky-bookmarks.cleanAllFiles",
-        "title": "Sticky Bookmarks: Clean All Files"
+        "command": "sticky-bookmarks.toggle",
+        "key": "ctrl+shift+alt+/",
+        "mac": "cmd+shift+alt+/",
+        "when": "editorTextFocus" 
       }
     ],
     "viewsContainers": {

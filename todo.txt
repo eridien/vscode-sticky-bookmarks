@@ -1,8 +1,9 @@
 bugs
+  junk in keyboard shortcuts menu
 
 todo
-  goto prev/next mark
-  show sideBar
+  finish default keys
+  sideBar
 
 settings
   min line len

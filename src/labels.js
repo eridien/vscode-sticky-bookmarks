@@ -48,13 +48,13 @@ async function getSurroundingSymbol(document, lineNumber) {
 async function getLabel(document, languageId, line) {
   let lineNumber = line.lineNumber;
   const symbol   = await getSurroundingSymbol(document, lineNumber);
-  let symName, symLineNum;
+  let symName, symLineNum, symKind;
   if(symbol) {
     symName    = symbol.name;
     symLineNum = symbol.location.range.start.line;
     symKind    = symbol.kind;
   }
-  else symName = symLineNum = null;
+  else symName = symLineNum = symKind = null;
 
   const [commLft, commRgt] = utils.commentsByLang(languageId);
   let regxEmptyComm;
@@ -93,7 +93,7 @@ async function getLabel(document, languageId, line) {
   }
   while(compText.length < 60 && lineNumber < document.lineCount);
   
-  return {symName, symLineNum, compText};
+  return {symKind, lineNumber, symName, symLineNum, compText};
 }
 
 

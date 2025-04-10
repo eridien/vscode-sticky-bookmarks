@@ -33,7 +33,7 @@ async function addGlobalMark(
   const label = await labels.getLabel(document, languageId, line);
   const token = getRandomToken();
   globalMarks[token] = {
-                folderPath, fileRelPath, lineNumber, languageId, label};
+              token, folderPath, fileRelPath, lineNumber, languageId, label};
   context.workspaceState.update('globalMarks', globalMarks);
   return token;
 }
@@ -52,6 +52,15 @@ function delGlobalMarksForFile(relPath) {
   log('delGlobalMarksForFile:', relPath);
 }
 
+const kindToCodicon= {
+     1: "file",         2: "module",      3: "namespace",  4: "package", 
+     5: "class",        6: "method",      7: "property",   8: "field", 
+     9: "constructor", 10: "enum",       11: "interface", 12: "function", 
+    13: "variable",    14: "constant",   15: "string",    16: "number", 
+    17: "boolean",     18: "array",      19: "object",    20: "key",
+    21: "null",        22: "enummember", 23: "struct",    24: "event", 
+    25: "operator",    26: "typeparameter"} ;
+
 function getMarksTree() {
   const marksArray = Object.values(globalMarks);
   marksArray.sort((a, b) => {
@@ -65,12 +74,13 @@ function getMarksTree() {
        b.fileRelPath.toLowerCase()) return -1;
     return (a.lineNumber - b.lineNumber);
   });
-  let folders=[], files=[], syms=[], marksInSym=[];
-  function cleanLastSym() {
-    if(syms.length > 0) {
-      const lastSym1 = syms[syms.length-1][1];
-      if(Array.isArray(lastSym1) && 
-          lastSym1.length === 0) syms.pop();
+  let folders=[], files=[], bookmarks=[], bookmarksInSym=[];
+  function cleaEmptyHead() {
+    if(bookmarks.length > 0) {
+      const lastBookmark = bookmarks.slice(-1)[0];
+      if(lastBookmark.type == 'symHead' && 
+             bookmarksInSym.length === 0)
+        delete lastBookmark.bookmarksInSym;
     }
   }
   let lastFolderPath = null;
@@ -78,42 +88,44 @@ function getMarksTree() {
   for(const mark of marksArray) {
     if(mark.folderPath !== lastFolderPath) {
       lastFolderPath = mark.folderPath;
-      cleanLastSym();
-      files = [];
-      folders.push([mark.folderPath, files]);
+      cleaEmptyHead();
+      files=[], bookmarks=[], bookmarksInSym=[];
+      folders.push({kind:'folder', type:'folder',
+                    folderPath:mark.folderPath, files});
       lastFileRelPath = null;
     }
     if(mark.fileRelPath !== lastFileRelPath) {
       lastFileRelPath = mark.fileRelPath;
-      cleanLastSym();
-      syms = [];
-      files.push([mark.fileRelPath, syms]);
+      cleaEmptyHead();
+      bookmarks=[], bookmarksInSym=[];
+      files.push({kind:'file',  type:'file',
+                  fileRelPath:mark.fileRelPath, bookmarks});
       lastSymName = null;
     }
-    const symName = mark.label.symName;
+    const {symName, symKind} = mark.label;
     if(symName === null) {
-      cleanLastSym();
+      cleaEmptyHead();
       lastSymName = null;
-      syms.push([null, mark]);
+      bookmarks.push({kind:'bookmark', type:'noSym', mark});
       continue;
     }
     if(symName !== lastSymName) {
-      cleanLastSym();
+      cleaEmptyHead();
       lastSymName = symName;
-      const lineNumber = mark.label.symLineNum;
-      if(mark.lineNumber !== lineNumber) {
-        const symMark = Object.assign({}, mark, 
-                           {lineNumber, token:null});
-        symMark.label.compText = null;
-        syms.push([symName, symMark]);
+      mark.label.compText = null;
+      const symLineNum = mark.label.symLineNum;
+      bookmarksInSym = [];
+      if(mark.lineNumber == symLineNum) {
+        bookmarks.push({kind:'bookmark', type:'symHead', 
+                        symName, symLineNum, mark, bookmarksInSym});
+        continue;
       }
-      else mark.label.compText = null;
-      marksInSym = [];
-      syms.push([symName, marksInSym]);
+      else bookmarks.push({kind:kindToCodicon(symKind), type:'symWrapper', 
+                           symName, symLineNum, bookmarksInSym});
     }
-    marksInSym.push(mark);
+    bookmarksInSym.push({kind:'bookmark', type:'symChild',  mark});
   }
-  cleanLastSym();
+  cleaEmptyHead();
   return folders;
 }
 

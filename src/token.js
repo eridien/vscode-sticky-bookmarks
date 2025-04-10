@@ -1,5 +1,6 @@
 const vscode = require('vscode');
 const marks  = require('./marks.js');
+const sett   = require('./settings.js');
 const utils  = require('./utils.js');
 const log    = utils.getLog('TOKE');
 
@@ -15,49 +16,34 @@ function init(contextIn) {
 const tokenRegEx  = new RegExp('\\:[0-9a-z]{4};');
 const tokenRegExG = new RegExp('\\:[0-9a-z]{4};', 'g');
 
-function commentRegExp(languageId) {
+function commRegExG(languageId) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
   if(commRgt !== '') {
     return new RegExp(
-      `\\s*${commLft}.*?${commRgt}\\s*?$`, 'g');
+      `\\s*${commLft}\\s*${commRgt}\\s*?$`, 'g');
   }
   else {
     return new RegExp(`\\s*${commLft}\\s*?$`, 'g');
   }
 }
 
-function getMaxLineLen(document, relPath, commentRegEx, update = false) {
-  if(update || maxLineLenByPath[relPath] === undefined) {
-    let maxLineLen = 0;
-    for(let lineNum = 0; lineNum < document.lineCount; lineNum++) {
-      const testLine = document.lineAt(lineNum);
-      const testStripLn = testLine.text
-            .replaceAll(tokenRegExG, '').replaceAll(commentRegEx, '');
-      maxLineLen = Math.max(maxLineLen, testStripLn.length);
-    }
-    maxLineLenByPath[relPath] = maxLineLen;
-  }
-  return maxLineLenByPath[relPath];
-}
-
-async function addTokenToLine(document, relPath, line, lineNumber, languageId, 
-                              commentRegEx, token) {
-  const maxLineLen   = getMaxLineLen(document, relPath, commentRegEx);
-  const strippedLine = stripLine(line, commentRegEx, true);
-  const padLen       = Math.max(maxLineLen - strippedLine.length, 0);
+async function addTokenToLine(document, line, languageId, token) {
+  const lineText = line.text.trimEnd(); 
+  const padLen = Math.max(sett.getMinCharPos() - lineText.length, 0);
   const [commLft, commRgt] = utils.commentsByLang(languageId);
-  const newLine = strippedLine +
-            `${' '.repeat(padLen)} ${commLft}${token} ${commRgt}`;
+  const newLine = lineText +
+                    `${' '.repeat(padLen)} ${commLft}${token}${commRgt}`;
   const edit = new vscode.WorkspaceEdit();
   edit.replace(document.uri, line.range, newLine);
   await vscode.workspace.applyEdit(edit);
 }
 
-function stripLine(line, commentRegEx) {
+function stripLine(line, languageId) {
   let lineText = line.text.trimEnd();
   lineText = lineText.replaceAll(tokenRegExG, 
                (token) => marks.delGlobalMark(token));
-  lineText = lineText.replaceAll(commentRegEx, '');
+  const regx = commRegExG(languageId);
+  lineText = lineText.replace(regx, '');
   return lineText.trimEnd();
 }
 
@@ -70,9 +56,8 @@ async function toggle() {
   const line         = document.lineAt(lineNumber);
   const lineText     = line.text.trimEnd();
   const languageId   = document.languageId;
-  const commentRegEx = commentRegExp(languageId);
   if(tokenRegEx.test(lineText)) {
-    const newLine = stripLine(line, commentRegEx);
+    const newLine = stripLine(line, languageId);
     await editor.edit(builder => {
       builder.replace(line.range, newLine);
     });
@@ -80,9 +65,8 @@ async function toggle() {
   else {
     const relPath = vscode.workspace.asRelativePath(document.uri);
     const token = await marks.addGlobalMark(
-      document, relPath, line, lineNumber, languageId);
-    await addTokenToLine(
-      document, relPath, line, lineNumber, languageId, commentRegEx, token);
+            document, relPath, line, lineNumber, languageId);
+    await addTokenToLine( document, line, languageId, token);
   }
   marks.dumpGlobalMarks();
 }
@@ -95,12 +79,11 @@ async function clearFile(document) {
     document = editor.document;
   }
   if(!tokenRegEx.test(document.getText())) return;
-  const languageId   = document.languageId;
-  const commentRegEx = commentRegExp(languageId);
-  let newFileText = '';
+  const languageId = document.languageId;
+  let newFileText  = '';
   for(let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);
-    newFileText += await stripLine(line, commentRegEx) + '\n';
+    newFileText += await stripLine(line, languageId) + '\n';
   }
   const uri  = document.uri;
   const edit = new vscode.WorkspaceEdit();
@@ -132,8 +115,7 @@ async function cleanFile(document) {
     if(!tokenRegEx.test(line.text)) continue;
     const token = await marks.addGlobalMark(
         document, relPath, line, i, languageId);
-    await addTokenToLine(
-        document, relPath, line, i, languageId, commentRegEx, token);
+    await addTokenToLine(document, line, languageId, token);
   }
   marks.dumpGlobalMarks();
   log(marks.getMarksTree());

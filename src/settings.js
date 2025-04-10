@@ -72,4 +72,9 @@ function setIgnoreFilePatterns() {
   parseAndSaveIgnoreFilePatterns(ignoreFilePatternStr);
 }
 
-module.exports = { init, logSettings, updateSetting, registerSettingCallback };
+function getMinCharPos() {
+  return 80;
+}
+
+module.exports = { init, logSettings, updateSetting, getMinCharPos,
+                   registerSettingCallback };

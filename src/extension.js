@@ -16,38 +16,22 @@ function activate(context) {
   token   .init(context);
 
 	const toggleCmd = vscode.commands.registerCommand(
-                        'sticky-bookmarks.toggle', function () {
-		token.toggle();
-	});
+                          'sticky-bookmarks.toggle',        token.toggle);
 	const prevCmd = vscode.commands.registerCommand(
-                        'sticky-bookmarks.prev', function () {
-		token.prev();
-	});
+                          'sticky-bookmarks.prev',          token.prev);
 	const nextCmd = vscode.commands.registerCommand(
-                        'sticky-bookmarks.next', function () {
-		token.next();
-	});
+                          'sticky-bookmarks.next',          token.next);
 	const clearFileCmd = vscode.commands.registerCommand(
-                        'sticky-bookmarks.clearFile', function () {
-		token.clearFile();
-	});
+                          'sticky-bookmarks.clearFile',     token.clearFile);
 	const clearAllFilesCmd = vscode.commands.registerCommand(
-                        'sticky-bookmarks.clearAllFiles', function () {
-		token.clearAllFiles();
-	});
+                          'sticky-bookmarks.clearAllFiles', token.clearAllFiles);
 	const cleanFileCmd = vscode.commands.registerCommand(
-                        'sticky-bookmarks.cleanFile', function () {
-		token.cleanFile();
-	});
+                          'sticky-bookmarks.cleanFile',     token.cleanFile);
 	const cleanAllFilesCmd = vscode.commands.registerCommand(
-                        'sticky-bookmarks.cleanAllFiles', function () {
-		token.cleanAllFiles();
-	});
+                          'sticky-bookmarks.cleanAllFiles', token.cleanAllFiles);
   
   const itemClickCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.itemClick', (item) => {
-        vscode.window.showInformationMessage(`You clicked: ${item.label}`);
-    }
+    'sticky-bookmarks.itemClick', (item) => sidebar.itemClickCmd(item)
   );
 
   vscode.window.registerTreeDataProvider(

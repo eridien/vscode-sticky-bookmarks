@@ -52,6 +52,7 @@ async function getLabel(document, languageId, line) {
   if(symbol) {
     symName    = symbol.name;
     symLineNum = symbol.location.range.start.line;
+    symKind    = symbol.kind;
   }
   else symName = symLineNum = null;
 
@@ -94,5 +95,6 @@ async function getLabel(document, languageId, line) {
   
   return {symName, symLineNum, compText};
 }
+
 
 module.exports = { getLabel };

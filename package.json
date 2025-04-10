@@ -14,6 +14,14 @@
         "title": "Sticky Bookmarks: Toggle Bookmark"
       },
       {
+        "command": "sticky-bookmarks.prev",
+        "title": "Sticky Bookmarks: Previous Bookmark"
+      },
+      {
+        "command": "sticky-bookmarks.next",
+        "title": "Sticky Bookmarks: Next Bookmark"
+      },
+      {
         "command": "sticky-bookmarks.clearFile",
         "title": "Sticky Bookmarks: Remove Bookmarks From File"
       },

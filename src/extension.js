@@ -19,6 +19,14 @@ function activate(context) {
                         'sticky-bookmarks.toggle', function () {
 		token.toggle();
 	});
+	const prevCmd = vscode.commands.registerCommand(
+                        'sticky-bookmarks.prev', function () {
+		token.prev();
+	});
+	const nextCmd = vscode.commands.registerCommand(
+                        'sticky-bookmarks.next', function () {
+		token.next();
+	});
 	const clearFileCmd = vscode.commands.registerCommand(
                         'sticky-bookmarks.clearFile', function () {
 		token.clearFile();
@@ -47,7 +55,8 @@ function activate(context) {
      new sidebar.SidebarProvider()
   );
 
-	context.subscriptions.push(toggleCmd, clearFileCmd, clearAllFilesCmd,
+	context.subscriptions.push(toggleCmd, prevCmd, nextCmd, 
+                             clearFileCmd, clearAllFilesCmd,
                              cleanFileCmd, cleanAllFilesCmd, itemClickCmd);
   log('activated');
 }

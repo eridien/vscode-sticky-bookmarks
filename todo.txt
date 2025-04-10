@@ -1,5 +1,4 @@
 bugs
-  toggle eats trailing comments
 
 todo
   goto prev/next mark

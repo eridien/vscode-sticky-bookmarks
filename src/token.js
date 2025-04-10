@@ -51,7 +51,8 @@ async function toggle() {
   log('toggle command called');
   const editor = vscode.window.activeTextEditor;
   if (!editor) { log('info', 'No active editor'); return; }
-  const document     = editor.document;
+  const document = editor.document;
+  if(document.lineCount == 0) return;
   const lineNumber   = editor.selection.active.line;
   const line         = document.lineAt(lineNumber);
   const lineText     = line.text.trimEnd();
@@ -69,6 +70,56 @@ async function toggle() {
     await addTokenToLine( document, line, languageId, token);
   }
   marks.dumpGlobalMarks();
+}
+
+function flashLine(editor, range) {
+  const decorationType = vscode.window.createTextEditorDecorationType({
+    backgroundColor: 'rgba(255, 255, 0, 0.5)'
+  });
+  editor.setDecorations(decorationType, [range]);
+  setTimeout(() => {
+    decorationType.dispose();
+  }, 100);
+}
+
+async function prevNext(fwd) {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) { log('info', 'No active editor'); return; }
+  const document = editor.document;
+  if(document.lineCount < 2) return;
+  const lineCnt    = document.lineCount;
+  const startLnNum = editor.selection.active.line;
+  let lineNumber;
+  if(fwd) lineNumber = (startLnNum == lineCnt-1) ? 0
+                                      : startLnNum+1;
+  else    lineNumber = (startLnNum == 0) ? lineCnt-1
+                                      : startLnNum-1;
+  while(lineNumber != startLnNum) {
+    let line = document.lineAt(lineNumber);
+    if(tokenRegEx.test(line.text)) {
+      const languageId = document.languageId;
+      let lineText = stripLine(line, languageId)
+      const begPos = new vscode.Position(lineNumber, 0);
+      const endPos = new vscode.Position(lineNumber, lineText.length);
+      editor.selection = new vscode.Selection(begPos, endPos);
+      editor.revealRange(editor.selection);
+      const range = new vscode.Range(begPos, endPos);
+      flashLine(editor, range);
+      break;
+    }
+    lineNumber = fwd ? ((lineNumber == lineCnt-1) ? 0 : lineNumber+1)
+                     : ((lineNumber == 0) ? lineCnt-1 : lineNumber-1);
+  }
+}
+
+async function prev() {
+  log('prev command called');
+  await prevNext(false);
+}
+
+async function next() {
+  log('next command called');
+  await prevNext(true);
 }
 
 async function clearFile(document) {
@@ -149,4 +200,6 @@ async function cleanAllFiles() {
   await runOnAllFiles(cleanFile);
 }
 
-module.exports = { init, toggle, clearFile, clearAllFiles, cleanFile, cleanAllFiles };
+module.exports = { init, toggle, prev, next,
+                   clearFile, clearAllFiles, 
+                   cleanFile, cleanAllFiles };

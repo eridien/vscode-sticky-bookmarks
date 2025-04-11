@@ -19,17 +19,22 @@ function getItem(params) {
   let {id, index, type, codicon, label, path,
        token, children, mark} = params;
   if(type == 'noSym' || type == 'symChild') codicon = 'bookmark';
+  if(codicon == 'function') label = `\u0192 ${label}`;
   const item = new vscode.TreeItem(label, 
           (children?.length)
                 ? vscode.TreeItemCollapsibleState.Expanded
                 : vscode.TreeItemCollapsibleState.none);
-  if(type != 'folder')
-    item.iconPath = new vscode.ThemeIcon(codicon);
-  Object.assign(item, {id, type, codicon, path, token, children, mark});
+  const returnObj = {id, index, codicon,
+                     type, path, token, mark, children};
+  if(codicon != 'folder' && codicon != 'function') {
+    returnObj.iconPath = new vscode.ThemeIcon("symbol-" + codicon);
+  }
+  Object.assign(item, returnObj);
   item.command = {
     command: 'sticky-bookmarks.itemClick',
     title:   'Item Clicked',
-    arguments: [{id, index, type, path, token, mark, children}],
+    arguments: [{id, index, codicon,
+                  type, path, token, mark, children}],
   }
   return item;
 };

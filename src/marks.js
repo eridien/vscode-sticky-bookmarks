@@ -98,8 +98,8 @@ function getMarksTree() {
       clearEmptyHead();
       const id = utils.fnv1aHash(mark.folderPath);
       files=[], bookmarks=[], bookmarksInSym=[];
-      folders.push({kind:'folder', type:'folder',
-                    folderPath:mark.folderPath, files, id});
+      folders.push({codicon:'folder', type:'folder',
+                    path:mark.folderPath, children:files, id});
       lastFileRelPath = null;
     }
     if(mark.fileRelPath !== lastFileRelPath) {
@@ -107,15 +107,15 @@ function getMarksTree() {
       clearEmptyHead();
       const id = utils.fnv1aHash(mark.folderPath + '/' + mark.fileRelPath);
       bookmarks=[], bookmarksInSym=[];
-      files.push({kind:'file',  type:'file',
-                  fileRelPath:mark.fileRelPath, bookmarks, id});
+      files.push({codicon:'file',  type:'file',
+                  path:mark.fileRelPath, mark, children:bookmarks, id});
       lastSymName = null;
     }
     const {symName, symKind, symHash} = mark.label;
     if(symName === null) {
       clearEmptyHead();
       lastSymName = null;
-      bookmarks.push({kind:'bookmark', type:'noSym', mark, 
+      bookmarks.push({codicon:'bookmark', type:'noSym', mark, 
                       id:mark.token});
       continue;
     }
@@ -126,15 +126,15 @@ function getMarksTree() {
       bookmarksInSym = [];
       const codicon = kindToCodicon(symKind);
       if(mark.lineNumber == symLineNum) {
-        bookmarks.push({kind:codicon, type:'symHead', 
+        bookmarks.push({codicon, type:'symHead', 
                         symName, symLineNum, mark,
-                        bookmarksInSym, id:mark.token});
+                        children:bookmarksInSym, id:mark.token});
         continue;
       }
-      else bookmarks.push({kind:codicon, type:'symWrapper', 
+      else bookmarks.push({codicon, type:'symWrapper', 
                symName, symLineNum, bookmarksInSym, id:symHash});
     }
-    bookmarksInSym.push({kind:'bookmark', type:'symChild',  
+    bookmarksInSym.push({codicon:'bookmark', type:'symChild',  
                          mark, id:mark.token});
   }
   clearEmptyHead();

@@ -38,14 +38,10 @@ function activate(context) {
     'sticky-bookmarks.closeItem', (item) => sidebar.closeItem(item)
   );
 
-  const cleanMenuCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.cleanItem', (item) => sidebar.cleanItem(item)
-  );
-
   context.subscriptions.push(toggleCmd, prevCmd, nextCmd, 
                              clearFileCmd, clearAllFilesCmd,
                              cleanFileCmd, cleanAllFilesCmd, 
-                             itemClickCmd, contextMenuCmd, cleanMenuCmd);
+                             itemClickCmd, contextMenuCmd);
 
   const glblFuncs = {};
   Object.assign(glblFuncs, utils   .init(context, glblFuncs));

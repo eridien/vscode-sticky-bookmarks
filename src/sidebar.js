@@ -15,46 +15,66 @@ function init(contextIn, glblFuncsIn, providerIn) {
   return {updateSidebar};
 }
 
-function getItem(id, index, codicon, label, children, type) {
-  if(type == 'noSym' || type == 'symChild') 
-    codicon = 'bookmark';
+function getItem(params) {
+  let {id, index, type, codicon, label, path,
+       token, children, mark} = params;
+  if(type == 'noSym' || type == 'symChild') codicon = 'bookmark';
   const item = new vscode.TreeItem(label, 
           (children?.length)
                 ? vscode.TreeItemCollapsibleState.Expanded
                 : vscode.TreeItemCollapsibleState.none);
   if(type != 'folder')
     item.iconPath = new vscode.ThemeIcon(codicon);
-  item.id = id;
+  Object.assign(item, {id, type, codicon, path, token, children, mark});
   item.command = {
     command: 'sticky-bookmarks.itemClick',
     title:   'Item Clicked',
-    arguments: [{id, index, codicon, label, type}],
+    arguments: [{id, index, type, path, token, mark, children}],
   }
   return item;
 };
 
 class SidebarProvider {
+  constructor() {
+    this._onDidChangeTreeData = new vscode.EventEmitter();
+    this.onDidChangeTreeData = this._onDidChangeTreeData.event;
+  }
+
   getTreeItem(element) {
     return element;
   }
 
-  getChildren(element) {
-    if (!element) {
-      // called with no element to create or refresh tree
+  getChildren(item) {
+    if (!item) {
       this.marksTree = marks.getMarksTree();
-      return this.marksTree.map((folderItems, index) => {
-        const {folderPath, files, id} = folderItems;
-        const folderName =
-              folderPath.split('/').pop().toUpperCase();
-        return getItem(id, index, 'folder', folderName, files, 'folder');
+      return this.marksTree.map((items, index) => {
+        const {codicon, type, path, children, id} = items;
+        const label = path.split('/').pop().toUpperCase();
+        return getItem({id, type, index, codicon, label, 
+                        path, children});
       });
     }
-    else return [];
-    // else {
-    //   return [
-    //     new vscode.TreeItem('Leaf', vscode.TreeItemCollapsibleState.None)
-    //   ];
-    // }
+    else {
+      const {codicon, type, path, children, mark, id} = item;
+      if(children) {
+        return children.map((items, index) => {
+          const {codicon, type, path, mark, children, id} = items;
+          let label;
+          switch (type) {
+            case 'file':       label = mark.fileRelPath;        break;
+            case 'symWrapper':
+            case 'symHead':    label = mark.label.symName;  break;
+          }
+          return getItem({id, type, index, codicon, label, 
+                           path, token:mark.token, mark, children});
+        });
+      }
+      else {
+        const label = mark.label.compText
+        return [getItem({id, type, codicon, label, path, 
+                         token:mark.token, mark})];
+      }
+    }
   }
 }
 
@@ -71,7 +91,7 @@ function closeItem(item) {
 } 
 
 function updateSidebar() {
-  provider.getChildren();
+  provider._onDidChangeTreeData.fire();
   log('updateSidebar');
 }
 

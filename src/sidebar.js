@@ -18,7 +18,7 @@ function getItem(id, index, codicon, label, children, type) {
   item.command = {
     command: 'sticky-bookmarks.itemClick',
     title:   'Item Clicked',
-    arguments: [{codicon, index, label, children, id}],
+    arguments: [{id, index, codicon, label, type}],
   }
   return item;
 };
@@ -52,6 +52,10 @@ function itemClick(item) {
   log('itemClick', item);
 } 
 
+function cleanItem(item) {
+  log('cleanItem', item);
+} 
+
 function closeItem(item) {
   log('closeItem', item);
 } 
@@ -64,4 +68,4 @@ function visibleChange(provider, visible) {
   sideBarIsVisible = visible;
 }
 
-module.exports = { SidebarProvider, visibleChange, itemClick, closeItem };
+module.exports = { SidebarProvider, visibleChange, itemClick, cleanItem, closeItem };

@@ -41,9 +41,12 @@
         "command": "sticky-bookmarks.itemClick",
         "title":   "Go To Bookmark"
       }, {
+        "command": "sticky-bookmarks.cleanItem",
+        "title":   " C "
+      } , {
         "command": "sticky-bookmarks.closeItem",
-        "title":   "X"
-      }
+        "title":   " X"
+      }    
     ],
     "keybindings": [
       {
@@ -77,6 +80,10 @@
     },
     "menus": {
       "view/item/context": [ {
+          "command": "sticky-bookmarks.cleanItem",
+          "when":    "view == sidebarView",
+          "group":   "inline"
+        }, {
           "command": "sticky-bookmarks.closeItem",
           "when":    "view == sidebarView",
           "group":   "inline"

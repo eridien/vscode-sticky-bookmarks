@@ -1,5 +1,6 @@
 bugs
   junk in keyboard shortcuts menu
+  removing all bookmarks still shows folder
   
 todo
   finish default keys

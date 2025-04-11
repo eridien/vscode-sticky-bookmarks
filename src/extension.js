@@ -39,17 +39,21 @@ function activate(context) {
   });
 
 	const itemClickCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.itemClick', (item) => sidebar.itemClickCmd(item)
+    'sticky-bookmarks.itemClick', (item) => sidebar.itemClick(item)
   );
 
   const contextMenuCmd = vscode.commands.registerCommand(
     'sticky-bookmarks.closeItem', (item) => sidebar.closeItem(item)
   );
 
+  const cleanMenuCmd = vscode.commands.registerCommand(
+    'sticky-bookmarks.cleanItem', (item) => sidebar.cleanItem(item)
+  );
+
   context.subscriptions.push(toggleCmd, prevCmd, nextCmd, 
                              clearFileCmd, clearAllFilesCmd,
                              cleanFileCmd, cleanAllFilesCmd, 
-                             itemClickCmd, contextMenuCmd);
+                             itemClickCmd, contextMenuCmd, cleanMenuCmd);
   log('activated');
 }
 

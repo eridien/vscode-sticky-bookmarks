@@ -158,7 +158,6 @@ async function cleanFile(document) {
     await addTokenToLine(document, line, languageId, token);
   }
   marks.dumpGlobalMarks();
-  log(marks.getMarksTree());
 }
 
 async function runOnAllFiles(func) {

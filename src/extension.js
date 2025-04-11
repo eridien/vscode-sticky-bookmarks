@@ -9,10 +9,6 @@ const log       = utils.getLog('extn');
 function activate(context) {
   log('activate');
 
-  utils   .init(context);
-  keywords.init(context);
-  marks   .init(context);
-
 	const toggleCmd = vscode.commands.registerCommand(
                           'sticky-bookmarks.toggle',        token.toggle);
 	const prevCmd = vscode.commands.registerCommand(
@@ -28,14 +24,10 @@ function activate(context) {
 	const cleanAllFilesCmd = vscode.commands.registerCommand(
                           'sticky-bookmarks.cleanAllFiles', token.cleanAllFiles);
   
-  const provider = new sidebar.SidebarProvider();
+  const sidebarProvider = new sidebar.SidebarProvider();
 
   const treeView = vscode.window.createTreeView('sidebarView', {
-    treeDataProvider: provider,
-  });
-
-  treeView.onDidChangeVisibility((e) => {
-    sidebar.visibleChange(provider, e.visible);
+    treeDataProvider: sidebarProvider,
   });
 
 	const itemClickCmd = vscode.commands.registerCommand(
@@ -54,6 +46,17 @@ function activate(context) {
                              clearFileCmd, clearAllFilesCmd,
                              cleanFileCmd, cleanAllFilesCmd, 
                              itemClickCmd, contextMenuCmd, cleanMenuCmd);
+
+  const glblFuncs = {};
+  Object.assign(glblFuncs, utils   .init(context, glblFuncs));
+  Object.assign(glblFuncs, keywords.init(context, glblFuncs));
+  Object.assign(glblFuncs, marks   .init(context, glblFuncs));
+  Object.assign(glblFuncs, sidebar .init(context, glblFuncs, sidebarProvider));
+
+  treeView.onDidChangeVisibility((e) => {
+    sidebar.visibleChange(e.visible);
+  });
+
   log('activated');
 }
 

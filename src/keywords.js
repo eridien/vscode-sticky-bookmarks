@@ -10,6 +10,7 @@ async function init() {
     const set = new Set(keywords);
     keywordSetsByLang[lang] = set;
   }
+  return {};
 }
 
 function isKeyWord(languageId, word) {

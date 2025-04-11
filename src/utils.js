@@ -2,11 +2,12 @@ const vscode = require('vscode');
 const path   = require('path');
 const log    = getLog('util');
 
-let context = null;
+let context;
 
 function init(contextIn) {
   context = contextIn;
   log('utils initialized');
+  return {};
 }
 
 const outputChannel = 

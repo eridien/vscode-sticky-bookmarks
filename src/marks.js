@@ -1,15 +1,18 @@
-const vscode = require('vscode');
-const labels = require('./labels.js');
-const utils  = require('./utils.js');
-const log    = utils.getLog('mark');
+const vscode  = require('vscode');
+const labels  = require('./labels.js');
+const utils   = require('./utils.js');
+const log     = utils.getLog('mark');
 
-let context, globalMarks;
+let globalMarks;
+let context, glblFuncs;
 
-function init(contextIn) { 
+function init(contextIn, glblFuncsIn) { 
   context = contextIn;
+  glblFuncs = glblFuncsIn;
   // context.workspaceState.update('globalMarks', {});   // DEBUG
   globalMarks = context.workspaceState.get('globalMarks', {});
   log('marks initialized'); 
+  return {};
 }
 
 function dumpGlobalMarks() {
@@ -33,12 +36,14 @@ async function addGlobalMark(
   globalMarks[token] = {
               token, folderPath, fileRelPath, lineNumber, languageId, label};
   context.workspaceState.update('globalMarks', globalMarks);
+  glblFuncs.updateSidebar();
   return token;
 }
 
 function delGlobalMark(token) {
   delete globalMarks[token];
   context.workspaceState.update('globalMarks', globalMarks);
+  glblFuncs.updateSidebar();
   return '';
 }
 
@@ -47,6 +52,7 @@ function delGlobalMarksForFile(relPath) {
     if(val.fileRelPath === relPath) delete globalMarks[token];
   }
   context.workspaceState.update('globalMarks', globalMarks);
+  glblFuncs.updateSidebar();
   log('delGlobalMarksForFile:', relPath);
 }
 
@@ -62,6 +68,7 @@ function kindToCodicon(kind) {
 }
 
 function getMarksTree() {
+  log('getMarksTree');
   const marksArray = Object.values(globalMarks);
   marksArray.sort((a, b) => {
     if(a.folderPath .toLowerCase() > 

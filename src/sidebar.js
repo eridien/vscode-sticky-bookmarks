@@ -4,6 +4,16 @@ const utils  = require('./utils.js');
 const log    = utils.getLog('side');
 
 // https://code.visualstudio.com/api/references/icons-in-labels#icon-listing
+  
+let context, glblFuncs, provider;
+
+function init(contextIn, glblFuncsIn, providerIn) {
+  context   = contextIn;
+  glblFuncs = glblFuncsIn;
+  provider  = providerIn;
+  log('sidebar initialized');
+  return {updateSidebar};
+}
 
 function getItem(id, index, codicon, label, children, type) {
   if(type == 'noSym' || type == 'symChild') 
@@ -60,12 +70,18 @@ function closeItem(item) {
   log('closeItem', item);
 } 
 
+function updateSidebar() {
+  provider.getChildren();
+  log('updateSidebar');
+}
+
 let sideBarIsVisible = false;
 
-function visibleChange(provider, visible) {
+function visibleChange(visible) {
   log('visibleChange', visible);
-  if(visible && !sideBarIsVisible) provider.refresh();
+  if(visible && !sideBarIsVisible) updateSidebar();
   sideBarIsVisible = visible;
 }
 
-module.exports = { SidebarProvider, visibleChange, itemClick, cleanItem, closeItem };
+module.exports = { init, SidebarProvider, visibleChange, 
+                   itemClick, cleanItem, closeItem };

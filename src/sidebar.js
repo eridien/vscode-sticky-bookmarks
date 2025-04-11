@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const marks  = require('./marks.js');
 const utils  = require('./utils.js');
-const log    = utils.getLog('SIDE');
+const log    = utils.getlog('side');
 
 // https://code.visualstudio.com/api/references/icons-in-labels#icon-listing
 

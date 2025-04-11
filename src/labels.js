@@ -1,7 +1,7 @@
 const vscode   = require('vscode');
 const keyWords = require('./keywords.js');
 const utils    = require('./utils.js');
-const log      = utils.getLog('LABL');
+const log      = utils.getlog('labl');
 
 function getSymbols(pos, symbols) {
   const parent = symbols[symbols.length - 1];

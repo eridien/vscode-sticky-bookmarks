@@ -8,7 +8,9 @@ todo
 settings
   min line len
   files to ignore
-  show marks in scrollbar, with color
-  show marks in gutter, with color
   comments by langs
   keywords
+
+unlikely
+  show marks in scrollbar, with color
+  show marks in gutter, with color

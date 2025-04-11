@@ -1,5 +1,5 @@
 const utils  = require('./utils.js');
-// const log    = utils.getLog('KEYW');
+// const log    = utils.getlog('keyw');
 
 const keywordSetsByLang = {};
 

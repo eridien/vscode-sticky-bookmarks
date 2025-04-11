@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const labels = require('./labels.js');
 const utils  = require('./utils.js');
-const log    = utils.getLog('MARK');
+const log    = utils.getlog('mark');
 
 let context, globalMarks;
 

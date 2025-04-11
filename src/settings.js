@@ -1,6 +1,6 @@
 const vscode = require('vscode');
 const utils  = require('./utils.js');
-const log    = utils.getLog('SETT');
+const log    = utils.getlog('sett');
 
 let config = null;
 

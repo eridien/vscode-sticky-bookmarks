@@ -19,6 +19,7 @@ function getItem(params) {
   let {id, index, type, codicon, label, path,
        token, children, mark} = params;
   if(type == 'noSym' || type == 'symChild') codicon = 'bookmark';
+  else codicon = 'symbol-' + codicon;
   if(codicon == 'function') label = `\u0192 ${label}`;
   const item = new vscode.TreeItem(label, 
           (children?.length)
@@ -27,7 +28,7 @@ function getItem(params) {
   const returnObj = {id, index, codicon,
                      type, path, token, mark, children};
   if(codicon != 'folder' && codicon != 'function') {
-    returnObj.iconPath = new vscode.ThemeIcon("symbol-" + codicon);
+    returnObj.iconPath = new vscode.ThemeIcon(codicon);
   }
   Object.assign(item, returnObj);
   item.command = {
@@ -66,9 +67,10 @@ class SidebarProvider {
           const {codicon, type, path, mark, children, id} = items;
           let label;
           switch (type) {
-            case 'file':       label = mark.fileRelPath;        break;
+            case 'file':       label = mark.fileRelPath;    break;
             case 'symWrapper':
             case 'symHead':    label = mark.label.symName;  break;
+            case 'noSym':      label = mark.label.compText; break;
           }
           return getItem({id, type, index, codicon, label, 
                            path, token:mark.token, mark, children});

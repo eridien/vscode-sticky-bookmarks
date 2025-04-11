@@ -28,10 +28,6 @@ function activate(context) {
 	const cleanAllFilesCmd = vscode.commands.registerCommand(
                           'sticky-bookmarks.cleanAllFiles', token.cleanAllFiles);
   
-  const itemClickCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.itemClick', (item) => sidebar.itemClickCmd(item)
-  );
-
   const provider = new sidebar.SidebarProvider();
 
   const treeView = vscode.window.createTreeView('sidebarView', {
@@ -42,9 +38,18 @@ function activate(context) {
     sidebar.visibleChange(provider, e.visible);
   });
 
-	context.subscriptions.push(toggleCmd, prevCmd, nextCmd, 
+	const itemClickCmd = vscode.commands.registerCommand(
+    'sticky-bookmarks.itemClick', (item) => sidebar.itemClickCmd(item)
+  );
+
+  const contextMenuCmd = vscode.commands.registerCommand(
+    'sticky-bookmarks.closeItem', (item) => sidebar.closeItem(item)
+  );
+
+  context.subscriptions.push(toggleCmd, prevCmd, nextCmd, 
                              clearFileCmd, clearAllFilesCmd,
-                             cleanFileCmd, cleanAllFilesCmd, itemClickCmd);
+                             cleanFileCmd, cleanAllFilesCmd, 
+                             itemClickCmd, contextMenuCmd);
   log('activated');
 }
 

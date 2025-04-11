@@ -1,6 +1,6 @@
 const vscode = require('vscode');
 const path   = require('path');
-const log    = getLog('UTIL');
+const log    = getLog('util');
 
 let context = null;
 
@@ -202,8 +202,18 @@ for(const [langs, comments] of commentsByLangs) {
 
 function commentsByLang(langId) {return comsByLang[langId] ?? ['//', '']}
 
+function fnv1aHash(str) {
+  let hash = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    hash ^= str.charCodeAt(i);
+    hash = (hash * 16777619) >>> 0;
+  }
+  return hash;
+}
+
 module.exports = { 
   init, getLog, getTextFromDoc, fixDriveLetter, sleep, getProjectIdx, commentsByLang,
   rangeContainsPos, containsRange, containsLocation, locationIsEntireFile, getRangeSize, 
-  readTxt, blkIdFromId, tailFromId, readDirByRelPath, pxToNum, numToPx
+  readTxt, blkIdFromId, tailFromId, readDirByRelPath, pxToNum, numToPx, fnv1aHash,
+  containsLocation
 };

@@ -2,7 +2,7 @@ const vscode = require('vscode');
 const marks  = require('./marks.js');
 const sett   = require('./settings.js');
 const utils  = require('./utils.js');
-const log    = utils.getlog('toke');
+const log    = utils.getLog('toke');
 
 const tokenRegEx  = new RegExp('\\:[0-9a-z]{4};');
 const tokenRegExG = new RegExp('\\:[0-9a-z]{4};', 'g');

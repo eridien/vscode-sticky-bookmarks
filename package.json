@@ -37,6 +37,12 @@
         "command": "sticky-bookmarks.cleanAllFiles",
         "title": "Clean Marks In All Files",
         "category": "Sticky Bookmarks"
+      }, {
+        "command": "sticky-bookmarks.itemClick",
+        "title":   "Go To Bookmark"
+      }, {
+        "command": "sticky-bookmarks.closeItem",
+        "title":   "X"
       }
     ],
     "keybindings": [
@@ -63,11 +69,19 @@
     },
     "views": {
       "activityBar": [ {
-          "id": "sidebarView",
+          "id":   "sidebarView",
           "name": "Sticky Bookmarks",
           "icon": "images/activity-icon.png"
         }
       ]
+    },
+    "menus": {
+      "view/item/context": [ {
+          "command": "sticky-bookmarks.closeItem",
+          "when":    "view == sidebarView",
+          "group":   "inline"
+        }
+      ] 
     }
   },
   "scripts": {

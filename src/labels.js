@@ -1,7 +1,7 @@
 const vscode   = require('vscode');
 const keyWords = require('./keywords.js');
 const utils    = require('./utils.js');
-const log      = utils.getlog('labl');
+const log      = utils.getLog('labl');
 
 function getSymbols(pos, symbols) {
   const parent = symbols[symbols.length - 1];
@@ -92,8 +92,11 @@ async function getLabel(document, languageId, line) {
     lineNumber++;
   }
   while(compText.length < 60 && lineNumber < document.lineCount);
+
+  const symHash = utils.fnv1aHash(
+                         `${document.uri.path}:${symName}:${symKind}`);
   
-  return {symKind, lineNumber, symName, symLineNum, compText};
+  return {symKind, symName, symLineNum, compText, symHash};
 }
 
 

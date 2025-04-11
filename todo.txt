@@ -5,13 +5,14 @@ bugs
 todo
   finish default keys
   substitue icons (bookmark, interface, etc.)
+  show marks in gutter
   
 settings
   min line len
   files to ignore
   comments by langs
   keywords
-
-unlikely
-  show marks in scrollbar, with color
-  show marks in gutter, with color
+  show in gutter
+  gutter color
+  show in scrollbar
+  scrollbar color

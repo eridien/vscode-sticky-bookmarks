@@ -72,7 +72,6 @@ class SidebarProvider {
             case 'symHead':    label = mark.label.symName;  break;
             case 'noSym':
             case 'symChild':   label = mark.label.compText; break;
-
           }
           return getItem({id, type, index, codicon, label, 
                            path, token:mark.token, mark, children});

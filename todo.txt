@@ -1,11 +1,11 @@
 bugs
   junk in keyboard shortcuts menu
-  removing all bookmarks still shows folder
+  click on folder or file returns entire subtree
   
 todo
   finish default keys
-  sideBar
-
+  substitue icons (bookmark, interface, etc.)
+  
 settings
   min line len
   files to ignore

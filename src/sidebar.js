@@ -70,7 +70,9 @@ class SidebarProvider {
             case 'file':       label = mark.fileRelPath;    break;
             case 'symWrapper':
             case 'symHead':    label = mark.label.symName;  break;
-            case 'noSym':      label = mark.label.compText; break;
+            case 'noSym':
+            case 'symChild':   label = mark.label.compText; break;
+
           }
           return getItem({id, type, index, codicon, label, 
                            path, token:mark.token, mark, children});

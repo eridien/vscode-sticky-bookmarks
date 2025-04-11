@@ -4,15 +4,6 @@ const sett   = require('./settings.js');
 const utils  = require('./utils.js');
 const log    = utils.getLog('TOKE');
 
-let context;
-
-const maxLineLenByPath = {}; 
-
-function init(contextIn) { 
-  context = contextIn;
-  log('token initialized'); 
-}
-
 const tokenRegEx  = new RegExp('\\:[0-9a-z]{4};');
 const tokenRegExG = new RegExp('\\:[0-9a-z]{4};', 'g');
 
@@ -157,10 +148,8 @@ async function cleanFile(document) {
   }
   if(!tokenRegEx.test(document.getText())) return;
   const languageId   = document.languageId;
-  const commentRegEx = commentRegExp(languageId);
   const relPath = vscode.workspace.asRelativePath(document.uri);
   marks.delGlobalMarksForFile(relPath);
-  getMaxLineLen(document, relPath, commentRegEx, true)
   for(let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);
     if(!tokenRegEx.test(line.text)) continue;
@@ -200,6 +189,6 @@ async function cleanAllFiles() {
   await runOnAllFiles(cleanFile);
 }
 
-module.exports = { init, toggle, prev, next,
+module.exports = { toggle, prev, next,
                    clearFile, clearAllFiles, 
                    cleanFile, cleanAllFiles };

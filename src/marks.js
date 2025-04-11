@@ -120,8 +120,9 @@ function getMarksTree() {
                         symName, symLineNum, mark, bookmarksInSym});
         continue;
       }
-      else bookmarks.push({kind:kindToCodicon(symKind), type:'symWrapper', 
-                           symName, symLineNum, bookmarksInSym});
+      else bookmarks.push({kind:kindToCodicon[symKind] ?? 'question', 
+                           type:'symWrapper', symName, symLineNum, 
+                           bookmarksInSym});
     }
     bookmarksInSym.push({kind:'bookmark', type:'symChild',  mark});
   }

@@ -5,24 +5,11 @@ const log    = utils.getLog('SIDE');
 
 // https://code.visualstudio.com/api/references/icons-in-labels#icon-listing
 
-let context;
-
-function init(contextIn) { 
-  context = contextIn;
-}
-
-function getItem(index, kindOrCodicon, label, children, mark) {
-  let codicon;
-  if(typeof kindOrCodicon === 'string')
-    codicon = kindOrCodicon;
-  else {
-    const kind = kindOrCodicon;
-    codicon = (kind === null) 
-        ? codiconIn : kindToCodicon[kind+1] || 'question';
-  }
+function getItem(index, codicon, label, children, type, mark) {
   let iconLabel;
-  if(codicon == 'compText') iconLabel = compText;
-  else                      iconLabel = `$(${codicon}) ${label}`;
+  if(type == 'noSym' || type == 'symChild') 
+        iconLabel = `$(bookmark)   ${mark.label.compText}`;
+  else  iconLabel = `$(${codicon}) ${label}`;
   const item = new vscode.TreeItem(iconLabel, 
           (children?.length)
                 ? vscode.TreeItemCollapsibleState.Expanded
@@ -41,18 +28,18 @@ class SidebarProvider {
     return element;
   }
 
-  // called with no element to create or refresh tree
   getChildren(element) {
     if (!element) {
+      // called with no element to create or refresh tree
       this.marksTree = marks.getMarksTree();
-      return marksTree.map((folderItems, index) => {
-        const [folderPath, files] = folderItems;
+      return this.marksTree.map((folderItems, index) => {
+        const {folderPath, files} = folderItems;
         const folderName =
               folderPath.split('/').pop().toUpperCase();
-        const childrenFiles = folderArr[1];
-        return getItem(index, 'folder', label, childrenFiles);
+        return getItem(index, 'folder', folderName, files);
       });
     }
+    else return [];
     // else {
     //   return [
     //     new vscode.TreeItem('Leaf', vscode.TreeItemCollapsibleState.None)
@@ -61,12 +48,15 @@ class SidebarProvider {
   }
 }
 
-function update() {
-
-}
-
 function itemClick(item) {
 
 } 
 
-module.exports = { init, SidebarProvider, update, itemClick };
+let sideBarIsVisible = false;
+
+function visibleChange(provider, visible) {
+  log('visibleChange', visible);
+  if(visible && !sideBarIsVisible) provider.refresh();
+  sideBarIsVisible = visible;
+}
+module.exports = { SidebarProvider, visibleChange, itemClick };

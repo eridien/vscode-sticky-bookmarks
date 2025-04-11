@@ -12,8 +12,6 @@ function activate(context) {
   utils   .init(context);
   keywords.init(context);
   marks   .init(context);
-  sidebar .init(context);
-  token   .init(context);
 
 	const toggleCmd = vscode.commands.registerCommand(
                           'sticky-bookmarks.toggle',        token.toggle);
@@ -34,10 +32,15 @@ function activate(context) {
     'sticky-bookmarks.itemClick', (item) => sidebar.itemClickCmd(item)
   );
 
-  vscode.window.registerTreeDataProvider(
-    'sidebarView',
-     new sidebar.SidebarProvider()
-  );
+  const provider = new sidebar.SidebarProvider();
+
+  const treeView = vscode.window.createTreeView('sidebarView', {
+    treeDataProvider: provider,
+  });
+
+  treeView.onDidChangeVisibility((e) => {
+    sidebar.visibleChange(provider, e.visible);
+  });
 
 	context.subscriptions.push(toggleCmd, prevCmd, nextCmd, 
                              clearFileCmd, clearAllFilesCmd,

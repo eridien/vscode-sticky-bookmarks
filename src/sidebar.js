@@ -18,16 +18,17 @@ function init(contextIn, glblFuncsIn, providerIn) {
 function getItem(params) {
   let {id, index, type, codicon, label, path,
        token, children, mark} = params;
-  if(type == 'noSym' || type == 'symChild') codicon = 'bookmark';
+  if(type == 'noSym' || type == 'symChild') 
+       codicon = 'bookmark';
   else codicon = 'symbol-' + codicon;
-  if(codicon == 'function') label = `\u0192 ${label}`;
+  if(codicon == 'symbol-function') label = `\u0192 ${label}`;
   const item = new vscode.TreeItem(label, 
           (children?.length)
                 ? vscode.TreeItemCollapsibleState.Expanded
                 : vscode.TreeItemCollapsibleState.none);
   const returnObj = {id, index, codicon,
                      type, path, token, mark, children};
-  if(codicon != 'folder' && codicon != 'function') {
+  if(codicon != 'folder' && codicon != 'symbol-function') {
     returnObj.iconPath = new vscode.ThemeIcon(codicon);
   }
   Object.assign(item, returnObj);

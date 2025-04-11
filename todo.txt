@@ -1,7 +1,8 @@
 bugs
   junk in keyboard shortcuts menu
-  click on folder or file returns entire subtree
-  
+  click on folder or file or sym returns entire subtree
+  bookmark inside function shows as symHead function (fCall)
+
 todo
   finish default keys
   substitue icons (bookmark, interface, etc.)

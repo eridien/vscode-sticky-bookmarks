@@ -208,7 +208,7 @@ function fnv1aHash(str) {
     hash ^= str.charCodeAt(i);
     hash = (hash * 16777619) >>> 0;
   }
-  return hash;
+  return hash.toString;
 }
 
 module.exports = { 

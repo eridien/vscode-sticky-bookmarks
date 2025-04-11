@@ -115,7 +115,6 @@ function getMarksTree() {
     if(symName !== lastSymName) {
       clearEmptyHead();
       lastSymName = symName;
-      mark.label.compText = null;
       const symLineNum = mark.label.symLineNum;
       bookmarksInSym = [];
       const codicon = kindToCodicon(symKind);
@@ -126,9 +125,7 @@ function getMarksTree() {
         continue;
       }
       else bookmarks.push({kind:codicon, type:'symWrapper', 
-                           symName, symLineNum, 
-                           bookmarksInSym, 
-                           id:symHash});
+               symName, symLineNum, bookmarksInSym, id:symHash});
     }
     bookmarksInSym.push({kind:'bookmark', type:'symChild',  
                          mark, id:mark.token});

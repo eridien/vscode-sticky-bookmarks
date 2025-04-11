@@ -1,6 +1,6 @@
 bugs
   junk in keyboard shortcuts menu
-
+  
 todo
   finish default keys
   sideBar

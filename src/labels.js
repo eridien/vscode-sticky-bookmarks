@@ -92,7 +92,8 @@ async function getLabel(document, languageId, line) {
     lineNumber++;
   }
   while(compText.length < 60 && lineNumber < document.lineCount);
-
+  compText = compText.trim();
+  
   const symHash = utils.fnv1aHash(
                          `${document.uri.path}:${symName}:${symKind}`);
   

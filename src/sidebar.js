@@ -65,17 +65,17 @@ class SidebarProvider {
       const {codicon, type, path, children, mark, id} = item;
       if(children) {
         return children.map((items, index) => {
-          const {codicon, type, path, mark, children, id} = items;
+          const {codicon, type, path, symName, mark, children, id} = items;
           let label;
           switch (type) {
             case 'file':       label = mark.fileRelPath;    break;
-            case 'symWrapper':
+            case 'symWrapper': label = symName;             break;
             case 'symHead':    label = mark.label.symName;  break;
             case 'noSym':
             case 'symChild':   label = mark.label.compText; break;
           }
           return getItem({id, type, index, codicon, label, 
-                           path, token:mark.token, mark, children});
+                           path, token:mark?.token, mark, children});
         });
       }
       else {
@@ -91,10 +91,6 @@ function itemClick(item) {
   log('itemClick', item);
 } 
 
-function cleanItem(item) {
-  log('cleanItem', item);
-} 
-
 function closeItem(item) {
   log('closeItem', item);
 } 
@@ -105,12 +101,19 @@ function updateSidebar() {
 }
 
 let sideBarIsVisible = false;
+let firstVisible     = true;
 
-function visibleChange(visible) {
+async function visibleChange(visible) {
   log('visibleChange', visible);
-  if(visible && !sideBarIsVisible) updateSidebar();
+  if(visible && !sideBarIsVisible) {
+    if(firstVisible) {
+      firstVisible = false;  
+      await glblFuncs.cleanAllFiles();
+    }
+    updateSidebar();
+  }
   sideBarIsVisible = visible;
 }
 
 module.exports = { init, SidebarProvider, visibleChange, 
-                   itemClick, cleanItem, closeItem };
+                   itemClick, closeItem };

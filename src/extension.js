@@ -6,7 +6,7 @@ const keywords  = require('./keywords.js');
 const utils     = require('./utils.js');
 const log       = utils.getLog('extn');
 
-function activate(context) {
+async function activate(context) {
   log('activate');
 
 	const toggleCmd = vscode.commands.registerCommand(
@@ -44,13 +44,14 @@ function activate(context) {
                              itemClickCmd, contextMenuCmd);
 
   const glblFuncs = {};
-  Object.assign(glblFuncs, utils   .init(context, glblFuncs));
-  Object.assign(glblFuncs, keywords.init(context, glblFuncs));
-  Object.assign(glblFuncs, marks   .init(context, glblFuncs));
-  Object.assign(glblFuncs, sidebar .init(context, glblFuncs, sidebarProvider));
+  Object.assign(glblFuncs, await marks   .init(context, glblFuncs));
+  Object.assign(glblFuncs,       utils   .init(context, glblFuncs));
+  Object.assign(glblFuncs, await keywords.init(context, glblFuncs));
+  Object.assign(glblFuncs,       token   .init(context, glblFuncs));
+  Object.assign(glblFuncs,       sidebar .init(context, glblFuncs, sidebarProvider));
 
-  treeView.onDidChangeVisibility((e) => {
-    sidebar.visibleChange(e.visible);
+  treeView.onDidChangeVisibility(async (e) => {
+    await sidebar.visibleChange(e.visible);
   });
 
   log('activated');

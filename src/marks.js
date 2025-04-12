@@ -6,10 +6,11 @@ const log     = utils.getLog('mark');
 let globalMarks;
 let context, glblFuncs;
 
-function init(contextIn, glblFuncsIn) { 
+async function init(contextIn, glblFuncsIn) { 
   context = contextIn;
   glblFuncs = glblFuncsIn;
-  // context.workspaceState.update('globalMarks', {});   // DEBUG
+  // this lets update sidebar to run which fails
+  // await context.workspaceState.update('globalMarks', {});   // DEBUG
   globalMarks = context.workspaceState.get('globalMarks', {});
   log('marks initialized'); 
   return {};

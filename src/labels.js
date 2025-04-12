@@ -22,22 +22,15 @@ async function getSurroundingSymbol(document, lineNumber) {
       log('No topSymbols found.');
       return null;
     }
-    const symbols = [{children: topSymbols}];
-    const lineLen = document.lineAt(lineNumber).text.length;
-    const pos = new vscode.Position(
-                      lineNumber, Math.max(lineLen-1, 0));
-    getSymbols(pos, symbols);
-    symbols.shift();
-    if (!symbols.length) {
-      log('getSurroundingSymbol, No symbol found', uri.path);
-      return null;
+    for(const sym of topSymbols) {
+      const lineNumber = sym.location.range.start.line;
+      const lineLen    = document.lineAt(lineNumber).text.length;
+      const pos = new vscode.Position(
+                         lineNumber, Math.max(lineLen-1, 0));
+      if(utils.rangeContainsPos(sym.range, pos))
+        return sym;
     }
-    if(symbols.length > 1 && 
-      (symbols[symbols.length-1].name === 
-       symbols[symbols.length-2].name)) {
-      symbols.pop();
-    }
-    return symbols[symbols.length-1];
+    return null;
   }
   catch (error) {
     log('err', 'getSurroundingSymbol error:', error.message);
@@ -93,7 +86,7 @@ async function getLabel(document, languageId, line) {
   }
   while(compText.length < 60 && lineNumber < document.lineCount);
   compText = compText.trim();
-  
+
   const symHash = utils.fnv1aHash(
                          `${document.uri.path}:${symName}:${symKind}`);
   

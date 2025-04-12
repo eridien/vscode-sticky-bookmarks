@@ -4,6 +4,14 @@ const sett   = require('./settings.js');
 const utils  = require('./utils.js');
 const log    = utils.getLog('toke');
 
+let glblFuncs;
+
+function init(contextIn, glblFuncsIn) {
+  glblFuncs = glblFuncsIn;
+  log('token initialized');
+  return {cleanAllFiles};
+}
+
 const tokenRegEx  = new RegExp('\\:[0-9a-z]{4};');
 const tokenRegExG = new RegExp('\\:[0-9a-z]{4};', 'g');
 
@@ -188,6 +196,6 @@ async function cleanAllFiles() {
   await runOnAllFiles(cleanFile);
 }
 
-module.exports = { toggle, prev, next,
+module.exports = { init, toggle, prev, next,
                    clearFile, clearAllFiles, 
                    cleanFile, cleanAllFiles };

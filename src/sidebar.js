@@ -1,61 +1,34 @@
 const vscode = require('vscode');
 const marks  = require('./marks.js');
+const labelm = require('./label.js');
 const utils  = require('./utils.js');
 const log    = utils.getLog('side');
 
-// https://code.visualstudio.com/api/references/icons-in-labels#icon-listing
-  
-let context, glblFuncs, provider;
+let glblFuncs, provider;
 
 function init(contextIn, glblFuncsIn, providerIn) {
-  context   = contextIn;
   glblFuncs = glblFuncsIn;
   provider  = providerIn;
   log('sidebar initialized');
   return {updateSidebar};
 }
 
-/*
-settings: workbench.colorTheme   auto-detect color scheme
-
-"https://github.com/microsoft/vscode-codicons/tree/main/src/icons"
-"https://tabler.io/icons"
-"https://lucide.dev/icons/"
-"https://fontawesome.com/icons"
-
-item.iconPath = new vscode.ThemeIcon("symbol-function"); // or...
-item.iconPath = vscode.Uri.file("/path/to/icon.svg");    // or...
-item.iconPath = { light: lightUri, dark: darkUri };
-
-📄 🔖 ƒ 📂 ✏️ 📦 ❔ ⬚ ⌀ … ❓
-
-If you're using SVGs as iconPath, color is respected unless overridden by the theme.
-But if you're using a ThemeIcon, 
-     VS Code handles the coloring and ignores any color in the SVG, 
-     since ThemeIcons are meant to match the theme's foreground color.
-For TreeItems, SVGs with color will show as-is, unless you're trying to theme them.
-*/
-
-function getItem(items) {
-  let {type, codicon, label, children} = items;
-  if(type == 'noSym' || type == 'symChild') 
-       codicon = 'bookmark';
-  else codicon = 'symbol-' + codicon;
-  items.codicon = codicon;
-  if(codicon == 'symbol-function') label = `ƒ  ${label}`;
-  items.label = label;
-  const item = new vscode.TreeItem(label, 
-          (children?.length)
-                ? vscode.TreeItemCollapsibleState.Expanded
-                : vscode.TreeItemCollapsibleState.none);
-  if(codicon != 'folder' && codicon != 'symbol-function') {
-    items.iconPath = new vscode.ThemeIcon(codicon);
+async function getItem(mark) {
+  const label = await labelm.getLabel(mark);
+  const {children} = mark;
+  let item;
+  if (children) {
+    item = new vscode.TreeItem(label, 
+            vscode.TreeItemCollapsibleState.Expanded);
+    item.children = children;
   }
-  Object.assign(item, items);
+  else 
+    item = new vscode.TreeItem(label, 
+            vscode.TreeItemCollapsibleState.None);
   item.command = {
     command: 'sticky-bookmarks.itemClick',
-    title:   'Item Clicked',
-    arguments: [{...items}],
+    title:   'Bookmark Clicked',
+    arguments: [mark],
   }
   return item;
 };

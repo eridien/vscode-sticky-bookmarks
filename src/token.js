@@ -4,10 +4,7 @@ const sett   = require('./settings.js');
 const utils  = require('./utils.js');
 const log    = utils.getLog('toke');
 
-let glblFuncs;
-
-function init(contextIn, glblFuncsIn) {
-  glblFuncs = glblFuncsIn;
+function init() {
   log('token initialized');
   return {clearFile, clearAllFiles, cleanFile, cleanAllFiles};
 }

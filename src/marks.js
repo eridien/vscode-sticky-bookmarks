@@ -71,7 +71,7 @@ function kindToCodicon(kind) {
 const unicodeIcons = {
   folder: "📁",        // U+1F4C1
   file: "📄",          // U+1F4C4
-  function: "ƒ",        // U+0192 (Latin Small Letter F with Hook)
+  function: "ƒ",        // U+0192
   method: "🛠️",        // U+1F6E0
   variable: "📝",      // U+1F4DD
   module: "📦",        // U+1F4E6
@@ -87,7 +87,7 @@ const unicodeIcons = {
   key: "🔑",           // U+1F511
   null: "␀",           // U+2400
   event: "📅",         // U+1F4C5
-  operator: "➕",      // U+2795 (use ➖ ✖️ ➗ as needed)
+  operator: "➕",      // U+2795   ➖ ✖️ ➗
   question: "❓"       // U+2753
 };
 

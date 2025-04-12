@@ -15,8 +15,26 @@ function init(contextIn, glblFuncsIn, providerIn) {
   return {updateSidebar};
 }
 
-// 📄 🔖 ƒ 📂 ✏️ 📦 ❔ ⬚ ⌀ …
+/*
+settings: workbench.colorTheme   auto-detect color scheme
 
+"https://github.com/microsoft/vscode-codicons/tree/main/src/icons"
+"https://tabler.io/icons"
+"https://lucide.dev/icons/"
+"https://fontawesome.com/icons"
+
+item.iconPath = new vscode.ThemeIcon("symbol-function"); // or...
+item.iconPath = vscode.Uri.file("/path/to/icon.svg");    // or...
+item.iconPath = { light: lightUri, dark: darkUri };
+
+📄 🔖 ƒ 📂 ✏️ 📦 ❔ ⬚ ⌀ … ❓
+
+If you're using SVGs as iconPath, color is respected unless overridden by the theme.
+But if you're using a ThemeIcon, 
+     VS Code handles the coloring and ignores any color in the SVG, 
+     since ThemeIcons are meant to match the theme's foreground color.
+For TreeItems, SVGs with color will show as-is, unless you're trying to theme them.
+*/
 
 function getItem(items) {
   let {type, codicon, label, children} = items;

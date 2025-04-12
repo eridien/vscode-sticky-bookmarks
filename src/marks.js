@@ -68,6 +68,29 @@ function kindToCodicon(kind) {
     25: "operator",    26: "typeparameter"}[kind] || 'question';
 }
 
+const unicodeIcons = {
+  folder: "📁",        // U+1F4C1
+  file: "📄",          // U+1F4C4
+  function: "ƒ",        // U+0192 (Latin Small Letter F with Hook)
+  method: "🛠️",        // U+1F6E0
+  variable: "📝",      // U+1F4DD
+  module: "📦",        // U+1F4E6
+  package: "📦",       // U+1F4E6
+  class: "🧱",         // U+1F9F1
+  constructor: "🏗️",   // U+1F3D7
+  constant: "🔒",      // U+1F512
+  string: "🔤",        // U+1F524
+  number: "🔢",        // U+1F522
+  boolean: "🔘",       // U+1F518
+  array: "📚",         // U+1F4DA
+  object: "🧩",        // U+1F9E9
+  key: "🔑",           // U+1F511
+  null: "␀",           // U+2400
+  event: "📅",         // U+1F4C5
+  operator: "➕",      // U+2795 (use ➖ ✖️ ➗ as needed)
+  question: "❓"       // U+2753
+};
+
 function getMarksTree() {
   log('getMarksTree');
   const marksArray = Object.values(globalMarks);

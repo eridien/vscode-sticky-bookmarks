@@ -42,7 +42,7 @@
         "title":   "Go To Bookmark"
       }, {
         "command": "sticky-bookmarks.closeItem",
-        "title":   " X"
+        "title":   "✖️"
       }    
     ],
     "keybindings": [

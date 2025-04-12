@@ -1,11 +1,12 @@
 bugs
   junk in keyboard shortcuts menu
-  click on folder or file or sym returns entire subtree
-  bookmark inside function shows as symHead function (fCall)
 
 todo
-  delete clicks
-  item clicks
+  on folder or file clickexpand/collapse and re-render sidebar
+  item click
+  edit click
+  delete click
+  highlight line
   substitue icons (bookmark, interface, etc.)
   show marks in gutter
   

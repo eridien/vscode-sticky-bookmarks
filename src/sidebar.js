@@ -15,13 +15,16 @@ function init(contextIn, glblFuncsIn, providerIn) {
   return {updateSidebar};
 }
 
+// 📄 🔖 ƒ 📂 ✏️ 📦 ❔ ⬚ ⌀ …
+
+
 function getItem(items) {
   let {type, codicon, label, children} = items;
   if(type == 'noSym' || type == 'symChild') 
        codicon = 'bookmark';
   else codicon = 'symbol-' + codicon;
   items.codicon = codicon;
-  if(codicon == 'symbol-function') label = `\u0192 ${label}`;
+  if(codicon == 'symbol-function') label = `ƒ  ${label}`;
   items.label = label;
   const item = new vscode.TreeItem(label, 
           (children?.length)

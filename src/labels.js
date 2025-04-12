@@ -92,7 +92,8 @@ async function getLabel(document, languageId, line) {
     lineNumber++;
   }
   while(compText.length < 60 && lineNumber < document.lineCount);
-  compText = compText.trim();
+  
+  compText = compText.trim().replace(/(\w)(\W)|(\W)(\w)/g, '$1$3 $2$4');
 
   const symHash = utils.fnv1aHash(
                          `${document.uri.path}:${symName}:${symKind}`);

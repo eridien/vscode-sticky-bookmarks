@@ -117,7 +117,7 @@ function getMarksTree() {
       lastSymName = symName;
       const symLineNum = mark.label.symLineNum;
       bookmarksInSym = [];
-      const codicon = kindToCodicon(symKind);
+      const codicon = ''
       if(mark.lineNumber == symLineNum) {
         bookmarks.push({codicon, type:'symHead', 
                         symName, symLineNum, compText,

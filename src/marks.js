@@ -133,7 +133,7 @@ function getMarksTree() {
         continue;
       }
       else bookmarks.push({codicon, type:'symWrapper', 
-               symName, symLineNum, bookmarksInSym, id:symHash});
+               symName, symLineNum, children:bookmarksInSym, id:symHash});
     }
     bookmarksInSym.push({codicon:'bookmark', type:'symChild',  
                          mark, id:mark.token});

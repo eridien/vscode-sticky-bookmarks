@@ -15,28 +15,26 @@ function init(contextIn, glblFuncsIn, providerIn) {
   return {updateSidebar};
 }
 
-function getItem(params) {
-  let {id, index, type, codicon, label, path,
-       token, children, mark} = params;
+function getItem(items) {
+  let {type, codicon, label, children} = items;
   if(type == 'noSym' || type == 'symChild') 
        codicon = 'bookmark';
   else codicon = 'symbol-' + codicon;
+  items.codicon = codicon;
   if(codicon == 'symbol-function') label = `\u0192 ${label}`;
+  items.label = label;
   const item = new vscode.TreeItem(label, 
           (children?.length)
                 ? vscode.TreeItemCollapsibleState.Expanded
                 : vscode.TreeItemCollapsibleState.none);
-  const returnObj = {id, index, codicon,
-                     type, path, token, mark, children};
   if(codicon != 'folder' && codicon != 'symbol-function') {
-    returnObj.iconPath = new vscode.ThemeIcon(codicon);
+    items.iconPath = new vscode.ThemeIcon(codicon);
   }
-  Object.assign(item, returnObj);
+  Object.assign(item, items);
   item.command = {
     command: 'sticky-bookmarks.itemClick',
     title:   'Item Clicked',
-    arguments: [{id, index, codicon,
-                  type, path, token, mark, children}],
+    arguments: [{...items}],
   }
   return item;
 };
@@ -55,33 +53,31 @@ class SidebarProvider {
     if (!item) {
       this.marksTree = marks.getMarksTree();
       return this.marksTree.map((items, index) => {
-        const {codicon, type, path, children, id} = items;
-        const label = path.split('/').pop().toUpperCase();
-        return getItem({id, type, index, codicon, label, 
-                        path, children});
+        items.index = index;
+        items.label = items.folderPath.split('/').pop().toUpperCase();
+        return getItem(items);
       });
     }
     else {
-      const {codicon, type, path, children, mark, id} = item;
+      const {children, mark} = item;
       if(children) {
         return children.map((items, index) => {
-          const {codicon, type, path, symName, mark, children, id} = items;
-          let label;
+          const {type, fileRelPath, symName, compText, mark} = items;
+          items.index = index;
+          items.token = mark?.token;
           switch (type) {
-            case 'file':       label = mark.fileRelPath;    break;
-            case 'symWrapper': label = symName;             break;
-            case 'symHead':    label = mark.label.symName;  break;
+            case 'file':       items.label = fileRelPath; break;
+            case 'symWrapper': 
+            case 'symHead':    items.label = symName;     break;
             case 'noSym':
-            case 'symChild':   label = mark.label.compText; break;
+            case 'symChild':   items.label = compText;    break;
           }
-          return getItem({id, type, index, codicon, label, 
-                           path, token:mark?.token, mark, children});
+          return getItem(items);
         });
       }
       else {
-        const label = mark.label.compText
-        return [getItem({id, type, codicon, label, path, 
-                         token:mark.token, mark})];
+        item.label = mark.label.compText
+        return [getItem(item)];
       }
     }
   }
@@ -93,6 +89,12 @@ function itemClick(item) {
 
 function closeItem(item) {
   log('closeItem', item);
+  switch (item.type) {
+    case 'folder':     glblFuncs.clearAllFiles(item.path); break;
+    case 'file':       glblFuncs.clearFile(item.path); break;
+    case 'symWrapper': glblFuncs.clearFile(item.mark.fileRelPath); break;
+    case 'symHead':    glblFuncs.clearFile(item.mark.fileRelPath); break;
+  }
 } 
 
 function updateSidebar() {

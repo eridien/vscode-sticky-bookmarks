@@ -4,7 +4,8 @@ bugs
   bookmark inside function shows as symHead function (fCall)
 
 todo
-  finish default keys
+  delete clicks
+  item clicks
   substitue icons (bookmark, interface, etc.)
   show marks in gutter
   

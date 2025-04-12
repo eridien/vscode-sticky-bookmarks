@@ -9,7 +9,7 @@ let glblFuncs;
 function init(contextIn, glblFuncsIn) {
   glblFuncs = glblFuncsIn;
   log('token initialized');
-  return {cleanAllFiles};
+  return {clearFile, clearAllFiles, cleanFile, cleanAllFiles};
 }
 
 const tokenRegEx  = new RegExp('\\:[0-9a-z]{4};');
@@ -168,11 +168,20 @@ async function cleanFile(document) {
   marks.dumpGlobalMarks();
 }
 
-async function runOnAllFiles(func) {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor) { log('info', 'No active editor'); return; }
-  const document = editor.document;
-  const folder   = vscode.workspace.getWorkspaceFolder(document.uri);
+async function runOnAllFiles(func, folderPath) {
+  let folder;
+  if(!folderPath) {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) { log('info', 'No active editor'); return; }
+    const document = editor.document;
+    folder = vscode.workspace.getWorkspaceFolder(document.uri);
+  }
+  else {
+    const folders = vscode.workspace.workspaceFolders;
+    if (!folders) { log('info', 'No folders in workspace'); return; }
+    folder = folders.find(folder => folder.uri.path === folderPath);
+    if(!folder) { log('info', 'Folder not found in workspace'); return; } 
+  }
   const pattern  = new vscode.RelativePattern(folder, '**/*');
   const uris     = await vscode.workspace.findFiles(
                                pattern, '**/node_modules/**');
@@ -186,14 +195,14 @@ async function runOnAllFiles(func) {
   marks.dumpGlobalMarks();
 } 
 
-async function clearAllFiles() {
+async function clearAllFiles(folderPath) {
   log('clearAllFiles command called');
-  await runOnAllFiles(clearFile);
+  await runOnAllFiles(clearFile, folderPath);
 }
 
-async function cleanAllFiles() {
+async function cleanAllFiles(folderPath) {
   log('cleanAllFiles command called');
-  await runOnAllFiles(cleanFile);
+  await runOnAllFiles(cleanFile, folderPath);
 }
 
 module.exports = { init, toggle, prev, next,

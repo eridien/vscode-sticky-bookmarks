@@ -95,29 +95,31 @@ function getMarksTree() {
   let lastFileRelPath, lastSymName;
   for(const mark of marksArray) {
     if(mark.folderPath !== lastFolderPath) {
-      lastFolderPath = mark.folderPath;
+      const {folderPath} = mark;
+      lastFolderPath = folderPath;
       clearEmptyHead();
-      const id = utils.fnv1aHash(mark.folderPath);
+      const id = utils.fnv1aHash(folderPath);
       files=[], bookmarks=[], bookmarksInSym=[];
       folders.push({codicon:'folder', type:'folder',
-                    path:mark.folderPath, children:files, id});
+                    folderPath, children:files, id});
       lastFileRelPath = null;
     }
     if(mark.fileRelPath !== lastFileRelPath) {
-      lastFileRelPath = mark.fileRelPath;
+      const {folderPath, fileRelPath} = mark;
+      lastFileRelPath = fileRelPath;
       clearEmptyHead();
-      const id = utils.fnv1aHash(mark.folderPath + '/' + mark.fileRelPath);
+      const id = utils.fnv1aHash(folderPath + '/' + fileRelPath);
       bookmarks=[], bookmarksInSym=[];
       files.push({codicon:'file',  type:'file',
-                  path:mark.fileRelPath, mark, children:bookmarks, id});
+                  folderPath, fileRelPath, mark, children:bookmarks, id});
       lastSymName = null;
     }
-    const {symName, symKind, symHash} = mark.label;
+    const {symName, symKind, symHash, compText} = mark.label;
     if(symName === null) {
       clearEmptyHead();
       lastSymName = null;
       bookmarks.push({codicon:'bookmark', type:'noSym', mark, 
-                      id:mark.token});
+                      compText, id:mark.token});
       continue;
     }
     if(symName !== lastSymName) {
@@ -128,15 +130,16 @@ function getMarksTree() {
       const codicon = kindToCodicon(symKind);
       if(mark.lineNumber == symLineNum) {
         bookmarks.push({codicon, type:'symHead', 
-                        symName, symLineNum, mark,
+                        symName, symLineNum, compText,
                         children:bookmarksInSym, id:mark.token});
         continue;
       }
       else bookmarks.push({codicon, type:'symWrapper', 
-               symName, symLineNum, children:bookmarksInSym, id:symHash});
+                           symName, symLineNum, compText, 
+                           children:bookmarksInSym, id:symHash});
     }
     bookmarksInSym.push({codicon:'bookmark', type:'symChild',  
-                         mark, id:mark.token});
+                         mark, compText, id:mark.token});
   }
   clearEmptyHead();
   return folders;

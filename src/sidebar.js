@@ -14,8 +14,8 @@ function init(contextIn, glblFuncsIn, providerIn) {
 }
 
 async function getItem(mark) {
-  const label = await labelm.getLabel(mark);
-  const {children} = mark;
+  const [codicon, label] = await labelm.getLabel(mark);
+  const {id, type, folderPath, fileRelPath, children} = mark;
   let item;
   if (children) {
     item = new vscode.TreeItem(label, 
@@ -25,9 +25,12 @@ async function getItem(mark) {
   else 
     item = new vscode.TreeItem(label, 
             vscode.TreeItemCollapsibleState.None);
+  if (codicon) item.iconPath = new vscode.ThemeIcon(codicon);
+  Object.assign(item, {id, type, folderPath});
+  if (fileRelPath) item.fileRelPath = fileRelPath;
   item.command = {
     command: 'sticky-bookmarks.itemClick',
-    title:   'Bookmark Clicked',
+    title:   'Item Clicked',
     arguments: [mark],
   }
   return item;
@@ -43,9 +46,12 @@ class SidebarProvider {
     return element;
   }
 
-  getChildren(item) {
-    if (!item) return marks.sortedMarks().map(mark => getItem(mark));
-    else       return [getItem(item)];
+  async getChildren(item) {
+    const children = (!item) ? marks.sortedMarks() 
+                             : item.children;
+    return await Promise.all(children.map(
+      mark => getItem(mark))
+    );
   }
 }
 

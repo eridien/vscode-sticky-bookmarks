@@ -110,11 +110,12 @@ async function getCompText(document, languageId, lineNumber) {
 async function getLabel(mark) {
   try {
     const {document, languageId, lineNumber, type} = mark;
-    const uri = document.uri;
     if(type == 'folder') 
-      return [null, '📂 ' + uri.path.split('/').pop()];
+      return [null, '📂 ' + mark.folderPath.split('/').pop()];
+    const normalizedUri = vscode.Uri.file(document.uri.fsPath);
+    const relPath       = vscode.workspace.asRelativePath(normalizedUri);
     if(type == 'file') 
-      return [null, '📄 ' + vscode.workspace.asRelativePath(uri)];
+      return [null, '📄 ' + relPath];
     const compText =  '🔖 ' + 
               await getCompText(document, languageId, lineNumber);
     let label = compText;

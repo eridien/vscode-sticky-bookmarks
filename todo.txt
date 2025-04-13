@@ -8,6 +8,7 @@ todo
   delete click
   highlight line
   show marks in gutter
+  show <No Bookmarks> in view
   
 settings
   min line len

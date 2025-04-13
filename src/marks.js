@@ -15,11 +15,13 @@ async function init(contextIn, glblFuncsIn) {
 
   globalMarks = context.workspaceState.get('globalMarks', {});
   log('marks initialized'); 
+  dumpGlobalMarks(true);
   return {};
 }
 
-function dumpGlobalMarks() {
-  log('globalMarks', Object.keys(globalMarks));
+function dumpGlobalMarks(all = false) {
+  if(all) log('globalMarks', globalMarks);
+  else    log('globalMarks', Object.keys(globalMarks));
 }
 
 function getRandomToken() {
@@ -36,7 +38,7 @@ async function newGlobalMark(document, lineNumber) {
   mark.folderPath  = vscode.workspace
                        .getWorkspaceFolder(document.uri).uri.path;
   mark.fileRelPath = vscode.workspace.asRelativePath(document.uri);
-  mark.path        = mark.folderPath + '/' + mark.fileRelPath;
+  mark.fsPath      = document.uri.fsPath;
   mark.languageId  = document.languageId;
   globalMarks[token] = mark;
   context.workspaceState.update('globalMarks', globalMarks);
@@ -86,11 +88,11 @@ function sortedMarks() {
       lastFileRelPath = null;
     }
     if(mark.fileRelPath !== lastFileRelPath) {
-      const {folderPath, fileRelPath} = mark;
+      const {document, folderPath, fileRelPath} = mark;
       lastFileRelPath = fileRelPath;
       const id = utils.fnv1aHash(folderPath + '/' + fileRelPath);
       bookmarks=[];
-      files.push({type:'file', folderPath, fileRelPath, 
+      files.push({document, type:'file', folderPath, fileRelPath, 
                   children:bookmarks, id});
     }
     bookmarks.push(mark);

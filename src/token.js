@@ -37,7 +37,7 @@ async function addTokenToLine(document, line, languageId, token) {
 function delMark(line, languageId) {
   let lineText = line.text.trimEnd();
   lineText = lineText.replaceAll(tokenRegExG, 
-               (token) => marks.delGlobalMark(token));
+               async (token) => await marks.delGlobalMark(token));
   const regx = commRegExG(languageId);
   lineText = lineText.replace(regx, '');
   return lineText.trimEnd();
@@ -138,7 +138,7 @@ async function clearFile(document) {
   ), newFileText);
   await vscode.workspace.applyEdit(edit);
   const fileRelPath = vscode.workspace.asRelativePath(uri);
-  marks.delGlobalMarksForFile(fileRelPath);
+  await marks.delGlobalMarksForFile(fileRelPath);
   marks.dumpGlobalMarks();
 }     
 
@@ -152,7 +152,7 @@ async function cleanFile(document) {
   if(!tokenRegEx.test(document.getText())) return;
   const languageId   = document.languageId;
   const fileRelPath = vscode.workspace.asRelativePath(document.uri);
-  marks.delGlobalMarksForFile(fileRelPath);
+  await marks.delGlobalMarksForFile(fileRelPath);
   for(let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);
     if(!tokenRegEx.test(line.text)) continue;

@@ -6,41 +6,38 @@ const log     = utils.getLog('mark');
 let globalMarks;
 let context, glblFuncs;
 
-async function openDocumentFromPath(filePath) {
-  const uri = vscode.Uri.file(path.resolve(filePath));
-  const doc = await vscode.workspace.openTextDocument(uri);
-  return doc;
-}
-
 async function init(contextIn, glblFuncsIn) { 
   context = contextIn;
   glblFuncs = glblFuncsIn;
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders || workspaceFolders.length === 0) {
     globalMarks = {};
-    context.workspaceState.update('globalMarks', globalMarks);
+    await context.workspaceState.update('globalMarks', globalMarks);
     log('no workspace folders found');
     return {};
   }
   // clear globalMarks for testing
   // this fails but gets the job done
   // await context.workspaceState.update('globalMarks', {});   // DEBUG
+
   globalMarks = context.workspaceState.get('globalMarks', {});
   for(const [token, mark] of Object.entries(globalMarks)) {
-     mark.document = await openDocumentFromPath(fileName);
-     if(!mark.document) { 
+    mark.fileFsPath = mark.document.fileName;
+    mark.document   = await vscode.workspace.openTextDocument(mark.fileFsPath);
+    if(!mark.document) { 
       delete globalMarks[token];
       continue;
-     }
-     const fileName = mark.document.fileName;
-     const folder = workspaceFolders.find(
-                      folder => folder.uri.fsPath === fileName); 
-     if(folder == -1) { 
+    }
+    const markUri = vscode.Uri.file(path.resolve(mark.fileFsPath)); 
+    const folder  = vscode.workspace.getWorkspaceFolder(markUri);
+    if(!folder) { 
       delete globalMarks[token];
       continue;
-     }
-     mark.folderIdx = folder.index;
+    }
+    mark.folderIdx  = folder.index;
+    mark.folderName = folder.name;
   }
+  await context.workspaceState.update('globalMarks', globalMarks);
   log('marks initialized'); 
   dumpGlobalMarks(true);
   return {};
@@ -58,7 +55,12 @@ function getRandomToken() {
   while(randHash in globalMarks);
   return `:${randHash};`;
 }
+/*
 
+function getProjectIdx(document) {
+  return 0;
+}
+*/
 async function newGlobalMark(document, lineNumber) {
   const token = getRandomToken();
   const mark  = {token, document, lineNumber, type:'bookmark'};
@@ -66,24 +68,35 @@ async function newGlobalMark(document, lineNumber) {
                        .getWorkspaceFolder(document.uri).uri.path;
   mark.fileRelPath = vscode.workspace.asRelativePath(document.uri);
   mark.languageId  = document.languageId;
+  mark.fileFsPath  = document.fileName;
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  let folder;
+  for (let i = 0; i < workspaceFolders.length; i++) {
+    folder = workspaceFolders[i];
+    if (document.uri.fsPath.startsWith(folder.uri.fsPath)) {
+      mark.folderIdx = i;
+      break;
+    }
+  }
+  mark.folderName = folder.name;
   globalMarks[token] = mark;
-  context.workspaceState.update('globalMarks', globalMarks);
+  await context.workspaceState.update('globalMarks', globalMarks);
   glblFuncs.updateSidebar();
   return token;
 }
 
-function delGlobalMark(token) {
+async function delGlobalMark(token) {
   delete globalMarks[token];
-  context.workspaceState.update('globalMarks', globalMarks);
+  await context.workspaceState.update('globalMarks', globalMarks);
   glblFuncs.updateSidebar();
   return '';
 }
 
-function delGlobalMarksForFile(fileRelPath) {
+async function delGlobalMarksForFile(fileRelPath) {
   for(const [token, val] of Object.entries(globalMarks)) {
     if(val.fileRelPath === fileRelPath) delete globalMarks[token];
   }
-  context.workspaceState.update('globalMarks', globalMarks);
+  await context.workspaceState.update('globalMarks', globalMarks);
   glblFuncs.updateSidebar();
   log('delGlobalMarksForFile:', fileRelPath);
 }

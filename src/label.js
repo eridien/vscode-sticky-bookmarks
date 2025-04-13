@@ -112,15 +112,14 @@ async function getLabel(mark) {
     const {document, languageId, lineNumber, type} = mark;
     if(type == 'folder') 
       return [null, '📂 ' + mark.folderPath.split('/').pop()];
-    const normalizedUri = vscode.Uri.file(document.uri.fsPath);
-    const relPath       = vscode.workspace.asRelativePath(normalizedUri);
+    const relPath = vscode.workspace.asRelativePath(document.uri);
     if(type == 'file') 
       return [null, '📄 ' + relPath];
     const compText =  '🔖 ' + 
               await getCompText(document, languageId, lineNumber);
     let label = compText;
     const topSymbols = await vscode.commands.executeCommand(
-                      'vscode.executeDocumentSymbolProvider', uri);
+                      'vscode.executeDocumentSymbolProvider', document.uri);
     if (!topSymbols || !topSymbols.length) {
       log('getLabel, No topSymbols found.');
       return [null, label];
@@ -132,20 +131,17 @@ async function getLabel(mark) {
     getSymbols(pos, symbols);
     symbols.shift();
     if (!symbols.length) {
-      log('getLabel, No symbol found', uri.path);
+      log('getLabel, No symbol found', document.uri.path);
       return [null, label];
     }
     symbols.reverse();
-    const dedupedSyms = symbols.reduce((acc, curr) => {
-      if (!acc.some(sym => sym.name === curr.name))
-        acc.push(curr);
-    }, []);
+    // remove dupes?  todo
     let symStr = '';
-    for(const sym of dedupedSyms) {
+    for(const sym of symbols) {
       symStr = `${sym.name}/${symStr}`;
     }
     symStr = symStr.slice(0, -1) + ' ' +  compText;
-    const icon = getIconForKind(dedupedSyms[0].kind); 
+    const icon = getIconForKind(symbols[0].kind); 
     if(icon instanceof vscode.ThemeIcon)
          return [icon, symStr];
     else return [null, icon + ' ' + symStr];

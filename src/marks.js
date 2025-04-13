@@ -1,9 +1,16 @@
 const vscode  = require('vscode');
+const path    = require('path');
 const utils   = require('./utils.js');
 const log     = utils.getLog('mark');
 
 let globalMarks;
 let context, glblFuncs;
+
+async function openDocumentFromPath(filePath) {
+  const uri = vscode.Uri.file(path.resolve(filePath));
+  const doc = await vscode.workspace.openTextDocument(uri);
+  return doc;
+}
 
 async function init(contextIn, glblFuncsIn) { 
   context = contextIn;
@@ -14,6 +21,11 @@ async function init(contextIn, glblFuncsIn) {
   // await context.workspaceState.update('globalMarks', {});   // DEBUG
 
   globalMarks = context.workspaceState.get('globalMarks', {});
+  for(const [token, mark] of Object.entries(globalMarks)) {
+    const fileName = mark.document.fileName;
+    mark.document = await openDocumentFromPath(fileName);
+    if(!mark.document) delete globalMarks[token];
+  }
   log('marks initialized'); 
   dumpGlobalMarks(true);
   return {};
@@ -38,7 +50,6 @@ async function newGlobalMark(document, lineNumber) {
   mark.folderPath  = vscode.workspace
                        .getWorkspaceFolder(document.uri).uri.path;
   mark.fileRelPath = vscode.workspace.asRelativePath(document.uri);
-  mark.fsPath      = document.uri.fsPath;
   mark.languageId  = document.languageId;
   globalMarks[token] = mark;
   context.workspaceState.update('globalMarks', globalMarks);

@@ -1,7 +1,9 @@
 bugs
   junk in keyboard shortcuts menu
-
+  closeitem broken
+  
 todo
+  test moving a project folder
   on folder or file clickexpand/collapse and re-render sidebar
   item click
   edit click

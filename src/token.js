@@ -60,9 +60,9 @@ async function toggle() {
     });
   }
   else {
-    const relPath = vscode.workspace.asRelativePath(document.uri);
-    const token = await marks.addGlobalMark(
-            document, relPath, line, lineNumber, languageId);
+    const fileRelPath = vscode.workspace.asRelativePath(document.uri);
+    const token = await marks.newGlobalMark(
+            document, fileRelPath, line, lineNumber, languageId);
     await addTokenToLine( document, line, languageId, token);
   }
   marks.dumpGlobalMarks();
@@ -139,8 +139,8 @@ async function clearFile(document) {
       new vscode.Position(document.lineCount, 0)
   ), newFileText);
   await vscode.workspace.applyEdit(edit);
-  const relPath = vscode.workspace.asRelativePath(uri);
-  marks.delGlobalMarksForFile(relPath);
+  const fileRelPath = vscode.workspace.asRelativePath(uri);
+  marks.delGlobalMarksForFile(fileRelPath);
   marks.dumpGlobalMarks();
 }     
 
@@ -153,13 +153,13 @@ async function cleanFile(document) {
   }
   if(!tokenRegEx.test(document.getText())) return;
   const languageId   = document.languageId;
-  const relPath = vscode.workspace.asRelativePath(document.uri);
-  marks.delGlobalMarksForFile(relPath);
+  const fileRelPath = vscode.workspace.asRelativePath(document.uri);
+  marks.delGlobalMarksForFile(fileRelPath);
   for(let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);
     if(!tokenRegEx.test(line.text)) continue;
-    const token = await marks.addGlobalMark(
-        document, relPath, line, i, languageId);
+    const token = await marks.newGlobalMark(
+        document, fileRelPath, line, i, languageId);
     await addTokenToLine(document, line, languageId, token);
   }
   marks.dumpGlobalMarks();

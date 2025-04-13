@@ -1,8 +1,8 @@
 const vscode    = require('vscode');
 const token     = require('./token.js');
 const sidebar   = require('./sidebar.js');
+const label     = require('./label.js');
 const marks     = require('./marks.js');
-const keywords  = require('./keywords.js');
 const utils     = require('./utils.js');
 const log       = utils.getLog('extn');
 
@@ -46,7 +46,7 @@ async function activate(context) {
   const glblFuncs = {};
   Object.assign(glblFuncs, await marks   .init(context, glblFuncs));
   Object.assign(glblFuncs,       utils   .init(context, glblFuncs));
-  Object.assign(glblFuncs, await keywords.init(context, glblFuncs));
+  Object.assign(glblFuncs, await label   .init(context, glblFuncs));
   Object.assign(glblFuncs,       token   .init(context, glblFuncs));
   Object.assign(glblFuncs,       sidebar .init(context, glblFuncs, sidebarProvider));
 

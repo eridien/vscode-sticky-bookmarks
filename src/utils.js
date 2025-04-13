@@ -38,8 +38,8 @@ function getLog(module) {
   return log;
 }
 
-async function readDirByRelPath(...relPath) {
-  const dirPath = path.join(context.extensionPath, ".", ...relPath);
+async function readDirByRelPath(...fileRelPath) {
+  const dirPath = path.join(context.extensionPath, ".", ...fileRelPath);
   const dirUri = vscode.Uri.file(dirPath);
   try {
     const entries = await vscode.workspace.fs.readDirectory(dirUri);

@@ -1,5 +1,4 @@
 const vscode  = require('vscode');
-const label   = require('./label.js');
 const utils   = require('./utils.js');
 const log     = utils.getLog('mark');
 
@@ -9,8 +8,11 @@ let context, glblFuncs;
 async function init(contextIn, glblFuncsIn) { 
   context = contextIn;
   glblFuncs = glblFuncsIn;
-  // this lets update sidebar to run which fails
+
+  // clear globalMarks for testing
+  // this fails but gets the job done
   // await context.workspaceState.update('globalMarks', {});   // DEBUG
+
   globalMarks = context.workspaceState.get('globalMarks', {});
   log('marks initialized'); 
   return {};
@@ -28,14 +30,14 @@ function getRandomToken() {
   return `:${randHash};`;
 }
 
-async function addGlobalMark(
-                document, fileRelPath, line, lineNumber, languageId) {
-  const folderPath = vscode.workspace
-                           .getWorkspaceFolder(document.uri).uri.path;
-  const label = await label.getLabel(document, languageId, line);
+async function newGlobalMark(document, lineNumber, type) {
   const token = getRandomToken();
-  globalMarks[token] = {
-              token, folderPath, fileRelPath, lineNumber, languageId, label};
+  const mark  = {token, document, lineNumber, type};
+  mark.folderPath  = vscode.workspace
+                       .getWorkspaceFolder(document.uri).uri.path;
+  mark.fileRelPath = vscode.workspace.asRelativePath(document.uri);
+  mark.languageId  = document.languageId;
+  globalMarks[token] = mark;
   context.workspaceState.update('globalMarks', globalMarks);
   glblFuncs.updateSidebar();
   return token;
@@ -48,13 +50,13 @@ function delGlobalMark(token) {
   return '';
 }
 
-function delGlobalMarksForFile(relPath) {
+function delGlobalMarksForFile(fileRelPath) {
   for(const [token, val] of Object.entries(globalMarks)) {
-    if(val.fileRelPath === relPath) delete globalMarks[token];
+    if(val.fileRelPath === fileRelPath) delete globalMarks[token];
   }
   context.workspaceState.update('globalMarks', globalMarks);
   glblFuncs.updateSidebar();
-  log('delGlobalMarksForFile:', relPath);
+  log('delGlobalMarksForFile:', fileRelPath);
 }
 
 
@@ -72,69 +74,30 @@ function getMarksTree() {
        b.fileRelPath.toLowerCase()) return -1;
     return (a.lineNumber - b.lineNumber);
   });
-  let folders=[], files=[], bookmarks=[], bookmarksInSym=[];
-  function clearEmptyHead() {
-    if(bookmarks.length > 0) {
-      const lastBookmark = bookmarks.slice(-1)[0];
-      if(lastBookmark.type == 'symHead' && 
-             bookmarksInSym.length === 0)
-        delete lastBookmark.bookmarksInSym;
-    }
-  }
-  let lastFolderPath = null;
-  let lastFileRelPath, lastSymName;
+  let folders=[], files=[], bookmarks=[];
+  let lastFolderPath = null, lastFileRelPath;
   for(const mark of marksArray) {
     if(mark.folderPath !== lastFolderPath) {
       const {folderPath} = mark;
       lastFolderPath = folderPath;
-      clearEmptyHead();
       const id = utils.fnv1aHash(folderPath);
-      files=[], bookmarks=[], bookmarksInSym=[];
-      folders.push({codicon:'folder', type:'folder',
-                    folderPath, children:files, id});
+      files=[], bookmarks=[];
+      folders.push({type:'folder', folderPath, children:files, id});
       lastFileRelPath = null;
     }
     if(mark.fileRelPath !== lastFileRelPath) {
       const {folderPath, fileRelPath} = mark;
       lastFileRelPath = fileRelPath;
-      clearEmptyHead();
       const id = utils.fnv1aHash(folderPath + '/' + fileRelPath);
-      bookmarks=[], bookmarksInSym=[];
-      files.push({codicon:'file',  type:'file',
-                  folderPath, fileRelPath, mark, children:bookmarks, id});
-      lastSymName = null;
+      bookmarks=[];
+      files.push({type:'file', folderPath, fileRelPath, 
+                  children:bookmarks, id});
     }
-    const {symName, symKind, symHash, compText} = mark.label;
-    if(symName === null) {
-      clearEmptyHead();
-      lastSymName = null;
-      bookmarks.push({codicon:'bookmark', type:'noSym', mark, 
-                      compText, id:mark.token});
-      continue;
-    }
-    if(symName !== lastSymName) {
-      clearEmptyHead();
-      lastSymName = symName;
-      const symLineNum = mark.label.symLineNum;
-      bookmarksInSym = [];
-      const codicon = ''
-      if(mark.lineNumber == symLineNum) {
-        bookmarks.push({codicon, type:'symHead', 
-                        symName, symLineNum, compText,
-                        children:bookmarksInSym, id:mark.token});
-        continue;
-      }
-      else bookmarks.push({codicon, type:'symWrapper', 
-                           symName, symLineNum, compText, 
-                           children:bookmarksInSym, id:symHash});
-    }
-    bookmarksInSym.push({codicon:'bookmark', type:'symChild',  
-                         mark, compText, id:mark.token});
+    bookmarks.push(mark);
   }
-  clearEmptyHead();
   return folders;
 }
 
 module.exports = {init, dumpGlobalMarks, getMarksTree, 
-                  addGlobalMark, delGlobalMark, delGlobalMarksForFile}
+                  newGlobalMark, delGlobalMark, delGlobalMarksForFile}
 

@@ -7,7 +7,6 @@ todo
   edit click
   delete click
   highlight line
-  substitue icons (bookmark, interface, etc.)
   show marks in gutter
   
 settings

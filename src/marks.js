@@ -30,12 +30,13 @@ function getRandomToken() {
   return `:${randHash};`;
 }
 
-async function newGlobalMark(document, lineNumber, type) {
+async function newGlobalMark(document, lineNumber) {
   const token = getRandomToken();
-  const mark  = {token, document, lineNumber, type};
+  const mark  = {token, document, lineNumber, type:'bookmark'};
   mark.folderPath  = vscode.workspace
                        .getWorkspaceFolder(document.uri).uri.path;
   mark.fileRelPath = vscode.workspace.asRelativePath(document.uri);
+  mark.path        = mark.folderPath + '/' + mark.fileRelPath;
   mark.languageId  = document.languageId;
   globalMarks[token] = mark;
   context.workspaceState.update('globalMarks', globalMarks);
@@ -59,9 +60,8 @@ function delGlobalMarksForFile(fileRelPath) {
   log('delGlobalMarksForFile:', fileRelPath);
 }
 
-
-function getMarksTree() {
-  log('getMarksTree');
+function sortedMarks() {
+  log('sortedMarks');
   const marksArray = Object.values(globalMarks);
   marksArray.sort((a, b) => {
     if(a.folderPath .toLowerCase() > 
@@ -98,6 +98,6 @@ function getMarksTree() {
   return folders;
 }
 
-module.exports = {init, dumpGlobalMarks, getMarksTree, 
+module.exports = {init, dumpGlobalMarks, sortedMarks, 
                   newGlobalMark, delGlobalMark, delGlobalMarksForFile}
 

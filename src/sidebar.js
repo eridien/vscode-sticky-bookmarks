@@ -44,36 +44,8 @@ class SidebarProvider {
   }
 
   getChildren(item) {
-    if (!item) {
-      this.marksTree = marks.getMarksTree();
-      return this.marksTree.map((items, index) => {
-        items.index = index;
-        items.label = items.folderPath.split('/').pop().toUpperCase();
-        return getItem(items);
-      });
-    }
-    else {
-      const {children, mark} = item;
-      if(children) {
-        return children.map((items, index) => {
-          const {type, fileRelPath, symName, compText, mark} = items;
-          items.index = index;
-          items.token = mark?.token;
-          switch (type) {
-            case 'file':       items.label = fileRelPath; break;
-            case 'symWrapper': 
-            case 'symHead':    items.label = symName;     break;
-            case 'noSym':
-            case 'symChild':   items.label = compText;    break;
-          }
-          return getItem(items);
-        });
-      }
-      else {
-        item.label = mark.label.compText
-        return [getItem(item)];
-      }
-    }
+    if (!item) return marks.sortedMarks().map(mark => getItem(mark));
+    else       return [getItem(item)];
   }
 }
 
@@ -84,10 +56,12 @@ function itemClick(item) {
 function closeItem(item) {
   log('closeItem', item);
   switch (item.type) {
-    case 'folder':     glblFuncs.clearAllFiles(item.path); break;
-    case 'file':       glblFuncs.clearFile(item.path); break;
-    case 'symWrapper': glblFuncs.clearFile(item.mark.fileRelPath); break;
-    case 'symHead':    glblFuncs.clearFile(item.mark.fileRelPath); break;
+    case 'folder':     glblFuncs.clearAllFiles(item.folderPath); break;
+    case 'file':       glblFuncs.clearFile(item.document);           break;
+    default: {
+      const line = item.document.lineAt(item.lineNumber);
+      glblFuncs.delMark(line, item.languageId); break;
+    } 
   }
 } 
 

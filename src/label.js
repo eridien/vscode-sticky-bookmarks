@@ -31,7 +31,7 @@ const codicons = {
 
 const unicodeIcons = {
   file: "📄",          // U+1F4C4
-  function: "ƒ",        // U+0192
+  function: "ƒ ",      // U+0192
   method: "🛠️",        // U+1F6E0
   variable: "📝",      // U+1F4DD
   module: "📦",        // U+1F4E6
@@ -52,9 +52,11 @@ const unicodeIcons = {
 
 function getIconForKind(kind) {
   const codicon = codicons[kind];
-  if(!codicon) return '❔';
-  const  char = unicodeIcons[codicon];
-  return char ?? new vscode.ThemeIcon(codicon);
+  if(!codicon) return '  ';
+  const char = unicodeIcons[codicon];
+  log('getIconForKind', codicon, char);
+  // return char ?? new vscode.ThemeIcon(codicon);
+  return char ?? '  ';
 };
 
 function getSymbols(pos, symbols) {
@@ -155,7 +157,7 @@ module.exports = { init, getLabel };
 
 /*
 settings: workbench.colorTheme   auto-detect color scheme
-
+https://code.visualstudio.com/api/references/icons-in-labels
 "https://github.com/microsoft/vscode-codicons/tree/main/src/icons"
 "https://tabler.io/icons"
 "https://lucide.dev/icons/"
@@ -166,6 +168,15 @@ item.iconPath = vscode.Uri.file("/path/to/icon.svg");    // or...
 item.iconPath = { light: lightUri, dark: darkUri };
 
 📄 🔖 ƒ 📂 ✏️ 📦 ❔ ⬚ ⌀ … ❓
+
+⚙ U+2699  Gear
+⌘ U+2318  Place of Interest Sign (Command)
+∞ U+221E  Infinity
+✳ U+2733  Eight Spoked Asterisk
+☯ U+262F  Yin Yang
+⊕ U+2295  Circled Plus
+⋆ U+22C6  Star Operator
+⎈ U+2388  Helm Symbol
 
 If you're using SVGs as iconPath, color is respected unless overridden by the theme.
 But if you're using a ThemeIcon, 

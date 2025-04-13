@@ -1,8 +1,19 @@
 bugs
   junk in keyboard shortcuts menu
   closeitem broken
-  
+
 todo
+  show folder with same indentation as file, not expandable
+  use darker char for function
+  need other chars for non-functions
+  show codicon by closest mark in sidebar
+      no marks in file     -> nothing
+      above first bookmark -> triangle-up
+      if exact line        -> triangle-right
+      below bookmark       -> triangle-down
+    triangle-down and triangle-up on adjacent marks if between?
+    what if only one mark in file?
+  remove tokens from text for deleted marks in marks.init
   test moving a project folder
   on folder or file clickexpand/collapse and re-render sidebar
   item click
@@ -11,7 +22,13 @@ todo
   highlight line
   show marks in gutter
   show <No Bookmarks> in view
+  undo?
+  put refresh menu item on files and folder
   
+top of sidebar
+  delete all (clearAllFiles)
+  refresh    (cleanAllFiles)
+
 settings
   min line len
   files to ignore
@@ -21,3 +38,10 @@ settings
   gutter color
   show in scrollbar
   scrollbar color
+
+codicons:
+  triangle-down triangle-up triangle-right triangle-left
+  chevron-right play send debug-hint debug-stackframe debug-start star star-full
+  circle-large-outline pass-filled globe circle-filled circle-large-filled
+  close-dirty debug-step-into debug-step-out export 
+  fold-down fold-up grabber layout-panel

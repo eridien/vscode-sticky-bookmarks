@@ -1,7 +1,8 @@
-const vscode  = require('vscode');
-const path    = require('path');
-const utils   = require('./utils.js');
-const log     = utils.getLog('mark');
+const vscode = require('vscode');
+const path   = require('path');
+const labelm = require('./label.js');
+const utils  = require('./utils.js');
+const log    = utils.getLog('mark');
 
 let globalMarks;
 let context, glblFuncs;
@@ -22,13 +23,8 @@ async function init(contextIn, glblFuncsIn) {
 
   globalMarks = context.workspaceState.get('globalMarks', {});
   for(const [token, mark] of Object.entries(globalMarks)) {
-    mark.fileFsPath = mark.document.fileName;
-    mark.document   = await vscode.workspace.openTextDocument(mark.fileFsPath);
-    if(!mark.document) { 
-      delete globalMarks[token];
-      continue;
-    }
-    const markUri = vscode.Uri.file(path.resolve(mark.fileFsPath)); 
+    const fileFsPath = mark.document.fileName;
+    const markUri = vscode.Uri.file(path.resolve(fileFsPath)); 
     const folder  = vscode.workspace.getWorkspaceFolder(markUri);
     if(!folder) { 
       delete globalMarks[token];
@@ -36,6 +32,14 @@ async function init(contextIn, glblFuncsIn) {
     }
     mark.folderIdx  = folder.index;
     mark.folderName = folder.name;
+    mark.fileFsPath = fileFsPath;
+    const document = 
+            await vscode.workspace.openTextDocument(markUri);
+    if(!document) { 
+      delete globalMarks[token];
+      continue;
+    }
+    mark.document   = document;
   }
   await context.workspaceState.update('globalMarks', globalMarks);
   log('marks initialized'); 
@@ -93,18 +97,49 @@ async function delGlobalMark(token) {
 }
 
 async function delGlobalMarksForFile(fileRelPath) {
-  for(const [token, val] of Object.entries(globalMarks)) {
-    if(val.fileRelPath === fileRelPath) delete globalMarks[token];
+  for(const [token, mark] of Object.entries(globalMarks)) {
+    if(mark.fileRelPath === fileRelPath) delete globalMarks[token];
   }
   await context.workspaceState.update('globalMarks', globalMarks);
   glblFuncs.updateSidebar();
   log('delGlobalMarksForFile:', fileRelPath);
 }
 
-function rootItems() {
-  log('rootItems');
+async function getItem(mark) {
+  const [codicon, label] = await labelm.getLabel(mark);
+  const {id, type, folderPath, 
+         fileRelPath, fileFsPath, children} = mark;
+  let item;
+  if (children) {
+    item = new vscode.TreeItem(label, 
+               vscode.TreeItemCollapsibleState.Expanded);
+    item.children = children;
+  }
+  else 
+    item = new vscode.TreeItem(label, 
+            vscode.TreeItemCollapsibleState.None);
+  if (codicon) item.iconPath = new vscode.ThemeIcon(codicon);
+  Object.assign(item, {id, type, folderPath});
+  if (fileRelPath) {
+    item.fileRelPath = fileRelPath;
+    item.fileFsPath  = fileFsPath;
+  }
+  item.command = {
+    command: 'sticky-bookmarks.itemClick',
+    title:   'Item Clicked',
+    arguments: [mark],
+  }
+  return item;
+};
+
+async function getRootItems() {
+  log('getRootItems');
+  const rootItems = [];
   const marksArray = Object.values(globalMarks);
+  if(marksArray.length == 0) return [];
   marksArray.sort((a, b) => {
+    if(a.folderIdx > b.folderIdx) return +1;
+    if(a.folderIdx < b.folderIdx) return -1;
     if(a.folderPath .toLowerCase() > 
        b.folderPath .toLowerCase()) return +1;
     if(a.folderPath .toLowerCase() < 
@@ -115,34 +150,31 @@ function rootItems() {
        b.fileRelPath.toLowerCase()) return -1;
     return (a.lineNumber - b.lineNumber);
   });
-  let folders=[], files=[], bookmarks=[];
+  let bookmarks;
   let lastFolderPath = null, lastFileRelPath;
   for(const mark of marksArray) {
     if(mark.folderPath !== lastFolderPath) {
       const {folderPath} = mark;
       lastFolderPath = folderPath;
       const id = utils.fnv1aHash(folderPath);
-      files=[], bookmarks=[];
-      folders.push({type:'folder', folderPath, id});
+      rootItems.push(await getItem({type:'folder', folderPath, id}));
       lastFileRelPath = null;
-
-      // item.iconPath = new vscode.ThemeIcon('chevron-right');
-      // delete item.children;
-
     }
     if(mark.fileRelPath !== lastFileRelPath) {
-      const {document, folderPath, fileRelPath} = mark;
+      const {document, folderPath, fileRelPath, fileFsPath} = mark;
       lastFileRelPath = fileRelPath;
-      const id = utils.fnv1aHash(folderPath + '/' + fileRelPath);
-      bookmarks=[];
-      files.push({document, type:'file', folderPath, fileRelPath, 
-                  children:bookmarks, id});
+      const id = utils.fnv1aHash(fileFsPath);
+      bookmarks = [];
+      rootItems.push(await getItem({document, type:'file', 
+                              folderPath, fileRelPath, fileFsPath,
+                              children:bookmarks, id}));
     }
-    bookmarks.push(mark);
+    mark.id = mark.token;
+    bookmarks.push(await getItem(mark));
   }
-  return folders;
+  return rootItems;
 }
 
-module.exports = {init, dumpGlobalMarks, rootItems, 
+module.exports = {init, dumpGlobalMarks, getRootItems, 
                   newGlobalMark, delGlobalMark, delGlobalMarksForFile}
 

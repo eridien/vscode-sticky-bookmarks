@@ -51,8 +51,8 @@ class SidebarProvider {
   }
 
   async getChildren(item) {
-    const children = (!item) ? marks.rootItems() 
-                             : item.children;
+    const children = (!item) ? await marks.getRootItems() 
+                                 : item.children;
     return await Promise.all(children.map(
       mark => getItem(mark))
     );

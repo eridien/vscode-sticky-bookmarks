@@ -19,45 +19,45 @@ function isKeyWord(languageId, word) {
   return keywordSetsByLang[languageId].has(word);
 }
 
-const codicons = { 
-     1: "file",         2: "module",      3: "namespace",  4: "package", 
-     5: "class",        6: "method",      7: "property",   8: "field", 
-     9: "constructor", 10: "enum",       11: "interface", 12: "function", 
-    13: "variable",    14: "constant",   15: "string",    16: "number", 
-    17: "boolean",     18: "array",      19: "object",    20: "key",
-    21: "null",        22: "enummember", 23: "struct",    24: "event", 
-    25: "operator",    26: "typeparameter"
-}
-// chevron-down chevron-right
-const unicodeIcons = {
-  file: "📄",          // U+1F4C4
-  function: "ƒ ",      // U+0192
-  method: "🛠️",        // U+1F6E0
-  variable: "📝",      // U+1F4DD
-  module: "📦",        // U+1F4E6
-  package: "📦",       // U+1F4E6
-  class: "🧱",         // U+1F9F1
-  constructor: "🏗️",   // U+1F3D7
-  constant: "🔒",      // U+1F512
-  string: "🔤",        // U+1F524
-  number: "🔢",        // U+1F522
-  boolean: "🔘",       // U+1F518
-  array: "📚",         // U+1F4DA
-  object: "🧩",        // U+1F9E9
-  key: "🔑",           // U+1F511
-  null: "␀",           // U+2400
-  event: "📅",         // U+1F4C5
-  operator: "➕",      // U+2795   ➖ ✖️ ➗
-};
+// const codicons = { 
+//      1: "file",         2: "module",      3: "namespace",  4: "package", 
+//      5: "class",        6: "method",      7: "property",   8: "field", 
+//      9: "constructor", 10: "enum",       11: "interface", 12: "function", 
+//     13: "variable",    14: "constant",   15: "string",    16: "number", 
+//     17: "boolean",     18: "array",      19: "object",    20: "key",
+//     21: "null",        22: "enummember", 23: "struct",    24: "event", 
+//     25: "operator",    26: "typeparameter"
+// }
+//
+// const unicodeIcons = {
+//   file: "📄",          // U+1F4C4
+//   function: "ƒ ",      // U+0192
+//   method: "🛠️",        // U+1F6E0
+//   variable: "📝",      // U+1F4DD
+//   module: "📦",        // U+1F4E6
+//   package: "📦",       // U+1F4E6
+//   class: "🧱",         // U+1F9F1
+//   constructor: "🏗️",   // U+1F3D7
+//   constant: "🔒",      // U+1F512
+//   string: "🔤",        // U+1F524
+//   number: "🔢",        // U+1F522
+//   boolean: "🔘",       // U+1F518
+//   array: "📚",         // U+1F4DA
+//   object: "🧩",        // U+1F9E9
+//   key: "🔑",           // U+1F511
+//   null: "␀",           // U+2400
+//   event: "📅",         // U+1F4C5
+//   operator: "➕",      // U+2795   ➖ ✖️ ➗
+// };
 
-function getIconForKind(kind) {
-  const codicon = codicons[kind];
-  if(!codicon) return '  ';
-  const char = unicodeIcons[codicon];
-  log('getIconForKind', codicon, char);
-  // return char ?? new vscode.ThemeIcon(codicon);
-  return char ?? '  ';
-};
+// function getIconForKind(kind) {
+//   const codicon = codicons[kind];
+//   if(!codicon) return '  ';
+//   const char = unicodeIcons[codicon];
+//   log('getIconForKind', codicon, char);
+//   // return char ?? new vscode.ThemeIcon(codicon);
+//   return char ?? '  ';
+// };
 
 function getSymbols(pos, symbols) {
   const parent = symbols[symbols.length - 1];
@@ -109,16 +109,17 @@ async function getCompText(document, languageId, lineNumber) {
   return compText.trim().replace(/(\w)(\W)|(\W)(\w)/g, '$1$3 $2$4');
 }
 
+// chevron-down chevron-right ●
+
 async function getLabel(mark) {
   try {
     const {document, languageId, lineNumber, type} = mark;
     if(type == 'folder') 
-      return [null, '📂 ' + mark.folderPath.split('/').pop()];
+      return ['chevron-down', '📂 ' + mark.folderName];
     const relPath = vscode.workspace.asRelativePath(document.uri);
     if(type == 'file') 
       return [null, '📄 ' + relPath];
-    const compText =  '🔖 ' + 
-              await getCompText(document, languageId, lineNumber);
+    const compText = await getCompText(document, languageId, lineNumber);
     let label = compText;
     const topSymbols = await vscode.commands.executeCommand(
                       'vscode.executeDocumentSymbolProvider', document.uri);
@@ -142,11 +143,8 @@ async function getLabel(mark) {
     for(const sym of symbols) {
       symStr = `${sym.name}/${symStr}`;
     }
-    symStr = symStr.slice(0, -1) + ' ' +  compText;
-    const icon = getIconForKind(symbols[0].kind); 
-    if(icon instanceof vscode.ThemeIcon)
-         return [icon, symStr];
-    else return [null, icon + ' ' + symStr];
+    symStr = symStr.slice(0, -1) + ' ● ' +  compText;
+    return [null, symStr];
   }
   catch (error) {
     log('err', 'getLabel error:', error.message);

@@ -15,16 +15,31 @@ async function openDocumentFromPath(filePath) {
 async function init(contextIn, glblFuncsIn) { 
   context = contextIn;
   glblFuncs = glblFuncsIn;
-
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (!workspaceFolders || workspaceFolders.length === 0) {
+    globalMarks = {};
+    context.workspaceState.update('globalMarks', globalMarks);
+    log('no workspace folders found');
+    return {};
+  }
   // clear globalMarks for testing
   // this fails but gets the job done
   // await context.workspaceState.update('globalMarks', {});   // DEBUG
-
   globalMarks = context.workspaceState.get('globalMarks', {});
   for(const [token, mark] of Object.entries(globalMarks)) {
-    const fileName = mark.document.fileName;
-    mark.document = await openDocumentFromPath(fileName);
-    if(!mark.document) delete globalMarks[token];
+     mark.document = await openDocumentFromPath(fileName);
+     if(!mark.document) { 
+      delete globalMarks[token];
+      continue;
+     }
+     const fileName = mark.document.fileName;
+     const folder = workspaceFolders.find(
+                      folder => folder.uri.fsPath === fileName); 
+     if(folder == -1) { 
+      delete globalMarks[token];
+      continue;
+     }
+     mark.folderIdx = folder.index;
   }
   log('marks initialized'); 
   dumpGlobalMarks(true);
@@ -73,8 +88,8 @@ function delGlobalMarksForFile(fileRelPath) {
   log('delGlobalMarksForFile:', fileRelPath);
 }
 
-function sortedMarks() {
-  log('sortedMarks');
+function rootItems() {
+  log('rootItems');
   const marksArray = Object.values(globalMarks);
   marksArray.sort((a, b) => {
     if(a.folderPath .toLowerCase() > 
@@ -95,8 +110,12 @@ function sortedMarks() {
       lastFolderPath = folderPath;
       const id = utils.fnv1aHash(folderPath);
       files=[], bookmarks=[];
-      folders.push({type:'folder', folderPath, children:files, id});
+      folders.push({type:'folder', folderPath, id});
       lastFileRelPath = null;
+
+      // item.iconPath = new vscode.ThemeIcon('chevron-right');
+      // delete item.children;
+
     }
     if(mark.fileRelPath !== lastFileRelPath) {
       const {document, folderPath, fileRelPath} = mark;
@@ -111,6 +130,6 @@ function sortedMarks() {
   return folders;
 }
 
-module.exports = {init, dumpGlobalMarks, sortedMarks, 
+module.exports = {init, dumpGlobalMarks, rootItems, 
                   newGlobalMark, delGlobalMark, delGlobalMarksForFile}
 

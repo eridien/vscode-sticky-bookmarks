@@ -33,6 +33,10 @@ async function getItem(mark) {
     title:   'Item Clicked',
     arguments: [mark],
   }
+  // if(mark.type === 'folder') {
+  //   item.iconPath = new vscode.ThemeIcon('chevron-right');
+  //   delete item.children;
+  // }
   return item;
 };
 
@@ -47,7 +51,7 @@ class SidebarProvider {
   }
 
   async getChildren(item) {
-    const children = (!item) ? marks.sortedMarks() 
+    const children = (!item) ? marks.rootItems() 
                              : item.children;
     return await Promise.all(children.map(
       mark => getItem(mark))

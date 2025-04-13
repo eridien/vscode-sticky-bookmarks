@@ -28,7 +28,7 @@ const codicons = {
     21: "null",        22: "enummember", 23: "struct",    24: "event", 
     25: "operator",    26: "typeparameter"
 }
-
+// chevron-down chevron-right
 const unicodeIcons = {
   file: "📄",          // U+1F4C4
   function: "ƒ ",      // U+0192

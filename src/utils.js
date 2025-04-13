@@ -153,18 +153,6 @@ function fixDriveLetter(windowsPath) {
   return windowsPath;
 }
 
-function getProjectIdx(document) {
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-  if (!workspaceFolders || workspaceFolders.length === 0) return 0;
-  for (let i = 0; i < workspaceFolders.length; i++) {
-    const folder = workspaceFolders[i];
-    if (document.uri.fsPath.startsWith(folder.uri.fsPath)) {
-      return i;
-    }
-  }
-  return 0;
-}
-
 function blkIdFromId(id) {
   return id.split('-').splice(0, 3).join('-');
 }
@@ -213,7 +201,7 @@ function fnv1aHash(str) {
 }
 
 module.exports = { 
-  init, getLog, getTextFromDoc, fixDriveLetter, sleep, getProjectIdx, commentsByLang,
+  init, getLog, getTextFromDoc, fixDriveLetter, sleep, commentsByLang,
   rangeContainsPos, containsRange, containsLocation, locationIsEntireFile, getRangeSize, 
   readTxt, blkIdFromId, tailFromId, readDirByRelPath, pxToNum, numToPx, fnv1aHash,
   containsLocation

@@ -116,9 +116,8 @@ async function getLabel(mark) {
     const {document, languageId, lineNumber, type} = mark;
     if(type == 'folder') 
       return ['chevron-down', '📂 ' + mark.folderName];
-    const relPath = vscode.workspace.asRelativePath(document.uri);
     if(type == 'file') 
-      return [null, '📄 ' + relPath];
+      return [null, '📄 ' + mark.fileRelPath];
     const compText = await getCompText(document, languageId, lineNumber);
     let label = compText;
     const topSymbols = await vscode.commands.executeCommand(

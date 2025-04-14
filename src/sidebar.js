@@ -15,7 +15,7 @@ async function init(contextIn, glblFuncsIn, providerIn) {
 
 async function getItem(mark) {
   const [codicon, label] = await labelm.getLabel(mark);
-  const {id, type, folderPath, 
+  const {id, type, folderPath, folderName,
          fileRelPath, fileFsPath, children} = mark;
   let item;
   if (children) {
@@ -27,7 +27,7 @@ async function getItem(mark) {
     item = new vscode.TreeItem(label, 
             vscode.TreeItemCollapsibleState.None);
   if (codicon) item.iconPath = new vscode.ThemeIcon(codicon);
-  Object.assign(item, {id, type, folderPath});
+  Object.assign(item, {id, type, folderPath, folderName});
   if (fileRelPath) {
     item.fileRelPath = fileRelPath;
     item.fileFsPath  = fileFsPath;
@@ -65,7 +65,9 @@ async function getItemTree() {
       const {folderPath} = mark;
       lastFolderPath = folderPath;
       const id = utils.fnv1aHash(folderPath);
-      rootItems.push(await getItem({type:'folder', folderPath, id}));
+      const folderName = folderPath.split('/').pop();
+      rootItems.push(await getItem(
+                 {type:'folder', folderPath, folderName, id}));
       lastFileRelPath = null;
     }
     if(mark.fileRelPath !== lastFileRelPath) {
@@ -92,7 +94,6 @@ class SidebarProvider {
     return element;
   }
   async getChildren(item) {
-    log('getChildren', item);
     if(!item) {
       await marks.waitForInit();
       return await getItemTree();

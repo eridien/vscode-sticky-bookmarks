@@ -17,9 +17,8 @@ async function init(contextIn, glblFuncsIn) {
     log('no workspace folders found');
     return {};
   }
-  // clear globalMarks for testing
-  // this fails but gets the job done
-  // await context.workspaceState.update('globalMarks', {});   // DEBUG
+  // clear globalMarks for testing     DEBUG
+  // await context.workspaceState.update('globalMarks', {}); 
 
   globalMarks = context.workspaceState.get('globalMarks', {});
   for(const [token, mark] of Object.entries(globalMarks)) {
@@ -40,12 +39,12 @@ async function init(contextIn, glblFuncsIn) {
       continue;
     }
     mark.document   = document;
-    log('init token:', token);;
+    // log('init token:', token);;
   }
   await context.workspaceState.update('globalMarks', globalMarks);
   log('marks initialized'); 
   initFinished = true;
-  dumpGlobalMarks('init');
+  // dumpGlobalMarks('init');
   return {};
 }
 
@@ -89,7 +88,9 @@ async function newGlobalMark(document, lineNumber) {
   const mark  = {token, document, lineNumber, type:'bookmark'};
   mark.folderPath  = vscode.workspace
                        .getWorkspaceFolder(document.uri).uri.path;
-  mark.fileRelPath = vscode.workspace.asRelativePath(document.uri);
+  const filePath   = document.uri.path;
+  mark.fileRelPath = 
+       filePath.slice( mark.folderPath.length + 1);
   mark.languageId  = document.languageId;
   mark.fileFsPath  = document.fileName;
   const workspaceFolders = vscode.workspace.workspaceFolders;

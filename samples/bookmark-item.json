@@ -1,0 +1,31 @@
+{
+  "token": ":ghki;",
+  "document": {
+    "uri": {
+      "$mid": 1,
+      "fsPath": "c:\\Users\\mark\\apps\\test-app\\src\\tvdb.js",
+      "_sep": 1,
+      "external": "file:///c%3A/Users/mark/apps/test-app/src/tvdb.js",
+      "path": "/c:/Users/mark/apps/test-app/src/tvdb.js",
+      "scheme": "file"
+    },
+    "fileName": "c:\\Users\\mark\\apps\\test-app\\src\\tvdb.js",
+    "isUntitled": false,
+    "languageId": "javascript",
+    "version": 1,
+    "isClosed": false,
+    "isDirty": false,
+    "encoding": "utf8",
+    "eol": 1,
+    "lineCount": 116
+  },
+  "lineNumber": 3,
+  "type": "bookmark",
+  "folderPath": "/c:/Users/mark/apps/test-app",
+  "fileRelPath": "src/tvdb.js",
+  "languageId": "javascript",
+  "fileFsPath": "c:\\Users\\mark\\apps\\test-app\\src\\tvdb.js",
+  "folderIdx": 0,
+  "folderName": "test-app",
+  "id": ":ghki;"
+}

@@ -4,14 +4,13 @@ const labelm = require('./label.js');
 const utils  = require('./utils.js');
 const log    = utils.getLog('side');
 
-let glblFuncs, provider, treeView;
+let glblFuncs, provider;
 
 const expandedState = {}; 
 
-async function init(contextIn, glblFuncsIn, providerIn, treeViewIn) {
+async function init(contextIn, glblFuncsIn, providerIn) {
   glblFuncs = glblFuncsIn;
   provider  = providerIn;
-  treeView  = treeViewIn;
   log('sidebar initialized');
   return {updateSidebar};
 }
@@ -46,7 +45,7 @@ async function getItem(mark) {
 };
 
 async function getItemTree() {
-  log('getItemTree');
+  log('getItemTree', marks.getGlobalMarks());
   const rootItems = [];
   const marksArray = Object.values(marks.getGlobalMarks());
   if(marksArray.length == 0) return [];
@@ -102,10 +101,6 @@ class SidebarProvider {
     return item;
   }
 
-  getParent(item) {
-    return undefined;
-  }
-
   async getChildren(item) {
     if(!item) {
       await marks.waitForInit();
@@ -117,11 +112,37 @@ class SidebarProvider {
 
 async function itemClick(item) {
   log('itemClick', item);
-  if(item.type === 'file') {
-    const isExpanded = expandedState[item.id] ?? true;
-    expandedState[item.id] = !isExpanded;
-    await treeView.reveal(item, {expand:!isExpanded});
-  }
+  if(item.type !== 'bookmark') return;
+  const doc        = await vscode.workspace.openTextDocument(item.document.uri);
+  const editor     = await vscode.window.showTextDocument(doc, {preview: false});
+  const lineRange  = doc.lineAt(item.lineNumber).range;
+  // editor.selection = new vscode.Selection(lineRange.start, lineRange.start);
+  editor.revealRange(lineRange, vscode.TextEditorRevealType.InCenter);
+  const decorationType = vscode.window.createTextEditorDecorationType({
+    backgroundColor: new vscode.ThemeColor('editor.selectionHighlightBackground'), 
+    // or use a custom color like 'rgba(255, 200, 0, 0.2)'
+    isWholeLine: true,
+  });
+  editor.setDecorations(decorationType, [lineRange]);
+  const disposable = vscode.window.onDidChangeTextEditorSelection(event => {
+    if (event.textEditor === editor) {
+      editor.setDecorations(decorationType, []);
+      decorationType.dispose();
+      disposable.dispose(); 
+    }
+  });
+  const clearDecoration = () => {
+    editor.setDecorations(decorationType, []);
+    decorationType.dispose();
+    selectionListener.dispose();
+    focusListener.dispose();
+  };
+  const selectionListener = vscode.window.onDidChangeTextEditorSelection(event => {
+    if (event.textEditor === editor) clearDecoration();
+  });
+  const focusListener = vscode.window.onDidChangeActiveTextEditor(activeEditor => {
+    if (activeEditor !== editor) clearDecoration();
+  }); 
 } 
 
 async function deleteMark(item) {

@@ -91,9 +91,9 @@ async function newGlobalMark(document, lineNumber) {
   const mark  = {token, document, lineNumber, type:'bookmark'};
   mark.folderPath  = vscode.workspace
                        .getWorkspaceFolder(document.uri).uri.path;
-  const filePath   = document.uri.path;
+  mark.filePath   = document.uri.path;
   mark.fileRelPath = 
-       filePath.slice( mark.folderPath.length + 1);
+       mark.filePath.slice( mark.folderPath.length + 1);
   mark.languageId  = document.languageId;
   mark.fileFsPath  = document.fileName;
   const workspaceFolders = vscode.workspace.workspaceFolders;

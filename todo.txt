@@ -1,6 +1,7 @@
 bugs
   junk in keyboard shortcuts menu
   adding global mark removes symbol from previous mark (waitingSends)
+  multiple folders broken
 
 todo
   toggle folder
@@ -17,19 +18,15 @@ todo
       below bookmark       -> triangle-down
     triangle-down and triangle-up on adjacent marks if between?
   test moving a project folder
-  on folder or file clickexpand/collapse and re-render sidebar
-  item click
-  edit click
-  delete click
-  highlight line
+  on folder or file click, expand/collapse and re-render sidebar
+  edit manu
   show marks in gutter
-  show <No Bookmarks> in view
   undo?
   put refresh menu item on files and folder
   
 top of sidebar
-  delete all (clearAllFiles)
-  refresh    (cleanAllFiles)
+  delete all (clearAllFiles on all folders)
+  refresh    (cleanAllFiles on all folders)
 
 settings
   min line len
@@ -44,9 +41,3 @@ settings
 testing
   https://code.visualstudio.com/api/working-with-extensions/testing-extension
 
-codicons:
-  triangle-down triangle-up triangle-right triangle-left
-  chevron-right play send debug-hint debug-stackframe debug-start star star-full
-  circle-large-outline pass-filled globe circle-filled circle-large-filled
-  close-dirty debug-step-into debug-step-out export 
-  fold-down fold-up grabber layout-panel

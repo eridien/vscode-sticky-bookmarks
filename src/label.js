@@ -69,22 +69,20 @@ async function getCompText(document, languageId, lineNumber) {
   return compText.trim().replace(/(\w)(\W)|(\W)(\w)/g, '$1$3 $2$4');
 }
 
-// chevron-down chevron-right ●
-
 async function getLabel(mark) {
   try {
     const {document, languageId, lineNumber, type} = mark;
     if(type == 'folder') 
-      return ['chevron-down', '📂 ' + mark.folderName];
+      return '📂 ' + mark.folderName;
     if(type == 'file') 
-      return [null, '📄 ' + mark.fileRelPath];
+      return '📄 ' + mark.fileRelPath;
     const compText = await getCompText(document, languageId, lineNumber);
     let label = compText;
     const topSymbols = await vscode.commands.executeCommand(
                       'vscode.executeDocumentSymbolProvider', document.uri);
     if (!topSymbols || !topSymbols.length) {
       log('getLabel, No topSymbols found.');
-      return [null, label];
+      return label;
     }
     const symbols = [{children: topSymbols}];
     const lineLen = document.lineAt(lineNumber).text.length;
@@ -94,7 +92,7 @@ async function getLabel(mark) {
     symbols.shift();
     if (!symbols.length) {
       // log('getLabel, No symbol found', document.uri.path);
-      return [null, label];
+      return label;
     }
     symbols.reverse();
     // remove dupes?  todo
@@ -103,7 +101,7 @@ async function getLabel(mark) {
       symStr = `${sym.name}/${symStr}`;
     }
     symStr = symStr.slice(0, -1) + ' ● ' +  compText;
-    return [null, symStr];
+    return symStr;
   }
   catch (error) {
     log('err', 'getLabel error:', error.message);
@@ -181,5 +179,13 @@ But if you're using a ThemeIcon,
      VS Code handles the coloring and ignores any color in the SVG, 
      since ThemeIcons are meant to match the theme's foreground color.
 For TreeItems, SVGs with color will show as-is, unless you're trying to theme them.
+
+codicons:
+  triangle-down triangle-up triangle-right triangle-left
+  chevron-right play send debug-hint debug-stackframe debug-start star star-full
+  circle-large-outline pass-filled globe circle-filled circle-large-filled
+  close-dirty debug-step-into debug-step-out export 
+  fold-down fold-up grabber layout-panel
+
 */
 

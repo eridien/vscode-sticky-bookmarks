@@ -4,9 +4,9 @@ const labelm = require('./label.js');
 const utils  = require('./utils.js');
 const log    = utils.getLog('side');
 
-let glblFuncs, provider;
+let glblFuncs, provider, itemTree;
 
-const expandedState = {}; 
+const closedFolders = new Set(); 
 
 async function init(contextIn, glblFuncsIn, providerIn) {
   glblFuncs = glblFuncsIn;
@@ -15,10 +15,10 @@ async function init(contextIn, glblFuncsIn, providerIn) {
   return {updateSidebar};
 }
 
-async function getItem(mark) {
-  const [codicon, label] = await labelm.getLabel(mark);
+async function getNewItem(mark) {
+  const label = await labelm.getLabel(mark);
   const {id, type, document, lineNumber, languageId,
-         folderPath, folderName,
+         folderPath, folderName, filePath, 
          fileRelPath, fileFsPath, children} = mark;
   let item;
   if (children) {
@@ -29,17 +29,23 @@ async function getItem(mark) {
   else 
     item = new vscode.TreeItem(label, 
             vscode.TreeItemCollapsibleState.None);
-  if (codicon) item.iconPath = new vscode.ThemeIcon(codicon);
+  if (type == 'folder') {
+    if(closedFolders.has(folderPath)) 
+      item.iconPath = new vscode.ThemeIcon("chevron-right");
+    else 
+      item.iconPath = new vscode.ThemeIcon("chevron-down");
+  }
   Object.assign(item, {id, type, document, languageId, lineNumber, 
                        folderPath, folderName});
-  if (fileRelPath) {
+  if (type !== 'folder' && fileRelPath) {
+    item.filePath    = filePath;
     item.fileRelPath = fileRelPath;
     item.fileFsPath  = fileFsPath;
   }
   item.command = {
     command: 'sticky-bookmarks.itemClick',
     title:   'Item Clicked',
-    arguments: [mark],
+    arguments: [{document, lineNumber, type, id}],
   }
   return item;
 };
@@ -69,26 +75,50 @@ async function getItemTree() {
       const {folderPath, document, languageId} = mark;
       lastFolderPath = folderPath;
       const id = utils.fnv1aHash(folderPath);
-      expandedState[id] = true;
       const folderName = folderPath.split('/').pop();
-      rootItems.push(await getItem(
+      rootItems.push(await getNewItem(
                  {type:'folder', document, languageId,
                   folderPath, folderName, id}));
       lastFileRelPath = null;
     }
     if(mark.fileRelPath !== lastFileRelPath) {
-      const {document, languageId, folderPath, fileRelPath, fileFsPath} = mark;
+      const {document, languageId, 
+             folderPath, filePath, 
+             fileRelPath, fileFsPath} = mark;
       lastFileRelPath = fileRelPath;
       const id = utils.fnv1aHash(fileFsPath);
-      expandedState[id] = true;
       bookmarks = [];
-      rootItems.push(await getItem({ type:'file', document, languageId,
-                                    folderPath, fileRelPath, fileFsPath,
-                                    children:bookmarks, id}));
+      if(closedFolders.has(folderPath)) continue;
+      rootItems.push(await getNewItem({ 
+            type:'file', document, languageId,
+            folderPath, filePath, fileRelPath, fileFsPath,
+            children:bookmarks, id}));
     }
     mark.id = mark.token;
-    bookmarks.push(await getItem(mark));
+    bookmarks.push(await getNewItem(mark));
   }
+  const editor = vscode.window.activeTextEditor;
+  if (editor) {
+    const document         = editor.document;
+    const editorFilePath   = document.uri.path;
+    const editorLine       = editor.selection.active.line;
+    for(const item of rootItems) {
+      if(item.type === 'file' && 
+         item.filePath === editorFilePath &&
+         !closedFolders.has(item.folderPath)) {
+        item.children.forEach(bookmarkItem => {
+          const markLine = bookmarkItem.lineNumber;
+          if(markLine === editorLine) 
+            bookmarkItem.iconPath = new vscode.ThemeIcon("triangle-right");
+          else if(markLine > editorLine) 
+            bookmarkItem.iconPath = new vscode.ThemeIcon("triangle-up");
+          else if(markLine < editorLine)
+            bookmarkItem.iconPath = new vscode.ThemeIcon("triangle-down");
+        });
+      }
+    }
+  }
+  itemTree = rootItems;
   return rootItems;
 }
 
@@ -111,38 +141,51 @@ class SidebarProvider {
 }
 
 async function itemClick(item) {
-  log('itemClick', item);
-  if(item.type !== 'bookmark') return;
-  const doc        = await vscode.workspace.openTextDocument(item.document.uri);
-  const editor     = await vscode.window.showTextDocument(doc, {preview: false});
-  const lineRange  = doc.lineAt(item.lineNumber).range;
-  // editor.selection = new vscode.Selection(lineRange.start, lineRange.start);
-  editor.revealRange(lineRange, vscode.TextEditorRevealType.InCenter);
-  const decorationType = vscode.window.createTextEditorDecorationType({
-    backgroundColor: new vscode.ThemeColor('editor.selectionHighlightBackground'), 
-    // or use a custom color like 'rgba(255, 200, 0, 0.2)'
-    isWholeLine: true,
-  });
-  editor.setDecorations(decorationType, [lineRange]);
-  const disposable = vscode.window.onDidChangeTextEditorSelection(event => {
-    if (event.textEditor === editor) {
+  log('itemClick');
+  if(item.type === 'folder') {
+    const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
+    if(folderItem) {
+      if(closedFolders.has(folderItem.folderPath)) 
+         closedFolders.delete(folderItem.folderPath);
+      else 
+         closedFolders.add(folderItem.folderPath);
+      updateSidebar();
+    }
+    return;
+  }
+  if(item.type === 'bookmark') {
+    const doc        = await vscode.workspace.openTextDocument(item.document.uri);
+    const editor     = await vscode.window.showTextDocument(doc, {preview: false});
+    const lineRange  = doc.lineAt(item.lineNumber).range;
+    // editor.selection = new vscode.Selection(lineRange.start, lineRange.start);
+    editor.revealRange(lineRange, vscode.TextEditorRevealType.InCenter);
+    const decorationType = vscode.window.createTextEditorDecorationType({
+      backgroundColor: new vscode.ThemeColor('editor.selectionHighlightBackground'), 
+      // or use a custom color like 'rgba(255, 200, 0, 0.2)'
+      isWholeLine: true,
+    });
+    editor.setDecorations(decorationType, [lineRange]);
+    const disposable = vscode.window.onDidChangeTextEditorSelection(event => {
+      if (event.textEditor === editor) {
+        editor.setDecorations(decorationType, []);
+        decorationType.dispose();
+        disposable.dispose(); 
+      }
+    });
+    const clearDecoration = () => {
       editor.setDecorations(decorationType, []);
       decorationType.dispose();
-      disposable.dispose(); 
-    }
-  });
-  const clearDecoration = () => {
-    editor.setDecorations(decorationType, []);
-    decorationType.dispose();
-    selectionListener.dispose();
-    focusListener.dispose();
-  };
-  const selectionListener = vscode.window.onDidChangeTextEditorSelection(event => {
-    if (event.textEditor === editor) clearDecoration();
-  });
-  const focusListener = vscode.window.onDidChangeActiveTextEditor(activeEditor => {
-    if (activeEditor !== editor) clearDecoration();
-  }); 
+      selectionListener.dispose();
+      focusListener.dispose();
+    };
+    const selectionListener = vscode.window.onDidChangeTextEditorSelection(event => {
+      if (event.textEditor === editor) clearDecoration();
+    });
+    const focusListener = vscode.window.onDidChangeActiveTextEditor(activeEditor => {
+      if (activeEditor !== editor) clearDecoration();
+    }); 
+    return;
+  }
 } 
 
 async function deleteMark(item) {
@@ -159,8 +202,8 @@ async function deleteMark(item) {
   }
 } 
 
-function updateSidebar() {
-  provider._onDidChangeTreeData.fire();
+function updateSidebar(item) {
+  provider._onDidChangeTreeData.fire(item);
 }
 
 let sideBarIsVisible = false;

@@ -1,11 +1,11 @@
 const vscode = require('vscode');
 const path   = require('path');
-const labelm = require('./label.js');
 const utils  = require('./utils.js');
 const log    = utils.getLog('mark');
 
 let globalMarks;
 let context, glblFuncs;
+let initFinished = false;
 
 async function init(contextIn, glblFuncsIn) { 
   context = contextIn;
@@ -40,16 +40,35 @@ async function init(contextIn, glblFuncsIn) {
       continue;
     }
     mark.document   = document;
+    log('init token:', token);;
   }
   await context.workspaceState.update('globalMarks', globalMarks);
   log('marks initialized'); 
-  dumpGlobalMarks(true);
+  initFinished = true;
+  dumpGlobalMarks('init');
   return {};
 }
 
-function dumpGlobalMarks(all = false) {
-  if(all) log('globalMarks', globalMarks);
-  else    log('globalMarks', Object.keys(globalMarks));
+function waitForInit() {
+  return new Promise((resolve) => {
+    const checkInit = () => {
+      if (initFinished) {
+        resolve();
+      } else {
+        setTimeout(checkInit, 100);
+      }
+    };
+    checkInit();
+  });
+}
+
+function getGlobalMarks() {
+  return globalMarks;
+}
+
+function dumpGlobalMarks(caller, all = false) {
+  if(all) log(caller, 'globalMarks', globalMarks);
+  else    log(caller, 'globalMarks', Object.keys(globalMarks));
 }
 
 function getRandomToken() {
@@ -105,76 +124,6 @@ async function delGlobalMarksForFile(fileRelPath) {
   log('delGlobalMarksForFile:', fileRelPath);
 }
 
-async function getItem(mark) {
-  const [codicon, label] = await labelm.getLabel(mark);
-  const {id, type, folderPath, 
-         fileRelPath, fileFsPath, children} = mark;
-  let item;
-  if (children) {
-    item = new vscode.TreeItem(label, 
-               vscode.TreeItemCollapsibleState.Expanded);
-    item.children = children;
-  }
-  else 
-    item = new vscode.TreeItem(label, 
-            vscode.TreeItemCollapsibleState.None);
-  if (codicon) item.iconPath = new vscode.ThemeIcon(codicon);
-  Object.assign(item, {id, type, folderPath});
-  if (fileRelPath) {
-    item.fileRelPath = fileRelPath;
-    item.fileFsPath  = fileFsPath;
-  }
-  item.command = {
-    command: 'sticky-bookmarks.itemClick',
-    title:   'Item Clicked',
-    arguments: [mark],
-  }
-  return item;
-};
-
-async function getRootItems() {
-  log('getRootItems');
-  const rootItems = [];
-  const marksArray = Object.values(globalMarks);
-  if(marksArray.length == 0) return [];
-  marksArray.sort((a, b) => {
-    if(a.folderIdx > b.folderIdx) return +1;
-    if(a.folderIdx < b.folderIdx) return -1;
-    if(a.folderPath .toLowerCase() > 
-       b.folderPath .toLowerCase()) return +1;
-    if(a.folderPath .toLowerCase() < 
-       b.folderPath .toLowerCase()) return -1;
-    if(a.fileRelPath.toLowerCase() > 
-       b.fileRelPath.toLowerCase()) return +1;
-    if(a.fileRelPath.toLowerCase() <
-       b.fileRelPath.toLowerCase()) return -1;
-    return (a.lineNumber - b.lineNumber);
-  });
-  let bookmarks;
-  let lastFolderPath = null, lastFileRelPath;
-  for(const mark of marksArray) {
-    if(mark.folderPath !== lastFolderPath) {
-      const {folderPath} = mark;
-      lastFolderPath = folderPath;
-      const id = utils.fnv1aHash(folderPath);
-      rootItems.push(await getItem({type:'folder', folderPath, id}));
-      lastFileRelPath = null;
-    }
-    if(mark.fileRelPath !== lastFileRelPath) {
-      const {document, folderPath, fileRelPath, fileFsPath} = mark;
-      lastFileRelPath = fileRelPath;
-      const id = utils.fnv1aHash(fileFsPath);
-      bookmarks = [];
-      rootItems.push(await getItem({document, type:'file', 
-                              folderPath, fileRelPath, fileFsPath,
-                              children:bookmarks, id}));
-    }
-    mark.id = mark.token;
-    bookmarks.push(await getItem(mark));
-  }
-  return rootItems;
-}
-
-module.exports = {init, dumpGlobalMarks, getRootItems, 
+module.exports = {init, waitForInit, getGlobalMarks, dumpGlobalMarks, 
                   newGlobalMark, delGlobalMark, delGlobalMarksForFile}
 

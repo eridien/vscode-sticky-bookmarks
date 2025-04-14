@@ -41,7 +41,7 @@ settings
 
 testing
   https://code.visualstudio.com/api/working-with-extensions/testing-extension
-  
+
 codicons:
   triangle-down triangle-up triangle-right triangle-left
   chevron-right play send debug-hint debug-stackframe debug-start star star-full

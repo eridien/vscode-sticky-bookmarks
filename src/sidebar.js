@@ -6,7 +6,7 @@ const log    = utils.getLog('side');
 
 let glblFuncs, provider;
 
-function init(contextIn, glblFuncsIn, providerIn) {
+async function init(contextIn, glblFuncsIn, providerIn) {
   glblFuncs = glblFuncsIn;
   provider  = providerIn;
   log('sidebar initialized');
@@ -15,11 +15,12 @@ function init(contextIn, glblFuncsIn, providerIn) {
 
 async function getItem(mark) {
   const [codicon, label] = await labelm.getLabel(mark);
-  const {id, type, folderPath, fileRelPath, children} = mark;
+  const {id, type, folderPath, 
+         fileRelPath, fileFsPath, children} = mark;
   let item;
   if (children) {
     item = new vscode.TreeItem(label, 
-            vscode.TreeItemCollapsibleState.Expanded);
+               vscode.TreeItemCollapsibleState.Expanded);
     item.children = children;
   }
   else 
@@ -27,34 +28,76 @@ async function getItem(mark) {
             vscode.TreeItemCollapsibleState.None);
   if (codicon) item.iconPath = new vscode.ThemeIcon(codicon);
   Object.assign(item, {id, type, folderPath});
-  if (fileRelPath) item.fileRelPath = fileRelPath;
+  if (fileRelPath) {
+    item.fileRelPath = fileRelPath;
+    item.fileFsPath  = fileFsPath;
+  }
   item.command = {
     command: 'sticky-bookmarks.itemClick',
     title:   'Item Clicked',
     arguments: [mark],
   }
-  // if(mark.type === 'folder') {
-  //   item.iconPath = new vscode.ThemeIcon('chevron-right');
-  //   delete item.children;
-  // }
   return item;
 };
+
+async function getItemTree() {
+  log('getItemTree');
+  const rootItems = [];
+  const marksArray = Object.values(marks.getGlobalMarks());
+  if(marksArray.length == 0) return [];
+  marksArray.sort((a, b) => {
+    if(a.folderIdx > b.folderIdx) return +1;
+    if(a.folderIdx < b.folderIdx) return -1;
+    if(a.folderPath .toLowerCase() > 
+       b.folderPath .toLowerCase()) return +1;
+    if(a.folderPath .toLowerCase() < 
+       b.folderPath .toLowerCase()) return -1;
+    if(a.fileRelPath.toLowerCase() > 
+       b.fileRelPath.toLowerCase()) return +1;
+    if(a.fileRelPath.toLowerCase() <
+       b.fileRelPath.toLowerCase()) return -1;
+    return (a.lineNumber - b.lineNumber);
+  });
+  let bookmarks;
+  let lastFolderPath = null, lastFileRelPath;
+  for(const mark of marksArray) {
+    if(mark.folderPath !== lastFolderPath) {
+      const {folderPath} = mark;
+      lastFolderPath = folderPath;
+      const id = utils.fnv1aHash(folderPath);
+      rootItems.push(await getItem({type:'folder', folderPath, id}));
+      lastFileRelPath = null;
+    }
+    if(mark.fileRelPath !== lastFileRelPath) {
+      const {document, folderPath, fileRelPath, fileFsPath} = mark;
+      lastFileRelPath = fileRelPath;
+      const id = utils.fnv1aHash(fileFsPath);
+      bookmarks = [];
+      rootItems.push(await getItem({document, type:'file', 
+                              folderPath, fileRelPath, fileFsPath,
+                              children:bookmarks, id}));
+    }
+    mark.id = mark.token;
+    bookmarks.push(await getItem(mark));
+  }
+  return rootItems;
+}
 
 class SidebarProvider {
   constructor() {
     this._onDidChangeTreeData = new vscode.EventEmitter();
     this.onDidChangeTreeData  = this._onDidChangeTreeData.event;
   }
-
   getTreeItem(element) {
     return element;
   }
-
   async getChildren(item) {
     log('getChildren', item);
-    if(!item) 
-      return await marks.getRootItems();
-      return item.children;
+    if(!item) {
+      await marks.waitForInit();
+      return await getItemTree();
+    }
+    return item.children ?? [];
   }
 }
 

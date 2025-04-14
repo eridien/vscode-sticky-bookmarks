@@ -63,7 +63,7 @@ async function toggle() {
     const token = await marks.newGlobalMark(document, lineNumber);
     await addTokenToLine(document, line, languageId, token);
   }
-  marks.dumpGlobalMarks();
+  marks.dumpGlobalMarks('toggle');
 }
 
 function flashLine(editor, range) {
@@ -139,7 +139,7 @@ async function clearFile(document) {
   await vscode.workspace.applyEdit(edit);
   const fileRelPath = vscode.workspace.asRelativePath(uri);
   await marks.delGlobalMarksForFile(fileRelPath);
-  marks.dumpGlobalMarks();
+  marks.dumpGlobalMarks('clearFile');
 }     
 
 async function cleanFile(document) {
@@ -159,7 +159,7 @@ async function cleanFile(document) {
     const token = await marks.newGlobalMark(document, line.lineNumber);
     await addTokenToLine(document, line, languageId, token);
   }
-  marks.dumpGlobalMarks();
+  marks.dumpGlobalMarks('cleanFile');
 }
 
 async function runOnAllFiles(func, folderPath) {
@@ -186,7 +186,7 @@ async function runOnAllFiles(func, folderPath) {
     }
     catch(e) {if(e){}};
   }
-  marks.dumpGlobalMarks();
+  marks.dumpGlobalMarks('runOnAllFiles');
 } 
 
 async function clearAllFiles(folderPath) {

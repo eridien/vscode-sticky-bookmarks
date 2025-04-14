@@ -4,11 +4,14 @@ const labelm = require('./label.js');
 const utils  = require('./utils.js');
 const log    = utils.getLog('side');
 
-let glblFuncs, provider;
+let glblFuncs, provider, treeView;
 
-async function init(contextIn, glblFuncsIn, providerIn) {
+const expandedState = {}; 
+
+async function init(contextIn, glblFuncsIn, providerIn, treeViewIn) {
   glblFuncs = glblFuncsIn;
   provider  = providerIn;
+  treeView  = treeViewIn;
   log('sidebar initialized');
   return {updateSidebar};
 }
@@ -67,6 +70,7 @@ async function getItemTree() {
       const {folderPath, document, languageId} = mark;
       lastFolderPath = folderPath;
       const id = utils.fnv1aHash(folderPath);
+      expandedState[id] = true;
       const folderName = folderPath.split('/').pop();
       rootItems.push(await getItem(
                  {type:'folder', document, languageId,
@@ -77,6 +81,7 @@ async function getItemTree() {
       const {document, languageId, folderPath, fileRelPath, fileFsPath} = mark;
       lastFileRelPath = fileRelPath;
       const id = utils.fnv1aHash(fileFsPath);
+      expandedState[id] = true;
       bookmarks = [];
       rootItems.push(await getItem({ type:'file', document, languageId,
                                     folderPath, fileRelPath, fileFsPath,
@@ -93,9 +98,14 @@ class SidebarProvider {
     this._onDidChangeTreeData = new vscode.EventEmitter();
     this.onDidChangeTreeData  = this._onDidChangeTreeData.event;
   }
-  getTreeItem(element) {
-    return element;
+  getTreeItem(item) {
+    return item;
   }
+
+  getParent(item) {
+    return undefined;
+  }
+
   async getChildren(item) {
     if(!item) {
       await marks.waitForInit();
@@ -105,10 +115,13 @@ class SidebarProvider {
   }
 }
 
-function itemClick(item) {
+async function itemClick(item) {
   log('itemClick', item);
-
-
+  if(item.type === 'file') {
+    const isExpanded = expandedState[item.id] ?? true;
+    expandedState[item.id] = !isExpanded;
+    await treeView.reveal(item, {expand:!isExpanded});
+  }
 } 
 
 async function deleteMark(item) {

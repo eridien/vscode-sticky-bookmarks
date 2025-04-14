@@ -1,22 +1,21 @@
 bugs
   junk in keyboard shortcuts menu
-  deleteMark broken
   adding global mark removes symbol from previous mark (waitingSends)
-  add mark to global marks on boot when token in text
 
 todo
+  toggle folder
+  show folder even if no files
+
+  add mark to global marks on boot when token in text
   add names to marks
     don't delete marks so names preserved
     how to remove old marks?
-  toggle folder
-  show folder even if no files
   show codicon by closest mark in sidebar
       no marks in file     -> nothing
       above first bookmark -> triangle-up
       if exact line        -> triangle-right
       below bookmark       -> triangle-down
     triangle-down and triangle-up on adjacent marks if between?
-    what if only one mark in file?
   test moving a project folder
   on folder or file clickexpand/collapse and re-render sidebar
   item click

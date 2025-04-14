@@ -3,6 +3,7 @@ bugs
   closeitem broken
 
 todo
+  show folder even if no files
   show folder with same indentation as file, not expandable
   use darker char for function
   need other chars for non-functions

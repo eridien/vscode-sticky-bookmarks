@@ -34,10 +34,13 @@ async function addTokenToLine(document, line, languageId, token) {
   await vscode.workspace.applyEdit(edit);
 }
 
-function delMark(line, languageId) {
-  let lineText = line.text.trimEnd();
-  lineText = lineText.replaceAll(tokenRegExG, 
-               async (token) => await marks.delGlobalMark(token));
+async function delMark(lineText, languageId) {
+  tokenRegExG.index = 0;
+  for(const tokenMatch of lineText.matchAll(tokenRegExG)) {
+    const token = tokenMatch[0];
+    lineText = lineText.replace(token, '');
+    await marks.delGlobalMark(token)
+  }
   const regx = commRegExG(languageId);
   lineText = lineText.replace(regx, '');
   return lineText.trimEnd();
@@ -54,7 +57,7 @@ async function toggle() {
   const lineText   = line.text.trimEnd();
   const languageId = document.languageId;
   if(tokenRegEx.test(lineText)) {
-    const newLine = delMark(line, languageId);
+    const newLine = await delMark(lineText, languageId);
     await editor.edit(builder => {
       builder.replace(line.range, newLine);
     });
@@ -92,7 +95,7 @@ async function prevNext(fwd) {
     let line = document.lineAt(lineNumber);
     if(tokenRegEx.test(line.text)) {
       const languageId = document.languageId;
-      let lineText = delMark(line, languageId)
+      let lineText = await delMark(line, languageId)
       const begPos = new vscode.Position(lineNumber, 0);
       const endPos = new vscode.Position(lineNumber, lineText.length);
       editor.selection = new vscode.Selection(begPos, endPos);
@@ -127,8 +130,10 @@ async function clearFile(document) {
   const languageId = document.languageId;
   let newFileText  = '';
   for(let i = 0; i < document.lineCount; i++) {
-    const line = document.lineAt(i);
-    newFileText += await delMark(line, languageId) + '\n';
+    let lineText = document.lineAt(i).text.trimEnd();
+    log('line.text', lineText);
+    newFileText += await delMark(lineText, languageId) + '\n';
+    log('newFileText', newFileText);
   }
   const uri  = document.uri;
   const edit = new vscode.WorkspaceEdit();

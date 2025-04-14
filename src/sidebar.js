@@ -106,14 +106,14 @@ function itemClick(item) {
   log('itemClick', item);
 } 
 
-function closeItem(item) {
+async function closeItem(item) {
   log('closeItem', item);
   switch (item.type) {
     case 'folder':     glblFuncs.clearAllFiles(item.folderPath); break;
     case 'file':       glblFuncs.clearFile(item.document);           break;
     default: {
       const line = item.document.lineAt(item.lineNumber);
-      glblFuncs.delMark(line, item.languageId); break;
+      await glblFuncs.delMark(line, item.languageId); break;
     } 
   }
 } 

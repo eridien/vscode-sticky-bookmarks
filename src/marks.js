@@ -3,6 +3,8 @@ const path   = require('path');
 const utils  = require('./utils.js');
 const log    = utils.getLog('mark');
 
+const DEBUG_REMOVE_MARKS_ON_START = false;
+
 let globalMarks;
 let context, glblFuncs;
 let initFinished = false;
@@ -18,7 +20,8 @@ async function init(contextIn, glblFuncsIn) {
     return {};
   }
   // clear globalMarks for testing     DEBUG
-  // await context.workspaceState.update('globalMarks', {}); 
+  if(DEBUG_REMOVE_MARKS_ON_START)
+      await context.workspaceState.update('globalMarks', {}); 
 
   globalMarks = context.workspaceState.get('globalMarks', {});
   for(const [token, mark] of Object.entries(globalMarks)) {
@@ -44,7 +47,7 @@ async function init(contextIn, glblFuncsIn) {
   await context.workspaceState.update('globalMarks', globalMarks);
   log('marks initialized'); 
   initFinished = true;
-  // dumpGlobalMarks('init');
+  dumpGlobalMarks('init');
   return {};
 }
 
@@ -113,7 +116,6 @@ async function delGlobalMark(token) {
   delete globalMarks[token];
   await context.workspaceState.update('globalMarks', globalMarks);
   glblFuncs.updateSidebar();
-  return '';
 }
 
 async function delGlobalMarksForFile(fileRelPath) {

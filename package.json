@@ -41,7 +41,7 @@
         "command": "sticky-bookmarks.itemClick",
         "title":   "Go To Bookmark"
       }, {
-        "command": "sticky-bookmarks.closeItem",
+        "command": "sticky-bookmarks.deleteMark",
         "title":   "✖️"
       }    
     ],
@@ -77,7 +77,7 @@
     },
     "menus": {
       "view/item/context": [{
-          "command": "sticky-bookmarks.closeItem",
+          "command": "sticky-bookmarks.deleteMark",
           "when":    "view == sidebarView",
           "group":   "inline"
         }

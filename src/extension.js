@@ -1,5 +1,5 @@
 const vscode    = require('vscode');
-const token     = require('./token.js');
+const comnd     = require('./commands.js');
 const sidebar   = require('./sidebar.js');
 const label     = require('./label.js');
 const marks     = require('./marks.js');
@@ -10,19 +10,19 @@ async function activate(context) {
   log('activate');
 
 	const toggleCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.toggle',        token.toggle);
+                          'sticky-bookmarks.toggle',        comnd.toggle);
 	const prevCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.prev',          token.prev);
+                          'sticky-bookmarks.prev',          comnd.prev);
 	const nextCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.next',          token.next);
+                          'sticky-bookmarks.next',          comnd.next);
 	const clearFileCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.clearFile',     token.clearFile);
+                          'sticky-bookmarks.clearFile',     comnd.clearFile);
 	const clearAllFilesCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.clearAllFiles', token.clearAllFiles);
+                          'sticky-bookmarks.clearAllFiles', comnd.clearAllFiles);
 	const cleanFileCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.cleanFile',     token.cleanFile);
+                          'sticky-bookmarks.cleanFile',     comnd.cleanFile);
 	const cleanAllFilesCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.cleanAllFiles', token.cleanAllFiles);
+                          'sticky-bookmarks.cleanAllFiles', comnd.cleanAllFiles);
   
   const sidebarProvider = new sidebar.SidebarProvider();
 
@@ -35,7 +35,7 @@ async function activate(context) {
   );
 
   const contextMenuCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.closeItem', (item) => sidebar.closeItem(item)
+    'sticky-bookmarks.deleteMark', (item) => sidebar.deleteMark(item)
   );
 
   context.subscriptions.push(toggleCmd, prevCmd, nextCmd, 
@@ -47,7 +47,7 @@ async function activate(context) {
   Object.assign(glblFuncs, await marks   .init(context, glblFuncs));
   Object.assign(glblFuncs,       utils   .init(context, glblFuncs));
   Object.assign(glblFuncs, await label   .init(context, glblFuncs));
-  Object.assign(glblFuncs,       token   .init(context, glblFuncs));
+  Object.assign(glblFuncs,       comnd   .init(context, glblFuncs));
   Object.assign(glblFuncs, await sidebar .init(context, glblFuncs, sidebarProvider));
 
   treeView.onDidChangeVisibility(async (e) => {

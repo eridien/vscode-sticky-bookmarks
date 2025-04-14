@@ -15,7 +15,8 @@ async function init(contextIn, glblFuncsIn, providerIn) {
 
 async function getItem(mark) {
   const [codicon, label] = await labelm.getLabel(mark);
-  const {id, type, folderPath, folderName,
+  const {id, type, document, lineNumber, languageId,
+         folderPath, folderName,
          fileRelPath, fileFsPath, children} = mark;
   let item;
   if (children) {
@@ -27,7 +28,8 @@ async function getItem(mark) {
     item = new vscode.TreeItem(label, 
             vscode.TreeItemCollapsibleState.None);
   if (codicon) item.iconPath = new vscode.ThemeIcon(codicon);
-  Object.assign(item, {id, type, folderPath, folderName});
+  Object.assign(item, {id, type, document, languageId, lineNumber, 
+                       folderPath, folderName});
   if (fileRelPath) {
     item.fileRelPath = fileRelPath;
     item.fileFsPath  = fileFsPath;
@@ -62,22 +64,23 @@ async function getItemTree() {
   let lastFolderPath = null, lastFileRelPath;
   for(const mark of marksArray) {
     if(mark.folderPath !== lastFolderPath) {
-      const {folderPath} = mark;
+      const {folderPath, document, languageId} = mark;
       lastFolderPath = folderPath;
       const id = utils.fnv1aHash(folderPath);
       const folderName = folderPath.split('/').pop();
       rootItems.push(await getItem(
-                 {type:'folder', folderPath, folderName, id}));
+                 {type:'folder', document, languageId,
+                  folderPath, folderName, id}));
       lastFileRelPath = null;
     }
     if(mark.fileRelPath !== lastFileRelPath) {
-      const {document, folderPath, fileRelPath, fileFsPath} = mark;
+      const {document, languageId, folderPath, fileRelPath, fileFsPath} = mark;
       lastFileRelPath = fileRelPath;
       const id = utils.fnv1aHash(fileFsPath);
       bookmarks = [];
-      rootItems.push(await getItem({document, type:'file', 
-                              folderPath, fileRelPath, fileFsPath,
-                              children:bookmarks, id}));
+      rootItems.push(await getItem({ type:'file', document, languageId,
+                                    folderPath, fileRelPath, fileFsPath,
+                                    children:bookmarks, id}));
     }
     mark.id = mark.token;
     bookmarks.push(await getItem(mark));
@@ -104,16 +107,18 @@ class SidebarProvider {
 
 function itemClick(item) {
   log('itemClick', item);
+
+
 } 
 
-async function closeItem(item) {
-  log('closeItem', item);
+async function deleteMark(item) {
+  log('deleteMark', item);
   switch (item.type) {
     case 'folder':     glblFuncs.clearAllFiles(item.folderPath); break;
-    case 'file':       glblFuncs.clearFile(item.document);           break;
+    case 'file':       glblFuncs.clearFile(item.document);       break;
     default: {
       const line = item.document.lineAt(item.lineNumber);
-      await glblFuncs.delMark(line, item.languageId); break;
+      await glblFuncs.delMark(line.text, item.languageId); break;
     } 
   }
 } 
@@ -138,4 +143,4 @@ async function visibleChange(visible) {
 }
 
 module.exports = { init, SidebarProvider, visibleChange, 
-                   itemClick, closeItem };
+                   itemClick, deleteMark };

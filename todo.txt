@@ -1,13 +1,15 @@
 bugs
   junk in keyboard shortcuts menu
-  closeitem broken
+  deleteMark broken
   adding global mark removes symbol from previous mark (waitingSends)
+  add mark to global marks on boot when token in text
 
 todo
+  add names to marks
+    don't delete marks so names preserved
+    how to remove old marks?
+  toggle folder
   show folder even if no files
-  show folder with same indentation as file, not expandable
-  use darker char for function
-  need other chars for non-functions
   show codicon by closest mark in sidebar
       no marks in file     -> nothing
       above first bookmark -> triangle-up
@@ -15,7 +17,6 @@ todo
       below bookmark       -> triangle-down
     triangle-down and triangle-up on adjacent marks if between?
     what if only one mark in file?
-  remove tokens from text for deleted marks in marks.init
   test moving a project folder
   on folder or file clickexpand/collapse and re-render sidebar
   item click

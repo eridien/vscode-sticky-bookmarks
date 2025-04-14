@@ -43,7 +43,7 @@ async function getItem(mark) {
 class SidebarProvider {
   constructor() {
     this._onDidChangeTreeData = new vscode.EventEmitter();
-    this.onDidChangeTreeData = this._onDidChangeTreeData.event;
+    this.onDidChangeTreeData  = this._onDidChangeTreeData.event;
   }
 
   getTreeItem(element) {
@@ -51,11 +51,10 @@ class SidebarProvider {
   }
 
   async getChildren(item) {
-    const children = (!item) ? await marks.getRootItems() 
-                                 : item.children;
-    return await Promise.all(children.map(
-      mark => getItem(mark))
-    );
+    log('getChildren', item);
+    if(!item) 
+      return await marks.getRootItems();
+      return item.children;
   }
 }
 

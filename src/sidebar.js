@@ -112,13 +112,15 @@ function itemClick(item) {
 } 
 
 async function deleteMark(item) {
-  log('deleteMark', item);
+  log('deleteMark command');
+  const document = item.document;
   switch (item.type) {
     case 'folder':     glblFuncs.clearAllFiles(item.folderPath); break;
-    case 'file':       glblFuncs.clearFile(item.document);       break;
+    case 'file':       glblFuncs.clearFile(document);            break;
     default: {
-      const line = item.document.lineAt(item.lineNumber);
-      await glblFuncs.delMark(line.text, item.languageId); break;
+      const line = document.lineAt(item.lineNumber);
+      await glblFuncs.delMark(document, line, item.languageId);
+      updateSidebar();
     } 
   }
 } 

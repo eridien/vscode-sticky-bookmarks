@@ -116,6 +116,7 @@ async function delGlobalMark(token) {
   delete globalMarks[token];
   await context.workspaceState.update('globalMarks', globalMarks);
   glblFuncs.updateSidebar();
+  dumpGlobalMarks('delGlobalMark');
 }
 
 async function delGlobalMarksForFile(folderPath) {

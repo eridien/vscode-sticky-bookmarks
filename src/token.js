@@ -126,24 +126,21 @@ async function clearFile(document) {
     if (!editor) { log('info', 'No active editor'); return; }
     document = editor.document;
   }
+  const uri = document.uri;
+  await marks.delGlobalMarksForFile(uri.path);
   if(!tokenRegEx.test(document.getText())) return;
   const languageId = document.languageId;
   let newFileText  = '';
   for(let i = 0; i < document.lineCount; i++) {
     let lineText = document.lineAt(i).text.trimEnd();
-    log('line.text', lineText);
     newFileText += await delMark(lineText, languageId) + '\n';
-    log('newFileText', newFileText);
   }
-  const uri  = document.uri;
   const edit = new vscode.WorkspaceEdit();
   edit.replace(uri, new vscode.Range(
       new vscode.Position(0, 0),
       new vscode.Position(document.lineCount, 0)
   ), newFileText);
   await vscode.workspace.applyEdit(edit);
-  const fileRelPath = vscode.workspace.asRelativePath(uri);
-  await marks.delGlobalMarksForFile(fileRelPath);
   marks.dumpGlobalMarks('clearFile');
 }     
 
@@ -154,10 +151,9 @@ async function cleanFile(document) {
     if (!editor) { log('info', 'No active editor'); return; }
     document = editor.document;
   }
+  await marks.delGlobalMarksForFile(document.uri.path);
   if(!tokenRegEx.test(document.getText())) return;
   const languageId   = document.languageId;
-  const fileRelPath = vscode.workspace.asRelativePath(document.uri);
-  await marks.delGlobalMarksForFile(fileRelPath);
   for(let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);
     if(!tokenRegEx.test(line.text)) continue;

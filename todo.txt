@@ -1,6 +1,7 @@
 bugs
   junk in keyboard shortcuts menu
   closeitem broken
+  adding global mark removes symbol from previous mark (waitingSends)
 
 todo
   show folder even if no files

@@ -120,7 +120,6 @@ async function closeItem(item) {
 
 function updateSidebar() {
   provider._onDidChangeTreeData.fire();
-  log('updateSidebar');
 }
 
 let sideBarIsVisible = false;

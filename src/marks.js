@@ -118,13 +118,14 @@ async function delGlobalMark(token) {
   glblFuncs.updateSidebar();
 }
 
-async function delGlobalMarksForFile(fileRelPath) {
+async function delGlobalMarksForFile(folderPath) {
   for(const [token, mark] of Object.entries(globalMarks)) {
+    const fileRelPath = 
+               folderPath.slice( mark.folderPath.length + 1);  
     if(mark.fileRelPath === fileRelPath) delete globalMarks[token];
   }
   await context.workspaceState.update('globalMarks', globalMarks);
   glblFuncs.updateSidebar();
-  log('delGlobalMarksForFile:', fileRelPath);
 }
 
 module.exports = {init, waitForInit, getGlobalMarks, dumpGlobalMarks, 

@@ -28,19 +28,18 @@ async function getNewItem(mark) {
   }
   else 
     item = new vscode.TreeItem(label, 
-            vscode.TreeItemCollapsibleState.None);
+               vscode.TreeItemCollapsibleState.None);
+  Object.assign(item, {id, type, folderPath, folderName});
   if (type == 'folder') {
     if(closedFolders.has(folderPath)) 
       item.iconPath = new vscode.ThemeIcon("chevron-right");
     else 
       item.iconPath = new vscode.ThemeIcon("chevron-down");
   }
-  Object.assign(item, {id, type, document, languageId, lineNumber, 
-                       folderPath, folderName});
-  if (type !== 'folder' && fileRelPath) {
-    item.filePath    = filePath;
-    item.fileRelPath = fileRelPath;
-    item.fileFsPath  = fileFsPath;
+  else {
+    Object.assign(item, {document, languageId, 
+                         filePath, fileRelPath, fileFsPath});
+    if(type == 'bookmark') item.lineNumber = lineNumber;
   }
   item.command = {
     command: 'sticky-bookmarks.itemClick',
@@ -50,11 +49,22 @@ async function getNewItem(mark) {
   return item;
 };
 
+async function addFolderItem(rootItems, folderPath, folderName) {
+  const id = utils.fnv1aHash(folderPath);
+  rootItems.push(await getNewItem({
+                        type:'folder', folderPath, folderName, id}));
+}
+
 async function getItemTree() {
-  log('getItemTree', marks.getGlobalMarks());
+  const folders = vscode.workspace.workspaceFolders;
+  if (!folders) { 
+    log('No folders in workspace'); 
+    itemTree = [];
+    return [];
+  }
+  log('getItemTree');
   const rootItems = [];
   const marksArray = Object.values(marks.getGlobalMarks());
-  if(marksArray.length == 0) return [];
   marksArray.sort((a, b) => {
     if(a.folderIdx > b.folderIdx) return +1;
     if(a.folderIdx < b.folderIdx) return -1;
@@ -71,14 +81,16 @@ async function getItemTree() {
   let bookmarks;
   let lastFolderPath = null, lastFileRelPath;
   for(const mark of marksArray) {
-    if(mark.folderPath !== lastFolderPath) {
-      const {folderPath, document, languageId} = mark;
-      lastFolderPath = folderPath;
-      const id = utils.fnv1aHash(folderPath);
-      const folderName = folderPath.split('/').pop();
-      rootItems.push(await getNewItem(
-                 {type:'folder', document, languageId,
-                  folderPath, folderName, id}));
+    const folderPath = mark.folderPath;
+    if(folderPath !== lastFolderPath) {
+      lastFolderPath = folderPath; 
+      let folder = folders[0];
+      while(folder && folder.uri.path !== folderPath) {
+        await addFolderItem(rootItems, folder.uri.path, folder.name);
+        folder = folders.shift();
+      }
+      await addFolderItem(rootItems, folderPath, folder.name);
+      folders.shift();
       lastFileRelPath = null;
     }
     if(mark.fileRelPath !== lastFileRelPath) {
@@ -117,6 +129,11 @@ async function getItemTree() {
         });
       }
     }
+  }
+  let folder = folders.shift();
+  while(folder) {
+    await addFolderItem(rootItems, folder.uri.path, folder.name);
+    folder = folders.shift();
   }
   itemTree = rootItems;
   return rootItems;

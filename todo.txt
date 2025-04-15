@@ -1,12 +1,14 @@
 bugs
   junk in keyboard shortcuts menu
   adding global mark removes symbol from previous mark (waitingSends)
-  multiple folders broken
-
+  loading is slow
+  triangles don't update
+  too many triangles
+  clicking on marks leaves old highlight
+  removing workspace folder doesn't remove marks
+  
 todo
-  toggle folder
-  show folder even if no files
-
+  remove hashing
   add mark to global marks on boot when token in text
   add names to marks
     don't delete marks so names preserved

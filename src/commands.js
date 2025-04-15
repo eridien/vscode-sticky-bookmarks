@@ -2,7 +2,7 @@ const vscode = require('vscode');
 const marks  = require('./marks.js');
 const sett   = require('./settings.js');
 const utils  = require('./utils.js');
-const log    = utils.getLog('cmds');
+const {log, start, end} = utils.getLog('cmds');
 
 function init() {
   log('token initialized');

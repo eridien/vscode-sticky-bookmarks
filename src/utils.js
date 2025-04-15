@@ -1,8 +1,9 @@
 const vscode = require('vscode');
 const path   = require('path');
-const log    = getLog('util');
+const {log}  = getLog('util');
 
 let context;
+const timers = {};
 
 function init(contextIn) {
   context = contextIn;
@@ -15,7 +16,31 @@ const outputChannel =
 outputChannel.clear();
 outputChannel.show(true);
 
+function timeInSecs(ms) {
+  return (ms / 1000).toFixed(2);
+}
+
 function getLog(module) {
+  const start = function(name) {
+    const startTime = Date.now();
+    timers[name]    = startTime;
+    const line      = `${module}: ${name} started`;
+    outputChannel.appendLine(line);
+    console.log(line);
+  }
+  const end = function(name) {
+    if(!timers[name]) {
+      const line = `${module}: ${name} ended`;
+      outputChannel.appendLine(line);
+      console.log(line);
+      return;
+    }
+    const endTime = Date.now();
+    const duration = endTime - timers[name];
+    const line      = `${module}: ${name} ended, ${timeInSecs(duration)}s`;
+    outputChannel.appendLine(line);
+    console.log(line);
+  }
   const log = function(...args) {
     let errFlag    = false;
     let infoFlag   = false;
@@ -35,7 +60,7 @@ function getLog(module) {
     else        console.log(line);
     if(infoFlag) vscode.window.showInformationMessage(line);
   }
-  return log;
+  return {log, start, end};
 }
 
 async function readDirByRelPath(...fileRelPath) {
@@ -201,7 +226,7 @@ function fnv1aHash(str) {
 }
 
 module.exports = { 
-  init, getLog, getTextFromDoc, fixDriveLetter, sleep, commentsByLang,
+  init, start, end, getLog, getTextFromDoc, fixDriveLetter, sleep, commentsByLang,
   rangeContainsPos, containsRange, containsLocation, locationIsEntireFile, getRangeSize, 
   readTxt, blkIdFromId, tailFromId, readDirByRelPath, pxToNum, numToPx, fnv1aHash,
   containsLocation

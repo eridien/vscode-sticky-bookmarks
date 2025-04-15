@@ -2,7 +2,7 @@ const vscode = require('vscode');
 const marks  = require('./marks.js');
 const labelm = require('./label.js');
 const utils  = require('./utils.js');
-const log    = utils.getLog('side');
+const {log, start, end} = utils.getLog('side');
 
 let glblFuncs, provider, itemTree;
 

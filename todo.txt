@@ -6,8 +6,9 @@ bugs
   too many triangles
   clicking on marks leaves old highlight
   removing workspace folder doesn't remove marks
-  
+
 todo
+  figure out something to do on file item click
   remove hashing
   add mark to global marks on boot when token in text
   add names to marks

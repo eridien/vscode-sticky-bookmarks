@@ -1,6 +1,6 @@
 const vscode   = require('vscode');
 const utils    = require('./utils.js');
-const log      = utils.getLog('labl');
+const {log, start, end} = utils.getLog('labl');
 
 const keywordSetsByLang = {};
 

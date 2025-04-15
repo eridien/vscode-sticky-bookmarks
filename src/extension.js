@@ -4,7 +4,7 @@ const sidebar   = require('./sidebar.js');
 const label     = require('./label.js');
 const marks     = require('./marks.js');
 const utils     = require('./utils.js');
-const log       = utils.getLog('extn');
+const {log, start, end} = utils.getLog('extn');
 
 async function activate(context) {
   log('activate');

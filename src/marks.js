@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const path   = require('path');
 const utils  = require('./utils.js');
-const log    = utils.getLog('mark');
+const {log, start, end} = utils.getLog('mark');
 
 const DEBUG_REMOVE_MARKS_ON_START = false;
 
@@ -10,6 +10,7 @@ let context, glblFuncs;
 let initFinished = false;
 
 async function init(contextIn, glblFuncsIn) { 
+  start('init marks');
   context = contextIn;
   glblFuncs = glblFuncsIn;
   const workspaceFolders = vscode.workspace.workspaceFolders;
@@ -45,9 +46,9 @@ async function init(contextIn, glblFuncsIn) {
     // log('init token:', token);;
   }
   await context.workspaceState.update('globalMarks', globalMarks);
-  log('marks initialized'); 
   initFinished = true;
   dumpGlobalMarks('init');
+  end('init marks');
   return {};
 }
 
@@ -68,9 +69,34 @@ function getGlobalMarks() {
   return globalMarks;
 }
 
-function dumpGlobalMarks(caller, all = false) {
-  if(all) log(caller, 'globalMarks', globalMarks);
-  else    log(caller, 'globalMarks', Object.keys(globalMarks));
+function dumpGlobalMarks(caller, list, dump) {
+  caller = caller + ' marks: ';
+  if(Object.keys(globalMarks).length === 0) {
+    log(caller, '<none>');
+    return; 
+  }
+  if(dump) log(caller, 'globalMarks', globalMarks);
+  else if(list) {
+    let sortedMarks = Object.entries(globalMarks)
+       .sort((a, b) => ( a[1].fileRelPath.localeCompare(b[1].fileRelPath) ||
+                         a[1].lineNumber - b[1].lineNumber));
+    let str = "\n";
+    for(let [token, mark] of sortedMarks) {
+      token = token.replace(/:/g, '').replace(/;/g, '');
+      str += `${token} -> ${mark.fileRelPath} ` +
+             `${mark.lineNumber.toString().padStart(3, ' ')} `+
+             `${mark.languageId.slice(0,3)}\n`;
+    }
+    log(caller, str);
+  }
+  else {
+    let str = "";
+    for(let token of Object.keys(globalMarks)) {
+      token = token.replace(/:/g, '').replace(/;/g, '');
+      str += token + ' ';;
+    }
+    log(caller, str);
+  }
 }
 
 function getRandomToken() {

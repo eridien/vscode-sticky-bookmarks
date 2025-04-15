@@ -4,10 +4,10 @@ const sidebar   = require('./sidebar.js');
 const label     = require('./label.js');
 const marks     = require('./marks.js');
 const utils     = require('./utils.js');
-const {log, start, end} = utils.getLog('extn');
+const {start, end} = utils.getLog('extn');
 
 async function activate(context) {
-  log('activate');
+  start('extension');
 
 	const toggleCmd = vscode.commands.registerCommand(
                           'sticky-bookmarks.toggle',        comnd.toggle);
@@ -50,17 +50,46 @@ async function activate(context) {
   Object.assign(glblFuncs,       comnd   .init(context, glblFuncs));
   Object.assign(glblFuncs, await sidebar .init(context, glblFuncs, sidebarProvider));
 
-  treeView.onDidChangeVisibility(async (e) => {
-    await sidebar.visibleChange(e.visible);
+  treeView.onDidChangeVisibility(async event => {
+    await sidebar.sidebarVisibleChange(event.visible);
   });
 
-  log('activated');
+  vscode.window.onDidChangeVisibleTextEditors(async editors => {
+    console.log('Currently visible editors:', editors);
+    await sidebar.changeVisEditors(editors);
+  });
+
+  vscode.workspace.onDidChangeTextDocument(async event => {
+    const document = event.document;
+    const uri = document.uri;
+    if (uri.scheme !== 'file') { 
+      // ignore virtual/extension docs like output channel write
+      // must use console.log here or we get an infinite loop
+      // console.log('Ignored non-file changeTextDocument', uri.path);
+      return;
+    }
+    await sidebar.changeDocument(document);
+  });
+
+  vscode.window.onDidChangeActiveTextEditor(async editor => {
+    await sidebar.changeEditor(editor);
+  });
+
+  vscode.window.onDidChangeTextEditorSelection(async event => {
+    const editor = event.textEditor;
+    const uri    = editor.document.uri;
+    if (uri.scheme !== 'file') { 
+      // ignore virtual/extension docs like output channel write
+      // must use console.log here or we get an infinite loop
+      // console.log('Ignored non-file changeTextDocument', uri.path);
+      return;
+    }
+    await sidebar.changeSelection(editor);
+  });
+
+  end('extension');
 }
 
-// This method is called when your extension is deactivated
 function deactivate() {}
 
-module.exports = {
-	activate,
-	deactivate
-}
+module.exports = { activate, deactivate }

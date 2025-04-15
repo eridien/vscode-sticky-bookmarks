@@ -31,11 +31,11 @@
         "category": "Sticky Bookmarks"
       }, {
         "command": "sticky-bookmarks.cleanFile",
-        "title": "Clean Marks In File",
+        "title": "Cleanup Marks In File",
         "category": "Sticky Bookmarks"
       }, {
         "command": "sticky-bookmarks.cleanAllFiles",
-        "title": "Clean Marks In All Files",
+        "title": "Cleanup Marks In All Files",
         "category": "Sticky Bookmarks"
       }, {
         "command": "sticky-bookmarks.itemClick",

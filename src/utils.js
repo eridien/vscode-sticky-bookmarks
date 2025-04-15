@@ -7,7 +7,7 @@ const timers = {};
 
 function init(contextIn) {
   context = contextIn;
-  log('utils initialized');
+  // log('utils initialized');
   return {};
 }
 
@@ -226,7 +226,7 @@ function fnv1aHash(str) {
 }
 
 module.exports = { 
-  init, start, end, getLog, getTextFromDoc, fixDriveLetter, sleep, commentsByLang,
+  init, getLog, getTextFromDoc, fixDriveLetter, sleep, commentsByLang,
   rangeContainsPos, containsRange, containsLocation, locationIsEntireFile, getRangeSize, 
   readTxt, blkIdFromId, tailFromId, readDirByRelPath, pxToNum, numToPx, fnv1aHash,
   containsLocation

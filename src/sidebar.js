@@ -2,7 +2,7 @@ const vscode = require('vscode');
 const marks  = require('./marks.js');
 const labelm = require('./label.js');
 const utils  = require('./utils.js');
-const {log, start, end} = utils.getLog('side');
+const {log} = utils.getLog('side');
 
 let glblFuncs, provider, itemTree;
 
@@ -11,7 +11,7 @@ const closedFolders = new Set();
 async function init(contextIn, glblFuncsIn, providerIn) {
   glblFuncs = glblFuncsIn;
   provider  = providerIn;
-  log('sidebar initialized');
+  // log('sidebar initialized');
   return {updateSidebar};
 }
 
@@ -114,20 +114,36 @@ async function getItemTree() {
     const document         = editor.document;
     const editorFilePath   = document.uri.path;
     const editorLine       = editor.selection.active.line;
+    let haveDown  = null;
+    let haveExact = null;
+    let haveUp    = null;
     for(const item of rootItems) {
       if(item.type === 'file' && 
          item.filePath === editorFilePath &&
          !closedFolders.has(item.folderPath)) {
-        item.children.forEach(bookmarkItem => {
+        for (const bookmarkItem of item.children) {
           const markLine = bookmarkItem.lineNumber;
-          if(markLine === editorLine) 
-            bookmarkItem.iconPath = new vscode.ThemeIcon("triangle-right");
-          else if(markLine > editorLine) 
-            bookmarkItem.iconPath = new vscode.ThemeIcon("triangle-up");
-          else if(markLine < editorLine)
-            bookmarkItem.iconPath = new vscode.ThemeIcon("triangle-down");
-        });
+          if(editorLine === markLine) {
+            haveExact = bookmarkItem;
+            break;
+          }
+          else if(editorLine < markLine)  {
+            haveUp = bookmarkItem;
+            break;
+          }
+          else if(editorLine > markLine) {
+            haveDown = bookmarkItem;
+          }
+        }
       }
+    }
+    if(haveExact)
+      haveExact.iconPath = new vscode.ThemeIcon("triangle-right");
+    else {
+      if(haveUp)   
+        haveUp.iconPath = new vscode.ThemeIcon("triangle-up");
+      if(haveDown) 
+        haveDown.iconPath = new vscode.ThemeIcon("triangle-down");
     }
   }
   let folder = folders.shift();
@@ -226,8 +242,8 @@ function updateSidebar(item) {
 let sideBarIsVisible = false;
 let firstVisible     = true;
 
-async function visibleChange(visible) {
-  log('visibleChange', visible);
+async function sidebarVisibleChange(visible) {
+  log('sidebarVisibleChange', visible);
   if(visible && !sideBarIsVisible) {
     if(firstVisible) {
       firstVisible = false;  
@@ -238,5 +254,32 @@ async function visibleChange(visible) {
   sideBarIsVisible = visible;
 }
 
-module.exports = { init, SidebarProvider, visibleChange, 
+async function changeDocument(document) {
+  log('changeDocument', document.uri.path);
+  updateSidebar();
+}
+
+async function changeEditor(editor) {
+  if(!editor || !editor.document) {
+    log('changeEditor, no active editor');
+    return;
+  }
+  log('changeEditor', editor.document.uri.path);
+  updateSidebar();
+}
+async function changeVisEditors(editors) {
+  log('changeVisEditors', editors.length);
+  updateSidebar();
+}
+
+async function changeSelection(editor) {
+  const uri      = editor.document.uri;
+  const position = editor.selection.active;
+  log('changeSelection', uri, position.line);
+  updateSidebar();
+}
+
+module.exports = { init, SidebarProvider, 
+                   sidebarVisibleChange, changeDocument, 
+                   changeEditor, changeVisEditors, changeSelection,
                    itemClick, deleteMark };

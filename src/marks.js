@@ -3,6 +3,7 @@ const path   = require('path');
 const utils  = require('./utils.js');
 const {log, start, end} = utils.getLog('mark');
 
+// const DEBUG_REMOVE_MARKS_ON_START = true;
 const DEBUG_REMOVE_MARKS_ON_START = false;
 
 let globalMarks;
@@ -20,7 +21,6 @@ async function init(contextIn, glblFuncsIn) {
     log('no workspace folders found');
     return {};
   }
-  // clear globalMarks for testing     DEBUG
   if(DEBUG_REMOVE_MARKS_ON_START)
       await context.workspaceState.update('globalMarks', {}); 
 
@@ -47,8 +47,8 @@ async function init(contextIn, glblFuncsIn) {
   }
   await context.workspaceState.update('globalMarks', globalMarks);
   initFinished = true;
-  dumpGlobalMarks('init');
   end('init marks');
+  dumpGlobalMarks('init');
   return {};
 }
 
@@ -72,7 +72,7 @@ function getGlobalMarks() {
 function dumpGlobalMarks(caller, list, dump) {
   caller = caller + ' marks: ';
   if(Object.keys(globalMarks).length === 0) {
-    log(caller, '<none>');
+    log(caller, '<no globalMarks>');
     return; 
   }
   if(dump) log(caller, 'globalMarks', globalMarks);

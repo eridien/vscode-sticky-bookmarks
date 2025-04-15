@@ -2,10 +2,10 @@ const vscode = require('vscode');
 const marks  = require('./marks.js');
 const sett   = require('./settings.js');
 const utils  = require('./utils.js');
-const {log, start, end} = utils.getLog('cmds');
+const {log} = utils.getLog('cmds');
 
 function init() {
-  log('token initialized');
+  // log('commands initialized');
   return {delMark, clearFile, clearAllFiles, cleanFile, cleanAllFiles};
 }
 
@@ -157,7 +157,7 @@ async function cleanFile(document) {
   }
   await marks.delGlobalMarksForFile(document.uri.path);
   if(!tokenRegEx.test(document.getText())) return;
-  const languageId   = document.languageId;
+  const languageId = document.languageId;
   for(let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);
     if(!tokenRegEx.test(line.text)) continue;
@@ -191,7 +191,6 @@ async function runOnAllFiles(func, folderPath) {
     }
     catch(e) {if(e){}};
   }
-  marks.dumpGlobalMarks('runOnAllFiles');
 } 
 
 async function clearAllFiles(folderPath) {

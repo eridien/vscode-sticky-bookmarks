@@ -3,8 +3,12 @@ bugs
   loading is slow
   multiple workspaces hides files & bookmarks
   removing workspace folder doesn't remove marks
+  went crazy adding marks (sticky project)
 
 todo
+  support aborted
+  folder delete X
+  busy indicator, open sidebar on mass operations
   figure out something to do on file item click
   remove hashing
   add mark to global marks on boot when token in text
@@ -18,6 +22,14 @@ todo
   undo?
   try to remove sidebar highlight when selection changes
   
+wild ideas ...
+  automatic bookmarks creation
+  invisible tokens
+
+file types to add
+  plaintext
+  markdown
+
 top of sidebar
   delete all (clearAllFiles on all folders)
   refresh    (cleanAllFiles on all folders)
@@ -35,3 +47,5 @@ settings
 testing
   https://code.visualstudio.com/api/working-with-extensions/testing-extension
 
+npm install -g @vscode/vsce
+vsce package

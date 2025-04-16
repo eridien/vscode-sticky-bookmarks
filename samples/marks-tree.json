@@ -16,7 +16,7 @@
                 "symLineNum": null,
                 "compText": "ws.onmessage=(event)=>{//console.log(\"onmessage:\"+event.data);"
               },
-              "token": ":fa25;"
+              "token": ""
             }
           ],
           [
@@ -32,7 +32,7 @@
                   "symLineNum": 18,
                   "compText": "ws.onmessage=(event)=>{//console.log(\"onmessage:\"+event.data);"
                 },
-                "token": ":ifj0;"
+                "token": ""
               }
             ]
           ],
@@ -48,7 +48,7 @@
                 "symLineNum": null,
                 "compText": "ws.onopen=()=>{console.log(\"opened websocket\");haveSocket=;"
               },
-              "token": ":vtvl;"
+              "token": ""
             }
           ],
           [
@@ -64,7 +64,7 @@
                   "symLineNum": 23,
                   "compText": "ws.onopen=()=>{console.log(\"opened websocket\");haveSocket=;"
                 },
-                "token": ":0s4f;"
+                "token": ""
               },
               {
                 "folderPath": "/c:/Users/mark/apps/test-app",
@@ -76,7 +76,7 @@
                   "symLineNum": 23,
                   "compText": "console.log(\"opened websocket\");haveSocket=;(msg of waitingSends)ws.send(msg);"
                 },
-                "token": ":ssce;"
+                "token": ""
               }
             ]
           ],
@@ -92,7 +92,7 @@
                 "symLineNum": 30,
                 "compText": "console.log(\"websocket closed,tryg open 2 secs\");haveSocket=;"
               },
-              "token": ":kg1z;"
+              "token": ""
             }
           ]
         ]
@@ -113,7 +113,7 @@
                   "symLineNum": 13,
                   "compText": "getToken=()=>{//loginResp=fetch('https://api4.thetvdb.com/v4/login',"
                 },
-                "token": ":tkxt;"
+                "token": ""
               }
             ]
           ]

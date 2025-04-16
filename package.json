@@ -7,6 +7,8 @@
   "engines": { "vscode": "^1.99.0" },
   "categories": [ "Other" ],
   "main": "./src/extension.js",
+  "repository": "https://github.com/eridien/vscode-sticky-bookmarks",
+  "license": "MIT",
   "contributes": {
     "commands": [
       {

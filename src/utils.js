@@ -1,14 +1,96 @@
 const vscode = require('vscode');
 const path   = require('path');
+const fs     = require('fs');
 const {log}  = getLog('util');
 
-let context;
+let context, aborted = false;
+
 const timers = {};
 
 function init(contextIn) {
   context = contextIn;
   // log('utils initialized');
   return {};
+}
+
+function abort() {
+  aborted = true;
+  log('err info', 'Aborted the extension Sticky Bookmarks');
+}
+function isAborted() { return aborted; }
+
+const comsByLang = {};
+
+for(const [langs, comments] of commentsByLangs) {
+  for(const lang of langs) {
+    comsByLang[lang] = comments;
+  }
+}
+function commentsByLang(langId) {return comsByLang[langId] ?? ['//', '']}
+
+
+function logErr(message, event) {
+  log('info err', message);
+  log('err', event.message);
+}
+
+function parseStickyBookmarksJson(data) { 
+
+}
+
+function readProjectFile(filename) {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (!workspaceFolders || workspaceFolders.length === 0) {
+    log('err info', 'No workspace is open.');
+    return;
+  }
+  const folderUri = workspaceFolders[0].uri;
+  const filePath  = path.join(folderUri.fsPath, filename);
+  let contents = null;
+  try {
+    contents = fs.readFile(filePath, 'utf8', (error, data) => {
+      if (error) throw(error);
+    });
+  } catch (error) {
+    logErr(`Failed to read ${filename} in project ${folderUri.path}`, 
+                      error);
+  }
+  return contents;
+}
+
+async function loadStickyBookmarksJson() {
+  const filePath = path.join(context.extensionPath, 'sticky-bookmarks.json');
+  const config = readProjectFile(vscode.Uri.file(filePath);
+  if(config === null) {
+    logErr('Error reading sticky-bookmarks.json, using default', err);
+    const defaultConfig = readDirByRelPath('sticky-bookmarks.json');
+    writeProjectFile('sticky-bookmarks.json', defaultConfig);
+    parseStickyBookmarksJson(defaultConfig);
+  } 
+  else parseStickyBookmarksJson(json);
+}
+
+async function writeProjectFile(fileName) {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (!workspaceFolders || workspaceFolders.length === 0) {
+    log('err info', 'No workspace is open.');
+    abort();
+    return;
+  }
+  const folderUri = workspaceFolders[0].uri;
+  const fileUri   = vscode.Uri.joinPath(folderUri, fileName);
+
+  const encoder = new TextEncoder();
+  const content = encoder.encode('Hello from your extension!');
+
+  try {
+    await vscode.workspace.fs.writeFile(fileUri, content);
+    console.log('File created:', fileUri.fsPath);
+  } catch (err) {
+    log('err info', 'Could not create file', fileName);
+    log('err',  err.message);
+    abort();
+  }
 }
 
 const outputChannel = 
@@ -193,28 +275,6 @@ function pxToNum(px) {
 function numToPx(num) {
   return `${num.toFixed(2)}px`;
 }
-
-const commentsByLangs = [
-  [['python', 'ruby', 'perl', 'shell (bash, zsh, sh)', 'makefile', 'r', 
-    'julia', 'yaml', 'toml', 'elixir', 'nim', 'crystal', 'coffeescript', 
-    'dockerfile', 'gnuplot', 'matlab', 'octave'],
-                                      ['#',  '']],
-  [['haskell', 'lua', 'ada', 'sql'],  ['--', '']],
-  [['matlab', 'tex', 'latex', 'erlang', 'prolog', 'lilypond', 'gap'],
-                                      ['%',  '']],
-  [['ocaml', 'f#', 'pascal', 'delphi', 'sml', 'reasonml', 'mathematica'],
-                                      ['\\(\\*', '\\*\\)']],
-  [['html'],                          ['<!--', '-->']],
-]
-
-const comsByLang = {};
-for(const [langs, comments] of commentsByLangs) {
-  for(const lang of langs) {
-    comsByLang[lang] = comments;
-  }
-}
-
-function commentsByLang(langId) {return comsByLang[langId] ?? ['//', '']}
 
 function fnv1aHash(str) {
   let hash = 2166136261;

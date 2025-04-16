@@ -77,12 +77,12 @@ async function getCompText(document, languageId, lineNumber) {
   return compText.trim().replace(/(\w)(\W)|(\W)(\w)/g, '$1$3 $2$4');
 }
 
-async function getLabel(mark) {
+async function getLabel(mark) {                                                  //
   try {
     const {document, languageId, lineNumber, type} = mark;
-    if(type == 'folder') 
+    if(type == 'folder')
       return '📂 ' + mark.folderName;
-    if(type == 'file') 
+    if(type == 'file')
       return '📄 ' + mark.fileRelPath;
     const compText = await getCompText(document, languageId, lineNumber);
     let label = compText;
@@ -90,7 +90,7 @@ async function getLabel(mark) {
                       'vscode.executeDocumentSymbolProvider', document.uri);
     if (!topSymbols || !topSymbols.length) {
       log('getLabel, No topSymbols found.');
-      if(showLineNumbers) 
+      if(showLineNumbers)
         label = `${(lineNumber+1).toString().padStart(3, ' ')}  `+
                 `${label}`;
       return label;
@@ -105,7 +105,7 @@ async function getLabel(mark) {
       symbols.shift();
       if (!symbols.length) {
         // log('getLabel, No symbol found', document.uri.path);
-        if(showLineNumbers) 
+        if(showLineNumbers)
           label = `${(lineNumber+1).toString().padStart(3, ' ')}  `+
                   `${label}`;
         return label;
@@ -117,11 +117,11 @@ async function getLabel(mark) {
       }
       crumbStr = crumbStr.slice(0, -2);
       crumbStr = crumbSepLft +  crumbStr + crumbSepRgt;
-      if(showLineNumbers) 
+      if(showLineNumbers)
         crumbStr = `${(lineNumber+1).toString().padStart(3, ' ')}  `+
                     `${crumbStr}`;
     }
-    if(showCodeWhenCrumbs && crumbStr.length > 0) 
+    if(showCodeWhenCrumbs && crumbStr.length > 0)
        return crumbStr + compText;
     return crumbStr;
   }
@@ -153,16 +153,16 @@ item.iconPath = { light: lightUri, dark: darkUri };
 
 
 /*
-// const codicons = { 
-//      1: "file",         2: "module",      3: "namespace",  4: "package", 
-//      5: "class",        6: "method",      7: "property",   8: "field", 
-//      9: "constructor", 10: "enum",       11: "interface", 12: "function", 
-//     13: "variable",    14: "constant",   15: "string",    16: "number", 
+// const codicons = {
+//      1: "file",         2: "module",      3: "namespace",  4: "package",
+//      5: "class",        6: "method",      7: "property",   8: "field",
+//      9: "constructor", 10: "enum",       11: "interface", 12: "function",
+//     13: "variable",    14: "constant",   15: "string",    16: "number",
 //     17: "boolean",     18: "array",      19: "object",    20: "key",
-//     21: "null",        22: "enummember", 23: "struct",    24: "event", 
+//     21: "null",        22: "enummember", 23: "struct",    24: "event",
 //     25: "operator",    26: "typeparameter"
 // }
-//
+
 // const unicodeIcons = {
 //   file: "📄",          // U+1F4C4
 //   function: "ƒ ",      // U+0192
@@ -203,8 +203,8 @@ item.iconPath = { light: lightUri, dark: darkUri };
 ⎈ U+2388  Helm Symbol
 
 If you're using SVGs as iconPath, color is respected unless overridden by the theme.
-But if you're using a ThemeIcon, 
-     VS Code handles the coloring and ignores any color in the SVG, 
+But if you're using a ThemeIcon,
+     VS Code handles the coloring and ignores any color in the SVG,
      since ThemeIcons are meant to match the theme's foreground color.
 For TreeItems, SVGs with color will show as-is, unless you're trying to theme them.
 
@@ -212,8 +212,9 @@ codicons:
   triangle-down triangle-up triangle-right triangle-left
   chevron-right play send debug-hint debug-stackframe debug-start star star-full
   circle-large-outline pass-filled globe circle-filled circle-large-filled
-  close-dirty debug-step-into debug-step-out export 
+  close-dirty debug-step-into debug-step-out export
   fold-down fold-up grabber layout-panel
 
 */
+
 

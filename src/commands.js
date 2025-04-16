@@ -24,7 +24,7 @@ function commRegExG(languageId) {
 }
 
 async function addTokenToLine(document, line, languageId, token) {
-  const lineText = line.text.trimEnd(); 
+  const lineText = line.text.trimEnd();
   const padLen = Math.max(sett.getMinCharPos() - lineText.length, 0);
   const [commLft, commRgt] = utils.commentsByLang(languageId);
   const newLine = lineText +
@@ -146,7 +146,7 @@ async function clearFile(document) {
   ), newFileText);
   await vscode.workspace.applyEdit(edit);
   marks.dumpGlobalMarks('clearFile');
-}     
+}
 
 async function cleanFile(document) {
   if(!document) {
@@ -179,7 +179,7 @@ async function runOnAllFiles(func, folderPath) {
     const folders = vscode.workspace.workspaceFolders;
     if (!folders) { log('info', 'No folders in workspace'); return; }
     folder = folders.find(folder => folder.uri.path === folderPath);
-    if(!folder) { log('info', 'Folder not found in workspace'); return; } 
+    if(!folder) { log('info', 'Folder not found in workspace'); return; }
   }
   const pattern  = new vscode.RelativePattern(folder, '**/*');
   const uris     = await vscode.workspace.findFiles(
@@ -187,11 +187,11 @@ async function runOnAllFiles(func, folderPath) {
   for (const uri of uris) {
     try {
       const document = await vscode.workspace.openTextDocument(uri);
-      await func(document); 
+      await func(document);
     }
     catch(e) {if(e){}};
   }
-} 
+}
 
 async function clearAllFiles(folderPath) {
   log('clearAllFiles command called');
@@ -204,5 +204,5 @@ async function cleanAllFiles(folderPath) {
 }
 
 module.exports = { init, toggle, prev, next,
-                   clearFile, clearAllFiles, 
+                   clearFile, clearAllFiles,
                    cleanFile, cleanAllFiles };

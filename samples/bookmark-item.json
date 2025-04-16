@@ -1,5 +1,5 @@
 {
-  "token": ":ghki;",
+  "token": "",
   "document": {
     "uri": {
       "$mid": 1,
@@ -27,5 +27,6 @@
   "fileFsPath": "c:\\Users\\mark\\apps\\test-app\\src\\tvdb.js",
   "folderIdx": 0,
   "folderName": "test-app",
-  "id": ":ghki;"
+  "id": ""
 }
+

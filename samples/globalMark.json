@@ -1,5 +1,5 @@
 {
-  ":tizd;": {
+  "": {
     "uri": {
       "$mid": 1,
       "fsPath": "c:\\Users\\mark\\apps\\test-app\\src\\tvdb.js",
@@ -13,3 +13,4 @@
     "languageId": "javascript"
   }
 }
+

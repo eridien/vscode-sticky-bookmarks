@@ -7,27 +7,29 @@ const timers = {};
 
 function init(contextIn) {
   context = contextIn;
-  // log('utils initialized');
+  log('utils initialized');
   return {};
 }
 
-const comsByLang = {};
+let comsByLang = [];
+function commentsByLang(langId) {
+  return comsByLang[langId] ?? ['//', '']
+}
 
-for(const [langs, comments] of commentsByLangs) {
-  for(const lang of langs) {
-    comsByLang[lang] = comments;
+let keywordsStore = {};
+function keywords() {
+  return keywordsStore;
+}
+
+function installBookmarksJson(config) { 
+  comsByLang = config.commentsByLangs;
+  if(!comsByLang || comsByLang.length == 0) {
+    log('err info', 
+        'No comment settings in sticky-bookmarks.json, aborting');
+    return false;
   }
-}
-function commentsByLang(langId) {return comsByLang[langId] ?? ['//', '']}
-
-
-function logErr(message, event) {
-  log('info err', message);
-  log('err', event.message);
-}
-
-function installBookmarksJson(data) { 
-
+  keywordsStore = config.keywords || {};
+  return true;
 }
 
 async function writeProjectFile(fileName, textData) {
@@ -56,12 +58,12 @@ async function projectFileExists(filename) {
   const fileUri = vscode.Uri.joinPath(folderUri, filename);
   try {
     await vscode.workspace.fs.stat(fileUri);
-    return true; // File exists
+    return true; 
   } catch (err) {
     if (err.code === 'FileNotFound' || err.code === 'ENOENT') {
-      return false; // File does not exist
+      log(`File ${filename} does not exist in the workspace.`);
     }
-    throw err; // Other error
+    return false
   }
 }
 
@@ -80,13 +82,16 @@ async function readProjectFile(filename) {
       }
     });
   } 
-  catch (e) {() => {e}; return null;}
+  catch (e) {
+    () => {e}; 
+    return null;
+  }
   return contents;
 }
 
 async function loadStickyBookmarksJson() {
-  function readDefaultConfig() {
-    const defaultConfig = readDirByRelPath('sticky-bookmarks.json');
+  async function readDefaultConfig() {
+    const defaultConfig = await readDirByRelPath('sticky-bookmarks.json');
     if(defaultConfig === null) {
       log('err info', 'unable to load sticky-bookmarks.json, aborting.');
       return null;
@@ -94,7 +99,7 @@ async function loadStickyBookmarksJson() {
     return defaultConfig;
   }
   if(!projectFileExists('sticky-bookmarks.json')) {
-    const defaultConfig = readDefaultConfig();
+    const defaultConfig = await readDefaultConfig();
     if(defaultConfig === null) return false;
     const writeOk = await writeProjectFile(
                              'sticky-bookmarks.json', defaultConfig);
@@ -102,16 +107,14 @@ async function loadStickyBookmarksJson() {
       log('err info', 
           'Error writing sticky-bookmarks.json, ignoring error.');
     }
-    installBookmarksJson(defaultConfig);
-    return true;
+    return installBookmarksJson(defaultConfig);
   }
-  let fileTxt = readProjectFile('sticky-bookmarks.json');
+  let fileTxt = await readProjectFile('sticky-bookmarks.json');
   if(fileTxt === null) {
-    fileTxt = readDefaultConfig();
+    fileTxt = await readDefaultConfig();
     if(fileTxt === null) return false;
   }
-  installBookmarksJson(fileTxt);
-  return true;
+  return installBookmarksJson(fileTxt);
 }
 
 const outputChannel = 
@@ -164,6 +167,11 @@ function getLog(module) {
     if(infoFlag) vscode.window.showInformationMessage(line);
   }
   return {log, start, end};
+}
+
+function logErr(message, event) {
+  log('info err', message);
+  log('err', event.message);
 }
 
 async function readDirByRelPath(...fileRelPath) {
@@ -305,10 +313,10 @@ function fnv1aHash(str) {
   }
   return hash.toString();
 }
-
+  
 module.exports = { 
-  init, getLog, getTextFromDoc, fixDriveLetter, sleep, commentsByLang,
-  rangeContainsPos, containsRange, containsLocation, locationIsEntireFile, getRangeSize, 
+  init, getLog, getTextFromDoc, fixDriveLetter, sleep, getRangeSize,
+  rangeContainsPos, containsRange, containsLocation, locationIsEntireFile, 
   readTxt, blkIdFromId, tailFromId, readDirByRelPath, pxToNum, numToPx, fnv1aHash,
-  containsLocation, loadStickyBookmarksJson
-};
+  containsLocation, loadStickyBookmarksJson, commentsByLang, keywords
+}

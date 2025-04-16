@@ -21,7 +21,7 @@
                                         ["%",  ""]],
     [["ocaml", "f#", "pascal", "delphi", "sml", "reasonml", "mathematica"],
                                         ["\\(\\*", "\\*\\)"]],
-    [["html", "markdown"],              ["<!--", "-->"]],
+    [["html", "markdown"],              ["<!--", "-->"]]
   ],
 
   "c31": "Keywords, also by vscode language codes",

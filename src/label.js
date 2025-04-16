@@ -13,9 +13,8 @@ const lineSep         = ' ••';
 const keywordSetsByLang = {};
 
 async function init() {
-  const text = await utils.readTxt(true, 'keywords.json');
-  const json = JSON.parse(text);
-  for(const [lang, keywords] of Object.entries(json)) {
+  const keywordsIn = utils.keywords();
+  for(const [lang, keywords] of Object.entries(keywordsIn)) {
     const set = new Set(keywords);
     keywordSetsByLang[lang] = set;
   }

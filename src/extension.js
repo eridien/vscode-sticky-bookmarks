@@ -19,7 +19,7 @@ async function activate(context) {
   Object.assign(glblFuncs,       comnd   .init(context, glblFuncs));
   Object.assign(glblFuncs, await sidebar .init(
                               glblFuncs, sidebarProvider, treeView));
-  }
+  
 	const toggleCmd = vscode.commands.registerCommand(
                           'sticky-bookmarks.toggle',        comnd.toggle);
 	const prevCmd = vscode.commands.registerCommand(

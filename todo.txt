@@ -1,9 +1,6 @@
 bugs
   junk in keyboard shortcuts menu
-  adding global mark removes symbol from previous mark (waitingSends)
   loading is slow
-  triangles don't update
-  too many triangles
   clicking on marks leaves old highlight
   removing workspace folder doesn't remove marks
 

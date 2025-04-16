@@ -2,8 +2,9 @@ const vscode   = require('vscode');
 const utils    = require('./utils.js');
 const {log} = utils.getLog('labl');
 
-const showLineNumbers = false;
-const showBreadCrumbs = false;
+const showLineNumbers    = true;
+const showBreadCrumbs    = true;
+const showCodeWhenCrumbs = false;
 
 const crumbSepLft     = '● ';
 const crumbSepRgt     = ' ● ';
@@ -90,37 +91,39 @@ async function getLabel(mark) {
     if (!topSymbols || !topSymbols.length) {
       log('getLabel, No topSymbols found.');
       if(showLineNumbers) 
-        label = `${lineNumber.toString().padStart(3, ' ')}  `+
+        label = `${(lineNumber+1).toString().padStart(3, ' ')}  `+
                 `${label}`;
       return label;
     }
-    const symbols = [{children: topSymbols}];
-    const lineLen = document.lineAt(lineNumber).text.length;
-    const pos = new vscode.Position(
-                      lineNumber, Math.max(lineLen-1, 0));
-    getSymbols(pos, symbols);
-    symbols.shift();
-    if (!symbols.length) {
-      // log('getLabel, No symbol found', document.uri.path);
-      if(showLineNumbers) 
-        label = `${lineNumber.toString().padStart(3, ' ')}  `+
-                `${label}`;
-      return label;
-    }
-    symbols.reverse();
-    // remove dupes?  todo
     let crumbStr = '';
     if(showBreadCrumbs) {
+      const symbols = [{children: topSymbols}];
+      const lineLen = document.lineAt(lineNumber).text.length;
+      const pos = new vscode.Position(
+                        lineNumber, Math.max(lineLen-1, 0));
+      getSymbols(pos, symbols);
+      symbols.shift();
+      if (!symbols.length) {
+        // log('getLabel, No symbol found', document.uri.path);
+        if(showLineNumbers) 
+          label = `${(lineNumber+1).toString().padStart(3, ' ')}  `+
+                  `${label}`;
+        return label;
+      }
+      symbols.reverse();
+      // remove dupes?  todo
       for(const sym of symbols) {
         crumbStr = `${sym.name}/${crumbStr}`;
       }
       crumbStr = crumbStr.slice(0, -1);
       crumbStr = crumbSepLft +  crumbStr + crumbSepRgt;
+      if(showLineNumbers) 
+        crumbStr = `${(lineNumber+1).toString().padStart(3, ' ')}  `+
+                    `${crumbStr}`;
     }
-    if(showLineNumbers) 
-      crumbStr = `${lineNumber.toString().padStart(3, ' ')}  `+
-                   `${crumbStr}`;
-    return crumbStr +  compText;
+    if(showCodeWhenCrumbs && crumbStr.length > 0) 
+       return crumbStr + compText;
+    return crumbStr;
   }
   catch (error) {
     log('err', 'getLabel error:', error.message);

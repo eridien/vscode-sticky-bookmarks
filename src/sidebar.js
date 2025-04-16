@@ -6,7 +6,7 @@ const {log} = utils.getLog('side');
 
 const showPointers = true;
 
-let glblFuncs, provider, itemTree;
+let glblFuncs, provider;
 
 const closedFolders = new Set(); 
 
@@ -62,7 +62,6 @@ async function getItemTree() {
   const folders = vscode.workspace.workspaceFolders;
   if (!folders) { 
     log('No folders in workspace'); 
-    itemTree = [];
     return [];
   }
   log('getItemTree', ++itemTreeLogCount);
@@ -157,7 +156,6 @@ async function getItemTree() {
     await addFolderItem(rootItems, folder.uri.path, folder.name);
     folder = folders.shift();
   }
-  itemTree = rootItems;
   return rootItems;
 }
 
@@ -179,50 +177,43 @@ class SidebarProvider {
   }
 }
 
+let decEditor            = null;
+let decDecorationType    = null;
+let decSelectionListener = null;
+let decFocusListener     = null;
+
+const clearDecoration = () => {
+  if(!decEditor) return;
+  decEditor.setDecorations(decDecorationType, []);
+  decDecorationType.dispose();
+  decSelectionListener.dispose();
+  decFocusListener.dispose();
+  decEditor = null;
+  updateSidebar();
+};
+
 async function itemClick(item) {
+  clearDecoration();
   // log('itemClick');
-  if(item.type === 'folder') {
-    const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
-    if(folderItem) {
-      if(closedFolders.has(folderItem.folderPath)) 
-         closedFolders.delete(folderItem.folderPath);
-      else 
-         closedFolders.add(folderItem.folderPath);
-      updateSidebar();
-    }
-    return;
-  }
   if(item.type === 'bookmark') {
-    const doc        = await vscode.workspace.openTextDocument(item.document.uri);
-    const editor     = await vscode.window.showTextDocument(doc, {preview: false});
+    const doc = await vscode.workspace.openTextDocument(item.document.uri);
+    decEditor = await vscode.window.showTextDocument(doc, {preview: false});
     const lineRange  = doc.lineAt(item.lineNumber).range;
     // editor.selection = new vscode.Selection(lineRange.start, lineRange.start);
-    editor.revealRange(lineRange, vscode.TextEditorRevealType.InCenter);
-    const decorationType = vscode.window.createTextEditorDecorationType({
+    decEditor.revealRange(lineRange, vscode.TextEditorRevealType.InCenter);
+    decDecorationType = vscode.window.createTextEditorDecorationType({
       backgroundColor: new vscode.ThemeColor('editor.selectionHighlightBackground'), 
       // or use a custom color like 'rgba(255, 200, 0, 0.2)'
       isWholeLine: true,
     });
-    editor.setDecorations(decorationType, [lineRange]);
-    const disposable = vscode.window.onDidChangeTextEditorSelection(event => {
-      if (event.textEditor === editor) {
-        editor.setDecorations(decorationType, []);
-        decorationType.dispose();
-        disposable.dispose(); 
-      }
+    decEditor.setDecorations(decDecorationType, [lineRange]);
+    decSelectionListener = vscode.window.onDidChangeTextEditorSelection(event => {
+      if (event.textEditor === decEditor) clearDecoration();
     });
-    const clearDecoration = () => {
-      editor.setDecorations(decorationType, []);
-      decorationType.dispose();
-      selectionListener.dispose();
-      focusListener.dispose();
-    };
-    const selectionListener = vscode.window.onDidChangeTextEditorSelection(event => {
-      if (event.textEditor === editor) clearDecoration();
-    });
-    const focusListener = vscode.window.onDidChangeActiveTextEditor(activeEditor => {
-      if (activeEditor !== editor) clearDecoration();
+    decFocusListener = vscode.window.onDidChangeActiveTextEditor(activeEditor => {
+      if (activeEditor !== decEditor) clearDecoration();
     }); 
+    // updateSidebar();
     return;
   }
 } 
@@ -260,7 +251,7 @@ async function sidebarVisibleChange(visible) {
   sideBarIsVisible = visible;
 }
 
-async function changeDocument(document) {
+async function changeDocument() {
   // log('changeDocument', document.uri.path);
   updateSidebar();
 }
@@ -273,14 +264,14 @@ async function changeEditor(editor) {
   // log('changeEditor', editor.document.uri.path);
   updateSidebar();
 }
-async function changeVisEditors(editors) {
+async function changeVisEditors() {
   // log('changeVisEditors', editors.length);
   updateSidebar();
 }
 
-async function changeSelection(editor) {
-  const uri      = editor.document.uri;
-  const position = editor.selection.active;
+async function changeSelection() {
+  // const uri      = editor.document.uri;
+  // const position = editor.selection.active;
   // log('changeSelection', uri, position.line);
   updateSidebar();
 }

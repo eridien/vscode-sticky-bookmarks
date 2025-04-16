@@ -113,9 +113,9 @@ async function getLabel(mark) {
       symbols.reverse();
       // remove dupes?  todo
       for(const sym of symbols) {
-        crumbStr = `${sym.name}/${crumbStr}`;
+        crumbStr = `${sym.name} > ${crumbStr}`;
       }
-      crumbStr = crumbStr.slice(0, -1);
+      crumbStr = crumbStr.slice(0, -2);
       crumbStr = crumbSepLft +  crumbStr + crumbSepRgt;
       if(showLineNumbers) 
         crumbStr = `${(lineNumber+1).toString().padStart(3, ' ')}  `+

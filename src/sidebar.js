@@ -6,13 +6,14 @@ const {log} = utils.getLog('side');
 
 const showPointers = true;
 
-let glblFuncs, provider;
+let glblFuncs, provider, treeView;
 
 const closedFolders = new Set(); 
 
-async function init(contextIn, glblFuncsIn, providerIn) {
+async function init(contextIn, glblFuncsIn, providerIn, treeViewIn) {
   glblFuncs = glblFuncsIn;
   provider  = providerIn;
+  treeView  = treeViewIn;
   // log('sidebar initialized');
   return {updateSidebar};
 }
@@ -190,6 +191,7 @@ const clearDecoration = () => {
   decFocusListener.dispose();
   decEditor = null;
   updateSidebar();
+  treeView.selection = [];
 };
 
 async function itemClick(item) {
@@ -209,13 +211,16 @@ async function itemClick(item) {
     decEditor.setDecorations(decDecorationType, [lineRange]);
     decSelectionListener = vscode.window.onDidChangeTextEditorSelection(event => {
       if (event.textEditor === decEditor) clearDecoration();
+      // updateSidebar();
     });
     decFocusListener = vscode.window.onDidChangeActiveTextEditor(activeEditor => {
       if (activeEditor !== decEditor) clearDecoration();
+      // updateSidebar();
     }); 
     // updateSidebar();
-    return;
+    return
   }
+
 } 
 
 async function deleteMark(item) {
@@ -234,6 +239,7 @@ async function deleteMark(item) {
 
 function updateSidebar(item) {
   provider._onDidChangeTreeData.fire(item);
+  treeView.selection = [];
 }
 
 let sideBarIsVisible = false;

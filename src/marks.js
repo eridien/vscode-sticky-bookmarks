@@ -53,12 +53,13 @@ async function init(contextIn, glblFuncsIn) {
 }
 
 function waitForInit() {
+  if (initFinished) return Promise.resolve();
   return new Promise((resolve) => {
     const checkInit = () => {
       if (initFinished) {
         resolve();
       } else {
-        setTimeout(checkInit, 100);
+        setTimeout(checkInit, 50);
       }
     };
     checkInit();

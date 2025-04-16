@@ -4,6 +4,8 @@ const labelm = require('./label.js');
 const utils  = require('./utils.js');
 const {log} = utils.getLog('side');
 
+const showPointers = true;
+
 let glblFuncs, provider, itemTree;
 
 const closedFolders = new Set(); 
@@ -55,6 +57,7 @@ async function addFolderItem(rootItems, folderPath, folderName) {
                         type:'folder', folderPath, folderName, id}));
 }
 
+let itemTreeLogCount = 0;
 async function getItemTree() {
   const folders = vscode.workspace.workspaceFolders;
   if (!folders) { 
@@ -62,7 +65,7 @@ async function getItemTree() {
     itemTree = [];
     return [];
   }
-  log('getItemTree');
+  log('getItemTree', ++itemTreeLogCount);
   const rootItems = [];
   const marksArray = Object.values(marks.getGlobalMarks());
   marksArray.sort((a, b) => {
@@ -114,36 +117,39 @@ async function getItemTree() {
     const document         = editor.document;
     const editorFilePath   = document.uri.path;
     const editorLine       = editor.selection.active.line;
-    let haveDown  = null;
-    let haveExact = null;
-    let haveUp    = null;
-    for(const item of rootItems) {
-      if(item.type === 'file' && 
-         item.filePath === editorFilePath &&
-         !closedFolders.has(item.folderPath)) {
-        for (const bookmarkItem of item.children) {
-          const markLine = bookmarkItem.lineNumber;
-          if(editorLine === markLine) {
-            haveExact = bookmarkItem;
-            break;
-          }
-          else if(editorLine < markLine)  {
-            haveUp = bookmarkItem;
-            break;
-          }
-          else if(editorLine > markLine) {
-            haveDown = bookmarkItem;
+    if(showPointers) {
+      let haveDown  = null;
+      let haveExact = null;
+      let haveUp    = null;
+      for(const item of rootItems) {
+        if(item.type === 'file' && 
+          item.filePath === editorFilePath &&
+          item.children && item.children.length > 0 &&
+          !closedFolders.has(item.folderPath)) {
+          for (const bookmarkItem of item.children) {
+            const markLine = bookmarkItem.lineNumber;
+            if(editorLine === markLine) {
+              haveExact = bookmarkItem;
+              break;
+            }
+            else if(editorLine < markLine)  {
+              haveUp = bookmarkItem;
+              break;
+            }
+            else if(editorLine > markLine) {
+              haveDown = bookmarkItem;
+            }
           }
         }
       }
-    }
-    if(haveExact)
-      haveExact.iconPath = new vscode.ThemeIcon("triangle-right");
-    else {
-      if(haveUp)   
-        haveUp.iconPath = new vscode.ThemeIcon("triangle-up");
-      if(haveDown) 
-        haveDown.iconPath = new vscode.ThemeIcon("triangle-down");
+      if(haveExact)
+        haveExact.iconPath = new vscode.ThemeIcon("triangle-right");
+      else {
+        if(haveUp)   
+          haveUp.iconPath = new vscode.ThemeIcon("triangle-up");
+        if(haveDown) 
+          haveDown.iconPath = new vscode.ThemeIcon("triangle-down");
+      }
     }
   }
   let folder = folders.shift();
@@ -174,7 +180,7 @@ class SidebarProvider {
 }
 
 async function itemClick(item) {
-  log('itemClick');
+  // log('itemClick');
   if(item.type === 'folder') {
     const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
     if(folderItem) {
@@ -222,7 +228,7 @@ async function itemClick(item) {
 } 
 
 async function deleteMark(item) {
-  log('deleteMark command');
+  // log('deleteMark command');
   const document = item.document;
   switch (item.type) {
     case 'folder':     glblFuncs.clearAllFiles(item.folderPath); break;
@@ -243,7 +249,7 @@ let sideBarIsVisible = false;
 let firstVisible     = true;
 
 async function sidebarVisibleChange(visible) {
-  log('sidebarVisibleChange', visible);
+  // log('sidebarVisibleChange', visible);
   if(visible && !sideBarIsVisible) {
     if(firstVisible) {
       firstVisible = false;  
@@ -255,7 +261,7 @@ async function sidebarVisibleChange(visible) {
 }
 
 async function changeDocument(document) {
-  log('changeDocument', document.uri.path);
+  // log('changeDocument', document.uri.path);
   updateSidebar();
 }
 
@@ -264,18 +270,18 @@ async function changeEditor(editor) {
     log('changeEditor, no active editor');
     return;
   }
-  log('changeEditor', editor.document.uri.path);
+  // log('changeEditor', editor.document.uri.path);
   updateSidebar();
 }
 async function changeVisEditors(editors) {
-  log('changeVisEditors', editors.length);
+  // log('changeVisEditors', editors.length);
   updateSidebar();
 }
 
 async function changeSelection(editor) {
   const uri      = editor.document.uri;
   const position = editor.selection.active;
-  log('changeSelection', uri, position.line);
+  // log('changeSelection', uri, position.line);
   updateSidebar();
 }
 

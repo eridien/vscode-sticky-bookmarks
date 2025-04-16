@@ -2,6 +2,13 @@ const vscode   = require('vscode');
 const utils    = require('./utils.js');
 const {log} = utils.getLog('labl');
 
+const showLineNumbers = false;
+const showBreadCrumbs = false;
+
+const crumbSepLft     = '● ';
+const crumbSepRgt     = ' ● ';
+const lineSep         = ' ••';
+
 const keywordSetsByLang = {};
 
 async function init() {
@@ -61,11 +68,11 @@ async function getCompText(document, languageId, lineNumber) {
     }
     while(lineText.length != lastLen);
 
-    compText += ' ' + lineText;
+    compText += ' ' + lineText + lineSep;
     lineNumber++;
   }
   while(compText.length < 60 && lineNumber < document.lineCount);
-
+  compText = compText.slice(0, -1); // remove last newline
   return compText.trim().replace(/(\w)(\W)|(\W)(\w)/g, '$1$3 $2$4');
 }
 
@@ -82,6 +89,9 @@ async function getLabel(mark) {
                       'vscode.executeDocumentSymbolProvider', document.uri);
     if (!topSymbols || !topSymbols.length) {
       log('getLabel, No topSymbols found.');
+      if(showLineNumbers) 
+        label = `${lineNumber.toString().padStart(3, ' ')}  `+
+                `${label}`;
       return label;
     }
     const symbols = [{children: topSymbols}];
@@ -92,16 +102,25 @@ async function getLabel(mark) {
     symbols.shift();
     if (!symbols.length) {
       // log('getLabel, No symbol found', document.uri.path);
+      if(showLineNumbers) 
+        label = `${lineNumber.toString().padStart(3, ' ')}  `+
+                `${label}`;
       return label;
     }
     symbols.reverse();
     // remove dupes?  todo
-    let symStr = '';
-    for(const sym of symbols) {
-      symStr = `${sym.name}/${symStr}`;
+    let crumbStr = '';
+    if(showBreadCrumbs) {
+      for(const sym of symbols) {
+        crumbStr = `${sym.name}/${crumbStr}`;
+      }
+      crumbStr = crumbStr.slice(0, -1);
+      crumbStr = crumbSepLft +  crumbStr + crumbSepRgt;
     }
-    symStr = symStr.slice(0, -1) + ' ● ' +  compText;
-    return symStr;
+    if(showLineNumbers) 
+      crumbStr = `${lineNumber.toString().padStart(3, ' ')}  `+
+                   `${crumbStr}`;
+    return crumbStr +  compText;
   }
   catch (error) {
     log('err', 'getLabel error:', error.message);
@@ -122,7 +141,13 @@ item.iconPath = new vscode.ThemeIcon("symbol-function"); // or...
 item.iconPath = vscode.Uri.file("/path/to/icon.svg");    // or...
 item.iconPath = { light: lightUri, dark: darkUri };
 
-📄 🔖 ƒ 📂 ✏️ 📦 ❔ ⬚ ⌀ … ❓
+📄 🔖 ƒ 📂 ✏️ 📦 ❔ ⬚ ⌀ … ❓ ↵ ⏎ ␤ • ●
+
+() [] {} <> （） ［］ ｛｝ ＜＞ ⟨⟩ ⌈⌉ ⌊⌋ ⟦⟧ ⟮⟯ ⦃⦄ ⟬⟭ ❲❳ ❴❵ ⧼⧽
+
+↵ ⏎ ␤ ␍␊ ¶ ¬ ︙ ─ │ ═ ║
+
+
 
 /*
 // const codicons = { 

@@ -8,7 +8,18 @@ const {start, end} = utils.getLog('extn');
 
 async function activate(context) {
   start('extension');
-
+  const glblFuncs = {};
+  Object.assign(glblFuncs, utils.init(context, glblFuncs));
+  if(!await utils.loadStickyBookmarksJson()) {
+    end('extension');
+    return;
+  }
+  Object.assign(glblFuncs, await marks   .init(context, glblFuncs));
+  Object.assign(glblFuncs, await label   .init(context, glblFuncs));
+  Object.assign(glblFuncs,       comnd   .init(context, glblFuncs));
+  Object.assign(glblFuncs, await sidebar .init(
+                              glblFuncs, sidebarProvider, treeView));
+  }
 	const toggleCmd = vscode.commands.registerCommand(
                           'sticky-bookmarks.toggle',        comnd.toggle);
 	const prevCmd = vscode.commands.registerCommand(
@@ -42,14 +53,6 @@ async function activate(context) {
                              clearFileCmd, clearAllFilesCmd,
                              cleanFileCmd, cleanAllFilesCmd, 
                              itemClickCmd, contextMenuCmd);
-
-  const glblFuncs = {};
-  Object.assign(glblFuncs, await marks   .init(context, glblFuncs));
-  Object.assign(glblFuncs,       utils   .init(context, glblFuncs));
-  Object.assign(glblFuncs, await label   .init(context, glblFuncs));
-  Object.assign(glblFuncs,       comnd   .init(context, glblFuncs));
-  Object.assign(glblFuncs, await sidebar .init(
-                              glblFuncs, sidebarProvider, treeView));
 
   treeView.onDidChangeVisibility(async event => {
     await sidebar.sidebarVisibleChange(event.visible);

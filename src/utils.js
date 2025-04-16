@@ -3,8 +3,6 @@ const path   = require('path');
 const fs     = require('fs');
 const {log}  = getLog('util');
 
-let context, aborted = false;
-
 const timers = {};
 
 function init(contextIn) {
@@ -12,12 +10,6 @@ function init(contextIn) {
   // log('utils initialized');
   return {};
 }
-
-function abort() {
-  aborted = true;
-  log('err info', 'Aborted the extension Sticky Bookmarks');
-}
-function isAborted() { return aborted; }
 
 const comsByLang = {};
 
@@ -34,63 +26,92 @@ function logErr(message, event) {
   log('err', event.message);
 }
 
-function parseStickyBookmarksJson(data) { 
+function installBookmarksJson(data) { 
 
 }
 
-function readProjectFile(filename) {
+async function writeProjectFile(fileName, textData) {
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders || workspaceFolders.length === 0) {
     log('err info', 'No workspace is open.');
-    return;
+    return false;
   }
+  const folderUri = workspaceFolders[0].uri;
+  const fileUri   = vscode.Uri.joinPath(folderUri, fileName);
+  const encoder   = new TextEncoder();
+  const content   = encoder.encode(textData);
+  try {
+    await vscode.workspace.fs.writeFile(fileUri, content);
+  } catch (err) {
+    logErr('err info', `Error writing ${fileName}.`, err);
+    return false;
+  }
+  return true;
+}
+
+async function projectFileExists(filename) {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (!workspaceFolders || workspaceFolders.length === 0) return false;
+  const folderUri = workspaceFolders[0].uri;
+  const fileUri = vscode.Uri.joinPath(folderUri, filename);
+  try {
+    await vscode.workspace.fs.stat(fileUri);
+    return true; // File exists
+  } catch (err) {
+    if (err.code === 'FileNotFound' || err.code === 'ENOENT') {
+      return false; // File does not exist
+    }
+    throw err; // Other error
+  }
+}
+
+async function readProjectFile(filename) {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
   const folderUri = workspaceFolders[0].uri;
   const filePath  = path.join(folderUri.fsPath, filename);
   let contents = null;
   try {
-    contents = fs.readFile(filePath, 'utf8', (error, data) => {
-      if (error) throw(error);
+    fs.readFile(filePath, 'utf8', (error, data) => {
+      if (error) return null;
+      try {contents = JSON.parse(data)}
+      catch(error) {
+        logErr(`Error parsing ${filename}`, error);
+        return null;
+      }
     });
-  } catch (error) {
-    logErr(`Failed to read ${filename} in project ${folderUri.path}`, 
-                      error);
-  }
+  } 
+  catch (e) {() => {e}; return null;}
   return contents;
 }
 
 async function loadStickyBookmarksJson() {
-  const filePath = path.join(context.extensionPath, 'sticky-bookmarks.json');
-  const config = readProjectFile(vscode.Uri.file(filePath);
-  if(config === null) {
-    logErr('Error reading sticky-bookmarks.json, using default', err);
+  function readDefaultConfig() {
     const defaultConfig = readDirByRelPath('sticky-bookmarks.json');
-    writeProjectFile('sticky-bookmarks.json', defaultConfig);
-    parseStickyBookmarksJson(defaultConfig);
-  } 
-  else parseStickyBookmarksJson(json);
-}
-
-async function writeProjectFile(fileName) {
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-  if (!workspaceFolders || workspaceFolders.length === 0) {
-    log('err info', 'No workspace is open.');
-    abort();
-    return;
+    if(defaultConfig === null) {
+      log('err info', 'unable to load sticky-bookmarks.json, aborting.');
+      return null;
+    }
+    return defaultConfig;
   }
-  const folderUri = workspaceFolders[0].uri;
-  const fileUri   = vscode.Uri.joinPath(folderUri, fileName);
-
-  const encoder = new TextEncoder();
-  const content = encoder.encode('Hello from your extension!');
-
-  try {
-    await vscode.workspace.fs.writeFile(fileUri, content);
-    console.log('File created:', fileUri.fsPath);
-  } catch (err) {
-    log('err info', 'Could not create file', fileName);
-    log('err',  err.message);
-    abort();
+  if(!projectFileExists('sticky-bookmarks.json')) {
+    const defaultConfig = readDefaultConfig();
+    if(defaultConfig === null) return false;
+    const writeOk = await writeProjectFile(
+                             'sticky-bookmarks.json', defaultConfig);
+    if(!writeOk) {
+      log('err info', 
+          'Error writing sticky-bookmarks.json, ignoring error.');
+    }
+    installBookmarksJson(defaultConfig);
+    return true;
   }
+  let fileTxt = readProjectFile('sticky-bookmarks.json');
+  if(fileTxt === null) {
+    fileTxt = readDefaultConfig();
+    if(fileTxt === null) return false;
+  }
+  installBookmarksJson(fileTxt);
+  return true;
 }
 
 const outputChannel = 
@@ -289,5 +310,5 @@ module.exports = {
   init, getLog, getTextFromDoc, fixDriveLetter, sleep, commentsByLang,
   rangeContainsPos, containsRange, containsLocation, locationIsEntireFile, getRangeSize, 
   readTxt, blkIdFromId, tailFromId, readDirByRelPath, pxToNum, numToPx, fnv1aHash,
-  containsLocation
+  containsLocation, loadStickyBookmarksJson
 };

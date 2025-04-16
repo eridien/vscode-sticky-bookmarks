@@ -3,8 +3,6 @@ bugs
   loading is slow
   clicking on marks leaves old highlight
   removing workspace folder doesn't remove marks
-  folder click broken
-  click goes to wrong line (tvdb.js)
 
 todo
   figure out something to do on file item click

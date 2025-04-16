@@ -6,7 +6,7 @@ const {log} = utils.getLog('side');
 
 const showPointers = true;
 
-let glblFuncs, provider, treeView;
+let glblFuncs, provider, treeView, itemTree;
 
 const closedFolders = new Set(); 
 
@@ -157,6 +157,7 @@ async function getItemTree() {
     await addFolderItem(rootItems, folder.uri.path, folder.name);
     folder = folders.shift();
   }
+  itemTree = rootItems;
   return rootItems;
 }
 
@@ -197,11 +198,22 @@ const clearDecoration = () => {
 async function itemClick(item) {
   clearDecoration();
   // log('itemClick');
+  if(item.type === 'folder') {
+    const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
+    if(folderItem) {
+      if(closedFolders.has(folderItem.folderPath)) 
+         closedFolders.delete(folderItem.folderPath);
+      else 
+         closedFolders.add(folderItem.folderPath);
+      updateSidebar();
+    }
+    return;
+  }
   if(item.type === 'bookmark') {
     const doc = await vscode.workspace.openTextDocument(item.document.uri);
     decEditor = await vscode.window.showTextDocument(doc, {preview: false});
     const lineRange  = doc.lineAt(item.lineNumber).range;
-    // editor.selection = new vscode.Selection(lineRange.start, lineRange.start);
+    decEditor.selection = new vscode.Selection(lineRange.start, lineRange.start);
     decEditor.revealRange(lineRange, vscode.TextEditorRevealType.InCenter);
     decDecorationType = vscode.window.createTextEditorDecorationType({
       backgroundColor: new vscode.ThemeColor('editor.selectionHighlightBackground'), 

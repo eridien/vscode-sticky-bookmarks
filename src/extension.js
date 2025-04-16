@@ -14,11 +14,6 @@ async function activate(context) {
     end('extension');
     return;
   }
-  Object.assign(glblFuncs, await marks   .init(context, glblFuncs));
-  Object.assign(glblFuncs, await label   .init(context, glblFuncs));
-  Object.assign(glblFuncs,       comnd   .init(context, glblFuncs));
-  Object.assign(glblFuncs, await sidebar .init(
-                              glblFuncs, sidebarProvider, treeView));
   
 	const toggleCmd = vscode.commands.registerCommand(
                           'sticky-bookmarks.toggle',        comnd.toggle);
@@ -53,6 +48,12 @@ async function activate(context) {
                              clearFileCmd, clearAllFilesCmd,
                              cleanFileCmd, cleanAllFilesCmd, 
                              itemClickCmd, contextMenuCmd);
+
+  Object.assign(glblFuncs, await marks   .init(context, glblFuncs));
+  Object.assign(glblFuncs, await label   .init(context, glblFuncs));
+  Object.assign(glblFuncs,       comnd   .init(context, glblFuncs));
+  Object.assign(glblFuncs, await sidebar .init(
+                              glblFuncs, sidebarProvider, treeView));
 
   treeView.onDidChangeVisibility(async event => {
     await sidebar.sidebarVisibleChange(event.visible);

@@ -60,9 +60,7 @@ async function projectFileExists(filename) {
     await vscode.workspace.fs.stat(fileUri);
     return true; 
   } catch (err) {
-    if (err.code === 'FileNotFound' || err.code === 'ENOENT') {
-      log(`File ${filename} does not exist in the workspace.`);
-    }
+    log(`File ${filename} does not exist in the workspace.`, err);
     return false
   }
 }
@@ -91,7 +89,8 @@ async function readProjectFile(filename) {
 
 async function loadStickyBookmarksJson() {
   async function readDefaultConfig() {
-    const defaultConfig = await readDirByRelPath('sticky-bookmarks.json');
+    const defaultConfig = 
+      (await readExtensionFile('sticky-bookmarks.json')).toString('utf8');
     if(defaultConfig === null) {
       log('err info', 'unable to load sticky-bookmarks.json, aborting.');
       return null;
@@ -114,7 +113,13 @@ async function loadStickyBookmarksJson() {
     fileTxt = await readDefaultConfig();
     if(fileTxt === null) return false;
   }
-  return installBookmarksJson(fileTxt);
+  let contents;
+  try {contents = JSON.parse(fileTxt)}
+  catch(error) {
+    logErr(`Error parsing default sticky-bookmarks.json`, error);
+    return false;
+  }
+  return installBookmarksJson(contents);
 }
 
 const outputChannel = 
@@ -174,17 +179,13 @@ function logErr(message, event) {
   log('err', event.message);
 }
 
-async function readDirByRelPath(...fileRelPath) {
-  const dirPath = path.join(context.extensionPath, ".", ...fileRelPath);
-  const dirUri = vscode.Uri.file(dirPath);
+async function readExtensionFile(filename) {
+  const filePath = path.join(context.extensionPath, ".", filename);
+  const fileUri = vscode.Uri.file(filePath);
   try {
-    const entries = await vscode.workspace.fs.readDirectory(dirUri);
-    const files = entries
-      .filter(([, type]) => type === vscode.FileType.File)
-      .map(([name]) => name);
-    return files;
+    return await vscode.workspace.fs.readFile(fileUri);
   } catch (error) {
-    log('err', "readDirByRelPath Error reading directory:", error.message);
+    log('err', "readExtensionFile Error reading file:", error.message);
     return null;
   }
 }
@@ -317,6 +318,6 @@ function fnv1aHash(str) {
 module.exports = { 
   init, getLog, getTextFromDoc, fixDriveLetter, sleep, getRangeSize,
   rangeContainsPos, containsRange, containsLocation, locationIsEntireFile, 
-  readTxt, blkIdFromId, tailFromId, readDirByRelPath, pxToNum, numToPx, fnv1aHash,
+  readTxt, blkIdFromId, tailFromId, pxToNum, numToPx, fnv1aHash,
   containsLocation, loadStickyBookmarksJson, commentsByLang, keywords
 }

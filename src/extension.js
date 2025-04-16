@@ -49,7 +49,7 @@ async function activate(context) {
   Object.assign(glblFuncs, await label   .init(context, glblFuncs));
   Object.assign(glblFuncs,       comnd   .init(context, glblFuncs));
   Object.assign(glblFuncs, await sidebar .init(
-                              context, glblFuncs, sidebarProvider, treeView));
+                              glblFuncs, sidebarProvider, treeView));
 
   treeView.onDidChangeVisibility(async event => {
     await sidebar.sidebarVisibleChange(event.visible);

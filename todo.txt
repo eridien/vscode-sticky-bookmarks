@@ -1,7 +1,7 @@
 bugs
   junk in keyboard shortcuts menu
   loading is slow
-  clicking on marks leaves old highlight
+  multiple workspaces hides files & bookmarks
   removing workspace folder doesn't remove marks
 
 todo
@@ -9,20 +9,14 @@ todo
   remove hashing
   add mark to global marks on boot when token in text
   add names to marks
+    edit menu
     don't delete marks so names preserved
     how to remove old marks?
-  show codicon by closest mark in sidebar
-      no marks in file     -> nothing
-      above first bookmark -> triangle-up
-      if exact line        -> triangle-right
-      below bookmark       -> triangle-down
-    triangle-down and triangle-up on adjacent marks if between?
+  put refresh menu item on files and folders
   test moving a project folder
-  on folder or file click, expand/collapse and re-render sidebar
-  edit manu
   show marks in gutter
   undo?
-  put refresh menu item on files and folder
+  try to remove sidebar highlight when selection changes
   
 top of sidebar
   delete all (clearAllFiles on all folders)

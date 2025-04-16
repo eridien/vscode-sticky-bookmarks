@@ -181,23 +181,25 @@ class SidebarProvider {
 
 let decEditor            = null;
 let decDecorationType    = null;
-let decSelectionListener = null;
 let decFocusListener     = null;
 
 const clearDecoration = () => {
   if(!decEditor) return;
   decEditor.setDecorations(decDecorationType, []);
   decDecorationType.dispose();
-  decSelectionListener.dispose();
   decFocusListener.dispose();
   decEditor = null;
   updateSidebar();
   treeView.selection = [];
 };
 
+let inItemClick = false;
+
 async function itemClick(item) {
-  clearDecoration();
   // log('itemClick');
+  clearDecoration();
+  inItemClick = true;
+  setTimeout(() => {inItemClick = false}, 100);
   if(item.type === 'folder') {
     const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
     if(folderItem) {
@@ -221,18 +223,14 @@ async function itemClick(item) {
       isWholeLine: true,
     });
     decEditor.setDecorations(decDecorationType, [lineRange]);
-    decSelectionListener = vscode.window.onDidChangeTextEditorSelection(event => {
-      if (event.textEditor === decEditor) clearDecoration();
-      // updateSidebar();
-    });
     decFocusListener = vscode.window.onDidChangeActiveTextEditor(activeEditor => {
       if (activeEditor !== decEditor) clearDecoration();
       // updateSidebar();
+      // treeView.selection = [];
     }); 
     // updateSidebar();
     return
   }
-
 } 
 
 async function deleteMark(item) {
@@ -251,7 +249,7 @@ async function deleteMark(item) {
 
 function updateSidebar(item) {
   provider._onDidChangeTreeData.fire(item);
-  treeView.selection = [];
+  // treeView.selection = [];
 }
 
 let sideBarIsVisible = false;
@@ -265,6 +263,7 @@ async function sidebarVisibleChange(visible) {
       await glblFuncs.cleanAllFiles();
     }
     updateSidebar();
+    // treeView.selection = [];
   }
   sideBarIsVisible = visible;
 }
@@ -272,6 +271,7 @@ async function sidebarVisibleChange(visible) {
 async function changeDocument() {
   // log('changeDocument', document.uri.path);
   updateSidebar();
+  // treeView.selection = [];
 }
 
 async function changeEditor(editor) {
@@ -281,17 +281,22 @@ async function changeEditor(editor) {
   }
   // log('changeEditor', editor.document.uri.path);
   updateSidebar();
+  // treeView.selection = [];
 }
 async function changeVisEditors() {
   // log('changeVisEditors', editors.length);
   updateSidebar();
+  // treeView.selection = [];
 }
 
 async function changeSelection() {
+  log('changeSelection', inItemClick);
   // const uri      = editor.document.uri;
   // const position = editor.selection.active;
   // log('changeSelection', uri, position.line);
   updateSidebar();
+  if(!inItemClick) clearDecoration();
+  treeView.selection = [];
 }
 
 module.exports = { init, SidebarProvider, 

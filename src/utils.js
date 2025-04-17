@@ -81,12 +81,12 @@ async function loadStickyBookmarksJson() {
   start('loadStickyBookmarksJson');
   async function readDefaultConfig() {
     const defaultConfig = 
-      (await readExtensionFile('sticky-bookmarks.json')).toString('utf8');
+                    await readExtensionFile('sticky-bookmarks.json');
     if(defaultConfig === null) {
       log('err info', 'unable to load sticky-bookmarks.json, aborting.');
       return null;
     }
-    return defaultConfig;
+    return defaultConfig.toString('utf8');
   }
   if(await workspaceFileMissing('sticky-bookmarks.json')) {
     log('sticky-bookmarks.json missing, copying default to workspace');
@@ -154,7 +154,7 @@ function getLog(module) {
     const par = args.map(a => 
       typeof a === 'object' ? JSON.stringify(a, null, 2) : a);
     const line = (nomodFlag ? '' : module + ': ') + 
-                 (errFlag    ? ' ERROR, ' : '') + par.join(' ')
+                 (errFlag    ? ' error, ' : '') + par.join(' ')
     outputChannel.appendLine(line);
     if(errFlag) console.error(line);
     else        console.log(line);

@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const path   = require('path');
 const fs     = require('fs');
-const {log}  = getLog('util');
+const {log, start, end}  = getLog('util');
 
 const timers = {};
 
@@ -21,14 +21,22 @@ function keywords() {
   return keywordsStore;
 }
 
-function installBookmarksJson(config) { 
-  comsByLang = config.commentsByLangs;
+function installBookmarksJson(configText) { 
+  let configObj;
+  try {configObj = JSON.parse(configText)}
+  catch(error) {
+    logErr(`Error parsing default sticky-bookmarks.json, aborting`, 
+            error);
+    return false;
+  }
+  comsByLang = configObj.commentsByLangs;
   if(!comsByLang || comsByLang.length == 0) {
     log('err info', 
         'No comment settings in sticky-bookmarks.json, aborting');
     return false;
   }
-  keywordsStore = config.keywords || {};
+  keywordsStore = configObj.keywords || {};
+  end('loadStickyBookmarksJson');
   return true;
 }
 
@@ -60,12 +68,12 @@ async function projectFileExists(filename) {
     await vscode.workspace.fs.stat(fileUri);
     return true; 
   } catch (err) {
-    log(`File ${filename} does not exist in the workspace.`, err);
+    log(`File ${filename} does not exist in the workspace.`);
     return false
   }
 }
 
-async function readProjectFile(filename) {
+async function readWorkspaceFile(filename) {
   const workspaceFolders = vscode.workspace.workspaceFolders;
   const folderUri = workspaceFolders[0].uri;
   const filePath  = path.join(folderUri.fsPath, filename);
@@ -88,6 +96,7 @@ async function readProjectFile(filename) {
 }
 
 async function loadStickyBookmarksJson() {
+  start('loadStickyBookmarksJson');
   async function readDefaultConfig() {
     const defaultConfig = 
       (await readExtensionFile('sticky-bookmarks.json')).toString('utf8');
@@ -97,7 +106,8 @@ async function loadStickyBookmarksJson() {
     }
     return defaultConfig;
   }
-  if(!projectFileExists('sticky-bookmarks.json')) {
+  if(!await projectFileExists('sticky-bookmarks.json')) {
+    log('writing default config');
     const defaultConfig = await readDefaultConfig();
     if(defaultConfig === null) return false;
     const writeOk = await writeProjectFile(
@@ -106,20 +116,19 @@ async function loadStickyBookmarksJson() {
       log('err info', 
           'Error writing sticky-bookmarks.json, ignoring error.');
     }
+    log('installing default config');
     return installBookmarksJson(defaultConfig);
   }
-  let fileTxt = await readProjectFile('sticky-bookmarks.json');
+  let fileTxt = await readWorkspaceFile('sticky-bookmarks.json');
   if(fileTxt === null) {
+    log('can\'t read config file in workspace, using default config');
     fileTxt = await readDefaultConfig();
-    if(fileTxt === null) return false;
+    if(fileTxt === null) {
+      log('error reading config file in extension, aborting');
+      return false;
+    }
   }
-  let contents;
-  try {contents = JSON.parse(fileTxt)}
-  catch(error) {
-    logErr(`Error parsing default sticky-bookmarks.json`, error);
-    return false;
-  }
-  return installBookmarksJson(contents);
+  return installBookmarksJson(fileTxt);
 }
 
 const outputChannel = 

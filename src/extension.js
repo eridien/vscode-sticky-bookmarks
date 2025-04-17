@@ -7,7 +7,7 @@ const utils     = require('./utils.js');
 const {start, end} = utils.getLog('extn');
 
 async function activate(context) {
-  start('extension');
+  start('activating extension');
   const glblFuncs = {};
   Object.assign(glblFuncs, utils.init(context, glblFuncs));
   if(!await utils.loadStickyBookmarksJson()) {
@@ -92,7 +92,7 @@ async function activate(context) {
     await sidebar.changeSelection(editor);
   });
 
-  end('extension');
+  end('activating extension');
 }
 
 function deactivate() {}

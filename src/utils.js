@@ -1,6 +1,6 @@
 const vscode = require('vscode');
 const path   = require('path');
-const fs     = require('fs');
+const fs     = require('fs').promises;
 const {log, start, end}  = getLog('util');
 
 const timers = {};
@@ -30,9 +30,8 @@ function installBookmarksJson(configText) {
     return false;
   }
   comsByLang = configObj.commentsByLangs;
-  if(!comsByLang || comsByLang.length == 0) {
-    log('err info', 
-        'No comment settings in sticky-bookmarks.json, aborting');
+  if(!comsByLang) {
+    log('err info', 'No comment settings in sticky-bookmarks.json, aborting');
     return false;
   }
   keywordsStore = configObj.keywords || {};
@@ -53,24 +52,19 @@ async function writeProjectFile(fileName, textData) {
   try {
     await vscode.workspace.fs.writeFile(fileUri, content);
   } catch (err) {
-    logErr('err info', `Error writing ${fileName}.`, err);
+    logErr(`Error writing ${fileName}.`, err);
     return false;
   }
   return true;
 }
 
-async function projectFileExists(filename) {
+async function workspaceFileMissing(filename) {
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders || workspaceFolders.length === 0) return false;
   const folderUri = workspaceFolders[0].uri;
   const fileUri = vscode.Uri.joinPath(folderUri, filename);
-  try {
-    await vscode.workspace.fs.stat(fileUri);
-    return true; 
-  } catch (err) {
-    log(`File ${filename} does not exist in the workspace.`);
-    return false
-  }
+  try {await vscode.workspace.fs.stat(fileUri); return null} 
+  catch (err) {return err.message}
 }
 
 async function readWorkspaceFile(filename) {
@@ -78,20 +72,8 @@ async function readWorkspaceFile(filename) {
   const folderUri = workspaceFolders[0].uri;
   const filePath  = path.join(folderUri.fsPath, filename);
   let contents = null;
-  try {
-    fs.readFile(filePath, 'utf8', (error, data) => {
-      if (error) return null;
-      try {contents = JSON.parse(data)}
-      catch(error) {
-        logErr(`Error parsing ${filename}`, error);
-        return null;
-      }
-    });
-  } 
-  catch (e) {
-    () => {e}; 
-    return null;
-  }
+  try { contents = await fs.readFile(filePath, 'utf8'); } 
+  catch (error) { logErr(`Error reading file ${filename}`, error);}
   return contents;
 }
 
@@ -106,22 +88,20 @@ async function loadStickyBookmarksJson() {
     }
     return defaultConfig;
   }
-  if(!await projectFileExists('sticky-bookmarks.json')) {
-    log('writing default config');
+  if(await workspaceFileMissing('sticky-bookmarks.json')) {
+    log('sticky-bookmarks.json missing, copying default to workspace');
     const defaultConfig = await readDefaultConfig();
     if(defaultConfig === null) return false;
     const writeOk = await writeProjectFile(
                              'sticky-bookmarks.json', defaultConfig);
-    if(!writeOk) {
-      log('err info', 
-          'Error writing sticky-bookmarks.json, ignoring error.');
-    }
+    if(!writeOk)
+      log('err info', 'Ignoring error and using default config.');
     log('installing default config');
     return installBookmarksJson(defaultConfig);
   }
   let fileTxt = await readWorkspaceFile('sticky-bookmarks.json');
   if(fileTxt === null) {
-    log('can\'t read config file in workspace, using default config');
+    log('Ignoring error and using default config.');
     fileTxt = await readDefaultConfig();
     if(fileTxt === null) {
       log('error reading config file in extension, aborting');

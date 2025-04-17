@@ -16,19 +16,19 @@ async function activate(context) {
   }
   
 	const toggleCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.toggle',        comnd.toggle);
+                          'sticky-bookmarks.togglecmd',        comnd.togglecmd);
 	const prevCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.prev',          comnd.prev);
+                          'sticky-bookmarks.prevcmd',          comnd.prevcmd);
 	const nextCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.next',          comnd.next);
+                          'sticky-bookmarks.nextcmd',          comnd.nextcmd);
 	const clearFileCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.clearFile',     comnd.clearFile);
+                          'sticky-bookmarks.clearFileCmd',     comnd.clearFileCmd);
 	const clearAllFilesCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.clearAllFiles', comnd.clearAllFiles);
+                          'sticky-bookmarks.clearAllFilesCmd', comnd.clearAllFilesCmd);
 	const cleanFileCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.cleanFile',     comnd.cleanFile);
+                          'sticky-bookmarks.cleanFileCmd',     comnd.cleanFileCmd);
 	const cleanAllFilesCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.cleanAllFiles', comnd.cleanAllFiles);
+                          'sticky-bookmarks.cleanAllFilesCmd', comnd.cleanAllFilesCmd);
   
   const sidebarProvider = new sidebar.SidebarProvider();
 
@@ -41,7 +41,7 @@ async function activate(context) {
   );
 
   const contextMenuCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.deleteMark', (item) => sidebar.deleteMark(item)
+    'sticky-bookmarks.deleteMarkCmd', (item) => sidebar.deleteMarkCmd(item)
   );
 
   context.subscriptions.push(toggleCmd, prevCmd, nextCmd, 

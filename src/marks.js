@@ -10,7 +10,7 @@ let globalMarks;
 let context, glblFuncs;
 let initFinished = false;
 
-async function init(contextIn, glblFuncsIn) { 
+async function init(contextIn, glblFuncsIn) {
   start('init marks');
   context = contextIn;
   glblFuncs = glblFuncsIn;
@@ -22,23 +22,23 @@ async function init(contextIn, glblFuncsIn) {
     return {};
   }
   if(DEBUG_REMOVE_MARKS_ON_START)
-      await context.workspaceState.update('globalMarks', {}); 
+      await context.workspaceState.update('globalMarks', {});
 
   globalMarks = context.workspaceState.get('globalMarks', {});
   for(const [token, mark] of Object.entries(globalMarks)) {
     const fileFsPath = mark.document.fileName;
-    const markUri = vscode.Uri.file(path.resolve(fileFsPath)); 
+    const markUri = vscode.Uri.file(path.resolve(fileFsPath));
     const folder  = vscode.workspace.getWorkspaceFolder(markUri);
-    if(!folder) { 
+    if(!folder) {
       delete globalMarks[token];
       continue;
     }
     mark.folderIdx  = folder.index;
     mark.folderName = folder.name;
     mark.fileFsPath = fileFsPath;
-    const document = 
+    const document =
             await vscode.workspace.openTextDocument(markUri);
-    if(!document) { 
+    if(!document) {
       delete globalMarks[token];
       continue;
     }
@@ -74,7 +74,7 @@ function dumpGlobalMarks(caller, list, dump) {
   caller = caller + ' marks: ';
   if(Object.keys(globalMarks).length === 0) {
     log(caller, '<no globalMarks>');
-    return; 
+    return;
   }
   if(dump) log(caller, 'globalMarks', globalMarks);
   else if(list) {
@@ -119,7 +119,7 @@ async function newGlobalMark(document, lineNumber) {
   mark.folderPath  = vscode.workspace
                        .getWorkspaceFolder(document.uri).uri.path;
   mark.filePath   = document.uri.path;
-  mark.fileRelPath = 
+  mark.fileRelPath =
        mark.filePath.slice( mark.folderPath.length + 1);
   mark.languageId  = document.languageId;
   mark.fileFsPath  = document.fileName;
@@ -139,14 +139,14 @@ async function newGlobalMark(document, lineNumber) {
   return token;
 }
 
-async function delGlobalMark(token) {                                            //:lqyf;
+async function delGlobalMark(token) {                                            //
   delete globalMarks[token];
   await context.workspaceState.update('globalMarks', globalMarks);
   glblFuncs.updateSidebar();
   dumpGlobalMarks('delGlobalMark');
 }
 
-async function replaceGlobalMark(oldToken, newToken) {                           //:kz1w;
+async function replaceGlobalMark(oldToken, newToken) {                           //
   globalMarks[newToken] = globalMarks[oldToken];
   delete globalMarks[oldToken];
   globalMarks[newToken].token = newToken;
@@ -156,15 +156,16 @@ async function replaceGlobalMark(oldToken, newToken) {                          
 
 async function delGlobalMarksForFile(folderPath) {
   for(const [token, mark] of Object.entries(globalMarks)) {
-    const fileRelPath = 
-               folderPath.slice( mark.folderPath.length + 1);  
+    const fileRelPath =
+               folderPath.slice( mark.folderPath.length + 1);
     if(mark.fileRelPath === fileRelPath) delete globalMarks[token];
   }
   await context.workspaceState.update('globalMarks', globalMarks);
   glblFuncs.updateSidebar();
 }
 
-module.exports = {init, waitForInit, getGlobalMarks, dumpGlobalMarks, 
+module.exports = {init, waitForInit, getGlobalMarks, dumpGlobalMarks,
                   newGlobalMark, delGlobalMark, replaceGlobalMark,
                   delGlobalMarksForFile}
+
 

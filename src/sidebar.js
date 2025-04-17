@@ -153,7 +153,7 @@ async function getItemTree() {
   }
   let folder = folders.shift();
   while(folder) {
-    await addFolderItem(rootItems, folder.uri.path, folder.name);                      //:v8hv;
+    await addFolderItem(rootItems, folder.uri.path, folder.name);                      //
     folder = folders.shift();
   }
   itemTree = rootItems;
@@ -182,18 +182,9 @@ let decEditor            = null;
 let decDecorationType    = null;
 let decFocusListener     = null;
 
-const clearDecoration = () => {
-  if(!decEditor) return;
-  decEditor.setDecorations(decDecorationType, []);
-  decDecorationType.dispose();
-  decFocusListener.dispose();
-  decEditor = null;
-  updateSidebar();
-};
-
 let itemJustClicked = false;
 
-async function itemClick(item) {                                                 // //
+async function itemClick(item) {                                                 //
   // log('itemClick');
   clearDecoration();
   itemJustClicked = true;
@@ -252,20 +243,6 @@ async function itemClick(item) {                                                
   }
 }
 
-async function deleteMark(item) {
-  // log('deleteMark command');
-  const document = item.document;
-  switch (item.type) {
-    case 'folder':     glblFuncs.clearAllFiles(item.folderPath); break;
-    case 'file':       glblFuncs.clearFile(document);            break;
-    default: {
-      const line = document.lineAt(item.lineNumber);
-      await glblFuncs.delMark(document, line, item.languageId);
-      updateSidebar();
-    }
-  }
-}
-
 function updateSidebar(item) {
   provider._onDidChangeTreeData.fire(item);
 }
@@ -278,7 +255,7 @@ async function sidebarVisibleChange(visible) {
   if(visible && !sideBarIsVisible) {
     if(firstVisible) {
       firstVisible = false;
-      await glblFuncs.cleanAllFiles();
+      await glblFuncs.cleanAllFilesCmd();
     }
     updateSidebar();
   }
@@ -316,5 +293,6 @@ async function changeSelection() {
 module.exports = { init, SidebarProvider,
                    sidebarVisibleChange, changeDocument,
                    changeEditor, changeVisEditors, changeSelection,
-                   itemClick, deleteMark };
+                   itemClick, deleteMarkCmd };
+
 

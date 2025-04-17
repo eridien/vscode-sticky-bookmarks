@@ -1,9 +1,29 @@
-
-run npm run lint" to find missing awaits
+why gen2
+  sticky
+  smart sidebar
+    line numbers
+    breadcrumbs
+    compressed code
+  auto bookmark suggestions
 
 TOKENS IN TEXT ARE GODS
-  
-
+  clean all files -- refresh menu on sidebar top
+    1 repair duplicate tokens, names have priority
+    2 align tokens
+    3 remove multiple tokens from same line
+        clean trailing empty comments and whitespace
+    4 remove global marks with no tokens
+        keeping names & suggestions
+        only delete named tokens when X menu used
+  implementation
+    scan all files with tokens in text or in global marks
+    regex search in file
+      store all marks to later use logic
+        remember all marks with locs
+        note non-aligned
+      choose multiples to keep
+      choose duplicates to rename
+      find global marks to delete
 
 bugs
   junk in keyboard shortcuts menu
@@ -11,40 +31,45 @@ bugs
   multiple workspaces hides files & bookmarks
   removing workspace folder doesn't remove marks
   went crazy adding marks (sticky project)
-    don't add if one exists, just use existing
 
 todo
+  check tokens on every edit
+  automatic suggestions based on visits
+    count visits in each symbol block
+    show in sidebar with question mark
+    click on sidebar to accept and create bookmark
+    limit suggestions (setting)
   throttle updateSidebar
-  should updateSidebar be in marks.json?
-  support aborted
   folder delete X
-  busy indicator, open sidebar on mass operations
-  figure out something to do on file item click
+  busy indicator
+  open sidebar on mark creation
+  togglecmd collapsed on file item click
   remove hashing
   add mark to global marks on boot when token in text
   add names to marks
     edit menu
     don't delete marks so names preserved
-    how to remove old marks?
+    remove old marks on x menu delete
   put refresh menu item on files and folders
   test moving a project folder
   show marks in gutter
   undo?
-  try to remove sidebar highlight when selection changes
   
-wild ideas ...
-  automatic bookmarks creation
+impossible?
   invisible tokens
+  togglecmd collapsed on file item click
+  remove sidebar highlight when selection changes
 
 file types to add
   plaintext
   markdown
 
 top of sidebar
-  delete all (clearAllFiles on all folders)
-  refresh    (cleanAllFiles on all folders)
+  delete all (clearAllFilesCmd on all folders)
+  refresh    (cleanAllFilesCmd on all folders)
 
 settings
+  clean trailing empty comments and whitespace
   open sidebar when adding mark
   min line len
   files to ignore
@@ -53,10 +78,103 @@ settings
   show in gutter
   gutter color
   show in scrollbar
+  open sidebar on mark creation
   scrollbar color
+  max suggestion count
+
+
+############################### NOTES ######################################
 
 testing
   https://code.visualstudio.com/api/working-with-extensions/testing-extension
 
 npm install -g @vscode/vsce
 vsce package
+
+const vscode   = require('vscode');
+const utils    = require('./utils.js');
+const {log} = utils.getLog('labl');
+
+/*
+settings: workbench.colorTheme   auto-detect color scheme
+https://code.visualstudio.com/api/references/icons-in-labels
+"https://github.com/microsoft/vscode-codicons/tree/main/src/icons"
+"https://tabler.io/icons"
+"https://lucide.dev/icons/"
+"https://fontawesome.com/icons"
+
+item.iconPath = new vscode.ThemeIcon("symbol-function"); // or...
+item.iconPath = vscode.Uri.file("/path/to/icon.svg");    // or...
+item.iconPath = { light: lightUri, dark: darkUri };
+
+📄 🔖 ƒ 📂 ✏️ 📦 ❔ ⬚ ⌀ … ❓ ↵ ⏎ ␤ • ●
+
+() [] {} <> （） ［］ ｛｝ ＜＞ ⟨⟩ ⌈⌉ ⌊⌋ ⟦⟧ ⟮⟯ ⦃⦄ ⟬⟭ ❲❳ ❴❵ ⧼⧽
+
+↵ ⏎ ␤ ␍␊ ¶ ¬ ︙ ─ │ ═ ║
+
+/*
+// const codicons = {
+//      1: "file",         2: "module",      3: "namespace",  4: "package",
+//      5: "class",        6: "method",      7: "property",   8: "field",
+//      9: "constructor", 10: "enum",       11: "interface", 12: "function",
+//     13: "variable",    14: "constant",   15: "string",    16: "number",
+//     17: "boolean",     18: "array",      19: "object",    20: "key",
+//     21: "null",        22: "enummember", 23: "struct",    24: "event",
+//     25: "operator",    26: "typeparameter"
+// }
+
+// const unicodeIcons = {
+//   file: "📄",          // U+1F4C4
+//   function: "ƒ ",      // U+0192
+//   method: "🛠️",        // U+1F6E0
+//   variable: "📝",      // U+1F4DD
+//   module: "📦",        // U+1F4E6
+//   package: "📦",       // U+1F4E6
+//   class: "🧱",         // U+1F9F1
+//   constructor: "🏗️",   // U+1F3D7
+//   constant: "🔒",      // U+1F512
+//   string: "🔤",        // U+1F524
+//   number: "🔢",        // U+1F522
+//   boolean: "🔘",       // U+1F518
+//   array: "📚",         // U+1F4DA
+//   object: "🧩",        // U+1F9E9
+//   key: "🔑",           // U+1F511
+//   null: "␀",           // U+2400
+//   event: "📅",         // U+1F4C5
+//   operator: "➕",      // U+2795   ➖ ✖️ ➗
+// };
+
+// function getIconForKind(kind) {
+//   const codicon = codicons[kind];
+//   if(!codicon) return '  ';
+//   const char = unicodeIcons[codicon];
+//   log('getIconForKind', codicon, char);
+//   // return char ?? new vscode.ThemeIcon(codicon);
+//   return char ?? '  ';
+// };
+
+⚙ U+2699  Gear
+⌘ U+2318  Place of Interest Sign (Command)
+∞ U+221E  Infinity
+✳ U+2733  Eight Spoked Asterisk
+☯ U+262F  Yin Yang
+⊕ U+2295  Circled Plus
+⋆ U+22C6  Star Operator
+⎈ U+2388  Helm Symbol
+
+If you're using SVGs as iconPath, color is respected unless overridden by the theme.
+But if you're using a ThemeIcon,
+     VS Code handles the coloring and ignores any color in the SVG,
+     since ThemeIcons are meant to match the theme's foreground color.
+For TreeItems, SVGs with color will show as-is, unless you're trying to theme them.
+
+codicons:
+  triangle-down triangle-up triangle-right triangle-left
+  chevron-right play send debug-hint debug-stackframe debug-start star star-full
+  circle-large-outline pass-filled globe circle-filled circle-large-filled
+  close-dirty debug-step-into debug-step-out export
+  fold-down fold-up grabber layout-panel
+
+
+

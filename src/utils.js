@@ -39,6 +39,11 @@ function installBookmarksJson(configText) {
   return true;
 }
 
+function isKeyWord(languageId, word) {
+  if(!keywordSetsByLang[languageId]) return false;
+  return keywordSetsByLang[languageId].has(word);
+}
+
 async function writeProjectFile(fileName, textData) {
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders || workspaceFolders.length === 0) {

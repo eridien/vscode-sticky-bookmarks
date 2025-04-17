@@ -17,37 +17,37 @@
   "contributes": {
     "commands": [
       {
-        "command": "sticky-bookmarks.toggle",
-        "title": "Toggle Bookmark",
+        "command": "sticky-bookmarks.togglecmd",
+        "title": "ToggleCmd Bookmark",
         "category": "Sticky Bookmarks"
       },
       {
-        "command": "sticky-bookmarks.prev",
+        "command": "sticky-bookmarks.prevcmd",
         "title": "Previous Bookmark",
         "category": "Sticky Bookmarks"
       },
       {
-        "command": "sticky-bookmarks.next",
-        "title": "Next Bookmark",
+        "command": "sticky-bookmarks.nextcmd",
+        "title": "NextCmd Bookmark",
         "category": "Sticky Bookmarks"
       },
       {
-        "command": "sticky-bookmarks.clearFile",
+        "command": "sticky-bookmarks.clearFileCmd",
         "title": "Remove Marks From File",
         "category": "Sticky Bookmarks"
       },
       {
-        "command": "sticky-bookmarks.clearAllFiles",
+        "command": "sticky-bookmarks.clearAllFilesCmd",
         "title": "Remove Marks From All Files",
         "category": "Sticky Bookmarks"
       },
       {
-        "command": "sticky-bookmarks.cleanFile",
+        "command": "sticky-bookmarks.cleanFileCmd",
         "title": "Cleanup Marks In File",
         "category": "Sticky Bookmarks"
       },
       {
-        "command": "sticky-bookmarks.cleanAllFiles",
+        "command": "sticky-bookmarks.cleanAllFilesCmd",
         "title": "Cleanup Marks In All Files",
         "category": "Sticky Bookmarks"
       },
@@ -56,19 +56,19 @@
         "title": "Go To Bookmark"
       },
       {
-        "command": "sticky-bookmarks.deleteMark",
+        "command": "sticky-bookmarks.deleteMarkCmd",
         "title": "✖️"
       }
     ],
     "keybindings": [
       {
-        "command": "sticky-bookmarks.toggle",
+        "command": "sticky-bookmarks.togglecmd",
         "key": "ctrl+shift+alt+/",
         "mac": "cmd+shift+alt+/",
         "when": "editorTextFocus"
       },
       {
-        "command": "sticky-bookmarks.toggle",
+        "command": "sticky-bookmarks.togglecmd",
         "key": "ctrl+shift+alt+/",
         "mac": "cmd+shift+alt+/",
         "when": "editorTextFocus"
@@ -95,7 +95,7 @@
     "menus": {
       "view/item/context": [
         {
-          "command": "sticky-bookmarks.deleteMark",
+          "command": "sticky-bookmarks.deleteMarkCmd",
           "when": "view == sidebarView",
           "group": "inline"
         }

@@ -1,5 +1,9 @@
 
+run npm run lint" to find missing awaits
+
 TOKENS IN TEXT ARE GODS
+  
+
 
 bugs
   junk in keyboard shortcuts menu
@@ -10,6 +14,7 @@ bugs
     don't add if one exists, just use existing
 
 todo
+  throttle updateSidebar
   should updateSidebar be in marks.json?
   support aborted
   folder delete X

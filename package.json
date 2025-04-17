@@ -1,11 +1,16 @@
 {
-  "name":        "sticky-bookmarks",
+  "name": "sticky-bookmarks",
   "displayName": "Sticky Bookmarks",
-  "publisher":   "eridien",
+  "publisher": "eridien",
   "description": "Lock bookmarks to code using inline tokens.",
-  "version":     "0.1.3",
-  "engines": { "vscode": "^1.99.0" },
-  "categories": [ "Other" ],
+  "version": "0.1.3",
+  "type": "commonjs",
+  "engines": {
+    "vscode": "^1.99.0"
+  },
+  "categories": [
+    "Other"
+  ],
   "main": "./src/extension.js",
   "repository": "https://github.com/eridien/vscode-sticky-bookmarks",
   "license": "MIT",
@@ -15,54 +20,63 @@
         "command": "sticky-bookmarks.toggle",
         "title": "Toggle Bookmark",
         "category": "Sticky Bookmarks"
-      }, {
+      },
+      {
         "command": "sticky-bookmarks.prev",
         "title": "Previous Bookmark",
         "category": "Sticky Bookmarks"
-      }, {
+      },
+      {
         "command": "sticky-bookmarks.next",
         "title": "Next Bookmark",
         "category": "Sticky Bookmarks"
-      }, {
+      },
+      {
         "command": "sticky-bookmarks.clearFile",
         "title": "Remove Marks From File",
         "category": "Sticky Bookmarks"
-      }, {
+      },
+      {
         "command": "sticky-bookmarks.clearAllFiles",
         "title": "Remove Marks From All Files",
         "category": "Sticky Bookmarks"
-      }, {
+      },
+      {
         "command": "sticky-bookmarks.cleanFile",
         "title": "Cleanup Marks In File",
         "category": "Sticky Bookmarks"
-      }, {
+      },
+      {
         "command": "sticky-bookmarks.cleanAllFiles",
         "title": "Cleanup Marks In All Files",
         "category": "Sticky Bookmarks"
-      }, {
+      },
+      {
         "command": "sticky-bookmarks.itemClick",
-        "title":   "Go To Bookmark"
-      }, {
+        "title": "Go To Bookmark"
+      },
+      {
         "command": "sticky-bookmarks.deleteMark",
-        "title":   "✖️"
-      }    
+        "title": "✖️"
+      }
     ],
     "keybindings": [
       {
         "command": "sticky-bookmarks.toggle",
         "key": "ctrl+shift+alt+/",
         "mac": "cmd+shift+alt+/",
-        "when": "editorTextFocus" 
+        "when": "editorTextFocus"
       },
       {
         "command": "sticky-bookmarks.toggle",
         "key": "ctrl+shift+alt+/",
         "mac": "cmd+shift+alt+/",
-        "when": "editorTextFocus" 
+        "when": "editorTextFocus"
       }
     ],
     "viewsContainers": {
-      "activitybar": [{
+      "activitybar": [
+        {
           "id": "activityBar",
           "title": "Sticky Bookmarks",
           "icon": "images/activity-icon.png"
@@ -70,33 +84,38 @@
       ]
     },
     "views": {
-      "activityBar": [ {
-          "id":   "sidebarView",
+      "activityBar": [
+        {
+          "id": "sidebarView",
           "name": "Sticky Bookmarks",
           "icon": "images/activity-icon.png"
         }
       ]
     },
     "menus": {
-      "view/item/context": [{
+      "view/item/context": [
+        {
           "command": "sticky-bookmarks.deleteMark",
-          "when":    "view == sidebarView",
-          "group":   "inline"
+          "when": "view == sidebarView",
+          "group": "inline"
         }
-      ] 
+      ]
     }
   },
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint . --config eslint.config.mjs",
     "pretest": "npm run lint",
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.99.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
-    "eslint": "^9.23.0",
+    "@types/vscode": "^1.99.0",
+    "@typescript-eslint/eslint-plugin": "^8.30.1",
+    "@typescript-eslint/parser": "^8.30.1",
     "@vscode/test-cli": "^0.0.10",
-    "@vscode/test-electron": "^2.4.1"
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^9.24.0",
+    "globals": "^13.24.0"
   }
 }

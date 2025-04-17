@@ -1,6 +1,6 @@
 const vscode = require('vscode');
 const utils  = require('./utils.js');
-const {log, start, end} = utils.getLog('sett');
+const {log} = utils.getLog('sett');
 
 let config = null;
 
@@ -45,7 +45,7 @@ vscode.workspace.onDidChangeConfiguration((event) => {
 })
 
 
-let ignorePatternRegexes = [];
+// let ignorePatternRegexes = [];
 
 function parseAndSaveIgnoreFilePatterns(strIn) {
   const partsIn = strIn.split(',').map(part => part.trim());
@@ -62,15 +62,15 @@ function parseAndSaveIgnoreFilePatterns(strIn) {
     }
     ignoreFilePatterns.push(part);
   }
-  ignorePatternRegexes = ignoreFilePatterns.map(pattern => RegExp(pattern));
+  // ignorePatternRegexes = ignoreFilePatterns.map(pattern => RegExp(pattern));
 }
 registerSettingCallback('ignoreFilePatterns', parseAndSaveIgnoreFilePatterns);
 
-// called on activation
-function setIgnoreFilePatterns() {
-  const ignoreFilePatternStr = config.get('ignoreFilePatterns');
-  parseAndSaveIgnoreFilePatterns(ignoreFilePatternStr);
-}
+// // called on activation
+// function setIgnoreFilePatterns() {
+//   const ignoreFilePatternStr = config.get('ignoreFilePatterns');
+//   parseAndSaveIgnoreFilePatterns(ignoreFilePatternStr);
+// }
 
 function getMinCharPos() {
   return 80;

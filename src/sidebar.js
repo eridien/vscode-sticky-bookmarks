@@ -8,7 +8,7 @@ const showPointers = true;
 
 let glblFuncs, provider, treeView, itemTree;
 
-const closedFolders = new Set(); 
+const closedFolders = new Set();
 
 async function init(glblFuncsIn, providerIn, treeViewIn) {
   glblFuncs = glblFuncsIn;
@@ -20,26 +20,26 @@ async function init(glblFuncsIn, providerIn, treeViewIn) {
 async function getNewItem(mark) {
   const label = await labelm.getLabel(mark);
   const {id, type, token, document, lineNumber, languageId,
-         folderPath, folderName, filePath, 
+         folderPath, folderName, filePath,
          fileRelPath, fileFsPath, children} = mark;
   let item;
   if (children) {
-    item = new vscode.TreeItem(label, 
+    item = new vscode.TreeItem(label,
                vscode.TreeItemCollapsibleState.Expanded);
     item.children = children;
   }
-  else 
-    item = new vscode.TreeItem(label, 
+  else
+    item = new vscode.TreeItem(label,
                vscode.TreeItemCollapsibleState.None);
   Object.assign(item, {id, type, folderPath, folderName});
   if (type == 'folder') {
-    if(closedFolders.has(folderPath)) 
+    if(closedFolders.has(folderPath))
       item.iconPath = new vscode.ThemeIcon("chevron-right");
-    else 
+    else
       item.iconPath = new vscode.ThemeIcon("chevron-down");
   }
   else {
-    Object.assign(item, {document, languageId, 
+    Object.assign(item, {document, languageId,
                          filePath, fileRelPath, fileFsPath});
     if(type == 'bookmark') item.lineNumber = lineNumber;
   }
@@ -58,10 +58,10 @@ async function addFolderItem(rootItems, folderPath, folderName) {
 }
 
 let itemTreeLogCount = 0;
-async function getItemTree() {                                                   //:e7bd;
+async function getItemTree() {
   const folders = vscode.workspace.workspaceFolders;
-  if (!folders) { 
-    log('No folders in workspace'); 
+  if (!folders) {
+    log('No folders in workspace');
     return [];
   }
   log('getItemTree', ++itemTreeLogCount);
@@ -70,11 +70,11 @@ async function getItemTree() {                                                  
   marksArray.sort((a, b) => {
     if(a.folderIdx > b.folderIdx) return +1;
     if(a.folderIdx < b.folderIdx) return -1;
-    if(a.folderPath .toLowerCase() > 
+    if(a.folderPath .toLowerCase() >
        b.folderPath .toLowerCase()) return +1;
-    if(a.folderPath .toLowerCase() < 
+    if(a.folderPath .toLowerCase() <
        b.folderPath .toLowerCase()) return -1;
-    if(a.fileRelPath.toLowerCase() > 
+    if(a.fileRelPath.toLowerCase() >
        b.fileRelPath.toLowerCase()) return +1;
     if(a.fileRelPath.toLowerCase() <
        b.fileRelPath.toLowerCase()) return -1;
@@ -85,7 +85,7 @@ async function getItemTree() {                                                  
   for(const mark of marksArray) {
     const folderPath = mark.folderPath;
     if(folderPath !== lastFolderPath) {
-      lastFolderPath = folderPath; 
+      lastFolderPath = folderPath;
       let folder = folders[0];
       while(folder && folder.uri.path !== folderPath) {
         await addFolderItem(rootItems, folder.uri.path, folder.name);
@@ -96,19 +96,19 @@ async function getItemTree() {                                                  
       lastFileRelPath = null;
     }
     if(mark.fileRelPath !== lastFileRelPath) {
-      const {document, languageId, 
-             folderPath, filePath, 
+      const {document, languageId,
+             folderPath, filePath,
              fileRelPath, fileFsPath} = mark;
       lastFileRelPath = fileRelPath;
       const id = utils.fnv1aHash(fileFsPath);
       bookmarks = [];
       if(closedFolders.has(folderPath)) continue;
-      rootItems.push(await getNewItem({ 
+      rootItems.push(await getNewItem({
             type:'file', document, languageId,
             folderPath, filePath, fileRelPath, fileFsPath,
             children:bookmarks, id}));
     }
-    mark.id = mark.token;                                                        //:d4xb;
+    mark.id = mark.token;
     bookmarks.push(await getNewItem(mark));
   }
   const editor = vscode.window.activeTextEditor;
@@ -121,7 +121,7 @@ async function getItemTree() {                                                  
       let haveExact = null;
       let haveUp    = null;
       for(const item of rootItems) {
-        if(item.type === 'file' && 
+        if(item.type === 'file' &&
           item.filePath === editorFilePath &&
           item.children && item.children.length > 0 &&
           !closedFolders.has(item.folderPath)) {
@@ -144,23 +144,23 @@ async function getItemTree() {                                                  
       if(haveExact)
         haveExact.iconPath = new vscode.ThemeIcon("triangle-right");
       else {
-        if(haveUp)   
+        if(haveUp)
           haveUp.iconPath = new vscode.ThemeIcon("triangle-up");
-        if(haveDown) 
+        if(haveDown)
           haveDown.iconPath = new vscode.ThemeIcon("triangle-down");
       }
     }
   }
   let folder = folders.shift();
   while(folder) {
-    await addFolderItem(rootItems, folder.uri.path, folder.name);
+    await addFolderItem(rootItems, folder.uri.path, folder.name);                      //:v8hv;
     folder = folders.shift();
   }
   itemTree = rootItems;
   return rootItems;
 }
 
-class SidebarProvider {                                                          //:y8qt;
+class SidebarProvider {
   constructor() {
     this._onDidChangeTreeData = new vscode.EventEmitter();
     this.onDidChangeTreeData  = this._onDidChangeTreeData.event;
@@ -193,7 +193,7 @@ const clearDecoration = () => {
 
 let itemJustClicked = false;
 
-async function itemClick(item) {                                                 // // //:pmjk;
+async function itemClick(item) {                                                 // //
   // log('itemClick');
   clearDecoration();
   itemJustClicked = true;
@@ -201,36 +201,36 @@ async function itemClick(item) {                                                
   if(item.type === 'folder') {
     const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
     if(folderItem) {
-      if(closedFolders.has(folderItem.folderPath)) 
+      if(closedFolders.has(folderItem.folderPath))
          closedFolders.delete(folderItem.folderPath);
-      else 
+      else
          closedFolders.add(folderItem.folderPath);
       updateSidebar();
     }
     return;
   }
-  if(item.type === 'bookmark') {                                                 //:tmxx;
+  if(item.type === 'bookmark') {
     const doc = await vscode.workspace.openTextDocument(item.document.uri);
     decEditor = await vscode.window.showTextDocument(doc, {preview: false});
     const lineRange  = doc.lineAt(item.lineNumber).range;
     decEditor.selection = new vscode.Selection(lineRange.start, lineRange.start);
     decEditor.revealRange(lineRange, vscode.TextEditorRevealType.InCenter);
     decDecorationType = vscode.window.createTextEditorDecorationType({
-      backgroundColor: new vscode.ThemeColor('editor.selectionHighlightBackground'), 
+      backgroundColor: new vscode.ThemeColor('editor.selectionHighlightBackground'),
       // or use a custom color like 'rgba(255, 200, 0, 0.2)'
       isWholeLine: true,
     });
     decEditor.setDecorations(decDecorationType, [lineRange]);
     decFocusListener = vscode.window.onDidChangeActiveTextEditor(activeEditor => {
       if (activeEditor !== decEditor) clearDecoration();
-    }); 
+    });
     const lineSel = new vscode.Selection(lineRange.start, lineRange.end);
-    const lineText = decEditor.document.getText(lineSel);                        //:c1ew;
-    const tokenMatches = await glblFuncs.getTokensInLine(lineText); 
-    if(tokenMatches.length === 0) { 
+    const lineText = decEditor.document.getText(lineSel);
+    const tokenMatches = await glblFuncs.getTokensInLine(lineText);
+    if(tokenMatches.length === 0) {
       log('itemClick, no token in line', item.lineNumber,
           'of', item.document.uri.path, ', removing GlobalMark', item.token);
-      marks.delGlobalMark(item.token);
+      await marks.delGlobalMark(item.token);
     }
     else {
       while(tokenMatches.length > 1 && tokenMatches[0][0] !== item.token) {
@@ -238,19 +238,19 @@ async function itemClick(item) {                                                
 
         // remove token from line also
 
-        marks.delGlobalMark(foundToken);
+        await marks.delGlobalMark(foundToken);
         tokenMatches.shift();
       }
       const foundToken = tokenMatches[0][0];
       if(foundToken !== item.token) {
         log(`wrong token found in line ${item.lineNumber} of ${item.document.uri.path}, `+
             `found: ${foundToken}, expected: ${item.token}, fixing GlobalMark`);
-        marks.replaceGlobalMark(item.token, foundToken);
+        await marks.replaceGlobalMark(item.token, foundToken);
       }
     }
     return;
   }
-} 
+}
 
 async function deleteMark(item) {
   // log('deleteMark command');
@@ -262,9 +262,9 @@ async function deleteMark(item) {
       const line = document.lineAt(item.lineNumber);
       await glblFuncs.delMark(document, line, item.languageId);
       updateSidebar();
-    } 
+    }
   }
-} 
+}
 
 function updateSidebar(item) {
   provider._onDidChangeTreeData.fire(item);
@@ -277,7 +277,7 @@ async function sidebarVisibleChange(visible) {
   // log('sidebarVisibleChange', visible);
   if(visible && !sideBarIsVisible) {
     if(firstVisible) {
-      firstVisible = false;  
+      firstVisible = false;
       await glblFuncs.cleanAllFiles();
     }
     updateSidebar();
@@ -313,7 +313,8 @@ async function changeSelection() {
   treeView.selection = []; // doesn't work
 }
 
-module.exports = { init, SidebarProvider, 
-                   sidebarVisibleChange, changeDocument, 
+module.exports = { init, SidebarProvider,
+                   sidebarVisibleChange, changeDocument,
                    changeEditor, changeVisEditors, changeSelection,
                    itemClick, deleteMark };
+

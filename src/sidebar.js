@@ -19,7 +19,7 @@ async function init(glblFuncsIn, providerIn, treeViewIn) {
 
 async function getNewItem(mark) {
   const label = await labelm.getLabel(mark);
-  const {id, type, document, lineNumber, languageId,
+  const {id, type, token, document, lineNumber, languageId,
          folderPath, folderName, filePath, 
          fileRelPath, fileFsPath, children} = mark;
   let item;
@@ -46,7 +46,7 @@ async function getNewItem(mark) {
   item.command = {
     command: 'sticky-bookmarks.itemClick',
     title:   'Item Clicked',
-    arguments: [{document, lineNumber, type, id}],
+    arguments: [{document, lineNumber, type, id, token}],
   }
   return item;
 };
@@ -58,7 +58,7 @@ async function addFolderItem(rootItems, folderPath, folderName) {
 }
 
 let itemTreeLogCount = 0;
-async function getItemTree() {
+async function getItemTree() {                                                   //:e7bd;
   const folders = vscode.workspace.workspaceFolders;
   if (!folders) { 
     log('No folders in workspace'); 
@@ -108,7 +108,7 @@ async function getItemTree() {
             folderPath, filePath, fileRelPath, fileFsPath,
             children:bookmarks, id}));
     }
-    mark.id = mark.token;
+    mark.id = mark.token;                                                        //:d4xb;
     bookmarks.push(await getNewItem(mark));
   }
   const editor = vscode.window.activeTextEditor;
@@ -160,7 +160,7 @@ async function getItemTree() {
   return rootItems;
 }
 
-class SidebarProvider {
+class SidebarProvider {                                                          //:y8qt;
   constructor() {
     this._onDidChangeTreeData = new vscode.EventEmitter();
     this.onDidChangeTreeData  = this._onDidChangeTreeData.event;
@@ -193,7 +193,7 @@ const clearDecoration = () => {
 
 let itemJustClicked = false;
 
-async function itemClick(item) {
+async function itemClick(item) {                                                 // // //:pmjk;
   // log('itemClick');
   clearDecoration();
   itemJustClicked = true;
@@ -209,7 +209,7 @@ async function itemClick(item) {
     }
     return;
   }
-  if(item.type === 'bookmark') {
+  if(item.type === 'bookmark') {                                                 //:tmxx;
     const doc = await vscode.workspace.openTextDocument(item.document.uri);
     decEditor = await vscode.window.showTextDocument(doc, {preview: false});
     const lineRange  = doc.lineAt(item.lineNumber).range;
@@ -224,7 +224,31 @@ async function itemClick(item) {
     decFocusListener = vscode.window.onDidChangeActiveTextEditor(activeEditor => {
       if (activeEditor !== decEditor) clearDecoration();
     }); 
-    return
+    const lineSel = new vscode.Selection(lineRange.start, lineRange.end);
+    const lineText = decEditor.document.getText(lineSel);                        //:c1ew;
+    const tokenMatches = await glblFuncs.getTokensInLine(lineText); 
+    if(tokenMatches.length === 0) { 
+      log('itemClick, no token in line', item.lineNumber,
+          'of', item.document.uri.path, ', removing GlobalMark', item.token);
+      marks.delGlobalMark(item.token);
+    }
+    else {
+      while(tokenMatches.length > 1 && tokenMatches[0][0] !== item.token) {
+        const foundToken = tokenMatches[0][0];
+
+        // remove token from line also
+
+        marks.delGlobalMark(foundToken);
+        tokenMatches.shift();
+      }
+      const foundToken = tokenMatches[0][0];
+      if(foundToken !== item.token) {
+        log(`wrong token found in line ${item.lineNumber} of ${item.document.uri.path}, `+
+            `found: ${foundToken}, expected: ${item.token}, fixing GlobalMark`);
+        marks.replaceGlobalMark(item.token, foundToken);
+      }
+    }
+    return;
   }
 } 
 

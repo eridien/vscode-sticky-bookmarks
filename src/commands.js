@@ -6,7 +6,7 @@ const {log} = utils.getLog('cmds');
 
 function init() {
   // log('commands initialized');
-  return {delMark, clearFile, clearAllFiles, cleanFile, cleanAllFiles};
+  return {getTokensInLine, delMark, clearFile, clearAllFiles, cleanFile, cleanAllFiles};
 }
 
 const tokenRegEx  = new RegExp('\\:[0-9a-z]{4};');
@@ -32,6 +32,11 @@ async function addTokenToLine(document, line, languageId, token) {
   const edit = new vscode.WorkspaceEdit();
   edit.replace(document.uri, line.range, newLine);
   await vscode.workspace.applyEdit(edit);
+}
+
+async function getTokensInLine(lineText) {                                         //:qdom;
+  tokenRegExG.index = 0;
+  return [...lineText.matchAll(tokenRegExG)];
 }
 
 async function delMark(document, line, languageId) {

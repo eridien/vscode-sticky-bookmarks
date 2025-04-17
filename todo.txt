@@ -1,11 +1,16 @@
+
+TOKENS IN TEXT ARE GODS
+
 bugs
   junk in keyboard shortcuts menu
   loading is slow
   multiple workspaces hides files & bookmarks
   removing workspace folder doesn't remove marks
   went crazy adding marks (sticky project)
+    don't add if one exists, just use existing
 
 todo
+  should updateSidebar be in marks.json?
   support aborted
   folder delete X
   busy indicator, open sidebar on mass operations
@@ -35,6 +40,7 @@ top of sidebar
   refresh    (cleanAllFiles on all folders)
 
 settings
+  open sidebar when adding mark
   min line len
   files to ignore
   comments by langs

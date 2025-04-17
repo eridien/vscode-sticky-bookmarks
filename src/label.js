@@ -4,7 +4,7 @@ const {log} = utils.getLog('labl');
 
 const showLineNumbers    = true;
 const showBreadCrumbs    = true;
-const showCodeWhenCrumbs = false;
+const showCodeWhenCrumbs = true;
 
 const crumbSepLft     = '● ';
 const crumbSepRgt     = ' ● ';

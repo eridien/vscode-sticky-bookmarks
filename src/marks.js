@@ -139,9 +139,17 @@ async function newGlobalMark(document, lineNumber) {
   return token;
 }
 
-async function delGlobalMark(token) {
+async function delGlobalMark(token) {                                            //:lqyf;
   delete globalMarks[token];
   await context.workspaceState.update('globalMarks', globalMarks);
+  glblFuncs.updateSidebar();
+  dumpGlobalMarks('delGlobalMark');
+}
+
+async function replaceGlobalMark(oldToken, newToken) {                           //:kz1w;
+  globalMarks[newToken] = globalMarks[oldToken];
+  delete globalMarks[oldToken];
+  globalMarks[newToken].token = newToken;
   glblFuncs.updateSidebar();
   dumpGlobalMarks('delGlobalMark');
 }
@@ -157,5 +165,6 @@ async function delGlobalMarksForFile(folderPath) {
 }
 
 module.exports = {init, waitForInit, getGlobalMarks, dumpGlobalMarks, 
-                  newGlobalMark, delGlobalMark, delGlobalMarksForFile}
+                  newGlobalMark, delGlobalMark, replaceGlobalMark,
+                  delGlobalMarksForFile}
 

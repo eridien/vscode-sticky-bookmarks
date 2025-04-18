@@ -14,7 +14,7 @@ function init(glblFuncsIn) {
 
 async function toggleCmd() {
   log('toggle command called');
-  text.toggle();
+  await text.toggle();
 }
 
 async function prevcmd() {
@@ -48,7 +48,7 @@ async function clearFileCmd(document) {
     if (!editor) { log('info', 'No active editor'); return; }
     document = editor.document;
   }
-  text.clearFile(document);
+  await text.clearFile(document);
 }
 
 async function cleanFileCmd(document) {
@@ -58,7 +58,7 @@ async function cleanFileCmd(document) {
     if (!editor) { log('info', 'No active editor'); return; }
     document = editor.document;
   }
-  text.cleanFile(document)
+  await text.cleanFile(document)
 }
 
 async function clearAllFilesCmd(folderPath) {

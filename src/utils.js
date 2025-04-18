@@ -272,13 +272,6 @@ function getRangeSize(range) {
   return range.end.line - range.start.line;
 }
 
-function fixDriveLetter(windowsPath) {
-  const match = /^\/([a-zA-Z]):\/(.*?)$/.exec(windowsPath);
-  if(match) windowsPath = 
-                `/${match[1].toUpperCase()}:/${match[2]}`;
-  return windowsPath;
-}
-
 function blkIdFromId(id) {
   return id.split('-').splice(0, 3).join('-');
 }
@@ -305,7 +298,7 @@ function fnv1aHash(str) {
 }
   
 module.exports = { 
-  init, getLog, getTextFromDoc, fixDriveLetter, sleep, getRangeSize,
+  init, getLog, getTextFromDoc, sleep, getRangeSize,
   rangeContainsPos, containsRange, containsLocation, locationIsEntireFile, 
   readTxt, blkIdFromId, tailFromId, pxToNum, numToPx, fnv1aHash,
   containsLocation, loadStickyBookmarksJson, commentsByLang, keywords

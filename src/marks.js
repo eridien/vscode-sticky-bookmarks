@@ -27,8 +27,8 @@ async function init(contextIn, glblFuncsIn) {
   globalMarks = context.workspaceState.get('globalMarks', {});
   for(const [token, mark] of Object.entries(globalMarks)) {
     const fileFsPath = mark.document.fileName;
-    if(!await utils.fileExists(fileFsPath)) {  
-      log(`file ${fileFsPath} does not exist, removing ${token}`);            //:ta9q;
+    if(!await utils.fileExists(fileFsPath)) {
+      log(`file ${fileFsPath} does not exist, removing ${token}`);
       delete globalMarks[token];
       continue;
     }
@@ -57,7 +57,7 @@ async function init(contextIn, glblFuncsIn) {
   return {};
 }
 
-function waitForInit() {                                               //:bzyw;
+function waitForInit() {
   if (initFinished) return Promise.resolve();
   return new Promise((resolve) => {
     const checkInit = () => {
@@ -144,14 +144,14 @@ async function newGlobalMark(document, lineNumber) {
   return token;
 }
 
-async function delGlobalMark(token) {                                            //
+async function delGlobalMark(token) {                                  //:p17k;
   delete globalMarks[token];
   await context.workspaceState.update('globalMarks', globalMarks);
   glblFuncs.updateSidebar();
   dumpGlobalMarks('delGlobalMark');
 }
 
-async function replaceGlobalMark(oldToken, newToken) {                           //
+async function replaceGlobalMark(oldToken, newToken) {
   globalMarks[newToken] = globalMarks[oldToken];
   delete globalMarks[oldToken];
   globalMarks[newToken].token = newToken;
@@ -172,5 +172,6 @@ async function delGlobalMarksForFile(folderPath) {
 module.exports = {init, waitForInit, getGlobalMarks, dumpGlobalMarks,
                   newGlobalMark, delGlobalMark, replaceGlobalMark,
                   delGlobalMarksForFile}
+
 
 

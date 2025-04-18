@@ -27,8 +27,8 @@ async function nextCmd() {
   await text.scrollToPrevNext(true);
 }
 
-async function deleteMarkCmd(item) {                                                //
-  // log('deleteMarkCmd command');                                                  //:1vyo;
+async function deleteMarkCmd(item) {
+  // log('deleteMarkCmd command');
   const document = item.document;
   switch (item.type) {
     case 'folder': glblFuncs.clearAllFilesCmd(item.folderPath); break;
@@ -75,4 +75,5 @@ module.exports = { init, toggleCmd, prevCmd, nextCmd,
                    deleteMarkCmd,
                    clearFileCmd, clearAllFilesCmd,
                    cleanFileCmd, cleanAllFilesCmd };
+
 

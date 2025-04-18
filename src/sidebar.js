@@ -235,7 +235,7 @@ async function changeVisEditors() {
 }
 
 async function changeSelection() {
-  log('changeSelection');
+  // log('changeSelection');
   // const uri      = editor.document.uri;
   // const position = editor.selection.active;
   // log('changeSelection', uri, position.line);

@@ -152,7 +152,7 @@ let tgtDecorationType = null;
 let tgtFocusListener  = null;
 let justDecorated     = false;
 
-async function gotoAndDecorate(document, lineNumber) {                 //:cfxl;
+async function gotoAndDecorate(document, lineNumber) {
   clearDecoration();
   justDecorated = true;
   setTimeout(() => {justDecorated = false}, 100);
@@ -174,7 +174,7 @@ async function gotoAndDecorate(document, lineNumber) {                 //:cfxl;
   return lineRange;
 }
 
-const clearDecoration = () => {                                        //:98zh;
+const clearDecoration = () => {
   if(!tgtEditor || justDecorated) return;
   tgtEditor.setDecorations(tgtDecorationType, []);
   tgtDecorationType.dispose();
@@ -183,7 +183,7 @@ const clearDecoration = () => {                                        //:98zh;
   glblFuncs.updateSidebar();
 };
 
-async function bookmarkClick(item) {                                   //:tits;
+async function bookmarkClick(item) {
     const lineRange = await gotoAndDecorate(item.document, item.lineNumber);
     const lineSel = new vscode.Selection(lineRange.start, lineRange.end);
     const lineText = tgtEditor.document.getText(lineSel);
@@ -263,7 +263,7 @@ async function toggle() {
   marks.dumpGlobalMarks('toggle');
 }
 
-async function scrollToPrevNext(fwd) {                                 //:ydrj;
+async function scrollToPrevNext(fwd) {
   const editor = vscode.window.activeTextEditor;
   if (!editor) { log('info', 'No active editor'); return; }
   const document = editor.document;
@@ -283,7 +283,7 @@ async function scrollToPrevNext(fwd) {                                 //:ydrj;
         const token = tokenMatch[0];
         lineText = lineText.replace(token, '');
       }
-      await gotoAndDecorate(document, lineNumber);                     //:nz1a;
+      await gotoAndDecorate(document, lineNumber);
       break;
     }
     lineNumber = fwd ? ((lineNumber == lineCnt-1) ? 0 : lineNumber+1)
@@ -349,8 +349,9 @@ async function runOnAllFiles(func, folderPath) {
   }
 }
 
-module.exports = {init, getLabel, bookmarkClick, 
+module.exports = {init, getLabel, bookmarkClick,
                   clearDecoration, justDecorated,
                   toggle, scrollToPrevNext,
                   clearFile, cleanFile, runOnAllFiles};
+
 

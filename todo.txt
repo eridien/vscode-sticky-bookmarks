@@ -3,8 +3,8 @@ bugs
   loading is slow
   multiple workspaces hides files & bookmarks
   removing workspace folder doesn't remove marks
-  deleted files show as blank items
-
+  clear all files slow -- need busy indicator
+  
 why gen2
   sticky
   smart sidebar
@@ -31,7 +31,7 @@ TOKENS IN TEXT ARE GODS
       choose multiples to keep
       choose duplicates to rename
       find global marks to delete
-      
+
 todo
   scroll to top for functions
   check tokens on every edit

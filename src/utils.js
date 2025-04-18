@@ -21,11 +21,11 @@ function keywords() {
   return keywordsStore;
 }
 
-function installBookmarksJson(configText) { 
+function installBookmarksJson(configText) {
   let configObj;
   try {configObj = JSON.parse(configText)}
   catch(error) {
-    logErr(`Error parsing default sticky-bookmarks.json, aborting`, 
+    logErr(`Error parsing default sticky-bookmarks.json, aborting`,
             error);
     return false;
   }
@@ -61,7 +61,7 @@ async function workspaceFilePath(relativePath) {
   return path.join(folder.uri.fsPath, relativePath);
 }
 
-async function fileExists(path) {                                      //:bltm;
+async function fileExists(path) {
   try {
     await vscode.workspace.fs.stat(vscode.Uri.file(path));
     return true;
@@ -113,14 +113,14 @@ async function writeWorkspaceFile(relativePath, textData) {
 async function loadStickyBookmarksJson() {
   start('loadStickyBookmarksJson');
   async function readDefaultConfig() {
-    const defaultConfig = 
+    const defaultConfig =
                     await readExtensionFile('sticky-bookmarks.json');
     if(defaultConfig === null) {
       log('err info', 'unable to load sticky-bookmarks.json, aborting.');
       return null;
     }
     return defaultConfig.toString('utf8');
-  }  
+  }
   if(!await workspaceFileExists('sticky-bookmarks.json')) {
     log('sticky-bookmarks.json missing, copying default to workspace');
     const defaultConfig = await readDefaultConfig();
@@ -144,7 +144,7 @@ async function loadStickyBookmarksJson() {
   return installBookmarksJson(fileTxt);
 }
 
-const outputChannel = 
+const outputChannel =
          vscode.window.createOutputChannel('Sticky Bookmarks');
 outputChannel.clear();
 outputChannel.show(true);
@@ -184,9 +184,9 @@ function getLog(module) {
       nomodFlag = infoFlag || args[0].includes('nomod');
     }
     if(errFlag || infoFlag) args = args.slice(1);
-    const par = args.map(a => 
+    const par = args.map(a =>
       typeof a === 'object' ? JSON.stringify(a, null, 2) : a);
-    const line = (nomodFlag ? '' : module + ': ') + 
+    const line = (nomodFlag ? '' : module + ': ') +
                  (errFlag    ? ' error, ' : '') + par.join(' ')
     outputChannel.appendLine(line);
     if(errFlag) console.error(line);
@@ -220,9 +220,9 @@ async function readTxt(noComments, ...paths) {
     const fileBuf = await vscode.workspace.fs.readFile(fileUri);
     text = Buffer.from(fileBuf).toString('utf8');
   }
-  catch (e) { 
-    log('err', `reading file ${filePath}, ${e.message}`); 
-    return null; 
+  catch (e) {
+    log('err', `reading file ${filePath}, ${e.message}`);
+    return null;
   }
   if(noComments) text = text.replaceAll(/\/\*[\s\S]*?\*\//g, '');
   return text;
@@ -239,7 +239,7 @@ async function getTextFromDoc(doc, location) {
       return null;
     }
     return doc.getText(location.range);
-  } 
+  }
   catch (error) {
     log('err', `Failed to get definition text: ${error.message}`);
     return null;
@@ -247,7 +247,7 @@ async function getTextFromDoc(doc, location) {
 }
 
 async function locationIsEntireFile(location) {
-  const document = 
+  const document =
           await vscode.workspace.openTextDocument(location.uri);
   let docStrtNonBlnkLn = 0;
   for(; docStrtNonBlnkLn < document.lineCount; docStrtNonBlnkLn++) {
@@ -298,9 +298,10 @@ function fnv1aHash(str) {
   return hash.toString();
 }
 
-module.exports = { 
+module.exports = {
   init, getLog, getTextFromDoc, sleep, getRangeSize,
-  locationIsEntireFile, readTxt, blkIdFromId, tailFromId, 
-  pxToNum, numToPx, fnv1aHash, loadStickyBookmarksJson, 
+  locationIsEntireFile, readTxt, blkIdFromId, tailFromId,
+  pxToNum, numToPx, fnv1aHash, loadStickyBookmarksJson,
   commentsByLang, keywords, fileExists
 }
+

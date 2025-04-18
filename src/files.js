@@ -1,10 +1,13 @@
 const vscode = require('vscode');
+const marks  = require('./marks.js');
 const utils  = require('./utils.js');
-const {log} = utils.getLog('cmds');
+const {log}  = utils.getLog('file');
 
-async function init() {
-  const keywordsIn = utils.keywords();
-  for(const [lang, keywords] of Object.entries(keywordsIn)) {
+let glblFuncs;
+
+async function init(glblFuncsIn) {
+  glblFuncs = glblFuncsIn;
+  for(const [lang, keywords] of Object.entries(utils.keywords())) {
     const set = new Set(keywords);
     keywordSetsByLang[lang] = set;
   }
@@ -33,6 +36,11 @@ function commRegExG(languageId) {
   else {
     return new RegExp(`\\s*${commLft}\\s*?$`, 'g');
   }
+}
+
+function isKeyWord(languageId, word) {
+  if(!keywordSetsByLang[languageId]) return false;
+  return keywordSetsByLang[languageId].has(word);
 }
 
 async function getCompText(document, languageId, lineNumber) {
@@ -138,13 +146,59 @@ async function getLabel(mark) {                                                 
   }
 }
 
-const clearDecoration = () => {                                                  //:pf5u;
-  if(!decEditor) return;
-  decEditor.setDecorations(decDecorationType, []);
-  decDecorationType.dispose();
-  decFocusListener.dispose();
-  decEditor = null;
-  updateSidebar();
+let tgtEditor         = null;
+let tgtDecorationType = null;
+let tgtFocusListener  = null;
+
+async function bookmarkClick(item) {                                             //:w053;
+    const doc = await vscode.workspace.openTextDocument(item.document.uri);
+    tgtEditor = await vscode.window.showTextDocument(doc, {preview: false});
+    const lineRange  = doc.lineAt(item.lineNumber).range;
+    tgtEditor.selection = new vscode.Selection(lineRange.start, lineRange.start);
+    tgtEditor.revealRange(lineRange, vscode.TextEditorRevealType.InCenter);
+    tgtDecorationType = vscode.window.createTextEditorDecorationType({
+      backgroundColor: new vscode.ThemeColor('editor.selectionHighlightBackground'),
+      // or use a custom color like 'rgba(255, 200, 0, 0.2)'
+      isWholeLine: true,
+    });
+    tgtEditor.setDecorations(tgtDecorationType, [lineRange]);
+    tgtFocusListener = vscode.window.onDidChangeActiveTextEditor(activeEditor => {
+      if (activeEditor !== tgtEditor) clearDecoration();
+    });
+    const lineSel = new vscode.Selection(lineRange.start, lineRange.end);
+    const lineText = tgtEditor.document.getText(lineSel);
+    const tokenMatches = await getTokensInLine(lineText);
+    if(tokenMatches.length === 0) {
+      log('itemClick, no token in line', item.lineNumber,
+          'of', item.document.uri.path, ', removing GlobalMark', item.token);
+      await marks.delGlobalMark(item.token);
+    }
+    else {
+      while(tokenMatches.length > 1 && tokenMatches[0][0] !== item.token) {
+        const foundToken = tokenMatches[0][0];
+
+        // remove token from line also
+
+        await marks.delGlobalMark(foundToken);
+        tokenMatches.shift();
+      }
+      const foundToken = tokenMatches[0][0];
+      if(foundToken !== item.token) {
+        log(`wrong token found in line ${item.lineNumber} of ${item.document.uri.path}, `+
+            `found: ${foundToken}, expected: ${item.token}, fixing GlobalMark`);
+        await marks.replaceGlobalMark(item.token, foundToken);
+      }
+    }
+    return;
+}
+
+const clearDecoration = () => {
+  if(!tgtEditor) return;
+  tgtEditor.setDecorations(tgtDecorationType, []);
+  tgtDecorationType.dispose();
+  tgtFocusListener.dispose();
+  tgtEditor = null;
+  glblFuncs.updateSidebar();
 };
 
 async function delMark(document, line, languageId) {
@@ -164,9 +218,13 @@ async function delMark(document, line, languageId) {
   return lineText;
 }
 
+function getMinCharPos() {
+  return 80;
+}
+
 async function addTokenToLine(document, line, languageId, token) {
   const lineText = line.text.trimEnd();
-  const padLen = Math.max(sett.getMinCharPos() - lineText.length, 0);
+  const padLen = Math.max(getMinCharPos() - lineText.length, 0);
   const [commLft, commRgt] = utils.commentsByLang(languageId);
   const newLine = lineText +
                     `${' '.repeat(padLen)} ${commLft}${token}${commRgt}`;
@@ -222,8 +280,7 @@ async function scrollToPrevNext(fwd) {
       const begPos = new vscode.Position(lineNumber, 0);
       const endPos = new vscode.Position(lineNumber, lineText.length);
       editor.selection = new vscode.Selection(begPos, endPos);
-      editor.revealRange(editor.selection);
-      const range = new vscode.Range(begPos, endPos);
+      editor.revealRange(editor.selection);                                      //:v3xj;
       break;
     }
     lineNumber = fwd ? ((lineNumber == lineCnt-1) ? 0 : lineNumber+1)
@@ -289,3 +346,6 @@ async function runOnAllFiles(func, folderPath) {
   }
 }
 
+module.exports = {init, getLabel, bookmarkClick, clearDecoration, 
+                  toggle, scrollToPrevNext, 
+                  clearFile, cleanFile, runOnAllFiles};

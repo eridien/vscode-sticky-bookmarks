@@ -1,25 +1,30 @@
-const vscode = require('vscode');
-const utils  = require('./utils.js');
-const {log} = utils.getLog('cmds');
+const vscode  = require('vscode');
+const sidebar = require('./sidebar.js');
+const files   = require('./files.js');
+const utils   = require('./utils.js');
+const {log}   = utils.getLog('cmds');
 
-function init() {
+let glblFuncs;
+
+function init(glblFuncsIn) {
+  glblFuncs = glblFuncsIn;
   // log('commands initialized');
-  return {getTokensInLine, delMark, clearFileCmd, clearAllFilesCmd, cleanFileCmd, cleanAllFilesCmd};
+  return {clearFileCmd, clearAllFilesCmd, cleanFileCmd, cleanAllFilesCmd};
 }
 
 async function toggleCmd() {
   log('toggle command called');
-  toggle();
+  files.toggle();
 }
 
 async function prevcmd() {
   log('prevcmd command called');
-  await scrollToPrevNext(false);
+  await files.scrollToPrevNext(false);
 }
 
 async function nextcmd() {
   log('nextcmd command called');
-  await scrollToPrevNext(true);
+  await files.scrollToPrevNext(true);
 }
 
 async function deleteMarkCmd(item) {                                                //
@@ -31,7 +36,7 @@ async function deleteMarkCmd(item) {                                            
     default: {
       const line = document.lineAt(item.lineNumber);
       await glblFuncs.delMark(document, line, item.languageId);
-      updateSidebar();
+      sidebar.updateSidebar();
     }
   }
 }
@@ -43,7 +48,7 @@ async function clearFileCmd(document) {
     if (!editor) { log('info', 'No active editor'); return; }
     document = editor.document;
   }
-  clearFile(document);
+  files.clearFile(document);
 }
 
 async function cleanFileCmd(document) {
@@ -53,20 +58,21 @@ async function cleanFileCmd(document) {
     if (!editor) { log('info', 'No active editor'); return; }
     document = editor.document;
   }
-  cleanFile(document)
+  files.cleanFile(document)
 }
 
 async function clearAllFilesCmd(folderPath) {
   log('clearAllFilesCmd command called');
-  await runOnAllFiles(clearFileCmd, folderPath);
+  await files.runOnAllFiles(clearFileCmd, folderPath);
 }
 
 async function cleanAllFilesCmd(folderPath) {
   log('cleanAllFilesCmd command called');
-  await runOnAllFiles(cleanFileCmd, folderPath);
+  await files.runOnAllFiles(cleanFileCmd, folderPath);
 }
 
-module.exports = { init, togglecmd, prevcmd, nextcmd,
+module.exports = { init, toggleCmd, prevcmd, nextcmd,
+                   deleteMarkCmd,
                    clearFileCmd, clearAllFilesCmd,
                    cleanFileCmd, cleanAllFilesCmd };
 

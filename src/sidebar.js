@@ -1,8 +1,8 @@
 const vscode = require('vscode');
+const files  = require('./files.js');
 const marks  = require('./marks.js');
-const labelm = require('./label.js');
 const utils  = require('./utils.js');
-const {log} = utils.getLog('side');
+const {log}  = utils.getLog('side');
 
 const showPointers = true;
 
@@ -18,7 +18,7 @@ async function init(glblFuncsIn, providerIn, treeViewIn) {
 }
 
 async function getNewItem(mark) {
-  const label = await labelm.getLabel(mark);
+  const label = await files.getLabel(mark);
   const {id, type, token, document, lineNumber, languageId,
          folderPath, folderName, filePath,
          fileRelPath, fileFsPath, children} = mark;
@@ -178,15 +178,11 @@ class SidebarProvider {
   }
 }
 
-let decEditor            = null;
-let decDecorationType    = null;
-let decFocusListener     = null;
-
 let itemJustClicked = false;
 
-async function itemClick(item) {                                                 //
+async function itemClick(item) {
   // log('itemClick');
-  clearDecoration();
+  files.clearDecoration();
   itemJustClicked = true;
   setTimeout(() => {itemJustClicked = false}, 100);
   if(item.type === 'folder') {
@@ -201,45 +197,7 @@ async function itemClick(item) {                                                
     return;
   }
   if(item.type === 'bookmark') {
-    const doc = await vscode.workspace.openTextDocument(item.document.uri);
-    decEditor = await vscode.window.showTextDocument(doc, {preview: false});
-    const lineRange  = doc.lineAt(item.lineNumber).range;
-    decEditor.selection = new vscode.Selection(lineRange.start, lineRange.start);
-    decEditor.revealRange(lineRange, vscode.TextEditorRevealType.InCenter);
-    decDecorationType = vscode.window.createTextEditorDecorationType({
-      backgroundColor: new vscode.ThemeColor('editor.selectionHighlightBackground'),
-      // or use a custom color like 'rgba(255, 200, 0, 0.2)'
-      isWholeLine: true,
-    });
-    decEditor.setDecorations(decDecorationType, [lineRange]);
-    decFocusListener = vscode.window.onDidChangeActiveTextEditor(activeEditor => {
-      if (activeEditor !== decEditor) clearDecoration();
-    });
-    const lineSel = new vscode.Selection(lineRange.start, lineRange.end);
-    const lineText = decEditor.document.getText(lineSel);
-    const tokenMatches = await glblFuncs.getTokensInLine(lineText);
-    if(tokenMatches.length === 0) {
-      log('itemClick, no token in line', item.lineNumber,
-          'of', item.document.uri.path, ', removing GlobalMark', item.token);
-      await marks.delGlobalMark(item.token);
-    }
-    else {
-      while(tokenMatches.length > 1 && tokenMatches[0][0] !== item.token) {
-        const foundToken = tokenMatches[0][0];
-
-        // remove token from line also
-
-        await marks.delGlobalMark(foundToken);
-        tokenMatches.shift();
-      }
-      const foundToken = tokenMatches[0][0];
-      if(foundToken !== item.token) {
-        log(`wrong token found in line ${item.lineNumber} of ${item.document.uri.path}, `+
-            `found: ${foundToken}, expected: ${item.token}, fixing GlobalMark`);
-        await marks.replaceGlobalMark(item.token, foundToken);
-      }
-    }
-    return;
+    await files.bookmarkClick(item);
   }
 }
 
@@ -286,13 +244,12 @@ async function changeSelection() {
   // const position = editor.selection.active;
   // log('changeSelection', uri, position.line);
   updateSidebar();
-  if(!itemJustClicked) clearDecoration();
+  if(!itemJustClicked) files.clearDecoration();
   treeView.selection = []; // doesn't work
 }
 
-module.exports = { init, SidebarProvider,
+module.exports = { init, SidebarProvider, itemClick,
                    sidebarVisibleChange, changeDocument,
-                   changeEditor, changeVisEditors, changeSelection,
-                   itemClick, deleteMarkCmd };
+                   changeEditor, changeVisEditors, changeSelection };
 
 

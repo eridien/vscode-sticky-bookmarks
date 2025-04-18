@@ -26,6 +26,7 @@ TOKENS IN TEXT ARE GODS
       find global marks to delete
 
 bugs
+  use decoration for prev/next
   junk in keyboard shortcuts menu
   loading is slow
   multiple workspaces hides files & bookmarks

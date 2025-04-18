@@ -1,7 +1,7 @@
 const vscode    = require('vscode');
 const comnd     = require('./commands.js');
 const sidebar   = require('./sidebar.js');
-const label     = require('./label.js');
+const files     = require('./files.js');
 const marks     = require('./marks.js');
 const utils     = require('./utils.js');
 const {start, end} = utils.getLog('extn');
@@ -50,8 +50,8 @@ async function activate(context) {
                              itemClickCmd, contextMenuCmd);
 
   Object.assign(glblFuncs, await marks   .init(context, glblFuncs));
-  Object.assign(glblFuncs, await label   .init(context, glblFuncs));
-  Object.assign(glblFuncs,       comnd   .init(context, glblFuncs));
+  Object.assign(glblFuncs, await files   .init(glblFuncs));
+  Object.assign(glblFuncs,       comnd   .init(glblFuncs));
   Object.assign(glblFuncs, await sidebar .init(
                               glblFuncs, sidebarProvider, treeView));
 

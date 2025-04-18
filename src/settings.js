@@ -72,9 +72,5 @@ registerSettingCallback('ignoreFilePatterns', parseAndSaveIgnoreFilePatterns);
 //   parseAndSaveIgnoreFilePatterns(ignoreFilePatternStr);
 // }
 
-function getMinCharPos() {
-  return 80;
-}
-
-module.exports = { init, logSettings, updateSetting, getMinCharPos,
+module.exports = { init, logSettings, updateSetting,
                    registerSettingCallback };

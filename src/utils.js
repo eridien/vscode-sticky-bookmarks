@@ -39,47 +39,76 @@ function installBookmarksJson(configText) {
   return true;
 }
 
-async function writeProjectFile(fileName, textData) {
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-  if (!workspaceFolders || workspaceFolders.length === 0) {
-    log('err info', 'No workspace is open.');
+function getFocusedWorkspaceFolder() {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) return null;
+  return vscode.workspace.getWorkspaceFolder(editor.document.uri);
+}
+
+function getTargetWorkspaceFolder() {
+  const focused = getFocusedWorkspaceFolder();
+  if (focused) return focused;
+  const all = vscode.workspace.workspaceFolders;
+  return all && all.length > 0 ? all[0] : null;
+}
+
+async function workspaceFilePath(relativePath) {
+  const folder = getTargetWorkspaceFolder();
+  if (!folder) {
+    log("No workspace folder available");
     return false;
   }
-  const folderUri = workspaceFolders[0].uri;
-  const fileUri   = vscode.Uri.joinPath(folderUri, fileName);
+  return path.join(folder.uri.fsPath, relativePath);
+}
+
+async function fileExists(path) {                                      //:bltm;
+  try {
+    await vscode.workspace.fs.stat(vscode.Uri.file(path));
+    return true;
+  } catch (_err) {
+    return false;
+  }
+}
+
+async function workspaceFileExists(relativePath) {
+  const filePath = await workspaceFilePath(relativePath);
+  if (!filePath) {
+    log('err', `No workspace folder for ${relativePath}`);
+    return false;
+  }
+  return fileExists(filePath);
+}
+
+async function readWorkspaceFile(relativePath) {
+  const filePath = await workspaceFilePath(relativePath);
+  if (!filePath) {
+    log('err', `No workspace folder for ${relativePath}`);
+    return null;
+  }
+  let contents = null;
+  try {
+    contents = await fs.readFile(filePath, 'utf8');
+  } catch (error) {
+    logErr(`Error reading file ${relativePath}`, error);
+  }
+  return contents;
+}
+
+async function writeWorkspaceFile(relativePath, textData) {
+  const folder    = await getTargetWorkspaceFolder();
+  const folderUri = folder.uri;
+  const fileUri   = vscode.Uri.joinPath(folderUri, relativePath);
   const encoder   = new TextEncoder();
   const content   = encoder.encode(textData);
   try {
     await vscode.workspace.fs.writeFile(fileUri, content);
   } catch (err) {
-    logErr(`Error writing ${fileName}.`, err);
+    logErr(`Error writing ${relativePath}.`, err);
     return false;
   }
   return true;
 }
 
-async function workspaceFileMissing(filename) {
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-  if (!workspaceFolders || workspaceFolders.length === 0) return false;
-  const folderUri = workspaceFolders[0].uri;
-  const fileUri = vscode.Uri.joinPath(folderUri, filename);
-  try {await vscode.workspace.fs.stat(fileUri); return null} 
-  catch (err) {return err.message}
-}
-
-async function readWorkspaceFile(filename) {                           //:705o;
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-  if (!workspaceFolders || workspaceFolders.length === 0) {
-    log('No workspace is open.');
-    return null;
-  }
-  const folderUri = workspaceFolders[0].uri;
-  const filePath  = path.join(folderUri.fsPath, filename);
-  let contents = null;
-  try { contents = await fs.readFile(filePath, 'utf8'); } 
-  catch (error) { logErr(`Error reading file ${filename}`, error);}
-  return contents;
-}
 
 async function loadStickyBookmarksJson() {
   start('loadStickyBookmarksJson');
@@ -91,12 +120,12 @@ async function loadStickyBookmarksJson() {
       return null;
     }
     return defaultConfig.toString('utf8');
-  }
-  if(await workspaceFileMissing('sticky-bookmarks.json')) {
+  }  
+  if(!await workspaceFileExists('sticky-bookmarks.json')) {
     log('sticky-bookmarks.json missing, copying default to workspace');
     const defaultConfig = await readDefaultConfig();
     if(defaultConfig === null) return false;
-    const writeOk = await writeProjectFile(
+    const writeOk = await writeWorkspaceFile(
                              'sticky-bookmarks.json', defaultConfig);
     if(!writeOk)
       log('err info', 'Ignoring error and using default config.');
@@ -267,15 +296,6 @@ function fnv1aHash(str) {
     hash = (hash * 16777619) >>> 0;
   }
   return hash.toString();
-}
-  
-async function fileExists(path) {
-  try {
-    await vscode.workspace.fs.stat(vscode.Uri.file(path));
-    return true;
-  } catch (_err) {
-    return false;
-  }
 }
 
 module.exports = { 

@@ -27,6 +27,11 @@ async function init(contextIn, glblFuncsIn) {
   globalMarks = context.workspaceState.get('globalMarks', {});
   for(const [token, mark] of Object.entries(globalMarks)) {
     const fileFsPath = mark.document.fileName;
+    if(!await utils.fileExists(fileFsPath)) {  
+      log(`file ${fileFsPath} does not exist, removing ${token}`);            //:ta9q;
+      delete globalMarks[token];
+      continue;
+    }
     const markUri = vscode.Uri.file(path.resolve(fileFsPath));
     const folder  = vscode.workspace.getWorkspaceFolder(markUri);
     if(!folder) {
@@ -43,7 +48,7 @@ async function init(contextIn, glblFuncsIn) {
       continue;
     }
     mark.document   = document;
-    // log('init token:', token);;
+    // log('init token:', token);
   }
   await context.workspaceState.update('globalMarks', globalMarks);
   initFinished = true;

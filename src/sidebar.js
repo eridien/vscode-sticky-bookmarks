@@ -1,5 +1,5 @@
 const vscode = require('vscode');
-const files  = require('./files.js');
+const text   = require('./text.js');
 const marks  = require('./marks.js');
 const utils  = require('./utils.js');
 const {log}  = utils.getLog('side');
@@ -18,7 +18,7 @@ async function init(glblFuncsIn, providerIn, treeViewIn) {
 }
 
 async function getNewItem(mark) {
-  const label = await files.getLabel(mark);
+  const label = await text.getLabel(mark);
   const {id, type, token, document, lineNumber, languageId,
          folderPath, folderName, filePath,
          fileRelPath, fileFsPath, children} = mark;
@@ -182,7 +182,7 @@ let itemJustClicked = false;
 
 async function itemClick(item) {
   // log('itemClick');
-  files.clearDecoration();
+  text.clearDecoration();
   itemJustClicked = true;
   setTimeout(() => {itemJustClicked = false}, 100);
   if(item.type === 'folder') {
@@ -197,7 +197,7 @@ async function itemClick(item) {
     return;
   }
   if(item.type === 'bookmark') {
-    await files.bookmarkClick(item);
+    await text.bookmarkClick(item);
   }
 }
 
@@ -244,7 +244,7 @@ async function changeSelection() {
   // const position = editor.selection.active;
   // log('changeSelection', uri, position.line);
   updateSidebar();
-  if(!itemJustClicked) files.clearDecoration();
+  if(!itemJustClicked) text.clearDecoration();
   treeView.selection = []; // doesn't work
 }
 

@@ -1,7 +1,7 @@
 const vscode    = require('vscode');
 const comnd     = require('./commands.js');
 const sidebar   = require('./sidebar.js');
-const files     = require('./files.js');
+const files     = require('./text.js');
 const marks     = require('./marks.js');
 const utils     = require('./utils.js');
 const {start, end} = utils.getLog('extn');

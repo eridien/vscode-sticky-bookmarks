@@ -1,6 +1,6 @@
 const vscode  = require('vscode');
 const sidebar = require('./sidebar.js');
-const files   = require('./files.js');
+const text   = require('./text.js');
 const utils   = require('./utils.js');
 const {log}   = utils.getLog('cmds');
 
@@ -14,17 +14,17 @@ function init(glblFuncsIn) {
 
 async function toggleCmd() {
   log('toggle command called');
-  files.toggle();
+  text.toggle();
 }
 
 async function prevcmd() {
   log('prevcmd command called');
-  await files.scrollToPrevNext(false);
+  await text.scrollToPrevNext(false);
 }
 
 async function nextcmd() {
   log('nextcmd command called');
-  await files.scrollToPrevNext(true);
+  await text.scrollToPrevNext(true);
 }
 
 async function deleteMarkCmd(item) {                                                //
@@ -48,7 +48,7 @@ async function clearFileCmd(document) {
     if (!editor) { log('info', 'No active editor'); return; }
     document = editor.document;
   }
-  files.clearFile(document);
+  text.clearFile(document);
 }
 
 async function cleanFileCmd(document) {
@@ -58,17 +58,17 @@ async function cleanFileCmd(document) {
     if (!editor) { log('info', 'No active editor'); return; }
     document = editor.document;
   }
-  files.cleanFile(document)
+  text.cleanFile(document)
 }
 
 async function clearAllFilesCmd(folderPath) {
   log('clearAllFilesCmd command called');
-  await files.runOnAllFiles(clearFileCmd, folderPath);
+  await text.runOnAllFiles(clearFileCmd, folderPath);
 }
 
 async function cleanAllFilesCmd(folderPath) {
   log('cleanAllFilesCmd command called');
-  await files.runOnAllFiles(cleanFileCmd, folderPath);
+  await text.runOnAllFiles(cleanFileCmd, folderPath);
 }
 
 module.exports = { init, toggleCmd, prevcmd, nextcmd,

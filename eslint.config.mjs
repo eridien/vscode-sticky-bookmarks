@@ -5,10 +5,13 @@ import tsParser from "@typescript-eslint/parser";
 export default [
   {
     ignores: [
-      "prism/languages/**",
-      "out/**",
       "node_modules/**",
+      "out/**",
       "samples/**",
+      "prism/languages/**",
+      "**/*.min.js",
+      "**/extensionHostProcess.js",
+      "**/.vscode/**",
     ],
   },
   {

@@ -52,7 +52,7 @@ async function init(contextIn, glblFuncsIn) {
   return {};
 }
 
-function waitForInit() {
+function waitForInit() {                                               //:bzyw;
   if (initFinished) return Promise.resolve();
   return new Promise((resolve) => {
     const checkInit = () => {

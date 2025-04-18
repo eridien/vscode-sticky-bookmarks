@@ -3,7 +3,6 @@ bugs
   loading is slow
   multiple workspaces hides files & bookmarks
   removing workspace folder doesn't remove marks
-  went crazy adding marks (sticky project)
   deleted files show as blank items
 
 why gen2
@@ -32,8 +31,9 @@ TOKENS IN TEXT ARE GODS
       choose multiples to keep
       choose duplicates to rename
       find global marks to delete
-
+      
 todo
+  scroll to top for functions
   check tokens on every edit
   automatic suggestions based on visits
     count visits in each symbol block
@@ -82,6 +82,7 @@ settings
   open sidebar on mark creation
   scrollbar color
   max suggestion count
+  scroll to top for functions
 
 
 ############################### NOTES ######################################

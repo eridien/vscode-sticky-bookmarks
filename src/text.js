@@ -87,7 +87,7 @@ async function getCompText(document, languageId, lineNumber) {
 function getSymbols(pos, symbols) {
   const parent = symbols[symbols.length - 1];
   for(const child of parent.children) {
-    if(utils.rangeContainsPos(child.range, pos)) {
+    if(child.range.contains(pos)) {
       symbols.push(child);
       return getSymbols(pos, symbols);
     }
@@ -152,12 +152,13 @@ let tgtDecorationType = null;
 let tgtFocusListener  = null;
 let justDecorated     = false;
 
-async function gotoAndDecorate(document, lineNumber) {                 //:jkfd;
+async function gotoAndDecorate(document, lineNumber) {                 //:cfxl;
   clearDecoration();
   justDecorated = true;
   setTimeout(() => {justDecorated = false}, 100);
   const doc = await vscode.workspace.openTextDocument(document.uri);
   tgtEditor = await vscode.window.showTextDocument(doc, {preview: false});
+  // const ranges = tgtEditor.visibleRanges;
   const lineRange  = doc.lineAt(lineNumber).range;
   tgtEditor.selection = new vscode.Selection(lineRange.start, lineRange.start);
   tgtEditor.revealRange(lineRange, vscode.TextEditorRevealType.InCenter);

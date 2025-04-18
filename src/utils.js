@@ -67,8 +67,12 @@ async function workspaceFileMissing(filename) {
   catch (err) {return err.message}
 }
 
-async function readWorkspaceFile(filename) {
+async function readWorkspaceFile(filename) {                           //:705o;
   const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (!workspaceFolders || workspaceFolders.length === 0) {
+    log('No workspace is open.');
+    return null;
+  }
   const folderUri = workspaceFolders[0].uri;
   const filePath  = path.join(folderUri.fsPath, filename);
   let contents = null;
@@ -213,32 +217,6 @@ async function getTextFromDoc(doc, location) {
   }
 }
 
-function containsRange(outerRange, innerRange) {
-  if((innerRange.start.line < outerRange.start.line) ||
-     (innerRange.end.line   > outerRange.end.line)) 
-    return false;
-  if((innerRange.start.line == outerRange.start.line) &&
-     (innerRange.start.character < outerRange.start.character))
-    return false;
-  if((innerRange.end.line == outerRange.end.line) &&
-     (innerRange.end.character > outerRange.end.character))
-    return false;
-  return true;
-}
-
-function rangeContainsPos(range, pos) {
-  if((pos.line < range.start.line) ||
-     (pos.line > range.end.line)) 
-    return false;
-  if((pos.line == range.start.line) &&
-     (pos.character < range.start.character))
-    return false;
-  if((pos.line == range.end.line) &&
-     (pos.character > range.end.character))
-    return false;
-  return true;
-}
-
 async function locationIsEntireFile(location) {
   const document = 
           await vscode.workspace.openTextDocument(location.uri);
@@ -260,12 +238,6 @@ async function locationIsEntireFile(location) {
           locEndLine   >= docEndLine           &&
           location.range.start.character == 0  &&
           location.range.end.character   == 0);
-}
-
-function containsLocation(outerLocation, innerLocation) {
-  if(outerLocation.uri.toString() !== 
-     innerLocation.uri.toString()) return false;
-  return containsRange(outerLocation.range, innerLocation.range);
 }
 
 function getRangeSize(range) {
@@ -299,7 +271,7 @@ function fnv1aHash(str) {
   
 module.exports = { 
   init, getLog, getTextFromDoc, sleep, getRangeSize,
-  rangeContainsPos, containsRange, containsLocation, locationIsEntireFile, 
-  readTxt, blkIdFromId, tailFromId, pxToNum, numToPx, fnv1aHash,
-  containsLocation, loadStickyBookmarksJson, commentsByLang, keywords
+  locationIsEntireFile, readTxt, blkIdFromId, tailFromId, 
+  pxToNum, numToPx, fnv1aHash, loadStickyBookmarksJson, 
+  commentsByLang, keywords
 }

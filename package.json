@@ -3,7 +3,7 @@
   "displayName": "Sticky Bookmarks",
   "publisher": "eridien",
   "description": "Lock bookmarks to code using inline tokens.",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "type": "commonjs",
   "engines": {
     "vscode": "^1.99.0"
@@ -16,6 +16,10 @@
   "license": "MIT",
   "contributes": {
     "commands": [
+      {
+        "command": "sticky-bookmarks.clearAllSavedData",
+        "title": "Sticky Bookmarks: Debug: Clear All Saved Data"
+      },
       {
         "command": "sticky-bookmarks.toggleCmd",
         "title": "ToggleCmd Bookmark",

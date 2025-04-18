@@ -6,8 +6,23 @@ const marks     = require('./marks.js');
 const utils     = require('./utils.js');
 const {start, end} = utils.getLog('extn');
 
+function waitForWorkspaceFolder() {
+  return new Promise((resolve) => {
+    const checkWsFldr = () => {
+      const workspaceFolders = vscode.workspace.workspaceFolders;
+      if (workspaceFolders && workspaceFolders.length > 0) {
+        resolve();
+      } else {
+        setTimeout(waitForWorkspaceFolder, 50);
+      }
+    };
+    checkWsFldr();
+  });
+}
+
 async function activate(context) {
   start('activating extension');
+  await waitForWorkspaceFolder();
   const glblFuncs = {};
   Object.assign(glblFuncs, utils.init(context, glblFuncs));
   if(!await utils.loadStickyBookmarksJson()) {
@@ -29,24 +44,28 @@ async function activate(context) {
                           'sticky-bookmarks.cleanFileCmd',     cmd.cleanFileCmd);
 	const cleanAllFilesCmd = vscode.commands.registerCommand(
                           'sticky-bookmarks.cleanAllFilesCmd', cmd.cleanAllFilesCmd);
-  
+  	const itemClickCmd = vscode.commands.registerCommand(
+    'sticky-bookmarks.itemClickCmd', (item) => sidebar.itemClickCmd(item)
+  );
+  const contextMenuCmd = vscode.commands.registerCommand(
+    'sticky-bookmarks.deleteMarkCmd', (item) => sidebar.deleteMarkCmd(item)
+  );
+  const clearAllSavedDataCmd = vscode.commands.registerCommand(
+   'sticky-bookmarks.clearAllSavedData', async () => {
+      for (const key of context.workspaceState.keys()) {
+        await context.workspaceState.update(key, undefined);
+      }
+      for (const key of context.globalState.keys()) {
+        await context.globalState.update(key, undefined);
+      }
+      vscode.window.showInformationMessage(
+            'Sticky Bookmarks: All saved data has been cleared.');
+    });
+
   const sidebarProvider = new sidebar.SidebarProvider();
   const treeView = vscode.window.createTreeView('sidebarView', {
     treeDataProvider: sidebarProvider,
   });
-
-	const itemClickCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.itemClickCmd', (item) => sidebar.itemClickCmd(item)
-  );
-
-  const contextMenuCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.deleteMarkCmd', (item) => sidebar.deleteMarkCmd(item)
-  );
-
-  context.subscriptions.push(toggleCmd, prevCmd, nextCmd, 
-                             clearFileCmd, clearAllFilesCmd,
-                             cleanFileCmd, cleanAllFilesCmd, 
-                             itemClickCmd, contextMenuCmd);
 
   Object.assign(glblFuncs, await marks   .init(context, glblFuncs));
   Object.assign(glblFuncs, await files   .init(glblFuncs));
@@ -91,9 +110,16 @@ async function activate(context) {
     await sidebar.changeSelection(editor);
   });
 
+  context.subscriptions.push(toggleCmd, prevCmd, nextCmd, 
+                             clearFileCmd, clearAllFilesCmd,
+                             cleanFileCmd, cleanAllFilesCmd, 
+                             itemClickCmd, contextMenuCmd,
+                             clearAllSavedDataCmd);
+
   end('activating extension');
 }
 
 function deactivate() {}
+
 
 module.exports = { activate, deactivate }

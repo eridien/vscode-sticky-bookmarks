@@ -12,7 +12,7 @@ function init(glblFuncsIn) {
   return {};
 }
 
-async function toggleCmd() {                                                     //:1ra7;
+async function toggleCmd() {
   log('toggle command called');
   await text.toggle();
 }

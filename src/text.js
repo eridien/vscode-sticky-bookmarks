@@ -150,22 +150,40 @@ async function getLabel(mark) {
 let tgtEditor         = null;
 let tgtDecorationType = null;
 let tgtFocusListener  = null;
+let justDecorated     = false;
 
-async function bookmarkClick(item) {
-    const doc = await vscode.workspace.openTextDocument(item.document.uri);
-    tgtEditor = await vscode.window.showTextDocument(doc, {preview: false});
-    const lineRange  = doc.lineAt(item.lineNumber).range;
-    tgtEditor.selection = new vscode.Selection(lineRange.start, lineRange.start);
-    tgtEditor.revealRange(lineRange, vscode.TextEditorRevealType.InCenter);
-    tgtDecorationType = vscode.window.createTextEditorDecorationType({
-      backgroundColor: new vscode.ThemeColor('editor.selectionHighlightBackground'),
-      // or use a custom color like 'rgba(255, 200, 0, 0.2)'
-      isWholeLine: true,
-    });
-    tgtEditor.setDecorations(tgtDecorationType, [lineRange]);
-    tgtFocusListener = vscode.window.onDidChangeActiveTextEditor(activeEditor => {
-      if (activeEditor !== tgtEditor) clearDecoration();
-    });
+async function gotoAndDecorate(document, lineNumber) {                 //:jkfd;
+  clearDecoration();
+  justDecorated = true;
+  setTimeout(() => {justDecorated = false}, 100);
+  const doc = await vscode.workspace.openTextDocument(document.uri);
+  tgtEditor = await vscode.window.showTextDocument(doc, {preview: false});
+  const lineRange  = doc.lineAt(lineNumber).range;
+  tgtEditor.selection = new vscode.Selection(lineRange.start, lineRange.start);
+  tgtEditor.revealRange(lineRange, vscode.TextEditorRevealType.InCenter);
+  tgtDecorationType = vscode.window.createTextEditorDecorationType({
+    backgroundColor: new vscode.ThemeColor('editor.selectionHighlightBackground'),
+    // or use a custom color like 'rgba(255, 200, 0, 0.2)'
+    isWholeLine: true,
+  });
+  tgtEditor.setDecorations(tgtDecorationType, [lineRange]);
+  tgtFocusListener = vscode.window.onDidChangeActiveTextEditor(activeEditor => {
+    if (activeEditor !== tgtEditor) clearDecoration();
+  });
+  return lineRange;
+}
+
+const clearDecoration = () => {                                        //:98zh;
+  if(!tgtEditor || justDecorated) return;
+  tgtEditor.setDecorations(tgtDecorationType, []);
+  tgtDecorationType.dispose();
+  tgtFocusListener.dispose();
+  tgtEditor = null;
+  glblFuncs.updateSidebar();
+};
+
+async function bookmarkClick(item) {                                   //:tits;
+    const lineRange = await gotoAndDecorate(item.document, item.lineNumber);
     const lineSel = new vscode.Selection(lineRange.start, lineRange.end);
     const lineText = tgtEditor.document.getText(lineSel);
     const tokenMatches = await getTokensInLine(lineText);
@@ -192,15 +210,6 @@ async function bookmarkClick(item) {
     }
     return;
 }
-
-const clearDecoration = () => {
-  if(!tgtEditor) return;
-  tgtEditor.setDecorations(tgtDecorationType, []);
-  tgtDecorationType.dispose();
-  tgtFocusListener.dispose();
-  tgtEditor = null;
-  glblFuncs.updateSidebar();
-};
 
 async function delMark(document, line, languageId) {
   let lineText = line.text;
@@ -253,7 +262,7 @@ async function toggle() {
   marks.dumpGlobalMarks('toggle');
 }
 
-async function scrollToPrevNext(fwd) {
+async function scrollToPrevNext(fwd) {                                 //:ydrj;
   const editor = vscode.window.activeTextEditor;
   if (!editor) { log('info', 'No active editor'); return; }
   const document = editor.document;
@@ -273,10 +282,7 @@ async function scrollToPrevNext(fwd) {
         const token = tokenMatch[0];
         lineText = lineText.replace(token, '');
       }
-      const begPos = new vscode.Position(lineNumber, 0);
-      const endPos = new vscode.Position(lineNumber, lineText.length);
-      editor.selection = new vscode.Selection(begPos, endPos);
-      editor.revealRange(editor.selection);
+      await gotoAndDecorate(document, lineNumber);                     //:nz1a;
       break;
     }
     lineNumber = fwd ? ((lineNumber == lineCnt-1) ? 0 : lineNumber+1)
@@ -342,7 +348,8 @@ async function runOnAllFiles(func, folderPath) {
   }
 }
 
-module.exports = {init, getLabel, bookmarkClick, clearDecoration,
+module.exports = {init, getLabel, bookmarkClick, 
+                  clearDecoration, justDecorated,
                   toggle, scrollToPrevNext,
                   clearFile, cleanFile, runOnAllFiles};
 

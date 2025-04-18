@@ -178,13 +178,9 @@ class SidebarProvider {
   }
 }
 
-let itemJustClicked = false;
-
 async function itemClickCmd(item) {
   // log('itemClickCmd');
   text.clearDecoration();
-  itemJustClicked = true;
-  setTimeout(() => {itemJustClicked = false}, 100);
   if(item.type === 'folder') {
     const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
     if(folderItem) {
@@ -239,12 +235,12 @@ async function changeVisEditors() {
 }
 
 async function changeSelection() {
-  log('changeSelection', itemJustClicked);
+  log('changeSelection');
   // const uri      = editor.document.uri;
   // const position = editor.selection.active;
   // log('changeSelection', uri, position.line);
   updateSidebar();
-  if(!itemJustClicked) text.clearDecoration();
+  text.clearDecoration();
   treeView.selection = []; // doesn't work
 }
 

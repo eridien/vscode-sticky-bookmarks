@@ -1,5 +1,5 @@
 const vscode    = require('vscode');
-const comnd     = require('./commands.js');
+const cmd       = require('./commands.js');
 const sidebar   = require('./sidebar.js');
 const files     = require('./text.js');
 const marks     = require('./marks.js');
@@ -16,28 +16,27 @@ async function activate(context) {
   }
   
 	const toggleCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.togglecmd',        comnd.togglecmd);
+                          'sticky-bookmarks.toggleCmd',        cmd.toggleCmd);
 	const prevCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.prevcmd',          comnd.prevcmd);
+                          'sticky-bookmarks.prevCmd',          cmd.prevCmd);
 	const nextCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.nextcmd',          comnd.nextcmd);
+                          'sticky-bookmarks.nextCmd',          cmd.nextCmd);
 	const clearFileCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.clearFileCmd',     comnd.clearFileCmd);
+                          'sticky-bookmarks.clearFileCmd',     cmd.clearFileCmd);
 	const clearAllFilesCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.clearAllFilesCmd', comnd.clearAllFilesCmd);
+                          'sticky-bookmarks.clearAllFilesCmd', cmd.clearAllFilesCmd);
 	const cleanFileCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.cleanFileCmd',     comnd.cleanFileCmd);
+                          'sticky-bookmarks.cleanFileCmd',     cmd.cleanFileCmd);
 	const cleanAllFilesCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.cleanAllFilesCmd', comnd.cleanAllFilesCmd);
+                          'sticky-bookmarks.cleanAllFilesCmd', cmd.cleanAllFilesCmd);
   
   const sidebarProvider = new sidebar.SidebarProvider();
-
   const treeView = vscode.window.createTreeView('sidebarView', {
     treeDataProvider: sidebarProvider,
   });
 
 	const itemClickCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.itemClick', (item) => sidebar.itemClick(item)
+    'sticky-bookmarks.itemClickCmd', (item) => sidebar.itemClickCmd(item)
   );
 
   const contextMenuCmd = vscode.commands.registerCommand(
@@ -51,7 +50,7 @@ async function activate(context) {
 
   Object.assign(glblFuncs, await marks   .init(context, glblFuncs));
   Object.assign(glblFuncs, await files   .init(glblFuncs));
-  Object.assign(glblFuncs,       comnd   .init(glblFuncs));
+  Object.assign(glblFuncs,       cmd   .init(glblFuncs));
   Object.assign(glblFuncs, await sidebar .init(
                               glblFuncs, sidebarProvider, treeView));
 

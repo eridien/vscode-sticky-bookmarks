@@ -3,6 +3,11 @@ const marks  = require('./marks.js');
 const utils  = require('./utils.js');
 const {log}  = utils.getLog('file');
 
+function getMinCharPos() { return 70; }
+const showLineNumbers    = true;
+const showBreadCrumbs    = true;
+const showCodeWhenCrumbs = true;
+
 let glblFuncs;
 
 async function init(glblFuncsIn) {
@@ -13,10 +18,6 @@ async function init(glblFuncsIn) {
   }
   return {};
 }
-
-const showLineNumbers    = true;
-const showBreadCrumbs    = true;
-const showCodeWhenCrumbs = true;
 
 const crumbSepLft     = '● ';
 const crumbSepRgt     = ' ● ';
@@ -93,7 +94,7 @@ function getSymbols(pos, symbols) {
   }
 }
 
-async function getLabel(mark) {                                                  //
+async function getLabel(mark) {
   try {
     const {document, languageId, lineNumber, type} = mark;
     if(type == 'folder')
@@ -150,7 +151,7 @@ let tgtEditor         = null;
 let tgtDecorationType = null;
 let tgtFocusListener  = null;
 
-async function bookmarkClick(item) {                                             //:w053;
+async function bookmarkClick(item) {
     const doc = await vscode.workspace.openTextDocument(item.document.uri);
     tgtEditor = await vscode.window.showTextDocument(doc, {preview: false});
     const lineRange  = doc.lineAt(item.lineNumber).range;
@@ -169,7 +170,7 @@ async function bookmarkClick(item) {                                            
     const lineText = tgtEditor.document.getText(lineSel);
     const tokenMatches = await getTokensInLine(lineText);
     if(tokenMatches.length === 0) {
-      log('itemClick, no token in line', item.lineNumber,
+      log('itemClickCmd, no token in line', item.lineNumber,
           'of', item.document.uri.path, ', removing GlobalMark', item.token);
       await marks.delGlobalMark(item.token);
     }
@@ -218,10 +219,6 @@ async function delMark(document, line, languageId) {
   return lineText;
 }
 
-function getMinCharPos() {
-  return 80;
-}
-
 async function addTokenToLine(document, line, languageId, token) {
   const lineText = line.text.trimEnd();
   const padLen = Math.max(getMinCharPos() - lineText.length, 0);
@@ -233,13 +230,12 @@ async function addTokenToLine(document, line, languageId, token) {
   await vscode.workspace.applyEdit(edit);
 }
 
-async function getTokensInLine(lineText) {                                         //
+async function getTokensInLine(lineText) {
   tokenRegExG.index = 0;
   return [...lineText.matchAll(tokenRegExG)];
 }
 
 async function toggle() {
-  log('togglecmd command called');
   const editor = vscode.window.activeTextEditor;
   if (!editor) { log('info', 'No active editor'); return; }
   const document = editor.document;
@@ -254,7 +250,7 @@ async function toggle() {
     const token = await marks.newGlobalMark(document, lineNumber);
     await addTokenToLine(document, line, languageId, token);
   }
-  marks.dumpGlobalMarks('togglecmd');
+  marks.dumpGlobalMarks('toggle');
 }
 
 async function scrollToPrevNext(fwd) {
@@ -280,7 +276,7 @@ async function scrollToPrevNext(fwd) {
       const begPos = new vscode.Position(lineNumber, 0);
       const endPos = new vscode.Position(lineNumber, lineText.length);
       editor.selection = new vscode.Selection(begPos, endPos);
-      editor.revealRange(editor.selection);                                      //:v3xj;
+      editor.revealRange(editor.selection);
       break;
     }
     lineNumber = fwd ? ((lineNumber == lineCnt-1) ? 0 : lineNumber+1)
@@ -304,7 +300,7 @@ async function clearFile(document) {
       new vscode.Position(document.lineCount, 0)
   ), newFileText);
   await vscode.workspace.applyEdit(edit);
-  marks.dumpGlobalMarks('clearFileCmd');
+  marks.dumpGlobalMarks('clearFile');
 }
 
 async function cleanFile(document) {
@@ -346,6 +342,7 @@ async function runOnAllFiles(func, folderPath) {
   }
 }
 
-module.exports = {init, getLabel, bookmarkClick, clearDecoration, 
-                  toggle, scrollToPrevNext, 
+module.exports = {init, getLabel, bookmarkClick, clearDecoration,
+                  toggle, scrollToPrevNext,
                   clearFile, cleanFile, runOnAllFiles};
+

@@ -221,7 +221,7 @@
 
     "perl":[
     "and","cmp","continue","default","do","else","elsif","eq","for","foreach","given",
-    "goto","grep","if","last","local","my","ne","nextcmd","no","or","our","package","redo",
+    "goto","grep","if","last","local","my","ne","nextCmd","no","or","our","package","redo",
     "require","return","scalar","sub","unless","until","use","when","while","xor",
     "__FILE__","__LINE__","__PACKAGE__","BEGIN","END","INIT","CHECK","UNITCHECK"
     ],
@@ -252,14 +252,14 @@
     ],
 
     "r":[
-    "if","else","repeat","while","function","for","in","nextcmd","break","TRUE","FALSE",
+    "if","else","repeat","while","function","for","in","nextCmd","break","TRUE","FALSE",
     "NULL","NA","NaN","Inf"
     ],
 
     "raku":[
     "my","our","has","state","constant","sub","method","multi","proto","only","module",
     "class","role","grammar","subset","enum","package","if","elsif","else","unless",
-    "when","given","default","while","until","for","loop","repeat","do","nextcmd","last",
+    "when","given","default","while","until","for","loop","repeat","do","nextCmd","last",
     "redo","return","take","leave","goto","try","CATCH","CONTROL","KEEP","UNDO","START",
     "TEMP","LET","INIT","END","BEGIN","UNIT","use","need","require","import","export",
     "is","does","but","with","without","and","or","xor","not","div","mod","xx","leg",
@@ -268,7 +268,7 @@
 
     "ruby":[
     "BEGIN","END","alias","and","begin","break","case","class","def","defined?",
-    "do","else","elsif","end","ensure","false","for","if","in","module","nextcmd",
+    "do","else","elsif","end","ensure","false","for","if","in","module","nextCmd",
     "nil","not","or","redo","rescue","retry","return","self","super","then",
     "true","undef","unless","until","when","while","yield"
     ],

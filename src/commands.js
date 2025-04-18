@@ -9,21 +9,21 @@ let glblFuncs;
 function init(glblFuncsIn) {
   glblFuncs = glblFuncsIn;
   // log('commands initialized');
-  return {clearFileCmd, clearAllFilesCmd, cleanFileCmd, cleanAllFilesCmd};
+  return {};
 }
 
-async function toggleCmd() {
+async function toggleCmd() {                                                     //:1ra7;
   log('toggle command called');
   await text.toggle();
 }
 
-async function prevcmd() {
-  log('prevcmd command called');
+async function prevCmd() {
+  log('prevCmd command called');
   await text.scrollToPrevNext(false);
 }
 
-async function nextcmd() {
-  log('nextcmd command called');
+async function nextCmd() {
+  log('nextCmd command called');
   await text.scrollToPrevNext(true);
 }
 
@@ -71,7 +71,7 @@ async function cleanAllFilesCmd(folderPath) {
   await text.runOnAllFiles(cleanFileCmd, folderPath);
 }
 
-module.exports = { init, toggleCmd, prevcmd, nextcmd,
+module.exports = { init, toggleCmd, prevCmd, nextCmd,
                    deleteMarkCmd,
                    clearFileCmd, clearAllFilesCmd,
                    cleanFileCmd, cleanAllFilesCmd };

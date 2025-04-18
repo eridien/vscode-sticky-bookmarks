@@ -44,7 +44,7 @@ async function getNewItem(mark) {
     if(type == 'bookmark') item.lineNumber = lineNumber;
   }
   item.command = {
-    command: 'sticky-bookmarks.itemClick',
+    command: 'sticky-bookmarks.itemClickCmd',
     title:   'Item Clicked',
     arguments: [{document, lineNumber, type, id, token}],
   }
@@ -180,8 +180,8 @@ class SidebarProvider {
 
 let itemJustClicked = false;
 
-async function itemClick(item) {
-  // log('itemClick');
+async function itemClickCmd(item) {
+  // log('itemClickCmd');
   text.clearDecoration();
   itemJustClicked = true;
   setTimeout(() => {itemJustClicked = false}, 100);
@@ -248,7 +248,7 @@ async function changeSelection() {
   treeView.selection = []; // doesn't work
 }
 
-module.exports = { init, SidebarProvider, itemClick,
+module.exports = { init, SidebarProvider, itemClickCmd,
                    sidebarVisibleChange, changeDocument,
                    changeEditor, changeVisEditors, changeSelection };
 

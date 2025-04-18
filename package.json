@@ -17,17 +17,17 @@
   "contributes": {
     "commands": [
       {
-        "command": "sticky-bookmarks.togglecmd",
+        "command": "sticky-bookmarks.toggleCmd",
         "title": "ToggleCmd Bookmark",
         "category": "Sticky Bookmarks"
       },
       {
-        "command": "sticky-bookmarks.prevcmd",
+        "command": "sticky-bookmarks.prevCmd",
         "title": "Previous Bookmark",
         "category": "Sticky Bookmarks"
       },
       {
-        "command": "sticky-bookmarks.nextcmd",
+        "command": "sticky-bookmarks.nextCmd",
         "title": "NextCmd Bookmark",
         "category": "Sticky Bookmarks"
       },
@@ -52,7 +52,7 @@
         "category": "Sticky Bookmarks"
       },
       {
-        "command": "sticky-bookmarks.itemClick",
+        "command": "sticky-bookmarks.itemClickCmd",
         "title": "Go To Bookmark"
       },
       {
@@ -60,15 +60,43 @@
         "title": "✖️"
       }
     ],
-    "keybindings": [
-      {
-        "command": "sticky-bookmarks.togglecmd",
+    "keybindings": [ {
+        "command": "sticky-bookmarks.toggleCmd",
         "key": "ctrl+shift+alt+/",
         "mac": "cmd+shift+alt+/",
         "when": "editorTextFocus"
-      },
-      {
-        "command": "sticky-bookmarks.togglecmd",
+      },{
+        "command": "sticky-bookmarks.prevCmd",
+        "key": "ctrl+shift+alt+<",
+        "mac": "cmd+shift+alt+<",
+        "when": "editorTextFocus"
+      },{
+        "command": "sticky-bookmarks.nextCmd",
+        "key": "ctrl+shift+alt+>",
+        "mac": "cmd+shift+alt+>",
+        "when": "editorTextFocus"
+      },{
+        "command": "sticky-bookmarks.clearFileCmd",
+        "key": "ctrl+shift+alt+'",
+        "mac": "cmd+shift+alt+'",
+        "when": "editorTextFocus"
+      },{
+        "command": "sticky-bookmarks.clearAllFilesCmd",
+        "key": "ctrl+shift+alt+;",
+        "mac": "cmd+shift+alt+;",
+        "when": "editorTextFocus"
+      },{
+        "command": "sticky-bookmarks.toggleCmd",
+        "key": "ctrl+shift+alt+/",
+        "mac": "cmd+shift+alt+/",
+        "when": "editorTextFocus"
+      },{
+        "command": "sticky-bookmarks.toggleCmd",
+        "key": "ctrl+shift+alt+/",
+        "mac": "cmd+shift+alt+/",
+        "when": "editorTextFocus"
+      },{
+        "command": "sticky-bookmarks.toggleCmd",
         "key": "ctrl+shift+alt+/",
         "mac": "cmd+shift+alt+/",
         "when": "editorTextFocus"

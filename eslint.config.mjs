@@ -34,13 +34,19 @@ export default [
       "@typescript-eslint": typescriptEslintPlugin,
     },
     rules: {
-      "no-const-assign": "warn",
+      "no-const-assign":      "warn",
       "no-this-before-super": "warn",
-      "no-undef": "warn",
-      "no-unreachable": "warn",
-      "no-unused-vars": "warn",
-      "constructor-super": "warn",
-      "valid-typeof": "warn",
+      "no-undef":             "warn",
+      "no-unreachable":       "warn",
+      "constructor-super":    "warn",
+      "valid-typeof":         "warn",
+      "no-unused-vars": [     "warn",
+        {
+          argsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_"
+        }
+      ]
+,
       "@typescript-eslint/no-floating-promises": "error"
     },
   },

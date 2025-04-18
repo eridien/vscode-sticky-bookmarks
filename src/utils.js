@@ -269,9 +269,18 @@ function fnv1aHash(str) {
   return hash.toString();
 }
   
+async function fileExists(path) {
+  try {
+    await vscode.workspace.fs.stat(vscode.Uri.file(path));
+    return true;
+  } catch (_err) {
+    return false;
+  }
+}
+
 module.exports = { 
   init, getLog, getTextFromDoc, sleep, getRangeSize,
   locationIsEntireFile, readTxt, blkIdFromId, tailFromId, 
   pxToNum, numToPx, fnv1aHash, loadStickyBookmarksJson, 
-  commentsByLang, keywords
+  commentsByLang, keywords, fileExists
 }

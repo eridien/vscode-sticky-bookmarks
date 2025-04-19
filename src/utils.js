@@ -111,58 +111,38 @@ async function writeWorkspaceFile(relativePath, textData) {
 
 function getPathsFromWorkspaceFolder(folder) {   
   if(!folder) return null;
-  const uri         = folder.uri;
-  const folderIndex = folder.index;
-  const folderName  = folder.name;
-
-  // Absolute paths
-  const absFsPath = uri.fsPath;
-  const absFolderName = path.basename(absFsPath);  // folder name only
-  const absParentFolder = path.dirname(absFsPath); // full path of parent
-  // URI-style absolute path
-  const absUriPath = uri.path;
-  const absWsPaths = {folderIndex, folderName, absFsPath, 
-                      absFolderName, absParentFolder, absUriPath};
-  // Workspace-relativ`e paths
-  const relUriPath = vscode.workspace.asRelativePath(uri);
-  const relFolderName = path.basename(relUriPath);
-  const relParent = path.dirname(relUriPath);
-  const relWsPaths = {relUriPath, relFolderName, relParent}
-  const wsPaths = Object.assign(absWsPaths, relWsPaths);
+  const uri                = folder.uri;
+  const folderIndex        = folder.index;
+  const folderName         = folder.name;
+  const folderFsPath       = uri.fsPath;
+  const folderUriPath      = uri.path;
+  const wsPaths = {folderIndex, folderName, folderFsPath, folderUriPath};
   log('getPathsFromWorkspaceFolder', wsPaths);  
   return wsPaths;
 }
 
-function getPathsFromFileDoc(doc) {                                       //:a16m;
+function getPathsFromFileDoc(doc) {
   if(!doc) return null;
   const uri = doc.uri;
-  // Absolute (platform-specific)
-  const absFsPath = uri.fsPath;
-  const absFile   = path.basename(absFsPath);
-  const absFolder = path.dirname(absFsPath);
-  const absUriPath = uri.path; // URI-style absolute path
-  const filePaths = {absFsPath, absFile, absFolder, absUriPath};
-  // Relative to workspace
-  const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
-  const inWorkspace = !!workspaceFolder;
+  const fileFsPath  = uri.fsPath;
+  const fileName    = path.basename(fileFsPath);
+  const fileUriPath = uri.path;
+  const filePaths   = {fileFsPath, fileName, fileUriPath};
+  const wsFolder    = vscode.workspace.getWorkspaceFolder(uri);
+  const inWorkspace = !!wsFolder;
   if(!inWorkspace) {
     filePaths.inWorkspace = false;
     log('getPathsFromFileDoc', filePaths);
+    return filePaths;
   }
   else {
-    const wsFolder = vscode.workspace.getWorkspaceFolder(uri);
-    const wsPaths = getPathsFromWorkspaceFolder(wsFolder);
-    const relFsPath =  path.relative(workspaceFolder.uri.fsPath, absFsPath);
-    const relFolder = path.dirname(relFsPath);
-    const relFile = path.basename(relFsPath);
-    const relUriPath = vscode.workspace.asRelativePath(uri);
-    const folderUriPath = wsPaths.absUriPath;
-    const fileUriPath = absUriPath;
-    const fileRelUriPath = fileUriPath.slice( folderUriPath.length + 1);
-    const relFilePaths = 
-            { inWorkspace, relFsPath, relFolder, relFile, relUriPath, fileRelUriPath };
+    const wsPaths           = getPathsFromWorkspaceFolder(wsFolder);
+    const folderUriPath     = wsPaths.folderUriPath;
+    const fileRelUriPath    = fileUriPath.slice( folderUriPath.length + 1);
+    const relFilePaths      = {inWorkspace, fileRelUriPath};
     Object.assign(filePaths, wsPaths, relFilePaths);
     log('getPathsFromFileDoc', filePaths);
+    return filePaths;
   }
 }
 

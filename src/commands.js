@@ -9,7 +9,7 @@ let glblFuncs;
 function init(glblFuncsIn) {
   glblFuncs = glblFuncsIn;
   // log('commands initialized');
-  return {};
+  return {cleanAllFilesCmd, clearAllFilesCmd};
 }
 
 async function toggleCmd() {

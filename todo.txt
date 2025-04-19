@@ -1,11 +1,11 @@
 bugs
   junk in keyboard shortcuts menu
   loading is slow
-  multiple workspaces hides files & bookmarks
-  removing workspace folder doesn't remove marks
+  removing workspace folder remove all marks
   clear all files slow -- need busy indicator
-  
-why gen2
+  get tree runs four times on item click
+  marks in babel.config.js
+  why gen2
   sticky
   smart sidebar
     line numbers
@@ -86,6 +86,37 @@ settings
 
 
 ############################### NOTES ######################################
+
+path with mark data
+  marks.newGlobalMark
+
+  marks.init
+
+  sidebar.getItemTree
+
+getPathsFromWorkspaceFolder {
+  "folderIndex": 0, ................................. folderIndex
+  "folderName": "test-app", ......................... folderName
+  "absFsPath": "c:\\Users\\mark\\apps\\test-app", ... folderFsPath
+  "absUriPath": "/C:/Users/mark/apps/test-app" ...... folderUriPath
+  "absParentFolder": "c:\\Users\\mark\\apps", ....... folderParentFsPath
+}
+
+getPathsFromFileDoc absolute{
+  "absFile": "srvr.js", .......................................... fileName
+  "absFsPath": "c:\\Users\\mark\\apps\\test-app\\src\\srvr.js", .. fileFsPath
+  "absUriPath": "/c:/Users/mark/apps/test-app/src/srvr.js" ....... fileUriPath
+  "absFolder": "c:\\Users\\mark\\apps\\test-app\\src", ........... fileParentFsPath
+}
+
+getPathsFromFileDoc relative {
+  "inWorkspace": true, ........................................... inWorkspace
+  "relFsPath": "src\\srvr.js", ................................... fileRelFsPath
+   fileUriPath.slice( folderUriPath.length + 1) .................. fileRelUriPath
+  "relFolder": "src", ............................................ ???? not used
+  "relFile": "srvr.js", .......................................... fileName dup not used
+  "relUriPath": "test-app/src/srvr.js" ........................... folderFileUriPath
+}
 
 testing
   https://code.visualstudio.com/api/working-with-extensions/testing-extension

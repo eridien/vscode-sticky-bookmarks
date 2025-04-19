@@ -39,7 +39,7 @@ function installBookmarksJson(configText) {
   return true;
 }
 
-function getFocusedWorkspaceFolder() {
+function getFocusedWorkspaceFolder() {                                 //:1vxx;
   const editor = vscode.window.activeTextEditor;
   if (!editor) return null;
   return vscode.workspace.getWorkspaceFolder(editor.document.uri);
@@ -61,7 +61,7 @@ async function workspaceFilePath(relativePath) {
   return path.join(folder.uri.fsPath, relativePath);
 }
 
-async function fileExists(path) {
+async function fileExists(path) {                                      //:qynh;
   try {
     await vscode.workspace.fs.stat(vscode.Uri.file(path));
     return true;
@@ -109,6 +109,62 @@ async function writeWorkspaceFile(relativePath, textData) {
   return true;
 }
 
+function getPathsFromWorkspaceFolder(folder) {   
+  if(!folder) return null;
+  const uri         = folder.uri;
+  const folderIndex = folder.index;
+  const folderName  = folder.name;
+
+  // Absolute paths
+  const absFsPath = uri.fsPath;
+  const absFolderName = path.basename(absFsPath);  // folder name only
+  const absParentFolder = path.dirname(absFsPath); // full path of parent
+  // URI-style absolute path
+  const absUriPath = uri.path;
+  const absWsPaths = {folderIndex, folderName, absFsPath, 
+                      absFolderName, absParentFolder, absUriPath};
+  // Workspace-relativ`e paths
+  const relUriPath = vscode.workspace.asRelativePath(uri);
+  const relFolderName = path.basename(relUriPath);
+  const relParent = path.dirname(relUriPath);
+  const relWsPaths = {relUriPath, relFolderName, relParent}
+  const wsPaths = Object.assign(absWsPaths, relWsPaths);
+  log('getPathsFromWorkspaceFolder', wsPaths);  
+  return wsPaths;
+}
+
+function getPathsFromFileDoc(doc) {                                       //:a16m;
+  if(!doc) return null;
+  const uri = doc.uri;
+  // Absolute (platform-specific)
+  const absFsPath = uri.fsPath;
+  const absFile   = path.basename(absFsPath);
+  const absFolder = path.dirname(absFsPath);
+  const absUriPath = uri.path; // URI-style absolute path
+  const filePaths = {absFsPath, absFile, absFolder, absUriPath};
+  // Relative to workspace
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
+  const inWorkspace = !!workspaceFolder;
+  if(!inWorkspace) {
+    filePaths.inWorkspace = false;
+    log('getPathsFromFileDoc', filePaths);
+  }
+  else {
+    const wsFolder = vscode.workspace.getWorkspaceFolder(uri);
+    const wsPaths = getPathsFromWorkspaceFolder(wsFolder);
+    const relFsPath =  path.relative(workspaceFolder.uri.fsPath, absFsPath);
+    const relFolder = path.dirname(relFsPath);
+    const relFile = path.basename(relFsPath);
+    const relUriPath = vscode.workspace.asRelativePath(uri);
+    const folderUriPath = wsPaths.absUriPath;
+    const fileUriPath = absUriPath;
+    const fileRelUriPath = fileUriPath.slice( folderUriPath.length + 1);
+    const relFilePaths = 
+            { inWorkspace, relFsPath, relFolder, relFile, relUriPath, fileRelUriPath };
+    Object.assign(filePaths, wsPaths, relFilePaths);
+    log('getPathsFromFileDoc', filePaths);
+  }
+}
 
 async function loadStickyBookmarksJson() {
   start('loadStickyBookmarksJson');
@@ -212,83 +268,6 @@ async function readExtensionFile(filename) {
   }
 }
 
-async function readTxt(noComments, ...paths) {
-  let text;
-  const filePath = path.join(context.extensionPath, ...paths);
-  try {
-    const fileUri = vscode.Uri.file(filePath);
-    const fileBuf = await vscode.workspace.fs.readFile(fileUri);
-    text = Buffer.from(fileBuf).toString('utf8');
-  }
-  catch (e) {
-    log('err', `reading file ${filePath}, ${e.message}`);
-    return null;
-  }
-  if(noComments) text = text.replaceAll(/\/\*[\s\S]*?\*\//g, '');
-  return text;
-}
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function getTextFromDoc(doc, location) {
-  try {
-    if (!doc || !location) {
-      log('err', 'missing document or location');
-      return null;
-    }
-    return doc.getText(location.range);
-  }
-  catch (error) {
-    log('err', `Failed to get definition text: ${error.message}`);
-    return null;
-  }
-}
-
-async function locationIsEntireFile(location) {
-  const document =
-          await vscode.workspace.openTextDocument(location.uri);
-  let docStrtNonBlnkLn = 0;
-  for(; docStrtNonBlnkLn < document.lineCount; docStrtNonBlnkLn++) {
-    const line = document.lineAt(docStrtNonBlnkLn).text.trim();
-    if(line.length > 0) break;
-  }
-  let docEndNonBlnkLn = document.lineCount-1;
-  for(; docEndNonBlnkLn >= 0; docEndNonBlnkLn--) {
-    const line = document.lineAt(docEndNonBlnkLn).text.trim();
-    if(line.length > 0) break;
-  }
-  const docStartLine = docStrtNonBlnkLn;
-  const docEndLine   = docEndNonBlnkLn;
-  const locStartLine = location.range.start.line;
-  const locEndLine   = location.range.end.line;
-  return (locStartLine <= docStartLine         &&
-          locEndLine   >= docEndLine           &&
-          location.range.start.character == 0  &&
-          location.range.end.character   == 0);
-}
-
-function getRangeSize(range) {
-  return range.end.line - range.start.line;
-}
-
-function blkIdFromId(id) {
-  return id.split('-').splice(0, 3).join('-');
-}
-
-function tailFromId(id) {
-  return id.split('-').splice(3).join('-');
-}
-
-function pxToNum(px) {
-  return +px.replace(/px$/, '');
-}
-
-function numToPx(num) {
-  return `${num.toFixed(2)}px`;
-}
-
 function fnv1aHash(str) {
   let hash = 2166136261;
   for (let i = 0; i < str.length; i++) {
@@ -299,9 +278,8 @@ function fnv1aHash(str) {
 }
 
 module.exports = {
-  init, getLog, getTextFromDoc, sleep, getRangeSize,
-  locationIsEntireFile, readTxt, blkIdFromId, tailFromId,
-  pxToNum, numToPx, fnv1aHash, loadStickyBookmarksJson,
-  commentsByLang, keywords, fileExists
+  init, getLog, fnv1aHash, loadStickyBookmarksJson,
+  commentsByLang, keywords, fileExists,
+  getPathsFromWorkspaceFolder, getPathsFromFileDoc
 }
 

@@ -258,6 +258,7 @@ async function toggle() {
     await delMark(document, line, languageId);  }
   else {
     const token = await marks.newGlobalMark(document, lineNumber);
+    if(!token) return;
     await addTokenToLine(document, line, languageId, token);
   }
   marks.dumpGlobalMarks('toggle');

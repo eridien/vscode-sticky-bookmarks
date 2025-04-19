@@ -58,11 +58,15 @@ async function addFolderItem(rootItems, folderPath, folderName) {
 }
 
 let itemTreeLogCount = 0;
-async function getItemTree() {
+
+async function getItemTree() {                                         //:tuzz;
   const folders = vscode.workspace.workspaceFolders;
   if (!folders) {
     log('No folders in workspace');
     return [];
+  }
+  for(const folder of folders) {
+    utils.getPathsFromWorkspaceFolder(folder)  
   }
   log('getItemTree', ++itemTreeLogCount);
   const rootItems = [];
@@ -80,18 +84,28 @@ async function getItemTree() {
        b.fileRelPath.toLowerCase()) return -1;
     return (a.lineNumber - b.lineNumber);
   });
-  let bookmarks;
+  let bookmarks;                                                       //:khs2;
   let lastFolderPath = null, lastFileRelPath;
   for(const mark of marksArray) {
     const folderPath = mark.folderPath;
+    // if(!await utils.fileExists(mark.folderFsPath)) {
+    //   log('Folder does not exist, deleting globalMark:', 
+    //                               mark.token, folderPath);
+    //   marks.deleteGlobalMark(mark.token);
+    //   continue;
+    // }
     if(folderPath !== lastFolderPath) {
       lastFolderPath = folderPath;
       let folder = folders[0];
+      if(!folder || folder.uri.path !== folderPath) {
+        log('skipping folder not found:', folderPath);
+        continue;
+      }
       while(folder && folder.uri.path !== folderPath) {
         await addFolderItem(rootItems, folder.uri.path, folder.name);
         folder = folders.shift();
       }
-      await addFolderItem(rootItems, folderPath, folder.name);
+      await addFolderItem(rootItems, folderPath, folder.name);         //:jnz4;
       folders.shift();
       lastFileRelPath = null;
     }
@@ -99,6 +113,7 @@ async function getItemTree() {
       const {document, languageId,
              folderPath, filePath,
              fileRelPath, fileFsPath} = mark;
+      utils.getPathsFromFileDoc(document);
       lastFileRelPath = fileRelPath;
       const id = utils.fnv1aHash(fileFsPath);
       bookmarks = [];
@@ -209,7 +224,7 @@ async function sidebarVisibleChange(visible) {
   if(visible && !sideBarIsVisible) {
     if(firstVisible) {
       firstVisible = false;
-      await glblFuncs.cleanAllFilesCmd();
+      await glblFuncs.cleanAllFilesCmd();                              //:rn54;
     }
     updateSidebar();
   }

@@ -1,0 +1,13 @@
+
+URI(file:///c%3A/Users/mark/apps/tv-series-client)
+
+  _formatted: 'file:///c%3A/Users/mark/apps/tv-series-client'
+  _fsPath: null
+  authority: ''
+  fragment: ''
+  fsPath: 'c:\\Users\\mark\\apps\\tv-series-client'
+  path: '/c:/Users/mark/apps/tv-series-client'
+  query: ''
+  scheme: 'file'
+  [[Prototype]]: Sm
+

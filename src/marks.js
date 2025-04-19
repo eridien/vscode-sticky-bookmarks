@@ -27,7 +27,7 @@ async function init(contextIn, glblFuncsIn) {
   globalMarks = context.workspaceState.get('globalMarks', {});
   for(const [token, mark] of Object.entries(globalMarks)) {
     const fileFsPath = mark.document.fileName;
-    if(!await utils.fileExists(fileFsPath)) {
+    if(!await utils.fileExists(fileFsPath)) {                          //:5l5l;
       log(`file ${fileFsPath} does not exist, removing ${token}`);
       delete globalMarks[token];
       continue;
@@ -117,6 +117,28 @@ function getRandomToken() {
 function getProjectIdx(document) {
   return 0;
 }
+
+const doc = vscode.window.activeTextEditor.document;
+const uri = doc.uri;
+
+// Full path (platform-specific)
+const fsPath = uri.fsPath;
+
+// URI-style path
+const uriPath = uri.path;
+
+// File name (just the base name)
+const fileName = path.basename(fsPath);
+
+// Folder (just the directory path)
+const folder = path.dirname(fsPath);
+
+console.log('fsPath:', fsPath);
+console.log('path:', uriPath);
+console.log('file name:', fileName);
+console.log('folder:', folder);
+
+
 */
 async function newGlobalMark(document, lineNumber) {
   const token = getRandomToken();
@@ -144,7 +166,7 @@ async function newGlobalMark(document, lineNumber) {
   return token;
 }
 
-async function delGlobalMark(token) {                                  //:p17k;
+async function delGlobalMark(token) {                                  //:qun7;
   delete globalMarks[token];
   await context.workspaceState.update('globalMarks', globalMarks);
   glblFuncs.updateSidebar();

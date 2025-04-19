@@ -16,7 +16,7 @@ async function init(glblFuncsIn) {
     const set = new Set(keywords);
     keywordSetsByLang[lang] = set;
   }
-  return {};
+  return {delMark};
 }
 
 const crumbSepLft     = '● ';

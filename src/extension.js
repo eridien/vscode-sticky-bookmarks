@@ -44,11 +44,11 @@ async function activate(context) {
                           'sticky-bookmarks.cleanFileCmd',     cmd.cleanFileCmd);
 	const cleanAllFilesCmd = vscode.commands.registerCommand(
                           'sticky-bookmarks.cleanAllFilesCmd', cmd.cleanAllFilesCmd);
-  	const itemClickCmd = vscode.commands.registerCommand(
+  const itemClickCmd = vscode.commands.registerCommand(
     'sticky-bookmarks.itemClickCmd', (item) => sidebar.itemClickCmd(item)
   );
   const contextMenuCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.deleteMarkCmd', (item) => sidebar.deleteMarkCmd(item)
+    'sticky-bookmarks.deleteMarkCmd', (item) => cmd.deleteMarkCmd(item)
   );
   const clearAllSavedDataCmd = vscode.commands.registerCommand(
    'sticky-bookmarks.clearAllSavedData', async () => {

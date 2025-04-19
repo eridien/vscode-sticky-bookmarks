@@ -268,8 +268,9 @@ async function changeSelection() {
   // treeView.selection = []; // doesn't work
 }
 
-module.exports = { init, SidebarProvider, itemClickCmd,
-                   sidebarVisibleChange, changeDocument,
-                   changeEditor, changeVisEditors, changeSelection };
+module.exports = { init, SidebarProvider, itemClickCmd, 
+                   updateSidebar, sidebarVisibleChange, 
+                   changeDocument, changeEditor, 
+                   changeVisEditors, changeSelection};
 
 

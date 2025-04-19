@@ -31,11 +31,11 @@ async function deleteMarkCmd(item) {
   // log('deleteMarkCmd command, X menu');
   const document = item.document;
   switch (item.type) {
-    case 'folder': glblFuncs.clearAllFilesCmd(item.folderPath); break;
-    case 'file':   glblFuncs.clearFileCmd(document);            break;
+    case 'folder': await clearAllFilesCmd(item.folderPath); break;
+    case 'file':   await clearFileCmd(document);            break;
     default: {
-      const line = document.lineAt(item.lineNumber);
-      await glblFuncs.delMark(document, line, item.languageId);
+      const line = document.lineAt(item.mark.lineNumber);
+      await glblFuncs.delMark(document, line, item.mark.languageId);
       sidebar.updateSidebar();
     }
   }

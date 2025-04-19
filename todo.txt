@@ -70,6 +70,7 @@ top of sidebar
   refresh    (cleanAllFilesCmd on all folders)
 
 settings
+  max num of enclosing folder names
   clean trailing empty comments and whitespace
   open sidebar when adding mark
   min line len

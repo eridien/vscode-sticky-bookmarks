@@ -44,7 +44,8 @@ function isKeyWord(languageId, word) {
   return keywordSetsByLang[languageId].has(word);
 }
 
-async function getCompText(document, languageId, lineNumber) {
+async function getCompText(mark) {
+  let   {document, lineNumber, languageId} = mark;
   const [commLft, commRgt] = utils.commentsByLang(languageId);
   let regxEmptyComm;
   if(commRgt !== '') regxEmptyComm = new RegExp(
@@ -56,15 +57,13 @@ async function getCompText(document, languageId, lineNumber) {
     let lineText = document.lineAt(lineNumber).text
                            .trim().replaceAll(/\s+/g, ' ');
     const matches = lineText.matchAll(/\b\w+?\b/g);
-    if(matches.length != 0) {
-      for(const match of matches) {
-        const word = match[0];
-        if(isKeyWord(languageId, word)) {
-          lineText = lineText.replaceAll(word, '')
-                             .replaceAll(/\s+/g, ' ').trim();
-        }
-        lineText = lineText.replaceAll(/\B\s+\B/g, '');
+    for(const match of matches) {
+      const word = match[0];
+      if(isKeyWord(languageId, word)) {
+        lineText = lineText.replaceAll(word, '')
+                            .replaceAll(/\s+/g, ' ').trim();
       }
+      lineText = lineText.replaceAll(/\B\s+\B/g, '');
     }
     lineText = lineText.replaceAll(/\B\s+?|\s+?\B/g, '')
                        .replaceAll(/:[0-9a-z]{4};/g, '');
@@ -94,23 +93,22 @@ function getSymbols(pos, symbols) {
   }
 }
 
+function labelWithLineNum(lineNumber, label) {
+  if(showLineNumbers) 
+    return `${(lineNumber + 1).toString().padStart(3, ' ')}  ${label}`;
+  return label;
+}
+
 async function getLabel(mark) {
   try {
-    const {document, languageId, lineNumber, type} = mark;
-    if(type == 'folder')
-      return '📂 ' + mark.folderName;
-    if(type == 'file')
-      return '📄 ' + mark.fileRelPath;
-    const compText = await getCompText(document, languageId, lineNumber);
+    const {document, lineNumber} = mark;
+    const compText = await getCompText(mark);
     let label = compText;
     const topSymbols = await vscode.commands.executeCommand(
                       'vscode.executeDocumentSymbolProvider', document.uri);
-    if (!topSymbols || !topSymbols.length) {
+    if (!topSymbols || topSymbols.length == 0) {
       log('getLabel, No topSymbols found.');
-      if(showLineNumbers)
-        label = `${(lineNumber+1).toString().padStart(3, ' ')}  `+
-                `${label}`;
-      return label;
+      return labelWithLineNum(lineNumber, label);
     }
     let crumbStr = '';
     if(showBreadCrumbs) {
@@ -121,11 +119,7 @@ async function getLabel(mark) {
       getSymbols(pos, symbols);
       symbols.shift();
       if (!symbols.length) {
-        // log('getLabel, No symbol found', document.uri.path);
-        if(showLineNumbers)
-          label = `${(lineNumber+1).toString().padStart(3, ' ')}  `+
-                  `${label}`;
-        return label;
+        return labelWithLineNum(lineNumber, label);
       }
       symbols.reverse();
       // remove dupes?  todo
@@ -134,9 +128,7 @@ async function getLabel(mark) {
       }
       crumbStr = crumbStr.slice(0, -2);
       crumbStr = crumbSepLft +  crumbStr + crumbSepRgt;
-      if(showLineNumbers)
-        crumbStr = `${(lineNumber+1).toString().padStart(3, ' ')}  `+
-                    `${crumbStr}`;
+      crumbStr = labelWithLineNum(lineNumber, crumbStr);
     }
     if(showCodeWhenCrumbs && crumbStr.length > 0)
        return crumbStr + compText;
@@ -229,12 +221,13 @@ async function delMark(document, line, languageId) {
   return lineText;
 }
 
-async function addTokenToLine(document, line, languageId, token) {
+async function addTokenToLine(mark) {
+  const line     = mark.document.lineAt(mark.lineNumber);
   const lineText = line.text.trimEnd();
-  const padLen = Math.max(getMinCharPos() - lineText.length, 0);
-  const [commLft, commRgt] = utils.commentsByLang(languageId);
+  const padLen   = Math.max(getMinCharPos() - lineText.length, 0);
+  const [commLft, commRgt] = utils.commentsByLang(mark.languageId);
   const newLine = lineText +
-                    `${' '.repeat(padLen)} ${commLft}${token}${commRgt}`;
+         `${' '.repeat(padLen)} ${commLft}${mark.token}${commRgt}`;
   const edit = new vscode.WorkspaceEdit();
   edit.replace(document.uri, line.range, newLine);
   await vscode.workspace.applyEdit(edit);
@@ -257,9 +250,9 @@ async function toggle() {
   if(tokenRegEx.test(lineText)) {
     await delMark(document, line, languageId);  }
   else {
-    const token = await marks.newGlobalMark(document, lineNumber);
-    if(!token) return;
-    await addTokenToLine(document, line, languageId, token);
+    const mark = await marks.newGlobalMark(document, lineNumber);
+    if(!mark) return;
+    await addTokenToLine(mark);
   }
   marks.dumpGlobalMarks('toggle');
 }
@@ -294,7 +287,7 @@ async function scrollToPrevNext(fwd) {
 
 async function clearFile(document) {
   const uri = document.uri;
-  await marks.delGlobalMarksForFile(uri.path);
+  await marks.delGlobalMarksForFile(document);
   if(!tokenRegEx.test(document.getText())) return;
   const languageId = document.languageId;
   let newFileText  = '';
@@ -314,12 +307,11 @@ async function clearFile(document) {
 async function cleanFile(document) {
   await marks.delGlobalMarksForFile(document.uri.path);
   if(!tokenRegEx.test(document.getText())) return;
-  const languageId = document.languageId;
   for(let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);
     if(!tokenRegEx.test(line.text)) continue;
-    const token = await marks.newGlobalMark(document, line.lineNumber);
-    await addTokenToLine(document, line, languageId, token);
+    const mark = await marks.newGlobalMark(document, line.lineNumber);
+    await addTokenToLine(mark);
   }
   marks.dumpGlobalMarks('cleanFileCmd');
 }

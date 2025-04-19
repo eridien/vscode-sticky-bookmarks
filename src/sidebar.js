@@ -17,46 +17,49 @@ async function init(glblFuncsIn, providerIn, treeViewIn) {
   return {updateSidebar};
 }
 
-async function getNewItem(mark) {
-  const label = await text.getLabel(mark);
-  const {id, type, token, document, lineNumber, languageId, children,
-         inWorkspace, folderIndex, 
-         folderName, folderFsPath, folderUriPath, 
-         fileName,   fileFsPath,   fileUriPath, fileRelUriPath } = mark;
-  let item;
-  if (children) {
-    item = new vscode.TreeItem(label,
-               vscode.TreeItemCollapsibleState.Expanded);
-    item.children = children;
-  }
-  else
-    item = new vscode.TreeItem(label,
-               vscode.TreeItemCollapsibleState.None);
-  Object.assign(item, {id, type, folderPath, folderName});
-  if (type == 'folder') {
-    if(closedFolders.has(folderPath))
-      item.iconPath = new vscode.ThemeIcon("chevron-right");
-    else
-      item.iconPath = new vscode.ThemeIcon("chevron-down");
-  }
-  else {
-    Object.assign(item, {document, languageId,
-                         filePath, fileRelPath, fileFsPath});
-    if(type == 'bookmark') item.lineNumber = lineNumber;
-  }
+async function getNewFolderItem(mark) {
+  const {folderIndex, folderName, folderFsPath, folderUriPath} = mark;
+  const id = utils.fnv1aHash(folderUriPath);
+  const item = {id, type:'folder', label: '📂 ' + folderName,
+                folderIndex, folderName, folderFsPath, folderUriPath};
   item.command = {
-    command: 'sticky-bookmarks.itemClickCmd',
-    title:   'Item Clicked',
-    arguments: [{document, lineNumber, type, id, token}],
+    command:   'sticky-bookmarks.itemClickCmd',
+    title:     'Item Clicked',
+    arguments: [item],
+  }
+  return item;
+}
+
+async function getNewFileItem(mark, children) { 
+  const label =  '📄 ' + mark.fileRelUriPath;
+  const {folderIndex, folderName, folderFsPath, folderUriPath, 
+         document, fileName, fileFsPath, fileUriPath, fileRelUriPath} = mark;
+  const item = new vscode.TreeItem(label,
+                   vscode.TreeItemCollapsibleState.Expanded);
+  item.id = utils.fnv1aHash(fileUriPath);
+  Object.assign(item, {type:'file', document, children, 
+                       folderIndex, folderName, folderFsPath, folderUriPath,
+                       fileName,    fileFsPath, fileUriPath,  fileRelUriPath});
+  item.command = {
+    command:   'sticky-bookmarks.itemClickCmd',
+    title:     'Item Clicked',
+    arguments: [item],
   }
   return item;
 };
 
-async function addFolderItem(rootItems, folderPath, folderName) {
-  const id = utils.fnv1aHash(folderPath);
-  rootItems.push(await getNewItem({
-                        type:'folder', folderPath, folderName, id}));
-}
+async function getNewMarkItem(mark) {
+  const label = await text.getLabel(mark);
+  const item  = new vscode.TreeItem(label,
+                    vscode.TreeItemCollapsibleState.None);
+  Object.assign(item, {id:mark.token, type:'bookmark', mark});
+  item.command = {
+    command: 'sticky-bookmarks.itemClickCmd',
+    title:   'Item Clicked',
+    arguments: [item],
+  }
+  return item;
+};
 
 let itemTreeLogCount = 0;
 
@@ -119,13 +122,11 @@ async function getItemTree() {                                         //:tuzz;
       const id = utils.fnv1aHash(fileFsPath);
       bookmarks = [];
       if(closedFolders.has(folderPath)) continue;
-      rootItems.push(await getNewItem({
-            type:'file', document, languageId,
-            folderPath, filePath, fileRelPath, fileFsPath,
-            children:bookmarks, id}));
+      rootItems.push(await getNewItem(
+           {type:'file', mark, children:bookmarks, id}));
     }
     mark.id = mark.token;
-    bookmarks.push(await getNewItem(mark));
+    bookmarks.push(await getNewItem({type:'bookmark', mark}));
   }
   const editor = vscode.window.activeTextEditor;
   if (editor) {

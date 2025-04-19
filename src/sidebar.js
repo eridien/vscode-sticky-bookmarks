@@ -24,6 +24,11 @@ async function getNewFolderItem(mark) {
                     vscode.TreeItemCollapsibleState.None);
   Object.assign(item, {id, type:'folder', label,
                        folderIndex, folderName, folderFsPath, folderUriPath});
+  if(closedFolders.has(folderUriPath))
+    item.iconPath = new vscode.ThemeIcon("chevron-right");
+  else
+    item.iconPath = new vscode.ThemeIcon("chevron-down");
+
   item.command = {
     command:   'sticky-bookmarks.itemClickCmd',
     title:     'Item Clicked',

@@ -105,7 +105,7 @@ async function getLabel(mark) {
     const compText = await getCompText(mark);
     let label = compText;
     const topSymbols = await vscode.commands.executeCommand(
-                      'vscode.executeDocumentSymbolProvider', document.uri);
+               'vscode.executeDocumentSymbolProvider', document.uri);
     if (!topSymbols || topSymbols.length == 0) {
       log('getLabel, No topSymbols found.');
       return labelWithLineNum(lineNumber, label);
@@ -176,32 +176,32 @@ const clearDecoration = () => {
 };
 
 async function bookmarkClick(item) {
-    const lineRange = await gotoAndDecorate(item.document, item.lineNumber);
-    const lineSel = new vscode.Selection(lineRange.start, lineRange.end);
-    const lineText = tgtEditor.document.getText(lineSel);
-    const tokenMatches = await getTokensInLine(lineText);
-    if(tokenMatches.length === 0) {
-      log('itemClickCmd, no token in line', item.lineNumber,
-          'of', item.document.uri.path, ', removing GlobalMark', item.token);
-      await marks.delGlobalMark(item.token);
-    }
-    else {
-      while(tokenMatches.length > 1 && tokenMatches[0][0] !== item.token) {
-        const foundToken = tokenMatches[0][0];
-
-        // remove token from line also
-
-        await marks.delGlobalMark(foundToken);
-        tokenMatches.shift();
-      }
+  const lineRange    = await gotoAndDecorate(item.document, item.lineNumber);
+  const lineSel      = new vscode.Selection(lineRange.start, lineRange.end);
+  const lineText     = tgtEditor.document.getText(lineSel);
+  const tokenMatches = await getTokensInLine(lineText);
+  if(tokenMatches.length === 0) {
+    log('itemClickCmd, no token in line', item.lineNumber,
+        'of', item.fileName, ', removing GlobalMark', item.token);
+    await marks.delGlobalMark(item.token);
+  }
+  else {
+    while(tokenMatches.length > 1 && tokenMatches[0][0] !== item.token) {
       const foundToken = tokenMatches[0][0];
-      if(foundToken !== item.token) {
-        log(`wrong token found in line ${item.lineNumber} of ${item.document.uri.path}, `+
-            `found: ${foundToken}, expected: ${item.token}, fixing GlobalMark`);
-        await marks.replaceGlobalMark(item.token, foundToken);
-      }
+
+      // remove token from line also
+
+      await marks.delGlobalMark(foundToken);
+      tokenMatches.shift();
     }
-    return;
+    const foundToken = tokenMatches[0][0];
+    if(foundToken !== item.token) {
+      log(`wrong token found in line ${item.lineNumber} of ${item.fileName}, `+
+          `found: ${foundToken}, expected: ${item.token}, fixing GlobalMark`);
+      await marks.replaceGlobalMark(item.token, foundToken);
+    }
+  }
+  return;
 }
 
 async function delMark(document, line, languageId) {
@@ -214,7 +214,6 @@ async function delMark(document, line, languageId) {
   }
   const regx = commRegExG(languageId);
   lineText = lineText.replace(regx, '').trimEnd();
-
   const edit = new vscode.WorkspaceEdit();
   edit.replace(document.uri, line.range, lineText);
   await vscode.workspace.applyEdit(edit);
@@ -229,7 +228,7 @@ async function addTokenToLine(mark) {
   const newLine = lineText +
          `${' '.repeat(padLen)} ${commLft}${mark.token}${commRgt}`;
   const edit = new vscode.WorkspaceEdit();
-  edit.replace(document.uri, line.range, newLine);
+  edit.replace(mark.document.uri, line.range, newLine);
   await vscode.workspace.applyEdit(edit);
 }
 
@@ -240,7 +239,7 @@ async function getTokensInLine(lineText) {
 
 async function toggle() {
   const editor = vscode.window.activeTextEditor;
-  if (!editor) { log('info', 'No active editor'); return; }
+  if (!editor) { log('info', 'Toggle, no active editor'); return; }
   const document = editor.document;
   if(document.lineCount == 0) return;
   const lineNumber = editor.selection.active.line;
@@ -259,7 +258,7 @@ async function toggle() {
 
 async function scrollToPrevNext(fwd) {
   const editor = vscode.window.activeTextEditor;
-  if (!editor) { log('info', 'No active editor'); return; }
+  if (!editor) {log('info', 'scrollToPrevNext, no active editor'); return; }
   const document = editor.document;
   if(document.lineCount < 2) return;
   const lineCnt    = document.lineCount;
@@ -273,10 +272,6 @@ async function scrollToPrevNext(fwd) {
     let line = document.lineAt(lineNumber);
     let lineText = line.text;
     if(tokenRegEx.test(lineText)) {
-      for(const tokenMatch of lineText.matchAll(tokenRegExG)) {
-        const token = tokenMatch[0];
-        lineText = lineText.replace(token, '');
-      }
       await gotoAndDecorate(document, lineNumber);
       break;
     }
@@ -328,7 +323,10 @@ async function runOnAllFiles(func, folderPath) {
     const folders = vscode.workspace.workspaceFolders;
     if (!folders) { log('info', 'No folders in workspace'); return; }
     folder = folders.find(folder => folder.uri.path === folderPath);
-    if(!folder) { log('info', 'Folder not found in workspace'); return; }
+    if(!folder) { 
+      log('info', 'runOnAllFiles, Folder not found in workspace'); 
+      return; 
+    }
   }
   const pattern  = new vscode.RelativePattern(folder, '**/*');
   const uris     = await vscode.workspace.findFiles(

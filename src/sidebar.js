@@ -6,22 +6,24 @@ const {log}  = utils.getLog('side');
 
 const showPointers = true;
 
-let glblFuncs, provider, treeView, itemTree;
+let glblFuncs, provider, itemTree;
 
 const closedFolders = new Set();
 
-async function init(glblFuncsIn, providerIn, treeViewIn) {
+async function init(glblFuncsIn, providerIn) {
   glblFuncs = glblFuncsIn;
   provider  = providerIn;
-  treeView  = treeViewIn;
   return {updateSidebar};
 }
 
 async function getNewFolderItem(mark) {
   const {folderIndex, folderName, folderFsPath, folderUriPath} = mark;
-  const id = utils.fnv1aHash(folderUriPath);
-  const item = {id, type:'folder', label: '📂 ' + folderName,
-                folderIndex, folderName, folderFsPath, folderUriPath};
+  const id    = utils.fnv1aHash(folderUriPath);
+  const label = '📂 ' + folderName;
+  const item  = new vscode.TreeItem(label,
+                    vscode.TreeItemCollapsibleState.None);
+  Object.assign(item, {id, type:'folder', label,
+                       folderIndex, folderName, folderFsPath, folderUriPath});
   item.command = {
     command:   'sticky-bookmarks.itemClickCmd',
     title:     'Item Clicked',
@@ -64,86 +66,83 @@ async function getNewMarkItem(mark) {
 let itemTreeLogCount = 0;
 
 async function getItemTree() {                                         //:tuzz;
-  const folders = vscode.workspace.workspaceFolders;
-  if (!folders) {
+  const allWsFolders = vscode.workspace.workspaceFolders;
+  if (!allWsFolders) {
     log('No folders in workspace');
     return [];
   }
-  for(const folder of folders) {
-    utils.getPathsFromWorkspaceFolder(folder)  
-  }
   log('getItemTree', ++itemTreeLogCount);
-  const rootItems = [];
-  const marksArray = Object.values(marks.getGlobalMarks());
+  const rootItems   = [];
+  const marksArray  = Object.values(marks.getGlobalMarks());
   marksArray.sort((a, b) => {
-    if(a.folderIdx > b.folderIdx) return +1;
-    if(a.folderIdx < b.folderIdx) return -1;
-    if(a.folderPath .toLowerCase() >
-       b.folderPath .toLowerCase()) return +1;
-    if(a.folderPath .toLowerCase() <
-       b.folderPath .toLowerCase()) return -1;
-    if(a.fileRelPath.toLowerCase() >
-       b.fileRelPath.toLowerCase()) return +1;
-    if(a.fileRelPath.toLowerCase() <
-       b.fileRelPath.toLowerCase()) return -1;
+    if(a.folderIndex > b.folderIndex) return +1;
+    if(a.folderIndex < b.folderIndex) return -1;
+    if(a.folderUriPath.toLowerCase() >
+       b.folderUriPath.toLowerCase()) return +1;
+    if(a.folderUriPath.toLowerCase() <
+       b.folderUriPath.toLowerCase()) return -1;
+    if(a.fileRelUriPath.toLowerCase() >
+       b.fileRelUriPath.toLowerCase()) return +1;
+    if(a.fileRelUriPath.toLowerCase() <
+       b.fileRelUriPath.toLowerCase()) return -1;
     return (a.lineNumber - b.lineNumber);
   });
-  let bookmarks;                                                       //:khs2;
-  let lastFolderPath = null, lastFileRelPath;
+  let bookmarks;
+  let lastFolderUriPath = null, lastFileRelPath;
   for(const mark of marksArray) {
-    const folderPath = mark.folderPath;
-    // if(!await utils.fileExists(mark.folderFsPath)) {
-    //   log('Folder does not exist, deleting globalMark:', 
-    //                               mark.token, folderPath);
-    //   marks.deleteGlobalMark(mark.token);
-    //   continue;
-    // }
-    if(folderPath !== lastFolderPath) {
-      lastFolderPath = folderPath;
-      let folder = folders[0];
-      if(!folder || folder.uri.path !== folderPath) {
-        log('skipping folder not found:', folderPath);
+    if(closedFolders.has(mark.folderUriPath)) continue;
+    if(!mark.inWorkspace || 
+       !await utils.fileExists(mark.folderFsPath)) {
+      log('Folder missing or mark not in workspace, '+
+          'deleting globalMark:', mark.token, mark.folderName);
+      await marks.delGlobalMark(mark.token);
+      continue;
+    }
+    const folderUriPath = mark.folderUriPath;
+    if(folderUriPath !== lastFolderUriPath) {
+      lastFolderUriPath = folderUriPath;
+      let   wsFolder    = allWsFolders[0];
+      const wsFolderUriPath = wsFolder?.uri.path;
+      while(wsFolder && folderUriPath !== wsFolderUriPath) {
+        rootItems.push(await getNewFolderItem(
+           {folderIndex:wsFolder.index, folderName:wsFolder.name, 
+            folderFsPath:wsFolder.uri.fsPath, 
+            folderUriPath:wsFolder.uri.path}));
+        wsFolder = allWsFolders.shift();
+      }
+      allWsFolders.shift();
+      if(!wsFolder) {
+        log('Folder missing or mark not in workspace, '+
+            'deleting globalMark:', mark.token, mark.folderName);
+        await marks.delGlobalMark(mark.token);
         continue;
       }
-      while(folder && folder.uri.path !== folderPath) {
-        await addFolderItem(rootItems, folder.uri.path, folder.name);
-        folder = folders.shift();
-      }
-      await addFolderItem(rootItems, folderPath, folder.name);         //:jnz4;
-      folders.shift();
+      rootItems.push(await getNewFolderItem(mark));
       lastFileRelPath = null;
     }
     if(mark.fileRelPath !== lastFileRelPath) {
-      const {document, languageId,
-             folderPath, filePath,
-             fileRelPath, fileFsPath} = mark;
-      utils.getPathsFromFileDoc(document);
-      lastFileRelPath = fileRelPath;
-      const id = utils.fnv1aHash(fileFsPath);
+      lastFileRelPath = mark.fileRelPath;
       bookmarks = [];
-      if(closedFolders.has(folderPath)) continue;
-      rootItems.push(await getNewItem(
-           {type:'file', mark, children:bookmarks, id}));
+      rootItems.push(await getNewFileItem(mark, bookmarks));
     }
-    mark.id = mark.token;
-    bookmarks.push(await getNewItem({type:'bookmark', mark}));
+    bookmarks.push(await getNewMarkItem(mark));
   }
   const editor = vscode.window.activeTextEditor;
   if (editor) {
-    const document         = editor.document;
-    const editorFilePath   = document.uri.path;
-    const editorLine       = editor.selection.active.line;
+    const document       = editor.document;
+    const editorFilePath = document.uri.path;
+    const editorLine     = editor.selection.active.line;
     if(showPointers) {
       let haveDown  = null;
       let haveExact = null;
       let haveUp    = null;
       for(const item of rootItems) {
         if(item.type === 'file' &&
-          item.filePath === editorFilePath &&
-          item.children && item.children.length > 0 &&
-          !closedFolders.has(item.folderPath)) {
+           item.fileUriPath === editorFilePath &&
+           item.children && item.children.length > 0 &&
+           !closedFolders.has(item.folderUriPath)) {
           for (const bookmarkItem of item.children) {
-            const markLine = bookmarkItem.lineNumber;
+            const markLine = bookmarkItem.mark.lineNumber;
             if(editorLine === markLine) {
               haveExact = bookmarkItem;
               break;
@@ -159,19 +158,22 @@ async function getItemTree() {                                         //:tuzz;
         }
       }
       if(haveExact)
-        haveExact.iconPath = new vscode.ThemeIcon("triangle-right");
+        haveExact.iconPath  = new vscode.ThemeIcon("triangle-right");
       else {
         if(haveUp)
-          haveUp.iconPath = new vscode.ThemeIcon("triangle-up");
+          haveUp.iconPath   = new vscode.ThemeIcon("triangle-up");
         if(haveDown)
           haveDown.iconPath = new vscode.ThemeIcon("triangle-down");
       }
     }
   }
-  let folder = folders.shift();
-  while(folder) {
-    await addFolderItem(rootItems, folder.uri.path, folder.name);                      //
-    folder = folders.shift();
+  let wsFolder = allWsFolders.shift();
+  while(wsFolder) {
+    rootItems.push(await getNewFolderItem(
+        {folderIndex:wsFolder.index, folderName:wsFolder.name, 
+         folderFsPath:wsFolder.uri.fsPath, 
+         folderUriPath:wsFolder.uri.path}));
+    wsFolder = allWsFolders.shift();
   }
   itemTree = rootItems;
   return rootItems;
@@ -185,7 +187,6 @@ class SidebarProvider {
   getTreeItem(item) {
     return item;
   }
-
   async getChildren(item) {
     if(!item) {
       await marks.waitForInit();
@@ -199,12 +200,13 @@ async function itemClickCmd(item) {
   // log('itemClickCmd');
   text.clearDecoration();
   if(item.type === 'folder') {
-    const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
+    const folderItem = 
+           itemTree.find(rootItem => rootItem.id === item.id);
     if(folderItem) {
-      if(closedFolders.has(folderItem.folderPath))
-         closedFolders.delete(folderItem.folderPath);
+      if(closedFolders.has(folderItem.folderUriPath))
+         closedFolders.delete(folderItem.folderUriPath);
       else
-         closedFolders.add(folderItem.folderPath);
+         closedFolders.add(folderItem.folderUriPath);
       updateSidebar();
     }
     return;
@@ -226,7 +228,7 @@ async function sidebarVisibleChange(visible) {
   if(visible && !sideBarIsVisible) {
     if(firstVisible) {
       firstVisible = false;
-      await glblFuncs.cleanAllFilesCmd();                              //:rn54;
+      await glblFuncs.cleanAllFilesCmd();
     }
     updateSidebar();
   }
@@ -258,7 +260,7 @@ async function changeSelection() {
   // log('changeSelection', uri, position.line);
   updateSidebar();
   text.clearDecoration();
-  treeView.selection = []; // doesn't work
+  // treeView.selection = []; // doesn't work
 }
 
 module.exports = { init, SidebarProvider, itemClickCmd,

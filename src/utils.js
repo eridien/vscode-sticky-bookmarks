@@ -117,7 +117,7 @@ function getPathsFromWorkspaceFolder(folder) {
   const folderFsPath       = uri.fsPath;
   const folderUriPath      = uri.path;
   const wsPaths = {folderIndex, folderName, folderFsPath, folderUriPath};
-  log('getPathsFromWorkspaceFolder', wsPaths);  
+  // log('getPathsFromWorkspaceFolder', wsPaths);  
   return wsPaths;
 }
 
@@ -132,7 +132,7 @@ function getPathsFromFileDoc(doc) {
   const inWorkspace = !!wsFolder;
   if(!inWorkspace) {
     filePaths.inWorkspace = false;
-    log('getPathsFromFileDoc', filePaths);
+    // log('getPathsFromFileDoc', filePaths);
     return filePaths;
   }
   else {
@@ -141,7 +141,7 @@ function getPathsFromFileDoc(doc) {
     const fileRelUriPath    = fileUriPath.slice( folderUriPath.length + 1);
     const relFilePaths      = {inWorkspace, fileRelUriPath};
     Object.assign(filePaths, wsPaths, relFilePaths);
-    log('getPathsFromFileDoc', filePaths);
+    // log('getPathsFromFileDoc', filePaths);
     return filePaths;
   }
 }

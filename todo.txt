@@ -5,7 +5,8 @@ bugs
   clear all files slow -- need busy indicator
   get tree runs four times on item click
   marks in babel.config.js
-  why gen2
+
+why gen2
   sticky
   smart sidebar
     line numbers
@@ -33,6 +34,7 @@ TOKENS IN TEXT ARE GODS
       find global marks to delete
 
 todo
+  cleanAllFilesCmd on activate
   scroll to top for functions
   check tokens on every edit
   automatic suggestions based on visits
@@ -70,6 +72,11 @@ top of sidebar
   refresh    (cleanAllFilesCmd on all folders)
 
 settings
+  smart scroll 
+    scroll to top for functions
+    don't scroll if mark visible in window
+  dumb scroll top/middle/bottom/smart
+  min number lines from window top/bottom
   max num of enclosing folder names
   clean trailing empty comments and whitespace
   open sidebar when adding mark
@@ -83,7 +90,6 @@ settings
   open sidebar on mark creation
   scrollbar color
   max suggestion count
-  scroll to top for functions
 
 
 ############################### NOTES ######################################

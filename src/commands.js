@@ -45,7 +45,7 @@ async function clearFileCmd(document) {
   if(!document) {
     log('clearFileCmd command called');
     const editor = vscode.window.activeTextEditor;
-    if (!editor) { log('info', 'No active editor'); return; }
+    if (!editor) { log('info', 'clearFileCmd, No active editor'); return; }
     document = editor.document;
   }
   await text.clearFile(document);
@@ -55,7 +55,7 @@ async function cleanFileCmd(document) {
   if(!document) {
     log('cleanFileCmd command called');
     const editor = vscode.window.activeTextEditor;
-    if (!editor) { log('info', 'No active editor'); return; }
+    if (!editor) { log('info', 'cleanFileCmd, No active editor'); return; }
     document = editor.document;
   }
   await text.cleanFile(document)

@@ -1,10 +1,9 @@
 const vscode = require('vscode');
-const path   = require('path');
 const utils  = require('./utils.js');
 const {log, start, end} = utils.getLog('mark');
 
-const DEBUG_REMOVE_MARKS_ON_START = true;
-// const DEBUG_REMOVE_MARKS_ON_START = false;
+// const DEBUG_REMOVE_MARKS_ON_START = true;
+const DEBUG_REMOVE_MARKS_ON_START = false;
 
 let globalMarks;
 let context, glblFuncs;
@@ -23,21 +22,20 @@ async function init(contextIn, glblFuncsIn) {
   }
   if(DEBUG_REMOVE_MARKS_ON_START)
       await context.workspaceState.update('globalMarks', {});
-
   globalMarks = context.workspaceState.get('globalMarks', {});
   for(const [token, mark] of Object.entries(globalMarks)) {
+    const markUri    = mark.document.uri;
+    const folder     = vscode.workspace.getWorkspaceFolder(markUri);
+    const document   = await vscode.workspace.openTextDocument(markUri);
     const fileFsPath = mark.fileFsPath;
-    if(!await utils.fileExists(fileFsPath)) {                          //:5l5l;
-      log(`file ${fileFsPath} does not exist, removing ${token}`);
+    if(!folder || !document || 
+                  !await utils.fileExists(fileFsPath)) {
+      log(`folder ${mark.folderName}, document, `+
+          `or file ${mark.fileName} missing, removing ${token}`);
       delete globalMarks[token];
       continue;
     }
-    const markUri = mark.document.uri;
-    const folder  = vscode.workspace.getWorkspaceFolder(markUri);
-    if(!folder) {
-      delete globalMarks[token];
-      continue;
-    }
+    mark.document = document;
     mark.inWorkspace = true;
   }
   await context.workspaceState.update('globalMarks', globalMarks);

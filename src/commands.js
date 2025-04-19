@@ -28,7 +28,7 @@ async function nextCmd() {
 }
 
 async function deleteMarkCmd(item) {
-  // log('deleteMarkCmd command');
+  // log('deleteMarkCmd command, X menu');
   const document = item.document;
   switch (item.type) {
     case 'folder': glblFuncs.clearAllFilesCmd(item.folderPath); break;

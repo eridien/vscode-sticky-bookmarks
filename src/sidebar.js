@@ -19,9 +19,10 @@ async function init(glblFuncsIn, providerIn, treeViewIn) {
 
 async function getNewItem(mark) {
   const label = await text.getLabel(mark);
-  const {id, type, token, document, lineNumber, languageId,
-         folderPath, folderName, filePath,
-         fileRelPath, fileFsPath, children} = mark;
+  const {id, type, token, document, lineNumber, languageId, children,
+         inWorkspace, folderIndex, 
+         folderName, folderFsPath, folderUriPath, 
+         fileName,   fileFsPath,   fileUriPath, fileRelUriPath } = mark;
   let item;
   if (children) {
     item = new vscode.TreeItem(label,

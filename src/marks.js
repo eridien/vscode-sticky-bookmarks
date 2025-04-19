@@ -141,25 +141,12 @@ console.log('folder:', folder);
 
 */
 async function newGlobalMark(document, lineNumber) {
-  const token = getRandomToken();
-  const mark  = {token, document, lineNumber, type:'bookmark'};
-  mark.folderPath  = vscode.workspace
-                       .getWorkspaceFolder(document.uri).uri.path;
-  mark.filePath   = document.uri.path;
-  mark.fileRelPath =
-       mark.filePath.slice( mark.folderPath.length + 1);
-  mark.languageId  = document.languageId;
-  mark.fileFsPath  = document.fileName;
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-  let folder;
-  for (let i = 0; i < workspaceFolders.length; i++) {
-    folder = workspaceFolders[i];
-    if (document.uri.fsPath.startsWith(folder.uri.fsPath)) {
-      mark.folderIdx = i;
-      break;
-    }
-  }
-  mark.folderName = folder.name;
+  const token     = getRandomToken();
+  const mark      = {token, document, lineNumber, type:'bookmark',
+                     languageId: document.languageId};
+  const filePaths = utils.getPathsFromFileDoc(document); 
+  if(!filePaths.inWorkspace) return null;
+  Object.assign(mark, filePaths);
   globalMarks[token] = mark;
   await context.workspaceState.update('globalMarks', globalMarks);
   glblFuncs.updateSidebar();

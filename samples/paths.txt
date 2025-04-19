@@ -17,3 +17,16 @@ util: getPathsFromFileDoc {
   "fileUriPath":    "/c:/Users/mark/apps/test-app/src/srvr.js",
   "fileRelUriPath": "src/srvr.js"
 }
+
+inWorkspace, folderIndex, folderName, folderFsPath, folderUriPath, 
+                          fileName,   fileFsPath,   fileUriPath, fileRelUriPath
+
+util: getPathsFromFileDoc {
+  "inWorkspace":     false,
+  "fileName":       "srvr.js",
+  "fileFsPath":     "c:\\Users\\mark\\apps\\test-app\\src\\srvr.js",
+  "fileUriPath":    "/c:/Users/mark/apps/test-app/src/srvr.js",
+}
+
+inWorkspace, fileFsPath, fileName, fileUriPath
+

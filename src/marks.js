@@ -24,7 +24,7 @@ async function init(contextIn, glblFuncsIn) {
       await context.workspaceState.update('globalMarks', {});
   globalMarks = context.workspaceState.get('globalMarks', {});
   for(const [token, mark] of Object.entries(globalMarks)) {
-    const markUri    = mark.document.uri;
+    const markUri    = vscode.Uri.file(mark.fileFsPath)
     const folder     = vscode.workspace.getWorkspaceFolder(markUri);
     const document   = await vscode.workspace.openTextDocument(markUri);
     const fileFsPath = mark.fileFsPath;

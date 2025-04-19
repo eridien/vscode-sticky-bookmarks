@@ -4,7 +4,7 @@ bugs
   removing workspace folder remove all marks
   clear all files slow -- need busy indicator
   get tree runs four times on item click
-  marks in babel.config.js
+  marks in text not adding to siadebar on activate
 
 why gen2
   sticky

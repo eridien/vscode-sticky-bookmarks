@@ -176,17 +176,18 @@ const clearDecoration = () => {
 };
 
 async function bookmarkClick(item) {
-  const lineRange    = await gotoAndDecorate(item.document, item.lineNumber);
+  const mark = item.mark;
+  const lineRange = await gotoAndDecorate(mark.document, mark.lineNumber);
   const lineSel      = new vscode.Selection(lineRange.start, lineRange.end);
   const lineText     = tgtEditor.document.getText(lineSel);
   const tokenMatches = await getTokensInLine(lineText);
   if(tokenMatches.length === 0) {
-    log('itemClickCmd, no token in line', item.lineNumber,
-        'of', item.fileName, ', removing GlobalMark', item.token);
-    await marks.delGlobalMark(item.token);
+    log('itemClickCmd, no token in line', mark.lineNumber,
+        'of', mark.fileName, ', removing GlobalMark', mark.token);
+    await marks.delGlobalMark(mark.token);
   }
   else {
-    while(tokenMatches.length > 1 && tokenMatches[0][0] !== item.token) {
+    while(tokenMatches.length > 1 && tokenMatches[0][0] !== mark.token) {
       const foundToken = tokenMatches[0][0];
 
       // remove token from line also
@@ -195,10 +196,10 @@ async function bookmarkClick(item) {
       tokenMatches.shift();
     }
     const foundToken = tokenMatches[0][0];
-    if(foundToken !== item.token) {
-      log(`wrong token found in line ${item.lineNumber} of ${item.fileName}, `+
-          `found: ${foundToken}, expected: ${item.token}, fixing GlobalMark`);
-      await marks.replaceGlobalMark(item.token, foundToken);
+    if(foundToken !== mark.token) {
+      log(`wrong token found in line ${mark.lineNumber} of ${mark.fileName}, `+
+          `found: ${foundToken}, expected: ${mark.token}, fixing GlobalMark`);
+      await marks.replaceGlobalMark(mark.token, foundToken);
     }
   }
   return;

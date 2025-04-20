@@ -11,7 +11,7 @@ let initFinished = false;
 
 async function init(contextIn, glblFuncsIn) {
   start('init marks');
-  context = contextIn;
+  context   = contextIn;
   glblFuncs = glblFuncsIn;
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders || workspaceFolders.length === 0) {
@@ -20,13 +20,13 @@ async function init(contextIn, glblFuncsIn) {
     log('no workspace folders found');
     return {};
   }
+  if(DEBUG_REMOVE_MARKS_ON_START)
+       await context.workspaceState.update('globalMarks', {});
+  globalMarks = context.workspaceState.get('globalMarks', {});
   for(const folder of workspaceFolders) {
-    await utils.addGlobalMarkIfMissing(
+    await utils.runOnAllFilesInFolder(
       glblFuncs.addMarksForTokens, folder.uri.fsPath);
   }
-  if(DEBUG_REMOVE_MARKS_ON_START)
-      await context.workspaceState.update('globalMarks', {});
-  globalMarks = context.workspaceState.get('globalMarks', {});
   for(const [token, mark] of Object.entries(globalMarks)) {
     const markUri    = vscode.Uri.file(mark.fileFsPath)
     const folder     = vscode.workspace.getWorkspaceFolder(markUri);
@@ -105,8 +105,8 @@ function getRandomToken() {
   return `:${randHash};`;
 }
 
-async function newMark(document, lineNumber) {                         //:bd5z;
-  const token = getRandomToken();
+async function newMark(document, lineNumber, token) {                         //:bd5z;
+  token ??= getRandomToken();
   const mark  = {token, document, lineNumber,
                  languageId: document.languageId};
   const filePaths = utils.getPathsFromFileDoc(document); 
@@ -121,7 +121,7 @@ async function newMark(document, lineNumber) {                         //:bd5z;
 
 async function addGlobalMarkIfMissing(token, document, lineNumber) {
   if(globalMarks[token]) return;
-  await newMark(document, lineNumber);
+  await newMark(document, lineNumber, token);
 }
 
 async function delGlobalMark(token) {

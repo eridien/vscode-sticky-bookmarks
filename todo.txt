@@ -217,5 +217,38 @@ codicons:
   close-dirty debug-step-into debug-step-out export
   fold-down fold-up grabber layout-panel
 
+requires: cmd sidebar text marks utils
 
+init: 
+  cmd 
+  sidebar 
+  text 
+  marks
+    text.addMarksForTokens 
+
+calls
+  cmd
+    sidebar.updateSidebar
+    text.toggle
+    text.scrollToPrevNext
+    text.clearFile
+    text.cleanFile
+    text.glblFuncs.delMark
+  sidebar
+    text.getLabel
+    text.clearDecoration
+    text.bookmarkClick
+    cmd.glblFuncs.cleanAllFilesCmd
+  text
+    marks.delGlobalMark
+    marks.replaceGlobalMark
+    marks.newMark
+    marks.dumpGlobalMarks
+    marks.addGlobalMarkIfMissing
+    marks.delGlobalMarksForFile
+    sidebar.glblFuncs.updateSidebar
+  marks
+    text.glblFuncs.addMarksForTokens
+    sidebar.glblFuncs.updateSidebar
+    
 

@@ -1,6 +1,6 @@
 const vscode  = require('vscode');
 const sidebar = require('./sidebar.js');
-const text   = require('./text.js');
+const text    = require('./text.js');
 const utils   = require('./utils.js');
 const {log}   = utils.getLog('cmds');
 
@@ -29,9 +29,9 @@ async function nextCmd() {
 
 async function deleteMarkCmd(item) {
   // log('deleteMarkCmd command, X menu');
-  const document = item.document;
+  const document = item.mark.document;
   switch (item.type) {
-    case 'folder': await clearAllFilesCmd(item.folderPath); break;
+    case 'folder': await clearAllFilesCmd(item.mark.folderPath); break;
     case 'file':   await clearFileCmd(document);            break;
     default: {
       const line = document.lineAt(item.mark.lineNumber);
@@ -63,12 +63,12 @@ async function cleanFileCmd(document) {
 
 async function clearAllFilesCmd() {                          //:jsgi;
   log('clearAllFilesCmd command called');
-  await utils.addGlobalMarkIfMissing(clearFileCmd);
+  await utils.runOnAllFilesInFolder(clearFileCmd);
 }
 
 async function cleanAllFilesCmd() {
   log('cleanAllFilesCmd command called');
-  await utils.addGlobalMarkIfMissing(cleanFileCmd);
+  await utils.runOnAllFilesInFolder(cleanFileCmd);
 }
 
 module.exports = { init, toggleCmd, prevCmd, nextCmd,

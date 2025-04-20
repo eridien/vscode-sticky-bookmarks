@@ -1,28 +1,13 @@
 const vscode    = require('vscode');
 const cmd       = require('./commands.js');
 const sidebar   = require('./sidebar.js');
-const files     = require('./text.js');
+const text      = require('./text.js');
 const marks     = require('./marks.js');
 const utils     = require('./utils.js');
 const {start, end} = utils.getLog('extn');
 
-function waitForWorkspaceFolder() {
-  return new Promise((resolve) => {
-    const checkWsFldr = () => {
-      const workspaceFolders = vscode.workspace.workspaceFolders;
-      if (workspaceFolders && workspaceFolders.length > 0) {
-        resolve();
-      } else {
-        setTimeout(waitForWorkspaceFolder, 50);
-      }
-    };
-    checkWsFldr();
-  });
-}
-
 async function activate(context) {
   start('activating extension');
-  await waitForWorkspaceFolder();
   const glblFuncs = {};
   Object.assign(glblFuncs, utils.init(context, glblFuncs));
   if(!await utils.loadStickyBookmarksJson()) {
@@ -67,11 +52,11 @@ async function activate(context) {
     treeDataProvider: sidebarProvider,
   });
 
-  Object.assign(glblFuncs, await marks   .init(context, glblFuncs));
-  Object.assign(glblFuncs, await files   .init(glblFuncs));
-  Object.assign(glblFuncs,       cmd   .init(glblFuncs));
-  Object.assign(glblFuncs, await sidebar .init(
-                              glblFuncs, sidebarProvider, treeView));
+  Object.assign(glblFuncs,           cmd.init(glblFuncs));
+  Object.assign(glblFuncs, await sidebar.init(
+                   glblFuncs, sidebarProvider, treeView));
+  Object.assign(glblFuncs, await    text.init(glblFuncs));
+  Object.assign(glblFuncs, await   marks.init(context, glblFuncs));
 
   treeView.onDidChangeVisibility(async event => {
     await sidebar.sidebarVisibleChange(event.visible);

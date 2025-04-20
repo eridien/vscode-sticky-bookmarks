@@ -167,7 +167,8 @@ async function gotoAndDecorate(document, lineNumber) {
 }
 
 const clearDecoration = () => {
-  if(!tgtEditor || justDecorated) return;
+  if(!glblFuncs.updateSidebar || 
+     !tgtEditor || justDecorated) return;
   tgtEditor.setDecorations(tgtDecorationType, []);
   tgtDecorationType.dispose();
   tgtFocusListener.dispose();
@@ -283,7 +284,7 @@ async function scrollToPrevNext(fwd) {
 
 async function addMarksForTokens(document) {
   const text = document.getText();
-  const matches = [...text.matchAll(tokenRegEx)];
+  const matches = [...text.matchAll(tokenRegExG)];
   for (const match of matches) {
     const matchedText = match[0];
     const startPos    = document.positionAt(match.index);

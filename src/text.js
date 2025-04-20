@@ -307,7 +307,7 @@ async function clearFile(document) {
 }
 
 async function cleanFile(document) {
-  await marks.delGlobalMarksForFile(document.uri.path);
+  await marks.delGlobalMarksForFile(document);
   if(!tokenRegEx.test(document.getText())) return;
   for(let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);

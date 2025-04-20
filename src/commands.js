@@ -79,7 +79,7 @@ async function sidebarVisibleChange(visible) {
   if(visible && !sideBarIsVisible) {
     if(firstVisible) {
       firstVisible = false;
-      await glblFuncs.cleanAllFilesCmd();
+      await cleanAllFilesCmd();
     }
    sidebar.updateSidebar();
   }

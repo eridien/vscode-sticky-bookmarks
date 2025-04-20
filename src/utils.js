@@ -277,9 +277,23 @@ function fnv1aHash(str) {
   return hash.toString();
 }
 
+async function insertLine(document, lineNumber, lineText) {
+  const position = new vscode.Position(lineNumber, 0);
+  const edit = new vscode.WorkspaceEdit();
+  edit.insert(document.uri, position, lineText);
+  return await vscode.workspace.applyEdit(edit);
+}
+
+async function replaceLine(document, lineNumber, lineText) {
+  const line = document.lineAt(lineNumber);
+  const edit = new vscode.WorkspaceEdit();
+  edit.replace(document.uri, line.range, lineText);
+  return await vscode.workspace.applyEdit(edit);
+}
+
 module.exports = {
   init, getLog, fnv1aHash, loadStickyBookmarksJson,
-  commentsByLang, keywords, fileExists,
+  commentsByLang, keywords, fileExists, insertLine, replaceLine,
   getPathsFromWorkspaceFolder, getPathsFromFileDoc,
   runOnAllFilesInFolder, getFocusedWorkspaceFolder
 }

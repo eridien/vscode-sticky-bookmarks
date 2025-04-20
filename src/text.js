@@ -22,8 +22,10 @@ const lineSep         = ' ••';
 
 const keywordSetsByLang = {};
 
+const tokenLen = 6;
 const tokenRegEx  = new RegExp('\\:[0-9a-z]{4};');
 const tokenRegExG = new RegExp('\\:[0-9a-z]{4};', 'g');
+const indentRegEx = /^\s*(\S)/;
 
 function commRegExG(languageId) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
@@ -33,6 +35,17 @@ function commRegExG(languageId) {
   }
   else {
     return new RegExp(`\\s*${commLft}\\s*?$`, 'g');
+  }
+}
+
+function lineRegEx(languageId) {                                       //:38p1;
+  const [commLft, commRgt] = utils.commentsByLang(languageId);
+  if(commRgt !== '') {
+    return new RegExp(
+      `^\\s*${commLft}\\s*(\\:[0-9a-z]{4};)\\s*${commRgt}\\s*$`);
+  }
+  else {
+    return new RegExp(`^\\s*${commLft}\\s*(\\:[0-9a-z]{4};)\\s*$`);
   }
 }
 
@@ -213,20 +226,57 @@ async function delMark(document, line, languageId) {
   lineText = lineText.replace(regx, '').trimEnd();
   const edit = new vscode.WorkspaceEdit();
   edit.replace(document.uri, line.range, lineText);
-  await vscode.workspace.applyEdit(edit);
+  await vscode.workspace.applyEdit(edit);   
   return lineText;
 }
+//  
 
-async function addTokenToLine(mark) {
-  const line     = mark.document.lineAt(mark.lineNumber);
-  const lineText = line.text.trimEnd();
-  const padLen   = Math.max(getMinCharPos() - lineText.length, 0);
-  const [commLft, commRgt] = utils.commentsByLang(mark.languageId);
-  const newLine = lineText +
-         `${' '.repeat(padLen)} ${commLft}${mark.token}${commRgt}`;
-  const edit = new vscode.WorkspaceEdit();
-  edit.replace(mark.document.uri, line.range, newLine);
-  await vscode.workspace.applyEdit(edit);
+function getNewTokenLine(indentLen, token, languageId) {
+  const [commLft, commRgt] = utils.commentsByLang(languageId);
+  return ' '.repeat(indentLen) + commLft + token + commRgt;
+}
+
+async function addTokenAtLine(mark) {
+  let   lineNumber = mark.lineNumber; 
+  const line       = mark.document.lineAt(lineNumber);
+  let   lineText   = line.text;
+  let   match      = lineRegEx.exec(lineText);
+  let   indentLen  = 0;
+  if(match) {
+    const oldToken = match[1];
+    log(`addTokenAtLine, line ${lineNumber} already has token ${oldToken}, `+
+        `replacing it with ${mark.token}`);
+    const tokenIdx = lineText.indexOf(oldToken);
+    await utils.replaceLine(mark.document, lineNumber,
+                            lineText.slice(0, tokenIdx) + mark.token +
+                            lineText.slice(tokenIdx + tokenLen));
+    return oldToken;
+  }
+  match = indentRegEx.exec(lineText);
+  if(!match) {
+    log('addTokenAtLine, blank line, checking next line');
+    lineNumber = lineNumber + 1;
+    if(lineNumber >= mark.document.lineCount) {
+      lineNumber = mark.lineNumber;
+      log('addTokenAtLine, no more lines in document');
+    }
+    else {
+      const nextLineText = mark.document.lineAt(lineNumber).text;
+      match = indentRegEx.exec(nextLineText);
+      if(!match) {
+        log('addTokenAtLine, next line is blank');
+        lineNumber = mark.lineNumber;
+      }
+      else {
+        indentLen = match.index;
+      }
+    }
+  }
+  else indentLen = match.index;
+  log('inserting before line', lineNumber, 'with indent', indentLen);
+  const lineText = getNewTokenLine(indentLen, mark.token, mark.languageId);
+  await utils.insertLine(mark.document, lineNumber, lineText);
+  mark.lineNumber = lineNumber;
 }
 
 async function getTokensInLine(lineText) {
@@ -248,7 +298,7 @@ async function toggle() {
   else {
     const mark = await marks.newMark(document, lineNumber);
     if(!mark) return;
-    await addTokenToLine(mark);
+    await addTokenAtLine(mark);
   }
   marks.dumpGlobalMarks('toggle');
 }
@@ -313,7 +363,7 @@ async function cleanFile(document) {
     const line = document.lineAt(i);
     if(!tokenRegEx.test(line.text)) continue;
     const mark = await marks.newMark(document, line.lineNumber);
-    await addTokenToLine(mark);
+    await addTokenAtLine(mark);
   }
   marks.dumpGlobalMarks('cleanFileCmd');
 }

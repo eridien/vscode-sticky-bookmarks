@@ -63,12 +63,12 @@ async function cleanFileCmd(document) {
 
 async function clearAllFilesCmd() {                          //:jsgi;
   log('clearAllFilesCmd command called');
-  await text.runOnAllFiles(clearFileCmd);
+  await utils.addGlobalMarkIfMissing(clearFileCmd);
 }
 
-async function cleanAllFilesCmd(folderPath) {
+async function cleanAllFilesCmd() {
   log('cleanAllFilesCmd command called');
-  await text.runOnAllFiles(cleanFileCmd, folderPath);
+  await utils.addGlobalMarkIfMissing(cleanFileCmd);
 }
 
 module.exports = { init, toggleCmd, prevCmd, nextCmd,

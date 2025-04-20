@@ -79,7 +79,12 @@ async function workspaceFileExists(relativePath) {
   return fileExists(filePath);
 }
 
-async function runOnEveryFileInFolder(folderFsPath, func) {
+async function addGlobalMarkIfMissing(func, folderFsPath) {
+  folderFsPath ??= getFocusedWorkspaceFolder()?.uri.fsPath;
+  if (!folderFsPath) { 
+    log('info err', 'Folder not found in workspace'); 
+    return; 
+  }
   const folderUri = vscode.Uri.file(folderFsPath);
   const pattern = new vscode.RelativePattern(folderUri, '**/*');
   const files = await vscode.workspace.findFiles(pattern, '**/node_modules/**');
@@ -275,6 +280,6 @@ module.exports = {
   init, getLog, fnv1aHash, loadStickyBookmarksJson,
   commentsByLang, keywords, fileExists,
   getPathsFromWorkspaceFolder, getPathsFromFileDoc,
-  runOnEveryFileInFolder, getFocusedWorkspaceFolder
+  addGlobalMarkIfMissing, getFocusedWorkspaceFolder
 }
 

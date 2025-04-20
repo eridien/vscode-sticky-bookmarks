@@ -16,7 +16,7 @@ async function init(glblFuncsIn) {
     const set = new Set(keywords);
     keywordSetsByLang[lang] = set;
   }
-  return {delMark};
+  return {delMark, addMarksForTokens};
 }
 
 const crumbSepLft     = '● ';
@@ -281,6 +281,16 @@ async function scrollToPrevNext(fwd) {
   }
 }
 
+async function addMarksForTokens(document) {
+  const text = document.getText();
+  const matches = [...text.matchAll(tokenRegEx)];
+  for (const match of matches) {
+    const matchedText = match[0];
+    const startPos    = document.positionAt(match.index);
+    await marks.addGlobalMarkIfMissing(matchedText, document, startPos.line);
+  }
+}
+
 async function clearFile(document) {
   const uri = document.uri;
   await marks.delGlobalMarksForFile(document);
@@ -312,18 +322,9 @@ async function cleanFile(document) {
   marks.dumpGlobalMarks('cleanFileCmd');
 }
 
-async function runOnAllFiles(func) {
-  let folderFsPath = utils.getFocusedWorkspaceFolder()?.uri.fsPath;
-  if (!folderFsPath) { 
-    log('info err', 'Folder not found in workspace'); 
-    return; 
-  }
-  await utils.runOnEveryFileInFolder(folderFsPath, func);
-}
-
 module.exports = {init, getLabel, bookmarkClick,
                   clearDecoration, justDecorated,
                   toggle, scrollToPrevNext,
-                  clearFile, cleanFile, runOnAllFiles};
+                  clearFile, cleanFile};
 
 

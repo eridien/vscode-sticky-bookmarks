@@ -20,6 +20,10 @@ async function init(contextIn, glblFuncsIn) {
     log('no workspace folders found');
     return {};
   }
+  for(const folder of workspaceFolders) {
+    await utils.addGlobalMarkIfMissing(
+      glblFuncs.addMarksForTokens, folder.uri.fsPath);
+  }
   if(DEBUG_REMOVE_MARKS_ON_START)
       await context.workspaceState.update('globalMarks', {});
   globalMarks = context.workspaceState.get('globalMarks', {});
@@ -115,7 +119,12 @@ async function newMark(document, lineNumber) {                         //:bd5z;
   return mark;
 }
 
-async function delGlobalMark(token) {                                  //:qun7;
+async function addGlobalMarkIfMissing(token, document, lineNumber) {
+  if(globalMarks[token]) return;
+  await newMark(document, lineNumber);
+}
+
+async function delGlobalMark(token) {
   delete globalMarks[token];
   await context.workspaceState.update('globalMarks', globalMarks);
   glblFuncs.updateSidebar();
@@ -142,7 +151,7 @@ async function delGlobalMarksForFile(document) {
 
 module.exports = {init, waitForInit, getGlobalMarks, dumpGlobalMarks,
                   newMark, delGlobalMark, replaceGlobalMark,
-                  delGlobalMarksForFile}
+                  delGlobalMarksForFile, addGlobalMarkIfMissing}
 
 
 

@@ -24,10 +24,8 @@ async function init(contextIn, updateSidebarIn, addMarksForTokensIn) {
   if(DEBUG_REMOVE_MARKS_ON_START)
        await context.workspaceState.update('globalMarks', {});
   globalMarks = context.workspaceState.get('globalMarks', {});
-  for(const folder of workspaceFolders) {
-    await utils.runOnAllFilesInFolder(
-      addMarksForTokens, folder.uri.fsPath);
-  }
+  for(const folder of workspaceFolders)
+    await utils.runOnAllFilesInFolder(addMarksForTokens, folder.uri.fsPath);
   for(const [token, mark] of Object.entries(globalMarks)) {
     const markUri    = vscode.Uri.file(mark.fileFsPath)
     const folder     = vscode.workspace.getWorkspaceFolder(markUri);

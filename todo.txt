@@ -1,10 +1,12 @@
+npm install -g @vscode/vsce
+vsce package
+
 bugs
   junk in keyboard shortcuts menu
   loading is slow
   removing workspace folder remove all marks
   clear all files slow -- need busy indicator
   get tree runs four times on item click
-  marks in text not adding to siadebar on activate
 
 why gen2
   sticky
@@ -13,6 +15,7 @@ why gen2
     breadcrumbs
     compressed code
   auto bookmark suggestions
+  smart scrolling
 
 TOKENS IN TEXT ARE GODS
   clean all files -- refresh menu on sidebar top
@@ -36,8 +39,10 @@ TOKENS IN TEXT ARE GODS
 todo
   monitor edits for mark changes
   cleanAllFilesCmd on activate
-  scroll to top for functions
-  check tokens on every edit
+  auto scroll
+    scroll to top for functions
+    min top and bottom border lines
+    don't scroll if mark visible in window
   automatic suggestions based on visits
     count visits in each symbol block
     show in sidebar with question mark
@@ -47,7 +52,6 @@ todo
   folder delete X
   busy indicator
   open sidebar on mark creation
-  toggleCmd collapsed on file item click
   remove hashing
   add mark to global marks on boot when token in text
   add names to marks
@@ -61,7 +65,7 @@ todo
   
 impossible?
   invisible tokens
-  toggleCmd collapsed on file item click
+  toggle collapsed/expanded on file item click
   remove sidebar highlight when selection changes
 
 file types to add
@@ -73,64 +77,31 @@ top of sidebar
   refresh    (cleanAllFilesCmd on all folders)
 
 settings
+  max suggestion count
   smart scroll 
     scroll to top for functions
     don't scroll if mark visible in window
-  dumb scroll top/middle/bottom/smart
-  min number lines from window top/bottom
+    dumb scroll top/middle/bottom/smart
+    min num lines above and below selection
   max num of enclosing folder names
   clean trailing empty comments and whitespace
   open sidebar when adding mark
   min line len
   files to ignore
-  comments by langs
-  keywords
   show in gutter
-  gutter color
+    gutter color
   show in scrollbar
-  open sidebar on mark creation
-  scrollbar color
-  max suggestion count
+    scrollbar color
+  
+  sticky-bookmarks.json
+    comments by langs
+    keywords
 
 
 ############################### NOTES ######################################
 
-path with mark data
-  marks.newGlobalMark
-
-  marks.init
-
-  sidebar.getItemTree
-
-getPathsFromWorkspaceFolder {
-  "folderIndex": 0, ................................. folderIndex
-  "folderName": "test-app", ......................... folderName
-  "absFsPath": "c:\\Users\\mark\\apps\\test-app", ... folderFsPath
-  "absUriPath": "/C:/Users/mark/apps/test-app" ...... folderUriPath
-  "absParentFolder": "c:\\Users\\mark\\apps", ....... folderParentFsPath
-}
-
-getPathsFromFileDoc absolute{
-  "absFile": "srvr.js", .......................................... fileName
-  "absFsPath": "c:\\Users\\mark\\apps\\test-app\\src\\srvr.js", .. fileFsPath
-  "absUriPath": "/c:/Users/mark/apps/test-app/src/srvr.js" ....... fileUriPath
-  "absFolder": "c:\\Users\\mark\\apps\\test-app\\src", ........... fileParentFsPath
-}
-
-getPathsFromFileDoc relative {
-  "inWorkspace": true, ........................................... inWorkspace
-  "relFsPath": "src\\srvr.js", ................................... fileRelFsPath
-   fileUriPath.slice( folderUriPath.length + 1) .................. fileRelUriPath
-  "relFolder": "src", ............................................ ???? not used
-  "relFile": "srvr.js", .......................................... fileName dup not used
-  "relUriPath": "test-app/src/srvr.js" ........................... folderFileUriPath
-}
-
 testing
   https://code.visualstudio.com/api/working-with-extensions/testing-extension
-
-npm install -g @vscode/vsce
-vsce package
 
 const vscode   = require('vscode');
 const utils    = require('./utils.js');

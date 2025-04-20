@@ -67,7 +67,7 @@ async function getNewMarkItem(mark) {
   return item;
 };
 
-let itemTreeLogCount = 0;
+// let itemTreeLogCount = 0;
 
 async function getItemTree() {                                         //:tuzz;
   const allWsFolders = vscode.workspace.workspaceFolders;
@@ -75,7 +75,7 @@ async function getItemTree() {                                         //:tuzz;
     log('No folders in workspace');
     return [];
   }
-  log('getItemTree', ++itemTreeLogCount);
+  // log('getItemTree', ++itemTreeLogCount);
   const rootItems   = [];
   const marksArray  = Object.values(marks.getGlobalMarks());
   marksArray.sort((a, b) => {

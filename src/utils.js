@@ -277,13 +277,22 @@ function fnv1aHash(str) {
   return hash.toString();
 }
 
+//:wyif;
+async function deleteLine(document, lineNumber) {
+  const line = document.lineAt(lineNumber); 
+  const edit = new vscode.WorkspaceEdit();
+  edit.delete(document.uri, line.rangeIncludingLineBreak); 
+  await vscode.workspace.applyEdit(edit);
+}
+
 async function insertLine(document, lineNumber, lineText) {
   const position = new vscode.Position(lineNumber, 0);
   const edit = new vscode.WorkspaceEdit();
-  edit.insert(document.uri, position, lineText);
+  edit.insert(document.uri, position, lineText + '\n');
   return await vscode.workspace.applyEdit(edit);
 }
 
+//:sl0k;
 async function replaceLine(document, lineNumber, lineText) {
   const line = document.lineAt(lineNumber);
   const edit = new vscode.WorkspaceEdit();
@@ -293,7 +302,8 @@ async function replaceLine(document, lineNumber, lineText) {
 
 module.exports = {
   init, getLog, fnv1aHash, loadStickyBookmarksJson,
-  commentsByLang, keywords, fileExists, insertLine, replaceLine,
+  commentsByLang, keywords, fileExists, 
+  deleteLine, insertLine, replaceLine,
   getPathsFromWorkspaceFolder, getPathsFromFileDoc,
   runOnAllFilesInFolder, getFocusedWorkspaceFolder
 }

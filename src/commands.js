@@ -21,7 +21,7 @@ async function nextCmd() {
 
 async function deleteMarkCmd(item) {
   // log('deleteMarkCmd command, X menu');
-  const document = item.mark.document;
+  const document = item.document;
   switch (item.type) {
     case 'folder': await clearAllFilesCmd(item.mark.folderPath); break;
     case 'file':   await clearFileCmd(document);            break;

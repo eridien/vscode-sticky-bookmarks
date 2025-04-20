@@ -3,7 +3,6 @@ const marks  = require('./marks.js');
 const utils  = require('./utils.js');
 const {log}  = utils.getLog('file');
 
-function getMinCharPos() { return 70; }
 const showLineNumbers    = true;
 const showBreadCrumbs    = true;
 const showCodeWhenCrumbs = true;
@@ -22,10 +21,9 @@ const lineSep         = ' ••';
 
 const keywordSetsByLang = {};
 
-const tokenLen = 6;
 const tokenRegEx  = new RegExp('\\:[0-9a-z]{4};');
 const tokenRegExG = new RegExp('\\:[0-9a-z]{4};', 'g');
-const indentRegEx = /^\s*(\S)/;
+const indentRegEx = /^(\s*)\S/;
 
 function commRegExG(languageId) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
@@ -38,15 +36,31 @@ function commRegExG(languageId) {
   }
 }
 
-function lineRegEx(languageId) {                                       //:38p1;
+function lineRegEx(languageId) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
   if(commRgt !== '') {
     return new RegExp(
-      `^\\s*${commLft}\\s*(\\:[0-9a-z]{4};)\\s*${commRgt}\\s*$`);
+      `^(.*?)${commLft}(.*?)`+
+      `((bookmark)?\\:[0-9a-z]{4};)(.*?)${commRgt}(.*)$`);
   }
   else {
-    return new RegExp(`^\\s*${commLft}\\s*(\\:[0-9a-z]{4};)\\s*$`);
+    return new RegExp(
+          `^(.*?)${commLft}(.*?)((bookmark)?\\:[0-9a-z]{4};)(.*)$`);
   }
+}
+
+//:0hxv;
+function getJunkAndBookmarkToken(lineText, languageId) {
+  const lineRegX      = lineRegEx(languageId);
+  const match         = lineRegX.exec(lineText);
+  if(!match) return {junk:'', bookmarkToken:''};
+  const junk1         = (match[1] ?? '').replaceAll(/\s/g, '');
+  const junk2         = (match[2] ?? '').replaceAll(/\s/g, '');
+  const junk5         = (match[5] ?? '').replaceAll(/\s/g, '');
+  const junk6         = (match[6] ?? '').replaceAll(/\s/g, '');
+  const junk          = junk1 + junk2 + junk5 + junk6;
+  const bookmarkToken = (match[3] ?? '')
+  return {junk, bookmarkToken};
 }
 
 function isKeyWord(languageId, word) {
@@ -231,26 +245,23 @@ async function delMark(document, line, languageId) {
 }
 //  
 
+//:n2bk;
 function getNewTokenLine(indentLen, token, languageId) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
-  return ' '.repeat(indentLen) + commLft + token + commRgt;
+  return ' '.repeat(indentLen) + commLft + 'bookmark' + token + commRgt;
 }
 
+//:pu16;
 async function addTokenAtLine(mark) {
   let   lineNumber = mark.lineNumber; 
   const line       = mark.document.lineAt(lineNumber);
-  let   lineText   = line.text;
-  let   match      = lineRegEx.exec(lineText);
   let   indentLen  = 0;
+  let   lineText   = line.text;
+  const lineRegx   = lineRegEx(mark.languageId);
+  let   match      = lineRegx.exec(lineText);
   if(match) {
-    const oldToken = match[1];
-    log(`addTokenAtLine, line ${lineNumber} already has token ${oldToken}, `+
-        `replacing it with ${mark.token}`);
-    const tokenIdx = lineText.indexOf(oldToken);
-    await utils.replaceLine(mark.document, lineNumber,
-                            lineText.slice(0, tokenIdx) + mark.token +
-                            lineText.slice(tokenIdx + tokenLen));
-    return oldToken;
+    log('err', `addTokenAtLine, line ${lineNumber} already has token`);
+    return null;
   }
   match = indentRegEx.exec(lineText);
   if(!match) {
@@ -268,15 +279,15 @@ async function addTokenAtLine(mark) {
         lineNumber = mark.lineNumber;
       }
       else {
-        indentLen = match.index;
+        indentLen = match[1].length;
       }
     }
   }
-  else indentLen = match.index;
-  log('inserting before line', lineNumber, 'with indent', indentLen);
-  const lineText = getNewTokenLine(indentLen, mark.token, mark.languageId);
+  else 
+    indentLen = match[1].length;
+  lineText = getNewTokenLine(indentLen, mark.token, mark.languageId);
   await utils.insertLine(mark.document, lineNumber, lineText);
-  mark.lineNumber = lineNumber;
+  return lineNumber;
 }
 
 async function getTokensInLine(lineText) {
@@ -284,6 +295,7 @@ async function getTokensInLine(lineText) {
   return [...lineText.matchAll(tokenRegExG)];
 }
 
+//:wl1m;
 async function toggle() {
   const editor = vscode.window.activeTextEditor;
   if (!editor) { log('info', 'Toggle, no active editor'); return; }
@@ -293,12 +305,31 @@ async function toggle() {
   const line       = document.lineAt(lineNumber);
   const lineText   = line.text.trimEnd();
   const languageId = document.languageId;
-  if(tokenRegEx.test(lineText)) {
-    await delMark(document, line, languageId);  }
+  const tokenMatch = tokenRegEx.exec(lineText);
+  if(tokenMatch) {
+    const token = tokenMatch[0];
+    const {junk, bookmarkToken} = 
+            getJunkAndBookmarkToken(lineText, languageId);
+    if(junk.length > 0) {
+      log('toggle, line has token and junk, removing only token');
+      const newLineText = lineText.replace(bookmarkToken, '');
+      await utils.replaceLine(document, lineNumber, newLineText);
+      return;
+    }
+    else {
+      log('toggle, line has token and no junk, removing line');
+      await utils.deleteLine(document, lineNumber);
+    }
+    await marks.delGlobalMark(token);
+  }
   else {
     const mark = await marks.newMark(document, lineNumber);
-    if(!mark) return;
-    await addTokenAtLine(mark);
+  if(!mark) return;
+  const tokenLineNumber = await addTokenAtLine(mark);
+    const position   = new vscode.Position(tokenLineNumber, 0);
+    editor.selection = new vscode.Selection(position, position);
+    editor.revealRange(new vscode.Range(position, position), 
+            vscode.TextEditorRevealType.InCenterIfOutsideViewport);
   }
   marks.dumpGlobalMarks('toggle');
 }
@@ -370,7 +401,7 @@ async function cleanFile(document) {
 
 module.exports = {init, getLabel, bookmarkClick,
                   clearDecoration, justDecorated,
-                  toggle, scrollToPrevNext,
+                  toggle, scrollToPrevNext, delMark,    
                   clearFile, cleanFile};
 
 

@@ -2,8 +2,8 @@ const vscode = require('vscode');
 const utils  = require('./utils.js');
 const {log, start, end} = utils.getLog('mark');
 
-// const DEBUG_REMOVE_MARKS_ON_START = true;
-const DEBUG_REMOVE_MARKS_ON_START = false;
+const DEBUG_REMOVE_MARKS_ON_START = true;
+// const DEBUG_REMOVE_MARKS_ON_START = false;
 
 let globalMarks;
 let context, updateSidebar, addMarksForTokens;
@@ -123,6 +123,7 @@ async function addGlobalMarkIfMissing(token, document, lineNumber) {
   await newMark(document, lineNumber, token);
 }
 
+//:ho3j;
 async function delGlobalMark(token) {
   delete globalMarks[token];
   await context.workspaceState.update('globalMarks', globalMarks);

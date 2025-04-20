@@ -37,6 +37,7 @@ TOKENS IN TEXT ARE GODS
       find global marks to delete
 
 todo
+  command to go to last file on prev/next
   monitor edits for mark changes
   cleanAllFilesCmd on activate
   auto scroll

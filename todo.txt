@@ -219,10 +219,10 @@ codicons:
 
 requires: cmd sidebar text marks utils
 
-init: 
-  cmd 
-  sidebar 
-  text 
+init:        provides glblFuncs ...
+  cmd
+  sidebar      updateSidebar
+  text         addMarksForTokens
   marks
     text.addMarksForTokens 
 
@@ -233,12 +233,15 @@ calls
     text.scrollToPrevNext
     text.clearFile
     text.cleanFile
-    text.glblFuncs.delMark
+
   sidebar
     text.getLabel
     text.clearDecoration
     text.bookmarkClick
-    cmd.glblFuncs.cleanAllFilesCmd
+    marks.getGlobalMarks
+    marks.delGlobalMark
+    marks.waitForInit
+  
   text
     marks.delGlobalMark
     marks.replaceGlobalMark
@@ -246,9 +249,7 @@ calls
     marks.dumpGlobalMarks
     marks.addGlobalMarkIfMissing
     marks.delGlobalMarksForFile
-    sidebar.glblFuncs.updateSidebar
-  marks
-    text.glblFuncs.addMarksForTokens
-    sidebar.glblFuncs.updateSidebar
     
-
+  marks
+    text.glblFuncs.addMarksForTokens *
+    sidebar.glblFuncs.updateSidebar  *

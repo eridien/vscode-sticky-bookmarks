@@ -9,7 +9,7 @@ let glblFuncs;
 function init(glblFuncsIn) {
   glblFuncs = glblFuncsIn;
   // log('commands initialized');
-  return {cleanAllFilesCmd, clearAllFilesCmd};
+  return {};
 }
 
 async function toggleCmd() {
@@ -35,7 +35,7 @@ async function deleteMarkCmd(item) {
     case 'file':   await clearFileCmd(document);            break;
     default: {
       const line = document.lineAt(item.mark.lineNumber);
-      await glblFuncs.delMark(document, line, item.mark.languageId);
+      await text.delMark(document, line, item.mark.languageId);
       sidebar.updateSidebar();
     }
   }
@@ -71,9 +71,55 @@ async function cleanAllFilesCmd() {
   await utils.runOnAllFilesInFolder(cleanFileCmd);
 }
 
+let sideBarIsVisible = false;
+let firstVisible     = true;
+
+async function sidebarVisibleChange(visible) {
+  // log('sidebarVisibleChange', visible);
+  if(visible && !sideBarIsVisible) {
+    if(firstVisible) {
+      firstVisible = false;
+      await glblFuncs.cleanAllFilesCmd();
+    }
+   sidebar.updateSidebar();
+  }
+  sideBarIsVisible = visible;
+}
+
+async function changeDocument() {
+  // log('changeDocument', document.uri.path);
+ sidebar.updateSidebar();
+}
+
+async function changeEditor(editor) {
+  if(!editor || !editor.document) {
+    log('changeEditor, no active editor');
+    return;
+  }
+  // log('changeEditor', editor.document.uri.path);
+ sidebar.updateSidebar();
+}
+async function changeVisEditors() {
+  // log('changeVisEditors', editors.length);
+ sidebar.updateSidebar();
+}
+
+async function changeSelection() {
+  // log('changeSelection');
+  // const uri      = editor.document.uri;
+  // const position = editor.selection.active;
+  // log('changeSelection', uri, position.line);
+ sidebar.updateSidebar();
+  text.clearDecoration();
+  // treeView.selection = []; // doesn't work
+}
+
+
 module.exports = { init, toggleCmd, prevCmd, nextCmd,
                    deleteMarkCmd,
                    clearFileCmd, clearAllFilesCmd,
-                   cleanFileCmd, cleanAllFilesCmd };
-
+                   cleanFileCmd, cleanAllFilesCmd,
+                   sidebarVisibleChange, 
+                   changeDocument, changeEditor, 
+                   changeVisEditors, changeSelection };
 

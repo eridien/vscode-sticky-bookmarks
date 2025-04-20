@@ -53,20 +53,17 @@ async function activate(context) {
   });
 
   Object.assign(glblFuncs,           cmd.init(glblFuncs));
-  Object.assign(glblFuncs, await sidebar.init(
-                   glblFuncs, sidebarProvider, treeView));
-  Object.assign(glblFuncs, await    text.init(glblFuncs));
+  Object.assign(glblFuncs, await sidebar.init(glblFuncs, sidebarProvider));
+  Object.assign(glblFuncs, await    text.init());
   Object.assign(glblFuncs, await   marks.init(context, glblFuncs));
 
   treeView.onDidChangeVisibility(async event => {
-    await sidebar.sidebarVisibleChange(event.visible);
+    await cmd.sidebarVisibleChange(event.visible);
   });
-
   vscode.window.onDidChangeVisibleTextEditors(async editors => {
     console.log('Currently visible editors:', editors);
-    await sidebar.changeVisEditors(editors);
+    await cmd.changeVisEditors(editors);
   });
-
   vscode.workspace.onDidChangeTextDocument(async event => {
     const document = event.document;
     const uri = document.uri;
@@ -76,13 +73,11 @@ async function activate(context) {
       // console.log('Ignored non-file changeTextDocument', uri.path);
       return;
     }
-    await sidebar.changeDocument(document);
+    await cmd.changeDocument(document);
   });
-
   vscode.window.onDidChangeActiveTextEditor(async editor => {
-    await sidebar.changeEditor(editor);
+    await cmd.changeEditor(editor);
   });
-
   vscode.window.onDidChangeTextEditorSelection(async event => {
     const editor = event.textEditor;
     const uri    = editor.document.uri;
@@ -92,7 +87,7 @@ async function activate(context) {
       // console.log('Ignored non-file changeTextDocument', uri.path);
       return;
     }
-    await sidebar.changeSelection(editor);
+    await cmd.changeSelection(editor);
   });
 
   context.subscriptions.push(toggleCmd, prevCmd, nextCmd, 

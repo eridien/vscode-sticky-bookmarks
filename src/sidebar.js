@@ -6,12 +6,11 @@ const {log}  = utils.getLog('side');
 
 const showPointers = true;
 
-let glblFuncs, provider, itemTree;
+let provider, itemTree;
 
 const closedFolders = new Set();
 
 async function init(glblFuncsIn, providerIn) {
-  glblFuncs = glblFuncsIn;
   provider  = providerIn;
   return {updateSidebar};
 }
@@ -225,52 +224,6 @@ function updateSidebar(item) {
   provider._onDidChangeTreeData.fire(item);
 }
 
-let sideBarIsVisible = false;
-let firstVisible     = true;
-
-async function sidebarVisibleChange(visible) {
-  // log('sidebarVisibleChange', visible);
-  if(visible && !sideBarIsVisible) {
-    if(firstVisible) {
-      firstVisible = false;
-      await glblFuncs.cleanAllFilesCmd();
-    }
-    updateSidebar();
-  }
-  sideBarIsVisible = visible;
-}
-
-async function changeDocument() {
-  // log('changeDocument', document.uri.path);
-  updateSidebar();
-}
-
-async function changeEditor(editor) {
-  if(!editor || !editor.document) {
-    log('changeEditor, no active editor');
-    return;
-  }
-  // log('changeEditor', editor.document.uri.path);
-  updateSidebar();
-}
-async function changeVisEditors() {
-  // log('changeVisEditors', editors.length);
-  updateSidebar();
-}
-
-async function changeSelection() {
-  // log('changeSelection');
-  // const uri      = editor.document.uri;
-  // const position = editor.selection.active;
-  // log('changeSelection', uri, position.line);
-  updateSidebar();
-  text.clearDecoration();
-  // treeView.selection = []; // doesn't work
-}
-
-module.exports = { init, SidebarProvider, itemClickCmd, 
-                   updateSidebar, sidebarVisibleChange, 
-                   changeDocument, changeEditor, 
-                   changeVisEditors, changeSelection};
+module.exports = { init, SidebarProvider, itemClickCmd, updateSidebar};
 
 

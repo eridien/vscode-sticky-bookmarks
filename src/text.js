@@ -8,15 +8,12 @@ const showLineNumbers    = true;
 const showBreadCrumbs    = true;
 const showCodeWhenCrumbs = true;
 
-let glblFuncs;
-
-async function init(glblFuncsIn) {
-  glblFuncs = glblFuncsIn;
+async function init() {
   for(const [lang, keywords] of Object.entries(utils.keywords())) {
     const set = new Set(keywords);
     keywordSetsByLang[lang] = set;
   }
-  return {delMark, addMarksForTokens};
+  return {addMarksForTokens};
 }
 
 const crumbSepLft     = '● ';
@@ -167,13 +164,11 @@ async function gotoAndDecorate(document, lineNumber) {
 }
 
 const clearDecoration = () => {
-  if(!glblFuncs.updateSidebar || 
-     !tgtEditor || justDecorated) return;
+  if(!tgtEditor || justDecorated) return;
   tgtEditor.setDecorations(tgtDecorationType, []);
   tgtDecorationType.dispose();
   tgtFocusListener.dispose();
   tgtEditor = null;
-  glblFuncs.updateSidebar();
 };
 
 async function bookmarkClick(item) {

@@ -250,7 +250,7 @@ async function toggle() {
   if(tokenRegEx.test(lineText)) {
     await delMark(document, line, languageId);  }
   else {
-    const mark = await marks.newGlobalMark(document, lineNumber);
+    const mark = await marks.newMark(document, lineNumber);
     if(!mark) return;
     await addTokenToLine(mark);
   }
@@ -306,39 +306,19 @@ async function cleanFile(document) {
   for(let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);
     if(!tokenRegEx.test(line.text)) continue;
-    const mark = await marks.newGlobalMark(document, line.lineNumber);
+    const mark = await marks.newMark(document, line.lineNumber);
     await addTokenToLine(mark);
   }
   marks.dumpGlobalMarks('cleanFileCmd');
 }
 
-async function runOnAllFiles(func, folderPath) {
-  let folder;
-  if(!folderPath) {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) { log('info', 'No active editor'); return; }
-    const document = editor.document;
-    folder = vscode.workspace.getWorkspaceFolder(document.uri);
+async function runOnAllFiles(func) {
+  let folderFsPath = utils.getFocusedWorkspaceFolder()?.uri.fsPath;
+  if (!folderFsPath) { 
+    log('info err', 'Folder not found in workspace'); 
+    return; 
   }
-  else {
-    const folders = vscode.workspace.workspaceFolders;
-    if (!folders) { log('info', 'No folders in workspace'); return; }
-    folder = folders.find(folder => folder.uri.path === folderPath);
-    if(!folder) { 
-      log('info', 'runOnAllFiles, Folder not found in workspace'); 
-      return; 
-    }
-  }
-  const pattern  = new vscode.RelativePattern(folder, '**/*');
-  const uris     = await vscode.workspace.findFiles(
-                               pattern, '**/node_modules/**');
-  for (const uri of uris) {
-    try {
-      const document = await vscode.workspace.openTextDocument(uri);
-      await func(document);
-    }
-    catch(e) {if(e){}};
-  }
+  await utils.runOnEveryFileInFolder(folderFsPath, func);
 }
 
 module.exports = {init, getLabel, bookmarkClick,

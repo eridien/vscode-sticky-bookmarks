@@ -34,6 +34,7 @@ TOKENS IN TEXT ARE GODS
       find global marks to delete
 
 todo
+  monitor edits for mark changes
   cleanAllFilesCmd on activate
   scroll to top for functions
   check tokens on every edit

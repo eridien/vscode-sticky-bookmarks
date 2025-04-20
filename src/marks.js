@@ -101,16 +101,17 @@ function getRandomToken() {
   return `:${randHash};`;
 }
 
-async function newGlobalMark(document, lineNumber) {
+async function newMark(document, lineNumber) {                         //:bd5z;
   const token = getRandomToken();
-  const mark  = {token, document, lineNumber, type:'bookmark',
+  const mark  = {token, document, lineNumber,
                  languageId: document.languageId};
   const filePaths = utils.getPathsFromFileDoc(document); 
-  if(!filePaths.inWorkspace) return null;
+  if(!filePaths?.inWorkspace) return null;
   Object.assign(mark, filePaths);
   globalMarks[token] = mark;
   await context.workspaceState.update('globalMarks', globalMarks);
   glblFuncs.updateSidebar();
+  dumpGlobalMarks('newMark');
   return mark;
 }
 
@@ -140,7 +141,7 @@ async function delGlobalMarksForFile(document) {
 }
 
 module.exports = {init, waitForInit, getGlobalMarks, dumpGlobalMarks,
-                  newGlobalMark, delGlobalMark, replaceGlobalMark,
+                  newMark, delGlobalMark, replaceGlobalMark,
                   delGlobalMarksForFile}
 
 

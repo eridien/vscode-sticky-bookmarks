@@ -61,9 +61,9 @@ async function cleanFileCmd(document) {
   await text.cleanFile(document)
 }
 
-async function clearAllFilesCmd(folderPath) {
+async function clearAllFilesCmd() {                          //:jsgi;
   log('clearAllFilesCmd command called');
-  await text.runOnAllFiles(clearFileCmd, folderPath);
+  await text.runOnAllFiles(clearFileCmd);
 }
 
 async function cleanAllFilesCmd(folderPath) {

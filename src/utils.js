@@ -79,6 +79,20 @@ async function workspaceFileExists(relativePath) {
   return fileExists(filePath);
 }
 
+async function runOnEveryFileInFolder(folderFsPath, func) {
+  const folderUri = vscode.Uri.file(folderFsPath);
+  const pattern = new vscode.RelativePattern(folderUri, '**/*');
+  const files = await vscode.workspace.findFiles(pattern, '**/node_modules/**');
+  for(const file of files) {
+    const uri = vscode.Uri.file(file.fsPath);
+    let document;
+    try {
+      document = await vscode.workspace.openTextDocument(uri);
+    } catch(_e) {continue}
+    await func(document);
+  }
+}
+
 async function readWorkspaceFile(relativePath) {
   const filePath = await workspaceFilePath(relativePath);
   if (!filePath) {
@@ -260,6 +274,7 @@ function fnv1aHash(str) {
 module.exports = {
   init, getLog, fnv1aHash, loadStickyBookmarksJson,
   commentsByLang, keywords, fileExists,
-  getPathsFromWorkspaceFolder, getPathsFromFileDoc
+  getPathsFromWorkspaceFolder, getPathsFromFileDoc,
+  runOnEveryFileInFolder, getFocusedWorkspaceFolder
 }
 

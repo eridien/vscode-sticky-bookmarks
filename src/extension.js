@@ -8,13 +8,11 @@ const {start, end} = utils.getLog('extn');
 
 async function activate(context) {
   start('activating extension');
-  const glblFuncs = {};
-  Object.assign(glblFuncs, utils.init(context, glblFuncs));
+  utils.init(context);
   if(!await utils.loadStickyBookmarksJson()) {
     end('extension');
     return;
   }
-  
 	const toggleCmd = vscode.commands.registerCommand(
                           'sticky-bookmarks.toggleCmd',        cmd.toggleCmd);
 	const prevCmd = vscode.commands.registerCommand(
@@ -52,10 +50,9 @@ async function activate(context) {
     treeDataProvider: sidebarProvider,
   });
 
-  Object.assign(glblFuncs,           cmd.init(glblFuncs));
-  Object.assign(glblFuncs, await sidebar.init(glblFuncs, sidebarProvider));
-  Object.assign(glblFuncs, await    text.init());
-  Object.assign(glblFuncs, await   marks.init(context, glblFuncs));
+  const updateSidebar     = await sidebar.init(sidebarProvider);
+  const addMarksForTokens = await text.init();
+  await marks.init(context, updateSidebar, addMarksForTokens);
 
   treeView.onDidChangeVisibility(async event => {
     await cmd.sidebarVisibleChange(event.visible);

@@ -4,14 +4,6 @@ const text    = require('./text.js');
 const utils   = require('./utils.js');
 const {log}   = utils.getLog('cmds');
 
-let glblFuncs;
-
-function init(glblFuncsIn) {
-  glblFuncs = glblFuncsIn;
-  // log('commands initialized');
-  return {};
-}
-
 async function toggleCmd() {
   log('toggle command called');
   await text.toggle();
@@ -115,7 +107,7 @@ async function changeSelection() {
 }
 
 
-module.exports = { init, toggleCmd, prevCmd, nextCmd,
+module.exports = { toggleCmd, prevCmd, nextCmd,
                    deleteMarkCmd,
                    clearFileCmd, clearAllFilesCmd,
                    cleanFileCmd, cleanAllFilesCmd,

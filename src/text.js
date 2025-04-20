@@ -13,7 +13,7 @@ async function init() {
     const set = new Set(keywords);
     keywordSetsByLang[lang] = set;
   }
-  return {addMarksForTokens};
+  return addMarksForTokens;
 }
 
 const crumbSepLft     = '● ';

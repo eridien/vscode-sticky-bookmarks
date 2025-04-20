@@ -6,13 +6,14 @@ const {log, start, end} = utils.getLog('mark');
 const DEBUG_REMOVE_MARKS_ON_START = false;
 
 let globalMarks;
-let context, glblFuncs;
+let context, updateSidebar, addMarksForTokens;
 let initFinished = false;
 
-async function init(contextIn, glblFuncsIn) {
+async function init(contextIn, updateSidebarIn, addMarksForTokensIn) {
   start('init marks');
-  context   = contextIn;
-  glblFuncs = glblFuncsIn;
+  context           = contextIn;
+  updateSidebar     = updateSidebarIn;
+  addMarksForTokens = addMarksForTokensIn;
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders || workspaceFolders.length === 0) {
     globalMarks = {};
@@ -25,7 +26,7 @@ async function init(contextIn, glblFuncsIn) {
   globalMarks = context.workspaceState.get('globalMarks', {});
   for(const folder of workspaceFolders) {
     await utils.runOnAllFilesInFolder(
-      glblFuncs.addMarksForTokens, folder.uri.fsPath);
+      addMarksForTokens, folder.uri.fsPath);
   }
   for(const [token, mark] of Object.entries(globalMarks)) {
     const markUri    = vscode.Uri.file(mark.fileFsPath)
@@ -114,7 +115,7 @@ async function newMark(document, lineNumber, token) {                         //
   Object.assign(mark, filePaths);
   globalMarks[token] = mark;
   await context.workspaceState.update('globalMarks', globalMarks);
-  glblFuncs.updateSidebar();
+  updateSidebar();
   dumpGlobalMarks('newMark');
   return mark;
 }
@@ -127,7 +128,7 @@ async function addGlobalMarkIfMissing(token, document, lineNumber) {
 async function delGlobalMark(token) {
   delete globalMarks[token];
   await context.workspaceState.update('globalMarks', globalMarks);
-  glblFuncs.updateSidebar();
+  updateSidebar();
   dumpGlobalMarks('delGlobalMark');
 }
 
@@ -135,7 +136,7 @@ async function replaceGlobalMark(oldToken, newToken) {
   globalMarks[newToken] = globalMarks[oldToken];
   delete globalMarks[oldToken];
   globalMarks[newToken].token = newToken;
-  glblFuncs.updateSidebar();
+  updateSidebar();
   dumpGlobalMarks('replaceGlobalMark');
 }
 
@@ -146,7 +147,7 @@ async function delGlobalMarksForFile(document) {
         delete globalMarks[token];
   }
   await context.workspaceState.update('globalMarks', globalMarks);
-  glblFuncs.updateSidebar();
+  updateSidebar();
 }
 
 module.exports = {init, waitForInit, getGlobalMarks, dumpGlobalMarks,

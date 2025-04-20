@@ -10,9 +10,9 @@ let provider, itemTree;
 
 const closedFolders = new Set();
 
-async function init(glblFuncsIn, providerIn) {
+async function init(providerIn) {
   provider  = providerIn;
-  return {updateSidebar};
+  return updateSidebar;
 }
 
 async function getNewFolderItem(mark) {

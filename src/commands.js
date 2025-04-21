@@ -19,7 +19,6 @@ async function nextCmd() {
   await text.scrollToPrevNext(true);
 }
 
-//:e4d3;
 async function clearFileCmd(document) {
   if(!document) {
     // log('clearFileCmd command called');
@@ -50,7 +49,7 @@ async function cleanFileCmd(document) {
   await text.cleanFile(document)
 }
 
-async function clearAllFilesCmd() {                          //:jsgi;
+async function clearAllFilesCmd() {                          //
   // log('clearAllFilesCmd command called');
   await utils.runOnAllFilesInFolder(clearFileCmd);
 }

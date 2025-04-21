@@ -39,7 +39,7 @@ function installBookmarksJson(configText) {
   return true;
 }
 
-function getFocusedWorkspaceFolder() {                                 //:1vxx;
+function getFocusedWorkspaceFolder() {                                 //
   const editor = vscode.window.activeTextEditor;
   if (!editor) return null;
   return vscode.workspace.getWorkspaceFolder(editor.document.uri);
@@ -218,7 +218,6 @@ function getLog(module) {
   const start = function(name) {
     const startTime = Date.now();
     timers[name]    = startTime;
-    //bookmark:y8xd;
     const line      = `${module}: ${name} started`;
     outputChannel.appendLine(line);
     console.log(line);
@@ -288,7 +287,6 @@ function fnv1aHash(str) {
   return hash.toString();
 }
 
-//:wyif;
 async function deleteLine(document, lineNumber) {
   const line = document.lineAt(lineNumber); 
   const edit = new vscode.WorkspaceEdit();
@@ -303,7 +301,6 @@ async function insertLine(document, lineNumber, lineText) {
   return await vscode.workspace.applyEdit(edit);
 }
 
-//:sl0k;
 async function replaceLine(document, lineNumber, lineText) {
   const line = document.lineAt(lineNumber);
   const edit = new vscode.WorkspaceEdit();

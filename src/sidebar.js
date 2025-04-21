@@ -15,7 +15,6 @@ async function init(providerIn) {
   return updateSidebar;
 }
 
-//:7rlm;
 async function getNewFolderItem(mark) {
   const {folderIndex, folderName, folderFsPath, folderUriPath} = mark;
   const id    = utils.fnv1aHash(folderUriPath);
@@ -36,7 +35,6 @@ async function getNewFolderItem(mark) {
   return item;
 }
 
-//:aguf;
 async function getNewFileItem(mark, children) { 
   const label =  '📄 ' + mark.fileRelUriPath;
   const {folderIndex, folderName, folderFsPath, folderUriPath, 
@@ -55,7 +53,6 @@ async function getNewFileItem(mark, children) {
   return item;
 };
 
-//:r8z9;
 async function getNewMarkItem(mark) {
   const label = await text.getLabel(mark);
   const item  = new vscode.TreeItem(label,
@@ -69,7 +66,6 @@ async function getNewMarkItem(mark) {
   return item;
 };
 
-//:ufim;
 async function getItemTree() {
   const allWsFolders = vscode.workspace.workspaceFolders;
   if (!allWsFolders) {
@@ -91,7 +87,6 @@ async function getItemTree() {
        b.fileRelUriPath.toLowerCase()) return -1;
     return (a.lineNumber - b.lineNumber);
   });
-//:hx8x;
   let bookmarks;
   let lastFolderUriPath = null, lastFileFsPath;
   for(const mark of marksArray) {
@@ -136,7 +131,6 @@ async function getItemTree() {
       bookmarks = [];
       rootItems.push(await getNewFileItem(mark, bookmarks));
     }
-//:4s9h;
     bookmarks.push(await getNewMarkItem(mark));
   }
   const editor = vscode.window.activeTextEditor;
@@ -191,7 +185,6 @@ async function getItemTree() {
   return rootItems;
 }
 
-//:9lza;
 async function itemClickCmd(item) {
   text.clearDecoration();
   if(item.type === 'folder') {
@@ -211,7 +204,6 @@ async function itemClickCmd(item) {
   }
 }
 
-//:0qrj;
 function updateSidebar(item) {
   provider._onDidChangeTreeData.fire(item);
 }

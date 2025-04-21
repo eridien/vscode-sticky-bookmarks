@@ -4,13 +4,10 @@ vsce package
 bugs
   junk in keyboard shortcuts menu
   loading is slow
-  removing workspace folder remove all marks
+  removing workspace folder gives inifinite loop removing one mark
   clear all files slow -- need busy indicator
   get tree runs four times on item click
       throttle updateSidebar
-  duplicate ids
-  multiple items for one mark
-  showing sidebar in this ws gives "reading tolowercase"
 
 why gen2
   sticky

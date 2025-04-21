@@ -9,7 +9,6 @@ let globalMarks;
 let context, updateSidebar, addMarksForTokens;
 let initFinished = false;
 
-//:h9mu;
 async function init(contextIn, updateSidebarIn, addMarksForTokensIn) {
   start('init marks');
   context           = contextIn;
@@ -60,8 +59,10 @@ function waitForInit() {
   });
 }
 
-//bookmark:jxaf;
-function getGlobalMark(token) {return globalMarks[token]}
+function getGlobalMark(token) {
+  return globalMarks[token];
+}
+
 function putGlobalMark(token) {globalMarks[token] = token}
 function delGlobalMark(token) {delete globalMarks[token]}
 function getGlobalMarks()     {return globalMarks}
@@ -123,7 +124,6 @@ function getRandomToken() {
   return `:${randHash};`;
 }
 
-//:fro4;
 async function newGlobalMark(document, lineNumber, token, save) {
   token ??= getRandomToken();
   const mark  = {token, document, lineNumber,

@@ -3,7 +3,7 @@
   "displayName": "Sticky Bookmarks",
   "publisher": "eridien",
   "description": "Lock bookmarks to code using inline tokens.",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "type": "commonjs",
   "engines": {
     "vscode": "^1.99.0"

@@ -37,7 +37,6 @@ function lineRegEx(languageId) {
   }
 }
 
-//:0hxv;
 function getJunkAndBookmarkToken(lineText, languageId) {
   const lineRegX      = lineRegEx(languageId);
   const match         = lineRegX.exec(lineText);
@@ -218,13 +217,21 @@ async function bookmarkClick(item) {
   return;
 }
 
-//:n2bk;
 function getNewTokenLine(indentLen, token, languageId) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
   return ' '.repeat(indentLen) + commLft + 'bookmark' + token + commRgt;
 }
 
-//:pu16;
+//bookmark:kd8i;
+async function replaceLineInDocument(document, lineNumber, newText) {
+  if (lineNumber < 0 || lineNumber >= document.lineCount) return;
+  const uri = document.uri;
+  const edit = new vscode.WorkspaceEdit();
+  const line = document.lineAt(lineNumber);
+  edit.replace(uri, line.range, newText);
+  await vscode.workspace.applyEdit(edit);
+}
+
 async function addTokenAtLine(mark) {
   let   lineNumber = mark.lineNumber; 
   const line       = mark.document.lineAt(lineNumber);
@@ -268,7 +275,6 @@ async function getTokensInLine(lineText) {
   return [...lineText.matchAll(tokenRegExG)];
 }
 
-//bookmark:nvba;
 async function delMarkFromLineAndGlobal(document, lineNumber, save = true) {
   const line       = document.lineAt(lineNumber);
   const lineText   = line.text.trimEnd();
@@ -296,7 +302,6 @@ async function delMarkFromLineAndGlobal(document, lineNumber, save = true) {
   else return false;
 }
 
-//:wl1m;
 async function toggle() {
   const editor = vscode.window.activeTextEditor;
   if (!editor) { log('info', 'Toggle, no active editor'); return; }
@@ -353,7 +358,7 @@ async function addMarksForTokens(document) {
   }
 }
 
-//bookmark:dzwf;
+//bookmark:r2yf;
 async function runOnAllTokensInDoc(document, getPos, getLine, func) {
   const text = document.getText();
   for (const match of text.matchAll(tokenRegExG)) {
@@ -366,7 +371,6 @@ async function runOnAllTokensInDoc(document, getPos, getLine, func) {
   }
 }
 
-//:7lc3;
 async function clearFile(document, saveMarks = true) {
   let haveDel = false;
   await runOnAllTokensInDoc(document, true, false, async (params) => {
@@ -377,16 +381,33 @@ async function clearFile(document, saveMarks = true) {
   if(haveDel && saveMarks) await marks.saveGlobalMarks();
 }
 
+//bookmark:51ha;
 async function cleanFile(document) {
+  const fileFsPath = document.uri.fsPath;
+  let haveMarkChg = false;
   const fileMarksByToken = {};
-  await runOnAllTokensInDoc(document, true, false, async (param) => {
-    fileMarksByToken[param.token] = param;
+  await runOnAllTokensInDoc(document, true, true, async (fileMark) => {
+    const {position, lineText, token} = fileMark;
+    const lineNumber = position.line;
+    const globalMark = marks.getGlobalMark[token];
+    if(globalMark && (globalMark.fileFsPath != fileFsPath || 
+                      globalMark.lineNumber != lineNumber)) {
+      const newMark = await marks.newGlobalMark(
+                                      document, lineNumber);
+      const newToken = newMark.token;
+      fileMarksByToken[newToken] = fileMark;
+      const newLineText = lineText.replace(token, newToken);
+      await replaceLineInDocument(document, lineNumber, newLineText);
+      haveMarkChg = true;
+      log(`cleanFile, replaced duplicate token, ${token} -> ${newMark.token}`);    
+      return;
+    }
+    fileMarksByToken[fileMark.token] = fileMark;
   });
   const globalMarksByToken = marks.getMarksForFile(document.uri.path);
-  let haveMarkChg = false;
-  for(const [token, param] of Object.entries(fileMarksByToken)) {
+  for(const [token, fileMark] of Object.entries(fileMarksByToken)) {
     if(!globalMarksByToken[token]) {
-      await marks.newGlobalMark(document, param.position.line, token);
+      await marks.newGlobalMark(document, fileMark.position.line, token);
       haveMarkChg = true;
     }
   }

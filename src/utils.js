@@ -137,7 +137,6 @@ function getPathsFromWorkspaceFolder(folder) {
   const folderFsPath       = uri.fsPath;
   const folderUriPath      = uri.path;
   const wsPaths = {folderIndex, folderName, folderFsPath, folderUriPath};
-  // log('getPathsFromWorkspaceFolder', wsPaths);  
   return wsPaths;
 }
 
@@ -152,7 +151,6 @@ function getPathsFromFileDoc(doc) {
   const inWorkspace = !!wsFolder;
   if(!inWorkspace) {
     filePaths.inWorkspace = false;
-    // log('getPathsFromFileDoc', filePaths);
     return filePaths;
   }
   else {
@@ -161,7 +159,6 @@ function getPathsFromFileDoc(doc) {
     const fileRelUriPath    = fileUriPath.slice( folderUriPath.length + 1);
     const relFilePaths      = {inWorkspace, fileRelUriPath};
     Object.assign(filePaths, wsPaths, relFilePaths);
-    // log('getPathsFromFileDoc', filePaths);
     return filePaths;
   }
 }
@@ -213,6 +210,7 @@ function getLog(module) {
   const start = function(name) {
     const startTime = Date.now();
     timers[name]    = startTime;
+    //bookmark:y8xd;
     const line      = `${module}: ${name} started`;
     outputChannel.appendLine(line);
     console.log(line);

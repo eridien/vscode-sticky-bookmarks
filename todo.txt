@@ -10,6 +10,7 @@ bugs
       throttle updateSidebar
   duplicate ids
   multiple items for one mark
+  showing sidebar in this ws gives "reading tolowercase"
 
 why gen2
   sticky
@@ -40,6 +41,7 @@ TOKENS IN TEXT ARE GODS
       find global marks to delete
 
 todo
+  don't show bookmarks in compressed label text
   always open view, folder, or file when new mark
   hide all marks and restore on any edit
   command to go to last file on prev/next

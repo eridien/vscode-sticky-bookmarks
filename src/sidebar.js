@@ -33,11 +33,6 @@ async function getNewFolderItem(mark) {
     title:     'Item Clicked',
     arguments: [item],
   }
-  // if(item.id == lastFolderId) debugger;
-  // lastFolderId =  item.id;
-
-  // log('');
-  // log('folder', item.folderName, item.id);
   return item;
 }
 
@@ -57,7 +52,6 @@ async function getNewFileItem(mark, children) {
     title:     'Item Clicked',
     arguments: [item],
   }
-  // log('file  ', item.fileName, item.id);
   return item;
 };
 
@@ -72,7 +66,6 @@ async function getNewMarkItem(mark) {
     title:   'Item Clicked',
     arguments: [item],
   }
-  // log('mark  ', item.label.slice(0,30), item.id);
   return item;
 };
 
@@ -83,7 +76,6 @@ async function getItemTree() {
     log('getItemTree, No folders in workspace');
     return [];
   }
-  // log('getItemTree', ++itemTreeLogCount);
   const rootItems   = [];
   const marksArray  = Object.values(marks.getGlobalMarks());
   marksArray.sort((a, b) => {
@@ -199,7 +191,6 @@ async function getItemTree() {
 
 //:9lza;
 async function itemClickCmd(item) {
-  // log('itemClickCmd');
   text.clearDecoration();
   if(item.type === 'folder') {
     const folderItem = 

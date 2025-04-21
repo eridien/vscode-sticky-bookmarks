@@ -129,6 +129,14 @@ async function writeWorkspaceFile(relativePath, textData) {
   return true;
 }
 
+function getLineFromTextAtOffset(text, offset) {
+  const before = text.lastIndexOf('\n', offset - 1);
+  const after  = text.indexOf('\n', offset);
+  const lineStart = before === -1 ? 0 : before + 1;
+  const lineEnd = after === -1 ? text.length : after;
+  return text.slice(lineStart, lineEnd);
+}
+
 function getPathsFromWorkspaceFolder(folder) {   
   if(!folder) return null;
   const uri                = folder.uri;
@@ -305,7 +313,7 @@ async function replaceLine(document, lineNumber, lineText) {
 
 module.exports = {
   init, getLog, fnv1aHash, loadStickyBookmarksJson,
-  commentsByLang, keywords, fileExists, 
+  commentsByLang, keywords, fileExists, getLineFromTextAtOffset,
   deleteLine, insertLine, replaceLine,
   getPathsFromWorkspaceFolder, getPathsFromFileDoc,
   runOnAllFilesInFolder, getFocusedWorkspaceFolder

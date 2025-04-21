@@ -61,6 +61,13 @@ function waitForInit() {
 }
 
 function getGlobalMarks() { return globalMarks; }
+function delGlobalMark(token) {delete globalMarks[token]}
+
+async function saveGlobalMarks() {
+  await context.workspaceState.update('globalMarks', globalMarks);
+  updateSidebar();
+  dumpGlobalMarks('saveGlobalMarks');
+}
 
 function dumpGlobalMarks(caller, list, dump) {
   caller = caller + ' marks: ';
@@ -106,7 +113,7 @@ function getRandomToken() {
 }
 
 //:fro4;
-async function newMark(document, lineNumber, token) {
+async function newGlobalMark(document, lineNumber, token) {
   token ??= getRandomToken();
   const mark  = {token, document, lineNumber,
                  languageId: document.languageId};
@@ -114,23 +121,21 @@ async function newMark(document, lineNumber, token) {
   if(!filePaths?.inWorkspace) return null;
   Object.assign(mark, filePaths);
   globalMarks[token] = mark;
-  await context.workspaceState.update('globalMarks', globalMarks);
-  updateSidebar();
-  dumpGlobalMarks('newMark');
+  await saveGlobalMarks();
+  dumpGlobalMarks('newGlobalMark');
   return mark;
 }
 
 async function addGlobalMarkIfMissing(token, document, lineNumber) {
   if(globalMarks[token]) return;
-  await newMark(document, lineNumber, token);
+  await newGlobalMark(document, lineNumber, token);
 }
 
 //:ho3j;
-async function delGlobalMark(token) {
+async function delGlobalMarkAndSave(token) {
   delete globalMarks[token];
-  await context.workspaceState.update('globalMarks', globalMarks);
-  updateSidebar();
-  dumpGlobalMarks('delGlobalMark');
+  await saveGlobalMarks();
+  dumpGlobalMarks('delGlobalMarkAndSave');
 }
 
 async function replaceGlobalMark(oldToken, newToken) {
@@ -144,15 +149,15 @@ async function replaceGlobalMark(oldToken, newToken) {
 async function delGlobalMarksForFile(document) {
   const docUriPath = document.uri.path;
   for(const [token, mark] of Object.entries(globalMarks)) {
-    if(mark.fileRelUriPath.startsWith(docUriPath)) 
+    if(mark.fileUriPath.startsWith(docUriPath)) 
         delete globalMarks[token];
   }
-  await context.workspaceState.update('globalMarks', globalMarks);
-  updateSidebar();
+  await saveGlobalMarks();
 }
 
-module.exports = {init, waitForInit, getGlobalMarks, dumpGlobalMarks,
-                  newMark, delGlobalMark, replaceGlobalMark,
+module.exports = {init, waitForInit, getGlobalMarks, dumpGlobalMarks, 
+                  newGlobalMark, delGlobalMark, replaceGlobalMark,
+                  saveGlobalMarks, delGlobalMarkAndSave,
                   delGlobalMarksForFile, addGlobalMarkIfMissing}
 
 

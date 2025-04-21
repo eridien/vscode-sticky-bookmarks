@@ -195,7 +195,7 @@ async function bookmarkClick(item) {
   if(tokenMatches.length === 0) {
     log('itemClickCmd, no token in line', mark.lineNumber,
         'of', mark.fileName, ', removing GlobalMark', mark.token);
-    await marks.delGlobalMark(mark.token);
+    await marks.delGlobalMarkAndSave(mark.token);
   }
   else {
     while(tokenMatches.length > 1 && tokenMatches[0][0] !== mark.token) {
@@ -203,7 +203,7 @@ async function bookmarkClick(item) {
 
       // remove token from line also
 
-      await marks.delGlobalMark(foundToken);
+      await marks.delGlobalMarkAndSave(foundToken);
       tokenMatches.shift();
     }
     const foundToken = tokenMatches[0][0];
@@ -266,9 +266,8 @@ async function getTokensInLine(lineText) {
   return [...lineText.matchAll(tokenRegExG)];
 }
 
-//:k1au;
-async function delMark(document, lineNumber) {
-  if(document.lineCount == 0) return;
+//bookmark:nvba;
+async function delMark(document, lineNumber, noSave=false) {
   const line       = document.lineAt(lineNumber);
   const lineText   = line.text.trimEnd();
   const languageId = document.languageId;
@@ -286,7 +285,8 @@ async function delMark(document, lineNumber) {
       log('delMark, line has token and no junk, removing line');
       await utils.deleteLine(document, lineNumber);
     }
-    await marks.delGlobalMark(token);
+    if(noSave) marks.delGlobalMark(token);
+    else await marks.delGlobalMarkAndSave(token);
     return true;
   }
   else return false;
@@ -303,7 +303,7 @@ async function toggle() {
   const lineText   = line.text.trimEnd();
   if(tokenRegEx.test(lineText)) await delMark(document, lineNumber);
   else {
-    const mark = await marks.newMark(document, lineNumber);
+    const mark = await marks.newGlobalMark(document, lineNumber);
     if(!mark) return;
     const tokenLineNumber = await addTokenAtLine(mark);
     const position   = new vscode.Position(tokenLineNumber, 0);
@@ -348,27 +348,32 @@ async function addMarksForTokens(document) {
   }
 }
 
-//:7lc3;
-async function clearFile(document) {
-  await marks.delGlobalMarksForFile(document);
-  if(!tokenRegEx.test(document.getText())) return;
-  for(let lineNumber = 0; lineNumber < document.lineCount; lineNumber++) {
-    const line = document.lineAt(lineNumber);
-    if(tokenRegEx.test(line.text)) await delMark(document, lineNumber);  
+//bookmark:dzwf;
+async function runOnAllTokensInDoc(document, getPos, getLine, func) {
+  const text = document.getText();
+  for (const match of text.matchAll(tokenRegExG)) {
+    const offset = match.index;
+    const token  = match[0];
+    const res    = {token};
+    if(getPos)  res.position = document.positionAt(offset); 
+    if(getLine) res.lineText = utils.getLineFromTextAtOffset(text, offset);
+    await func(res);
   }
-  marks.dumpGlobalMarks('clearFile');
+}
+
+//:7lc3;
+async function clearFile(document, saveMarks = true) {
+  let haveDel = false;
+  await runOnAllTokensInDoc(document, true, false, async (params) => {
+    const {position} = params;
+    await delMark(document, position.line, true);
+    haveDel = true;
+  });
+  if(haveDel && saveMarks) await marks.saveGlobalMarks();
 }
 
 async function cleanFile(document) {
-  await marks.delGlobalMarksForFile(document);
-  if(!tokenRegEx.test(document.getText())) return;
-  for(let i = 0; i < document.lineCount; i++) {
-    const line = document.lineAt(i);
-    if(!tokenRegEx.test(line.text)) continue;
-    const mark = await marks.newMark(document, line.lineNumber);
-    await addTokenAtLine(mark);
-  }
-  marks.dumpGlobalMarks('cleanFileCmd');
+
 }
 
 module.exports = {init, getLabel, bookmarkClick,

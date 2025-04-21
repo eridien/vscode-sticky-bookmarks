@@ -101,7 +101,7 @@ async function getItemTree() {
        !await utils.fileExists(mark.folderFsPath)) {
       log('Folder missing or mark not in workspace(1), '+
           'deleting globalMark:', mark.token, mark.folderName);
-      await marks.delGlobalMark(mark.token);
+      await marks.delGlobalMarkAndSave(mark.token);
       continue;
     }
     const markFolderUriPath = mark.folderUriPath;
@@ -124,7 +124,7 @@ async function getItemTree() {
       if(!wsFolder) {
         log('Folder missing or mark not in workspace(2), '+
             'deleting globalMark:', mark.token, mark.folderName);
-        await marks.delGlobalMark(mark.token);
+        await marks.delGlobalMarkAndSave(mark.token);
         continue;
       }
       lastFileFsPath = null;

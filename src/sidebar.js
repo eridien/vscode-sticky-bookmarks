@@ -54,6 +54,7 @@ async function getNewFileItem(mark, children) {
   return item;
 };
 
+//:r8z9;
 async function getNewMarkItem(mark) {
   const label = await text.getLabel(mark);
   const item  = new vscode.TreeItem(label,
@@ -69,7 +70,8 @@ async function getNewMarkItem(mark) {
 
 // let itemTreeLogCount = 0;
 
-async function getItemTree() {                                         //:tuzz;
+//:ufim;
+async function getItemTree() {
   const allWsFolders = vscode.workspace.workspaceFolders;
   if (!allWsFolders) {
     log('No folders in workspace');
@@ -92,7 +94,7 @@ async function getItemTree() {                                         //:tuzz;
     return (a.lineNumber - b.lineNumber);
   });
   let bookmarks;
-  let lastFolderUriPath = null, lastFileRelPath;
+  let lastFolderUriPath = null, lastFileFsPath;
   for(const mark of marksArray) {
     if(closedFolders.has(mark.folderUriPath)) continue;
     if(!mark.inWorkspace || 
@@ -122,13 +124,14 @@ async function getItemTree() {                                         //:tuzz;
         continue;
       }
       rootItems.push(await getNewFolderItem(mark));
-      lastFileRelPath = null;
+      lastFileFsPath = null;
     }
-    if(mark.fileRelPath !== lastFileRelPath) {
-      lastFileRelPath = mark.fileRelPath;
+    if(mark.fileFsPath !== lastFileFsPath) {
+      lastFileFsPath = mark.fileFsPath;
       bookmarks = [];
       rootItems.push(await getNewFileItem(mark, bookmarks));
     }
+//:4s9h;
     bookmarks.push(await getNewMarkItem(mark));
   }
   const editor = vscode.window.activeTextEditor;
@@ -183,23 +186,7 @@ async function getItemTree() {                                         //:tuzz;
   return rootItems;
 }
 
-class SidebarProvider {
-  constructor() {
-    this._onDidChangeTreeData = new vscode.EventEmitter();
-    this.onDidChangeTreeData  = this._onDidChangeTreeData.event;
-  }
-  getTreeItem(item) {
-    return item;
-  }
-  async getChildren(item) {
-    if(!item) {
-      await marks.waitForInit();
-      return await getItemTree();
-    }
-    return item.children ?? [];
-  }
-}
-
+//:9lza;
 async function itemClickCmd(item) {
   // log('itemClickCmd');
   text.clearDecoration();
@@ -222,6 +209,23 @@ async function itemClickCmd(item) {
 
 function updateSidebar(item) {
   provider._onDidChangeTreeData.fire(item);
+}
+
+class SidebarProvider {
+  constructor() {
+    this._onDidChangeTreeData = new vscode.EventEmitter();
+    this.onDidChangeTreeData  = this._onDidChangeTreeData.event;
+  }
+  getTreeItem(item) {
+    return item;
+  }
+  async getChildren(item) {
+    if(!item) {
+      await marks.waitForInit();
+      return await getItemTree();
+    }
+    return item.children ?? [];
+  }
 }
 
 module.exports = { init, SidebarProvider, itemClickCmd, updateSidebar};

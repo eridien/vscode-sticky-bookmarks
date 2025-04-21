@@ -19,20 +19,7 @@ async function nextCmd() {
   await text.scrollToPrevNext(true);
 }
 
-async function deleteMarkCmd(item) {
-  // log('deleteMarkCmd command, X menu');
-  const document = item.document;
-  switch (item.type) {
-    case 'folder': await clearAllFilesCmd(item.mark.folderPath); break;
-    case 'file':   await clearFileCmd(document);            break;
-    default: {
-      const line = document.lineAt(item.mark.lineNumber);
-      await text.delMark(document, line, item.mark.languageId);
-      sidebar.updateSidebar();
-    }
-  }
-}
-
+//:e4d3;
 async function clearFileCmd(document) {
   if(!document) {
     log('clearFileCmd command called');
@@ -41,6 +28,18 @@ async function clearFileCmd(document) {
     document = editor.document;
   }
   await text.clearFile(document);
+}
+
+async function deleteItemXCmd(item) {
+  // log('deleteItemXCmd command, X menu');
+  switch (item.type) {
+    case 'folder':   
+          await clearAllFilesCmd(item.folderPath);                      break;
+    case 'file':     
+          await clearFileCmd(item.document);                            break;
+    case 'bookmark': 
+          await text.delMark(item.mark.document, item.mark.lineNumber); break;
+  }
 }
 
 async function cleanFileCmd(document) {
@@ -108,7 +107,7 @@ async function changeSelection() {
 
 
 module.exports = { toggleCmd, prevCmd, nextCmd,
-                   deleteMarkCmd,
+                   deleteItemXCmd,
                    clearFileCmd, clearAllFilesCmd,
                    cleanFileCmd, cleanAllFilesCmd,
                    sidebarVisibleChange, 

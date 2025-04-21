@@ -60,7 +60,7 @@
         "title": "Go To Bookmark"
       },
       {
-        "command": "sticky-bookmarks.deleteMarkCmd",
+        "command": "sticky-bookmarks.deleteItemXCmd",
         "title": "✖️"
       }
     ],
@@ -127,7 +127,7 @@
     "menus": {
       "view/item/context": [
         {
-          "command": "sticky-bookmarks.deleteMarkCmd",
+          "command": "sticky-bookmarks.deleteItemXCmd",
           "when": "view == sidebarView",
           "group": "inline"
         }

@@ -9,8 +9,7 @@ const showCodeWhenCrumbs = true;
 
 async function init() {
   for(const [lang, keywords] of Object.entries(utils.keywords())) {
-    const set = new Set(keywords);
-    keywordSetsByLang[lang] = set;
+    keywordSetsByLang[lang] = new Set(keywords);
   }
   return addMarksForTokens;
 }
@@ -24,17 +23,6 @@ const keywordSetsByLang = {};
 const tokenRegEx  = new RegExp('\\:[0-9a-z]{4};');
 const tokenRegExG = new RegExp('\\:[0-9a-z]{4};', 'g');
 const indentRegEx = /^(\s*)\S/;
-
-function commRegExG(languageId) {
-  const [commLft, commRgt] = utils.commentsByLang(languageId);
-  if(commRgt !== '') {
-    return new RegExp(
-      `\\s*${commLft}\\s*${commRgt}\\s*?$`, 'g');
-  }
-  else {
-    return new RegExp(`\\s*${commLft}\\s*?$`, 'g');
-  }
-}
 
 function lineRegEx(languageId) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
@@ -228,23 +216,6 @@ async function bookmarkClick(item) {
   return;
 }
 
-async function delMark(document, line, languageId) {
-  let lineText = line.text;
-  tokenRegExG.index = 0;
-  for(const tokenMatch of lineText.matchAll(tokenRegExG)) {
-    const token = tokenMatch[0];
-    lineText = lineText.replace(token, '');
-    await marks.delGlobalMark(token)
-  }
-  const regx = commRegExG(languageId);
-  lineText = lineText.replace(regx, '').trimEnd();
-  const edit = new vscode.WorkspaceEdit();
-  edit.replace(document.uri, line.range, lineText);
-  await vscode.workspace.applyEdit(edit);   
-  return lineText;
-}
-//  
-
 //:n2bk;
 function getNewTokenLine(indentLen, token, languageId) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
@@ -295,6 +266,32 @@ async function getTokensInLine(lineText) {
   return [...lineText.matchAll(tokenRegExG)];
 }
 
+//:k1au;
+async function delMark(document, lineNumber) {
+  if(document.lineCount == 0) return;
+  const line       = document.lineAt(lineNumber);
+  const lineText   = line.text.trimEnd();
+  const languageId = document.languageId;
+  const tokenMatch = tokenRegEx.exec(lineText);
+  if(tokenMatch) {
+    const token = tokenMatch[0];
+    const {junk, bookmarkToken} = 
+                     getJunkAndBookmarkToken(lineText, languageId);
+    if(junk.length > 0) {
+      log('delMark, line has token and junk, removing only token');
+      const newLineText = lineText.replace(bookmarkToken, '');
+      await utils.replaceLine(document, lineNumber, newLineText);
+    }
+    else {
+      log('delMark, line has token and no junk, removing line');
+      await utils.deleteLine(document, lineNumber);
+    }
+    await marks.delGlobalMark(token);
+    return true;
+  }
+  else return false;
+}
+
 //:wl1m;
 async function toggle() {
   const editor = vscode.window.activeTextEditor;
@@ -304,28 +301,11 @@ async function toggle() {
   const lineNumber = editor.selection.active.line;
   const line       = document.lineAt(lineNumber);
   const lineText   = line.text.trimEnd();
-  const languageId = document.languageId;
-  const tokenMatch = tokenRegEx.exec(lineText);
-  if(tokenMatch) {
-    const token = tokenMatch[0];
-    const {junk, bookmarkToken} = 
-            getJunkAndBookmarkToken(lineText, languageId);
-    if(junk.length > 0) {
-      log('toggle, line has token and junk, removing only token');
-      const newLineText = lineText.replace(bookmarkToken, '');
-      await utils.replaceLine(document, lineNumber, newLineText);
-      return;
-    }
-    else {
-      log('toggle, line has token and no junk, removing line');
-      await utils.deleteLine(document, lineNumber);
-    }
-    await marks.delGlobalMark(token);
-  }
+  if(tokenRegEx.test(lineText)) await delMark(document, lineNumber);
   else {
     const mark = await marks.newMark(document, lineNumber);
-  if(!mark) return;
-  const tokenLineNumber = await addTokenAtLine(mark);
+    if(!mark) return;
+    const tokenLineNumber = await addTokenAtLine(mark);
     const position   = new vscode.Position(tokenLineNumber, 0);
     editor.selection = new vscode.Selection(position, position);
     editor.revealRange(new vscode.Range(position, position), 
@@ -368,22 +348,14 @@ async function addMarksForTokens(document) {
   }
 }
 
+//:7lc3;
 async function clearFile(document) {
-  const uri = document.uri;
   await marks.delGlobalMarksForFile(document);
   if(!tokenRegEx.test(document.getText())) return;
-  const languageId = document.languageId;
-  let newFileText  = '';
-  for(let i = 0; i < document.lineCount; i++) {
-    const line = document.lineAt(i);
-    newFileText += await delMark(document, line, languageId) + '\n';
+  for(let lineNumber = 0; lineNumber < document.lineCount; lineNumber++) {
+    const line = document.lineAt(lineNumber);
+    if(tokenRegEx.test(line.text)) await delMark(document, lineNumber);  
   }
-  const edit = new vscode.WorkspaceEdit();
-  edit.replace(uri, new vscode.Range(
-      new vscode.Position(0, 0),
-      new vscode.Position(document.lineCount, 0)
-  ), newFileText);
-  await vscode.workspace.applyEdit(edit);
   marks.dumpGlobalMarks('clearFile');
 }
 

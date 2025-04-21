@@ -195,7 +195,8 @@ async function bookmarkClick(item) {
   if(tokenMatches.length === 0) {
     log('itemClickCmd, no token in line', mark.lineNumber,
         'of', mark.fileName, ', removing GlobalMark', mark.token);
-    await marks.delGlobalMarkAndSave(mark.token);
+    marks.delGlobalMark[mark.token];
+    await marks.saveGlobalMarks();
   }
   else {
     while(tokenMatches.length > 1 && tokenMatches[0][0] !== mark.token) {
@@ -203,7 +204,8 @@ async function bookmarkClick(item) {
 
       // remove token from line also
 
-      await marks.delGlobalMarkAndSave(foundToken);
+      marks.delGlobalMark[foundToken];
+      await marks.saveGlobalMarks();
       tokenMatches.shift();
     }
     const foundToken = tokenMatches[0][0];
@@ -267,7 +269,7 @@ async function getTokensInLine(lineText) {
 }
 
 //bookmark:nvba;
-async function delMark(document, lineNumber, noSave=false) {
+async function delMarkFromLineAndGlobal(document, lineNumber, save = true) {
   const line       = document.lineAt(lineNumber);
   const lineText   = line.text.trimEnd();
   const languageId = document.languageId;
@@ -277,16 +279,18 @@ async function delMark(document, lineNumber, noSave=false) {
     const {junk, bookmarkToken} = 
                      getJunkAndBookmarkToken(lineText, languageId);
     if(junk.length > 0) {
-      log('delMark, line has token and junk, removing only token');
+      log('delMarkFromLineAndGlobal, line has token and junk, '+
+          'removing only token');
       const newLineText = lineText.replace(bookmarkToken, '');
       await utils.replaceLine(document, lineNumber, newLineText);
     }
     else {
-      log('delMark, line has token and no junk, removing line');
+      log('delMarkFromLineAndGlobal, line has token and no junk, '+
+          'removing line');
       await utils.deleteLine(document, lineNumber);
     }
-    if(noSave) marks.delGlobalMark(token);
-    else await marks.delGlobalMarkAndSave(token);
+    marks.delGlobalMark(token);
+    if(save) await marks.saveGlobalMarks();
     return true;
   }
   else return false;
@@ -301,7 +305,8 @@ async function toggle() {
   const lineNumber = editor.selection.active.line;
   const line       = document.lineAt(lineNumber);
   const lineText   = line.text.trimEnd();
-  if(tokenRegEx.test(lineText)) await delMark(document, lineNumber);
+  if(tokenRegEx.test(lineText)) 
+                  await delMarkFromLineAndGlobal(document, lineNumber);
   else {
     const mark = await marks.newGlobalMark(document, lineNumber);
     if(!mark) return;
@@ -366,7 +371,7 @@ async function clearFile(document, saveMarks = true) {
   let haveDel = false;
   await runOnAllTokensInDoc(document, true, false, async (params) => {
     const {position} = params;
-    await delMark(document, position.line, true);
+    await delMarkFromLineAndGlobal(document, position.line, false);
     haveDel = true;
   });
   if(haveDel && saveMarks) await marks.saveGlobalMarks();
@@ -378,7 +383,7 @@ async function cleanFile(document) {
 
 module.exports = {init, getLabel, bookmarkClick,
                   clearDecoration, justDecorated,
-                  toggle, scrollToPrevNext, delMark,    
+                  toggle, scrollToPrevNext, delMarkFromLineAndGlobal,    
                   clearFile, cleanFile};
 
 

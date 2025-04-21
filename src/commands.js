@@ -33,12 +33,10 @@ async function clearFileCmd(document) {
 async function deleteItemXCmd(item) {
   // log('deleteItemXCmd command, X menu');
   switch (item.type) {
-    case 'folder':   
-          await clearAllFilesCmd(item.folderPath);                      break;
-    case 'file':     
-          await clearFileCmd(item.document);                            break;
-    case 'bookmark': 
-          await text.delMark(item.mark.document, item.mark.lineNumber); break;
+    case 'folder': await clearAllFilesCmd(item.folderPath); break;
+    case 'file':   await clearFileCmd(item.document);       break;
+    case 'bookmark': await text.delMarkFromLineAndGlobal(
+                 item.mark.document, item.mark.lineNumber); break;
   }
 }
 

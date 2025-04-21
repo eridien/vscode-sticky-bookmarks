@@ -131,13 +131,6 @@ async function addGlobalMarkIfMissing(token, document, lineNumber) {
   await newGlobalMark(document, lineNumber, token);
 }
 
-//:ho3j;
-async function delGlobalMarkAndSave(token) {
-  delete globalMarks[token];
-  await saveGlobalMarks();
-  dumpGlobalMarks('delGlobalMarkAndSave');
-}
-
 async function replaceGlobalMark(oldToken, newToken) {
   globalMarks[newToken] = globalMarks[oldToken];
   delete globalMarks[oldToken];
@@ -157,8 +150,8 @@ async function delGlobalMarksForFile(document) {
 
 module.exports = {init, waitForInit, getGlobalMarks, dumpGlobalMarks, 
                   newGlobalMark, delGlobalMark, replaceGlobalMark,
-                  saveGlobalMarks, delGlobalMarkAndSave,
-                  delGlobalMarksForFile, addGlobalMarkIfMissing}
+                  saveGlobalMarks, delGlobalMarksForFile, 
+                  addGlobalMarkIfMissing}
 
 
 

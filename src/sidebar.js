@@ -15,6 +15,7 @@ async function init(providerIn) {
   return updateSidebar;
 }
 
+//:7rlm;
 async function getNewFolderItem(mark) {
   const {folderIndex, folderName, folderFsPath, folderUriPath} = mark;
   const id    = utils.fnv1aHash(folderUriPath);
@@ -27,15 +28,20 @@ async function getNewFolderItem(mark) {
     item.iconPath = new vscode.ThemeIcon("chevron-right");
   else
     item.iconPath = new vscode.ThemeIcon("chevron-down");
-
   item.command = {
     command:   'sticky-bookmarks.itemClickCmd',
     title:     'Item Clicked',
     arguments: [item],
   }
+  // if(item.id == lastFolderId) debugger;
+  // lastFolderId =  item.id;
+
+  // log('');
+  // log('folder', item.folderName, item.id);
   return item;
 }
 
+//:aguf;
 async function getNewFileItem(mark, children) { 
   const label =  '📄 ' + mark.fileRelUriPath;
   const {folderIndex, folderName, folderFsPath, folderUriPath, 
@@ -51,6 +57,7 @@ async function getNewFileItem(mark, children) {
     title:     'Item Clicked',
     arguments: [item],
   }
+  // log('file  ', item.fileName, item.id);
   return item;
 };
 
@@ -65,16 +72,15 @@ async function getNewMarkItem(mark) {
     title:   'Item Clicked',
     arguments: [item],
   }
+  // log('mark  ', item.label.slice(0,30), item.id);
   return item;
 };
-
-// let itemTreeLogCount = 0;
 
 //:ufim;
 async function getItemTree() {
   const allWsFolders = vscode.workspace.workspaceFolders;
   if (!allWsFolders) {
-    log('No folders in workspace');
+    log('getItemTree, No folders in workspace');
     return [];
   }
   // log('getItemTree', ++itemTreeLogCount);
@@ -93,37 +99,42 @@ async function getItemTree() {
        b.fileRelUriPath.toLowerCase()) return -1;
     return (a.lineNumber - b.lineNumber);
   });
+//:hx8x;
   let bookmarks;
   let lastFolderUriPath = null, lastFileFsPath;
   for(const mark of marksArray) {
+    // log('mark of marksArray', mark);
     if(closedFolders.has(mark.folderUriPath)) continue;
     if(!mark.inWorkspace || 
        !await utils.fileExists(mark.folderFsPath)) {
-      log('Folder missing or mark not in workspace, '+
+      log('Folder missing or mark not in workspace(1), '+
           'deleting globalMark:', mark.token, mark.folderName);
       await marks.delGlobalMark(mark.token);
       continue;
     }
-    const folderUriPath = mark.folderUriPath;
-    if(folderUriPath !== lastFolderUriPath) {
-      lastFolderUriPath = folderUriPath;
-      let   wsFolder    = allWsFolders[0];
-      const wsFolderUriPath = wsFolder?.uri.path;
-      while(wsFolder && folderUriPath !== wsFolderUriPath) {
+    const markFolderUriPath = mark.folderUriPath;
+    if(markFolderUriPath !== lastFolderUriPath) {
+      lastFolderUriPath = markFolderUriPath;
+      let wsFolder = null;
+      while(wsFolder = allWsFolders.shift()) {
+        // log('wsFolder = allWsFolders.shift()', wsFolder);
+        if(wsFolder.uri.path === markFolderUriPath) {
+          const {folderIndex, folderName, folderFsPath, folderUriPath} = mark;
+          rootItems.push(await getNewFolderItem(
+                {folderIndex, folderName, folderFsPath, folderUriPath}));
+          break;
+        }
+        const {index, name, uri} = wsFolder;
         rootItems.push(await getNewFolderItem(
-           {folderIndex:wsFolder.index, folderName:wsFolder.name, 
-            folderFsPath:wsFolder.uri.fsPath, 
-            folderUriPath:wsFolder.uri.path}));
-        wsFolder = allWsFolders.shift();
+           {folderIndex:index, folderName:name, 
+            folderFsPath:uri.fsPath, folderUriPath:uri.path}));
       }
-      allWsFolders.shift();
       if(!wsFolder) {
-        log('Folder missing or mark not in workspace, '+
+        log('Folder missing or mark not in workspace(2), '+
             'deleting globalMark:', mark.token, mark.folderName);
         await marks.delGlobalMark(mark.token);
         continue;
       }
-      rootItems.push(await getNewFolderItem(mark));
       lastFileFsPath = null;
     }
     if(mark.fileFsPath !== lastFileFsPath) {
@@ -207,6 +218,7 @@ async function itemClickCmd(item) {
   }
 }
 
+//:0qrj;
 function updateSidebar(item) {
   provider._onDidChangeTreeData.fire(item);
 }

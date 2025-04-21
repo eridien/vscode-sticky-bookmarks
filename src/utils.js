@@ -240,8 +240,13 @@ function getLog(module) {
       nomodFlag = infoFlag || args[0].includes('nomod');
     }
     if(errFlag || infoFlag) args = args.slice(1);
-    const par = args.map(a =>
-      typeof a === 'object' ? JSON.stringify(a, null, 2) : a);
+    const par = args.map(a => {
+      if(typeof a === 'object') {
+        try{ return JSON.stringify(a, null, 2); }
+        catch(e) { return JSON.stringify(Object.keys(a)) + e.message }
+      }
+      else return a;
+    });
     const line = (nomodFlag ? '' : module + ': ') +
                  (errFlag    ? ' error, ' : '') + par.join(' ')
     outputChannel.appendLine(line);

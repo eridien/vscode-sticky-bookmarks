@@ -5,24 +5,24 @@ const utils   = require('./utils.js');
 const {log}   = utils.getLog('cmds');
 
 async function toggleCmd() {
-  log('toggle command called');
+  // log('toggle command called');
   await text.toggle();
 }
 
 async function prevCmd() {
-  log('prevCmd command called');
+  // log('prevCmd command called');
   await text.scrollToPrevNext(false);
 }
 
 async function nextCmd() {
-  log('nextCmd command called');
+  // log('nextCmd command called');
   await text.scrollToPrevNext(true);
 }
 
 //:e4d3;
 async function clearFileCmd(document) {
   if(!document) {
-    log('clearFileCmd command called');
+    // log('clearFileCmd command called');
     const editor = vscode.window.activeTextEditor;
     if (!editor) { log('info', 'clearFileCmd, No active editor'); return; }
     document = editor.document;
@@ -44,7 +44,7 @@ async function deleteItemXCmd(item) {
 
 async function cleanFileCmd(document) {
   if(!document) {
-    log('cleanFileCmd command called');
+    // log('cleanFileCmd command called');
     const editor = vscode.window.activeTextEditor;
     if (!editor) { log('info', 'cleanFileCmd, No active editor'); return; }
     document = editor.document;
@@ -53,12 +53,12 @@ async function cleanFileCmd(document) {
 }
 
 async function clearAllFilesCmd() {                          //:jsgi;
-  log('clearAllFilesCmd command called');
+  // log('clearAllFilesCmd command called');
   await utils.runOnAllFilesInFolder(clearFileCmd);
 }
 
 async function cleanAllFilesCmd() {
-  log('cleanAllFilesCmd command called');
+  // log('cleanAllFilesCmd command called');
   await utils.runOnAllFilesInFolder(cleanFileCmd);
 }
 
@@ -84,7 +84,7 @@ async function changeDocument() {
 
 async function changeEditor(editor) {
   if(!editor || !editor.document) {
-    log('changeEditor, no active editor');
+    // log('changeEditor, no active editor');
     return;
   }
   // log('changeEditor', editor.document.uri.path);

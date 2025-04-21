@@ -7,6 +7,9 @@ bugs
   removing workspace folder remove all marks
   clear all files slow -- need busy indicator
   get tree runs four times on item click
+      throttle updateSidebar
+  duplicate ids
+  multiple items for one mark
 
 why gen2
   sticky
@@ -37,6 +40,7 @@ TOKENS IN TEXT ARE GODS
       find global marks to delete
 
 todo
+  always open view, folder, or file when new mark
   hide all marks and restore on any edit
   command to go to last file on prev/next
   monitor edits for mark changes
@@ -50,7 +54,6 @@ todo
     show in sidebar with question mark
     click on sidebar to accept and create bookmark
     limit suggestions (setting)
-  throttle updateSidebar
   folder delete X
   busy indicator
   open sidebar on mark creation

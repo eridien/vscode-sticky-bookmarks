@@ -9,6 +9,7 @@ let globalMarks;
 let context, updateSidebar, addMarksForTokens;
 let initFinished = false;
 
+//:h9mu;
 async function init(contextIn, updateSidebarIn, addMarksForTokensIn) {
   start('init marks');
   context           = contextIn;
@@ -80,7 +81,7 @@ function dumpGlobalMarks(caller, list, dump) {
              `${mark.lineNumber.toString().padStart(3, ' ')} `+
              `${mark.languageId.slice(0,3)}\n`;
     }
-    log(caller, str);
+    log(caller, str.slice(0,-1));
   }
   else {
     let str = "";
@@ -104,7 +105,8 @@ function getRandomToken() {
   return `:${randHash};`;
 }
 
-async function newMark(document, lineNumber, token) {                         //:bd5z;
+//:fro4;
+async function newMark(document, lineNumber, token) {
   token ??= getRandomToken();
   const mark  = {token, document, lineNumber,
                  languageId: document.languageId};

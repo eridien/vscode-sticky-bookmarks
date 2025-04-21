@@ -378,7 +378,25 @@ async function clearFile(document, saveMarks = true) {
 }
 
 async function cleanFile(document) {
-
+  const fileMarksByToken = {};
+  await runOnAllTokensInDoc(document, true, false, async (param) => {
+    fileMarksByToken[param.token] = param;
+  });
+  const globalMarksByToken = marks.getMarksForFile(document.uri.path);
+  let haveMarkChg = false;
+  for(const [token, param] of Object.entries(fileMarksByToken)) {
+    if(!globalMarksByToken[token]) {
+      await marks.newGlobalMark(document, param.position.line, token);
+      haveMarkChg = true;
+    }
+  }
+  for(const token of Object.keys(globalMarksByToken)) {
+    if(!fileMarksByToken[token]) {
+      await marks.delGlobalMark(token);
+      haveMarkChg = true;
+    }
+  }
+  if(haveMarkChg) await marks.saveGlobalMarks();
 }
 
 module.exports = {init, getLabel, bookmarkClick,

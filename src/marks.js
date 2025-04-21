@@ -60,8 +60,19 @@ function waitForInit() {
   });
 }
 
-function getGlobalMarks() { return globalMarks; }
+//bookmark:jxaf;
+function getGlobalMark(token) {return globalMarks[token]}
+function putGlobalMark(token) {globalMarks[token] = token}
 function delGlobalMark(token) {delete globalMarks[token]}
+function getGlobalMarks()     {return globalMarks}
+
+function getMarksForFile(fileUriPath) {
+  const marksByToken = {};
+  for(const [token, mark] of Object.entries(globalMarks)) {
+    if(mark.fileUriPath === fileUriPath) marksByToken[token] = mark;
+  }
+  return marksByToken;
+}
 
 async function saveGlobalMarks() {
   await context.workspaceState.update('globalMarks', globalMarks);
@@ -113,7 +124,7 @@ function getRandomToken() {
 }
 
 //:fro4;
-async function newGlobalMark(document, lineNumber, token) {
+async function newGlobalMark(document, lineNumber, token, save) {
   token ??= getRandomToken();
   const mark  = {token, document, lineNumber,
                  languageId: document.languageId};
@@ -121,8 +132,10 @@ async function newGlobalMark(document, lineNumber, token) {
   if(!filePaths?.inWorkspace) return null;
   Object.assign(mark, filePaths);
   globalMarks[token] = mark;
-  await saveGlobalMarks();
-  dumpGlobalMarks('newGlobalMark');
+  if (save) {
+    await saveGlobalMarks();
+    dumpGlobalMarks('newGlobalMark');
+  }
   return mark;
 }
 
@@ -148,10 +161,11 @@ async function delGlobalMarksForFile(document) {
   await saveGlobalMarks();
 }
 
-module.exports = {init, waitForInit, getGlobalMarks, dumpGlobalMarks, 
-                  newGlobalMark, delGlobalMark, replaceGlobalMark,
-                  saveGlobalMarks, delGlobalMarksForFile, 
-                  addGlobalMarkIfMissing}
+module.exports = {init, waitForInit, dumpGlobalMarks, replaceGlobalMark, 
+                  getGlobalMarks, getMarksForFile, saveGlobalMarks,
+                  getGlobalMark,  putGlobalMark,   delGlobalMark,
+                  newGlobalMark,  delGlobalMarksForFile, 
+                  addGlobalMarkIfMissing};
 
 
 

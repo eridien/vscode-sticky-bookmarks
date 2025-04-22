@@ -23,7 +23,7 @@ async function getNewFolderItem(mark) {
                     vscode.TreeItemCollapsibleState.None);
   Object.assign(item, {id, type:'folder', label,
                        folderIndex, folderName, folderFsPath, folderUriPath});
-  if(closedFolders.has(folderUriPath))
+  if(closedFolders.has(folderFsPath))
     item.iconPath = new vscode.ThemeIcon("chevron-right");
   else
     item.iconPath = new vscode.ThemeIcon("chevron-down");
@@ -66,8 +66,67 @@ async function getNewMarkItem(mark) {
   return item;
 };
 
+// let fileWithPtrFsPath = null;
+
+//bookmark:pt4m;
+async function updatePointers(editor) {
+  if(showPointers) {
+    const fsPath        = editor.document.uri.fsPath;
+    const selectionLine = editor.selection.active.line;
+    let itemDown  = null;
+    let itemExact = null;
+    let itemUp    = null;
+    for(const item of itemTree) {
+      if(item.type === 'file' && !closedFolders.has(item.folderFsPath) && 
+              item.children.length > 0) {
+        // if (fsPath !== fileWithPtrFsPath && 
+        //     item.fileFsPath === fileWithPtrFsPath) {
+        //   for (const bookmarkItem of item.children)
+        //       delete bookmarkItem.iconPath;
+        //   continue;
+        // }
+        if(item.fileFsPath === fsPath) {
+          for (const bookmarkItem of item.children)
+              delete bookmarkItem.iconPath;
+          for (const bookmarkItem of item.children) {
+            const bookmarkLine = bookmarkItem.mark.lineNumber;
+            if(selectionLine === bookmarkLine) {
+              itemExact = bookmarkItem;
+              break;
+            }
+            else if(selectionLine < bookmarkLine)  {
+              itemUp = bookmarkItem;
+              break;
+            }
+            else if(selectionLine > bookmarkLine) {
+              itemDown = bookmarkItem;
+            }
+          }
+        }
+      }
+    }
+    if(itemExact) {
+      // fileWithPtrFsPath  = itemExact.fileFsPath;
+      itemExact.iconPath = new vscode.ThemeIcon("triangle-right");
+    }
+    else {
+      if(itemUp) {
+        // fileWithPtrFsPath = itemUp.fileFsPath;
+        itemUp.iconPath   = new vscode.ThemeIcon("triangle-up");
+      }
+      if(itemDown) {
+        // fileWithPtrFsPath =  itemDown.fileFsPath;
+        itemDown.iconPath = new vscode.ThemeIcon("triangle-down");
+      }
+    }
+  }
+}
+
+let logIdx = 0;
+
 //bookmark:8h1t;
 async function getItemTree() {
+  log('getItemTree', logIdx++);
   const allWsFolders = vscode.workspace.workspaceFolders;
   if (!allWsFolders) {
     log('getItemTree, No folders in workspace');
@@ -92,7 +151,7 @@ async function getItemTree() {
   let lastFolderUriPath = null, lastFileFsPath;
   for(const mark of marksArray) {
     // log('mark of marksArray', mark);
-    if(closedFolders.has(mark.folderUriPath)) continue;
+    if(closedFolders.has(mark.folderFsPath)) continue;
     if(!mark.inWorkspace || 
        !await utils.fileExists(mark.folderFsPath)) {
       log('Folder missing or mark not in workspace(1), '+
@@ -134,46 +193,10 @@ async function getItemTree() {
     }
     bookmarks.push(await getNewMarkItem(mark));
   }
+  //bookmark:kbc3;
+  itemTree = rootItems;
   const editor = vscode.window.activeTextEditor;
-  if (editor) {
-    const document       = editor.document;
-    const editorFilePath = document.uri.path;
-    const editorLine     = editor.selection.active.line;
-    if(showPointers) {
-      let haveDown  = null;
-      let haveExact = null;
-      let haveUp    = null;
-      for(const item of rootItems) {
-        if(item.type === 'file' &&
-           item.fileUriPath === editorFilePath &&
-           item.children && item.children.length > 0 &&
-           !closedFolders.has(item.folderUriPath)) {
-          for (const bookmarkItem of item.children) {
-            const markLine = bookmarkItem.mark.lineNumber;
-            if(editorLine === markLine) {
-              haveExact = bookmarkItem;
-              break;
-            }
-            else if(editorLine < markLine)  {
-              haveUp = bookmarkItem;
-              break;
-            }
-            else if(editorLine > markLine) {
-              haveDown = bookmarkItem;
-            }
-          }
-        }
-      }
-      if(haveExact)
-        haveExact.iconPath  = new vscode.ThemeIcon("triangle-right");
-      else {
-        if(haveUp)
-          haveUp.iconPath   = new vscode.ThemeIcon("triangle-up");
-        if(haveDown)
-          haveDown.iconPath = new vscode.ThemeIcon("triangle-down");
-      }
-    }
-  }
+  if (editor) await updatePointers(editor);
   let wsFolder = allWsFolders.shift();
   while(wsFolder) {
     rootItems.push(await getNewFolderItem(
@@ -182,7 +205,6 @@ async function getItemTree() {
          folderUriPath:wsFolder.uri.path}));
     wsFolder = allWsFolders.shift();
   }
-  itemTree = rootItems;
   return rootItems;
 }
 
@@ -192,11 +214,11 @@ async function itemClickCmd(item) {
     const folderItem = 
            itemTree.find(rootItem => rootItem.id === item.id);
     if(folderItem) {
-      if(closedFolders.has(folderItem.folderUriPath))
-         closedFolders.delete(folderItem.folderUriPath);
+      if(closedFolders.has(folderItem.folderFsPath))
+         closedFolders.delete(folderItem.folderFsPath);
       else
-         closedFolders.add(folderItem.folderUriPath);
-      updateSidebar();
+         closedFolders.add(folderItem.folderFsPath);
+      await updateSidebar();
     }
     return;
   }
@@ -205,12 +227,17 @@ async function itemClickCmd(item) {
   }
 }
 
-function updateSidebar(fsPath) {
-  if(!fsPath) provider._onDidChangeTreeData.fire();
-  else for(let rootItem in itemTree) {
-    if(rootItem.type == 'file' && rootItem.fileFsPath == fsPath) {
-      provider._onDidChangeTreeData.fire(rootItem);
-      return;
+//bookmark:ou0q;
+async function updateSidebar(textEditor) {
+  if(!textEditor) provider._onDidChangeTreeData.fire();
+  else {
+    const fsPath = textEditor.document.uri.fsPath;
+    for(let rootItem of itemTree) {
+      if(rootItem.type == 'file' && rootItem.fileFsPath == fsPath) {
+        await updatePointers(textEditor);
+        provider._onDidChangeTreeData.fire(rootItem);
+        return;
+      }
     }
   }
 }

@@ -69,14 +69,14 @@ async function sidebarVisibleChange(visible) {
       firstVisible = false;
       await cleanAllFilesCmd();
     }
-   sidebar.updateSidebar();
+   await sidebar.updateSidebar();
   }
   sideBarIsVisible = visible;
 }
 
 async function changeDocument() {
   // log('changeDocument', document.uri.path);
- sidebar.updateSidebar();
+ await sidebar.updateSidebar();
 }
 
 async function changeEditor(editor) {
@@ -85,21 +85,19 @@ async function changeEditor(editor) {
     return;
   }
   // log('changeEditor', editor.document.uri.path);
- sidebar.updateSidebar();
+ await sidebar.updateSidebar();
 }
 
 async function changeVisEditors() {
   // log('changeVisEditors', editors.length);
- sidebar.updateSidebar();
+ await sidebar.updateSidebar();
 }  
 
 const changeSelection = utils.debounce(async (event) => {
-  const {textEditor, selections} = event;
-  const document = textEditor.document;
-  log('changeSelection', document.uri.path, selections);
+  const {textEditor} = event;
   text.clearDecoration();
   await text.cleanFile(textEditor.document);
-  sidebar.updateSidebar(document.uri.fsPath);
+  await sidebar.updateSidebar(textEditor);
 });
 
 module.exports = { toggleCmd, prevCmd, nextCmd,

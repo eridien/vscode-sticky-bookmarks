@@ -81,7 +81,7 @@ function getMarksForFile(fileUriPath) {
 
 async function saveGlobalMarks() {
   await context.workspaceState.update('globalMarks', globalMarks);
-  updateSidebar();
+  await updateSidebar();
   dumpGlobalMarks('saveGlobalMarks');
 }
 
@@ -152,7 +152,7 @@ async function replaceGlobalMark(oldToken, newToken) {
   globalMarks[newToken] = globalMarks[oldToken];
   delete globalMarks[oldToken];
   globalMarks[newToken].token = newToken;
-  updateSidebar();
+  await updateSidebar();
   dumpGlobalMarks('replaceGlobalMark');
 }
 

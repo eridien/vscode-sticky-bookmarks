@@ -2,17 +2,16 @@ const vscode = require('vscode');
 const text   = require('./text.js');
 const marks  = require('./marks.js');
 const utils  = require('./utils.js');
-const {log}  = utils.getLog('side');
+const {log, start, end}  = utils.getLog('side');
 
 const showPointers = true;
 
-let provider, itemTree = [];
+let sidebarProvider, itemTree = [];
 
 const closedFolders = new Set();
 
-async function init(providerIn) {
-  provider  = providerIn;
-  return updateSidebar;
+function init(sidebarProviderIn) {
+  sidebarProvider = sidebarProviderIn;
 }
 
 async function getNewFolderItem(mark) {
@@ -68,7 +67,7 @@ async function getNewMarkItem(mark) {
 
 // let fileWithPtrFsPath = null;
 
-//bookmark:pt4m;
+//bookmark:d6bh;
 async function updatePointers(editor) {
   if(showPointers) {
     const fsPath        = editor.document.uri.fsPath;
@@ -124,8 +123,9 @@ async function updatePointers(editor) {
 
 let logIdx = 0;
 
-//bookmark:8h1t;
+//bookmark:w2jy;
 async function getItemTree() {
+  start('getItemTree');
   log('getItemTree', logIdx++);
   const allWsFolders = vscode.workspace.workspaceFolders;
   if (!allWsFolders) {
@@ -193,7 +193,7 @@ async function getItemTree() {
     }
     bookmarks.push(await getNewMarkItem(mark));
   }
-  //bookmark:kbc3;
+  //bookmark:jt4x;
   itemTree = rootItems;
   const editor = vscode.window.activeTextEditor;
   if (editor) await updatePointers(editor);
@@ -205,6 +205,7 @@ async function getItemTree() {
          folderUriPath:wsFolder.uri.path}));
     wsFolder = allWsFolders.shift();
   }
+  end('getItemTree');
   return rootItems;
 }
 
@@ -218,7 +219,7 @@ async function itemClickCmd(item) {
          closedFolders.delete(folderItem.folderFsPath);
       else
          closedFolders.add(folderItem.folderFsPath);
-      await updateSidebar();
+      updateSidebar();
     }
     return;
   }
@@ -227,24 +228,8 @@ async function itemClickCmd(item) {
   }
 }
 
-//bookmark:ou0q;
-async function updateSidebar(textEditor) {
-  if(!textEditor) provider._onDidChangeTreeData.fire();
-  else {
-    const fsPath = textEditor.document.uri.fsPath;
-    for(let rootItem of itemTree) {
-      if(rootItem.type == 'file' && rootItem.fileFsPath == fsPath) {
-        // const savedChildren = rootItem.children;
-        // rootItem.children = [];
-        // provider._onDidChangeTreeData.fire(rootItem);
-        // rootItem.children = savedChildren;
-        // // await utils.sleep(1000);
-        await updatePointers(textEditor);
-        provider._onDidChangeTreeData.fire(rootItem);
-        return;
-      }
-    }
-  }
+function updateSidebar() {
+  sidebarProvider._onDidChangeTreeData.fire();
 }
 
 class SidebarProvider {
@@ -264,6 +249,6 @@ class SidebarProvider {
   }
 }
 
-module.exports = { init, SidebarProvider, itemClickCmd, updateSidebar};
+module.exports = { init, SidebarProvider, itemClickCmd};
 
 

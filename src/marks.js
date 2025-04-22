@@ -6,13 +6,15 @@ const {log, start, end} = utils.getLog('mark');
 const DONT_LOAD_MARKS_ON_START = false;
 
 let globalMarks = {};
-let context, updateSidebar;
+let context, sidebarProvider;
+
 let initFinished = false;
 
-async function init(contextIn, updateSidebarIn) {
+//bookmark:tkpj;
+async function init(contextIn, sidebarProviderIn) {
   start('init marks');
-  context           = contextIn;
-  updateSidebar     = updateSidebarIn;
+  context         = contextIn;
+  sidebarProvider = sidebarProviderIn;
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders || workspaceFolders.length === 0) {
     globalMarks = {};
@@ -52,7 +54,6 @@ async function init(contextIn, updateSidebarIn) {
   initFinished = true;
   dumpGlobalMarks('init');
   end('init marks');
-  return {};
 }
 
 function waitForInit() {
@@ -65,6 +66,8 @@ function waitForInit() {
     checkInit();
   });
 }
+
+function updateSidebar() { sidebarProvider._onDidChangeTreeData.fire() }
 
 function putGlobalMark(token) {globalMarks[token] = token}
 function delGlobalMark(token) {delete globalMarks[token]}
@@ -81,7 +84,7 @@ function getMarksForFile(fileUriPath) {
 
 async function saveGlobalMarks() {
   await context.workspaceState.update('globalMarks', globalMarks);
-  await updateSidebar();
+  updateSidebar();
   dumpGlobalMarks('saveGlobalMarks');
 }
 
@@ -152,7 +155,7 @@ async function replaceGlobalMark(oldToken, newToken) {
   globalMarks[newToken] = globalMarks[oldToken];
   delete globalMarks[oldToken];
   globalMarks[newToken].token = newToken;
-  await updateSidebar();
+  updateSidebar();
   dumpGlobalMarks('replaceGlobalMark');
 }
 

@@ -45,9 +45,9 @@ export default [
           argsIgnorePattern: "^_",
           caughtErrorsIgnorePattern: "^_"
         }
-      ]
-,
-      "@typescript-eslint/no-floating-promises": "error"
+      ],
+      "@typescript-eslint/no-floating-promises": "error",
+      "no-await-outside-async": "error"
     },
   },
 ];

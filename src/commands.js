@@ -1,8 +1,15 @@
 const vscode  = require('vscode');
-const sidebar = require('./sidebar.js');
 const text    = require('./text.js');
 const utils   = require('./utils.js');
 const {log}   = utils.getLog('cmds');
+
+let sidebarProvider;
+
+function init(contextIn, sidebarProviderIn) {
+  sidebarProvider = sidebarProviderIn;
+}
+
+function updateSidebar() { sidebarProvider._onDidChangeTreeData.fire() }
 
 async function toggleCmd() {
   // log('toggle command called');
@@ -59,52 +66,65 @@ async function cleanAllFilesCmd() {
   await utils.runOnAllFilesInFolder(cleanFileCmd);
 }
 
-let sideBarIsVisible = false;
+let sidebarIsVisible = false;
 let firstVisible     = true;
 
 async function sidebarVisibleChange(visible) {
   // log('sidebarVisibleChange', visible);
-  if(visible && !sideBarIsVisible) {
+  if(visible && !sidebarIsVisible) {
     if(firstVisible) {
       firstVisible = false;
       await cleanAllFilesCmd();
     }
-   await sidebar.updateSidebar();
+   updateSidebar();
   }
-  sideBarIsVisible = visible;
+  sidebarIsVisible = visible;
 }
 
 async function changeDocument() {
   // log('changeDocument', document.uri.path);
- await sidebar.updateSidebar();
+ updateSidebar();
 }
 
 async function changeEditor(editor) {
   if(!editor || !editor.document) {
-    // log('changeEditor, no active editor');
     return;
   }
   // log('changeEditor', editor.document.uri.path);
- await sidebar.updateSidebar();
+ updateSidebar();
 }
 
 async function changeVisEditors() {
   // log('changeVisEditors', editors.length);
- await sidebar.updateSidebar();
+ updateSidebar();
 }  
 
 const changeSelection = utils.debounce(async (event) => {
   const {textEditor} = event;
   text.clearDecoration();
   await text.cleanFile(textEditor.document);
-  await sidebar.updateSidebar(textEditor);
-});
+  await updateSidebar(textEditor);
+}, 200);
+
+// document: [TextDocument],
+// contentChanges: [
+//   { range: Range { start: [Position], end: [Position] },
+//     rangeLength: 0,
+//     text: 'a' }
+// ],
+// reason: undefined
+async function textEdited (event) {
+  const {textEditor} = event;
+  text.clearDecoration();
+  await text.cleanFile(textEditor.document);
+  await updateSidebar(textEditor);
+}
 
 module.exports = { toggleCmd, prevCmd, nextCmd,
-                   deleteItemXCmd,
+                   deleteItemXCmd, init,
                    clearFileCmd, clearAllFilesCmd,
                    cleanFileCmd, cleanAllFilesCmd,
-                   sidebarVisibleChange, 
+                   sidebarVisibleChange, textEdited,
                    changeDocument, changeEditor, 
                    changeVisEditors, changeSelection };
 

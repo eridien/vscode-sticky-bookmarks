@@ -7,11 +7,10 @@ const showLineNumbers    = true;
 const showBreadCrumbs    = true;
 const showCodeWhenCrumbs = true;
 
-async function init() {
+function init() {
   for(const [lang, keywords] of Object.entries(utils.keywords())) {
     keywordSetsByLang[lang] = new Set(keywords);
   }
-  return {};
 }
 
 const crumbSepLft     = '● ';

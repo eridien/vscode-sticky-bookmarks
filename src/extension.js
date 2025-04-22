@@ -1,9 +1,9 @@
-const vscode    = require('vscode');
-const cmd       = require('./commands.js');
-const sidebar   = require('./sidebar.js');
-const text      = require('./text.js');
-const marks     = require('./marks.js');
-const utils     = require('./utils.js');
+const vscode   = require('vscode');
+const commands = require('./commands.js');
+const sidebar  = require('./sidebar.js');
+const text     = require('./text.js');
+const marks    = require('./marks.js');
+const utils    = require('./utils.js');
 const {start, end} = utils.getLog('extn');
 
 async function activate(context) {
@@ -14,24 +14,24 @@ async function activate(context) {
     return;
   }
 	const toggleCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.toggleCmd',        cmd.toggleCmd);
+                'sticky-bookmarks.toggleCmd',        commands.toggleCmd);
 	const prevCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.prevCmd',          cmd.prevCmd);
+                'sticky-bookmarks.prevCmd',          commands.prevCmd);
 	const nextCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.nextCmd',          cmd.nextCmd);
+                'sticky-bookmarks.nextCmd',          commands.nextCmd);
 	const clearFileCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.clearFileCmd',     cmd.clearFileCmd);
+                'sticky-bookmarks.clearFileCmd',     commands.clearFileCmd);
 	const clearAllFilesCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.clearAllFilesCmd', cmd.clearAllFilesCmd);
+                'sticky-bookmarks.clearAllFilesCmd', commands.clearAllFilesCmd);
 	const cleanFileCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.cleanFileCmd',     cmd.cleanFileCmd);
+                'sticky-bookmarks.cleanFileCmd',     commands.cleanFileCmd);
 	const cleanAllFilesCmd = vscode.commands.registerCommand(
-                          'sticky-bookmarks.cleanAllFilesCmd', cmd.cleanAllFilesCmd);
+                'sticky-bookmarks.cleanAllFilesCmd', commands.cleanAllFilesCmd);
   const itemClickCmd = vscode.commands.registerCommand(
     'sticky-bookmarks.itemClickCmd', (item) => sidebar.itemClickCmd(item)
   );
   const contextMenuCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.deleteItemXCmd', (item) => cmd.deleteItemXCmd(item)
+    'sticky-bookmarks.deleteItemXCmd', (item) => commands.deleteItemXCmd(item)
   );
   const clearAllSavedDataCmd = vscode.commands.registerCommand(
    'sticky-bookmarks.clearAllSavedData', async () => {
@@ -50,16 +50,17 @@ async function activate(context) {
     treeDataProvider: sidebarProvider,
   });
 
-  const updateSidebar = await sidebar.init(sidebarProvider);
-  await text.init();
-  await marks.init(context, updateSidebar);
+  commands.init(sidebarProvider);
+  sidebar.init(sidebarProvider);
+  text.init();
+  await marks.init(context, sidebarProvider);
 
   treeView.onDidChangeVisibility(async event => {
-    await cmd.sidebarVisibleChange(event.visible);
+    await commands.sidebarVisibleChange(event.visible);
   });
   vscode.window.onDidChangeVisibleTextEditors(async editors => {
     console.log('Currently visible editors:', editors);
-    await cmd.changeVisEditors(editors);
+    await commands.changeVisEditors(editors);
   });
   vscode.workspace.onDidChangeTextDocument(async event => {
     const document = event.document;
@@ -70,10 +71,10 @@ async function activate(context) {
       // console.log('Ignored non-file changeTextDocument', uri.path);
       return;
     }
-    await cmd.changeDocument(document);
+    await commands.changeDocument(document);
   });
   vscode.window.onDidChangeActiveTextEditor(async editor => {
-    await cmd.changeEditor(editor);
+    await commands.changeEditor(editor);
   });
   vscode.window.onDidChangeTextEditorSelection(async event => {
     const editor = event.textEditor;
@@ -84,7 +85,11 @@ async function activate(context) {
       // console.log('Ignored non-file changeTextDocument', uri.path);
       return;
     }
-    await cmd.changeSelection(event);
+    await commands.changeSelection(event);
+  });
+
+  vscode.workspace.onDidChangeTextDocument(async event => {
+    await commands.textEdited(event);
   });
 
   context.subscriptions.push(toggleCmd, prevCmd, nextCmd, 

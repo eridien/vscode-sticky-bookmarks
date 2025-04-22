@@ -5,10 +5,10 @@ bugs
   junk in keyboard shortcuts menu
   removing workspace folder gives inifinite loop removing one mark
   clear all files slow -- need busy indicator
-  get tree runs four times on item click
-      throttle updateSidebar
+  pointers broken
 
 todo
+  only update file item
   remove multiple tokens from same line on delete token
   separate breadcrumbs with \n
   don't show bookmarks in compressed label text

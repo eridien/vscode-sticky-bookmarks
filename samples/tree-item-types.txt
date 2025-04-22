@@ -1,0 +1,47 @@
+collapsibleState: 0
+command: {command: 'sticky-bookmarks.itemClickCmd', title: 'Item Clicked', arguments: Array(1)}
+folderFsPath: 'c:\\Users\\mark\\apps\\test-app'
+folderIndex: 0
+folderName: 'test-app'
+folderUriPath: '/c:/Users/mark/apps/test-app'
+iconPath: ui {id: 'chevron-down', color: undefined}
+id: '1165499476'
+label: '📂 test-app'
+type: 'folder'
+
+collapsibleState: 2
+children: <see bookmark below>
+command: {command: 'sticky-bookmarks.itemClickCmd', title: 'Item Clicked', arguments: Array(1)}
+document: TextDocument(file:///c%3A/Users/mark/apps/test-app/src/srvr.js)
+fileFsPath: 'c:\\Users\\mark\\apps\\test-app\\src\\srvr.js'
+fileName: 'srvr.js'
+fileRelUriPath: 'src/srvr.js'
+fileUriPath: '/c:/Users/mark/apps/test-app/src/srvr.js'
+folderFsPath: 'c:\\Users\\mark\\apps\\test-app'
+folderIndex: 0
+folderName: 'test-app'
+folderUriPath: '/c:/Users/mark/apps/test-app'
+id: '128755008'
+label: '📄 src/srvr.js'
+type: 'file'
+
+collapsibleState: 0
+command: {command: 'sticky-bookmarks.itemClickCmd', title: 'Item Clicked', arguments: Array(1)}
+iconPath: ui {id: 'triangle-up', color: undefined}
+id: ':cpix;'
+label: '  8  haveSocket=fal\\n waitingSends=[];\\n ws.onmessage=(event)=>{\\n x=0;'
+mark: document: TextDocument(file:///c%3A/Users/mark/apps/test-app/src/srvr.js)
+      fileFsPath: 'c:\\Users\\mark\\apps\\test-app\\src\\srvr.js'
+      fileName: 'srvr.js'
+      fileRelUriPath: 'src/srvr.js'
+      fileUriPath: '/c:/Users/mark/apps/test-app/src/srvr.js'
+      folderFsPath: 'c:\\Users\\mark\\apps\\test-app'
+      folderIndex: 0
+      folderName: 'test-app'
+      folderUriPath: '/c:/Users/mark/apps/test-app'
+      inWorkspace: true
+      languageId: 'javascript'
+      lineNumber: 7
+      token: ':cpix;'
+type: 'bookmark'
+

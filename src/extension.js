@@ -84,7 +84,7 @@ async function activate(context) {
       // console.log('Ignored non-file changeTextDocument', uri.path);
       return;
     }
-    await cmd.changeSelection(editor);
+    await cmd.changeSelection(event);
   });
 
   context.subscriptions.push(toggleCmd, prevCmd, nextCmd, 

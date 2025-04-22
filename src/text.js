@@ -15,8 +15,8 @@ async function init() {
 }
 
 const crumbSepLft     = '● ';
-const crumbSepRgt     = ' ● ';
-const lineSep         = ' ••';
+const crumbSepRgt     = '●';
+const lineSep         = '\x00';
 
 const keywordSetsByLang = {};
 
@@ -40,7 +40,7 @@ function lineRegEx(languageId) {
 function getJunkAndBookmarkToken(lineText, languageId) {
   const lineRegX      = lineRegEx(languageId);
   const match         = lineRegX.exec(lineText);
-  if(!match) return {junk:'', bookmarkToken:''};
+  if(!match) return {junk:'', bookmarkToken:'', noMatch:true};
   const junk1         = (match[1] ?? '').replaceAll(/\s/g, '');
   const junk2         = (match[2] ?? '').replaceAll(/\s/g, '');
   const junk5         = (match[5] ?? '').replaceAll(/\s/g, '');
@@ -65,33 +65,36 @@ async function getCompText(mark) {
         `\\s*${commLft}\\s*?$`, 'g');
   let compText = '';
   do {
-    let lineText = document.lineAt(lineNumber).text
-                           .trim().replaceAll(/\s+/g, ' ');
-    const matches = lineText.matchAll(/\b\w+?\b/g);
-    for(const match of matches) {
-      const word = match[0];
-      if(isKeyWord(languageId, word)) {
-        lineText = lineText.replaceAll(word, '')
-                            .replaceAll(/\s+/g, ' ').trim();
+    let lineText = document.lineAt(lineNumber).text;
+    const {junk, bookmarkToken, noMatch} = 
+                    getJunkAndBookmarkToken(lineText, languageId)
+    if(noMatch || junk !== '') {
+      if(bookmarkToken !== '') 
+        lineText = lineText.replace(bookmarkToken, '');
+      const matches = lineText.matchAll(/\b\w+?\b/g);
+      for(const match of matches) {
+        const word = match[0];
+        if(isKeyWord(languageId, word)) {
+          const strtIdx = match.index;
+          const endIdx  = strtIdx + word.length;
+          lineText = lineText.slice(0, strtIdx) +
+                     lineText.slice(endIdx);
+        }
       }
-      lineText = lineText.replaceAll(/\B\s+\B/g, '');
+      lineText = lineText.replaceAll(/\B\s+?|\s+?\B/g, '');
+      let lastLen;
+      do {
+        lastLen = lineText.length;
+        lineText = lineText.replaceAll(regxEmptyComm, ' ');
+      }
+      while(lineText.length != lastLen);
+      compText += ' ' + lineText + lineSep;
     }
-    lineText = lineText.replaceAll(/\B\s+?|\s+?\B/g, '')
-                       .replaceAll(/:[0-9a-z]{4};/g, '');
-    let lastLen;
-    do {
-      lastLen = lineText.length;
-      lineText = lineText.replaceAll(regxEmptyComm, ' ')
-                        .replaceAll(/\s+/g, ' ').trim();
-    }
-    while(lineText.length != lastLen);
-
-    compText += ' ' + lineText + lineSep;
     lineNumber++;
   }
   while(compText.length < 60 && lineNumber < document.lineCount);
-  compText = compText.slice(0, -1); // remove last newline
-  return compText.trim().replace(/(\w)(\W)|(\W)(\w)/g, '$1$3 $2$4');
+  return compText.slice(0, -1).replaceAll(/\s+/g, ' ').trim()
+                              .replaceAll('\x00', '\\n');
 }
 
 function getSymbols(pos, symbols) {
@@ -158,7 +161,7 @@ let justDecorated     = false;
 async function gotoAndDecorate(document, lineNumber) {
   clearDecoration();
   justDecorated = true;
-  setTimeout(() => {justDecorated = false}, 100);
+  setTimeout(() => {justDecorated = false}, 200);
   const doc = await vscode.workspace.openTextDocument(document.uri);
   tgtEditor = await vscode.window.showTextDocument(doc, {preview: false});
   // const ranges = tgtEditor.visibleRanges;
@@ -222,7 +225,6 @@ function getNewTokenLine(indentLen, token, languageId) {
   return ' '.repeat(indentLen) + commLft + 'bookmark' + token + commRgt;
 }
 
-//bookmark:kd8i;
 async function replaceLineInDocument(document, lineNumber, newText) {
   if (lineNumber < 0 || lineNumber >= document.lineCount) return;
   const uri = document.uri;
@@ -348,7 +350,6 @@ async function scrollToPrevNext(fwd) {
   }
 }
 
-//bookmark:r2yf;
 async function runOnAllTokensInDoc(document, getPos, getLine, func) {
   const text = document.getText();
   const matches = [...text.matchAll(tokenRegExG)];

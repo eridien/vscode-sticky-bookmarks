@@ -6,7 +6,7 @@ const {log}  = utils.getLog('side');
 
 const showPointers = true;
 
-let provider, itemTree;
+let provider, itemTree = [];
 
 const closedFolders = new Set();
 
@@ -66,6 +66,7 @@ async function getNewMarkItem(mark) {
   return item;
 };
 
+//bookmark:8h1t;
 async function getItemTree() {
   const allWsFolders = vscode.workspace.workspaceFolders;
   if (!allWsFolders) {
@@ -204,8 +205,14 @@ async function itemClickCmd(item) {
   }
 }
 
-function updateSidebar(item) {
-  provider._onDidChangeTreeData.fire(item);
+function updateSidebar(fsPath) {
+  if(!fsPath) provider._onDidChangeTreeData.fire();
+  else for(let rootItem in itemTree) {
+    if(rootItem.type == 'file' && rootItem.fileFsPath == fsPath) {
+      provider._onDidChangeTreeData.fire(rootItem);
+      return;
+    }
+  }
 }
 
 class SidebarProvider {

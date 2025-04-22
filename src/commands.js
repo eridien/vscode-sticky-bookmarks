@@ -87,21 +87,20 @@ async function changeEditor(editor) {
   // log('changeEditor', editor.document.uri.path);
  sidebar.updateSidebar();
 }
+
 async function changeVisEditors() {
   // log('changeVisEditors', editors.length);
  sidebar.updateSidebar();
-}
+}  
 
-async function changeSelection() {
-  // log('changeSelection');
-  // const uri      = editor.document.uri;
-  // const position = editor.selection.active;
-  // log('changeSelection', uri, position.line);
- sidebar.updateSidebar();
+const changeSelection = utils.debounce(async (event) => {
+  const {textEditor, selections} = event;
+  const document = textEditor.document;
+  log('changeSelection', document.uri.path, selections);
   text.clearDecoration();
-  // treeView.selection = []; // doesn't work
-}
-
+  await text.cleanFile(textEditor.document);
+  sidebar.updateSidebar(document.uri.fsPath);
+});
 
 module.exports = { toggleCmd, prevCmd, nextCmd,
                    deleteItemXCmd,

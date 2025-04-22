@@ -308,10 +308,27 @@ async function replaceLine(document, lineNumber, lineText) {
   return await vscode.workspace.applyEdit(edit);
 }
 
+function debounce(fn, delay = 100) {
+  let timeout;
+  let pendingResolve;
+  return function (...args) {
+    return new Promise(resolve => {
+      clearTimeout(timeout);
+      if (pendingResolve) pendingResolve(undefined); // cancel previous
+      pendingResolve = resolve;
+      timeout = setTimeout(async () => {
+        const result = await fn.apply(this, args);
+        resolve(result);
+        pendingResolve = null;
+      }, delay);
+    });
+  };
+}
+
 module.exports = {
   init, getLog, fnv1aHash, loadStickyBookmarksJson,
   commentsByLang, keywords, fileExists, getLineFromTextAtOffset,
-  deleteLine, insertLine, replaceLine,
+  deleteLine, insertLine, replaceLine, debounce,
   getPathsFromWorkspaceFolder, getPathsFromFileDoc,
   runOnAllFilesInFolder, getFocusedWorkspaceFolder
 }

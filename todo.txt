@@ -7,15 +7,11 @@ bugs
   clear all files slow -- need busy indicator
 
 todo
-  only update file item
+  clean newly opened editors
   remove multiple tokens from same line on delete token
-  separate breadcrumbs with \n
-  don't show bookmarks in compressed label text
   always open view, folder, or file when new mark
-  hide all marks and restore on any edit
+  hide all marks, restore on any edit
   command to go to last file on prev/next
-  monitor edits for mark changes
-  cleanAllFilesCmd on activate
   auto scroll
     scroll to top for functions
     min top and bottom border lines
@@ -25,11 +21,9 @@ todo
     show in sidebar with question mark
     click on sidebar to accept and create bookmark
     limit suggestions (setting)
-  folder delete X
   busy indicator
   open sidebar on mark creation
   remove hashing
-  add mark to global marks on boot when token in text
   add names to marks
     edit menu
     don't delete named marks so names preserved
@@ -73,6 +67,7 @@ settings
   open sidebar when adding mark
   min line len
   files to ignore
+  ignore .gitignore
   show in gutter
     gutter color
   show in scrollbar

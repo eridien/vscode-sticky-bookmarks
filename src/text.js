@@ -286,13 +286,13 @@ async function delMarkFromLineAndGlobal(document, lineNumber, save = true) {
                      getJunkAndBookmarkToken(lineText, languageId);
     if(junk.length > 0) {
       log('delMarkFromLineAndGlobal, line has token and junk, '+
-          'removing only token');
+          'removing only token', token);
       const newLineText = lineText.replace(bookmarkToken, '');
       await utils.replaceLine(document, lineNumber, newLineText);
     }
     else {
       log('delMarkFromLineAndGlobal, line has token and no junk, '+
-          'removing line');
+          'removing line', lineNumber, token);
       await utils.deleteLine(document, lineNumber);
     }
     marks.delGlobalMark(token);
@@ -361,7 +361,9 @@ async function addMarksForTokens(document) {
 //bookmark:r2yf;
 async function runOnAllTokensInDoc(document, getPos, getLine, func) {
   const text = document.getText();
-  for (const match of text.matchAll(tokenRegExG)) {
+  const matches = [...text.matchAll(tokenRegExG)];
+  matches.reverse();
+  for (const match of matches) {
     const offset = match.index;
     const token  = match[0];
     const res    = {token};
@@ -389,7 +391,7 @@ async function cleanFile(document) {
   await runOnAllTokensInDoc(document, true, true, async (fileMark) => {
     const {position, lineText, token} = fileMark;
     const lineNumber = position.line;
-    const globalMark = marks.getGlobalMark[token];
+    const globalMark = marks.getGlobalMark(token);
     if(globalMark && (globalMark.fileFsPath != fileFsPath || 
                       globalMark.lineNumber != lineNumber)) {
       const newMark = await marks.newGlobalMark(

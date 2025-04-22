@@ -38,6 +38,7 @@ TOKENS IN TEXT ARE GODS
       find global marks to delete
 
 todo
+  separate breadcrumbs with \n
   don't show bookmarks in compressed label text
   always open view, folder, or file when new mark
   hide all marks and restore on any edit

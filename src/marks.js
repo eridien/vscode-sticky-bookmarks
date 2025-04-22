@@ -59,12 +59,9 @@ function waitForInit() {
   });
 }
 
-function getGlobalMark(token) {
-  return globalMarks[token];
-}
-
 function putGlobalMark(token) {globalMarks[token] = token}
 function delGlobalMark(token) {delete globalMarks[token]}
+function getGlobalMark(token) {return globalMarks[token]}
 function getGlobalMarks()     {return globalMarks}
 
 function getMarksForFile(fileUriPath) {

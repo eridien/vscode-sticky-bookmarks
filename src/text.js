@@ -11,7 +11,7 @@ async function init() {
   for(const [lang, keywords] of Object.entries(utils.keywords())) {
     keywordSetsByLang[lang] = new Set(keywords);
   }
-  return addMarksForTokens;
+  return {};
 }
 
 const crumbSepLft     = '● ';
@@ -286,13 +286,13 @@ async function delMarkFromLineAndGlobal(document, lineNumber, save = true) {
                      getJunkAndBookmarkToken(lineText, languageId);
     if(junk.length > 0) {
       log('delMarkFromLineAndGlobal, line has token and junk, '+
-          'removing only token', token);
+          'removing only token', document.uri.path, lineNumber, token);
       const newLineText = lineText.replace(bookmarkToken, '');
       await utils.replaceLine(document, lineNumber, newLineText);
     }
     else {
       log('delMarkFromLineAndGlobal, line has token and no junk, '+
-          'removing line', lineNumber, token);
+          'removing line', document.uri.path, lineNumber, token);
       await utils.deleteLine(document, lineNumber);
     }
     marks.delGlobalMark(token);
@@ -345,16 +345,6 @@ async function scrollToPrevNext(fwd) {
     }
     lineNumber = fwd ? ((lineNumber == lineCnt-1) ? 0 : lineNumber+1)
                      : ((lineNumber == 0) ? lineCnt-1 : lineNumber-1);
-  }
-}
-
-async function addMarksForTokens(document) {
-  const text = document.getText();
-  const matches = [...text.matchAll(tokenRegExG)];
-  for (const match of matches) {
-    const matchedText = match[0];
-    const startPos    = document.positionAt(match.index);
-    await marks.addGlobalMarkIfMissing(matchedText, document, startPos.line);
   }
 }
 

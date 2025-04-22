@@ -50,9 +50,9 @@ async function activate(context) {
     treeDataProvider: sidebarProvider,
   });
 
-  const updateSidebar     = await sidebar.init(sidebarProvider);
-  const addMarksForTokens = await text.init();
-  await marks.init(context, updateSidebar, addMarksForTokens);
+  const updateSidebar = await sidebar.init(sidebarProvider);
+  await text.init();
+  await marks.init(context, updateSidebar);
 
   treeView.onDidChangeVisibility(async event => {
     await cmd.sidebarVisibleChange(event.visible);

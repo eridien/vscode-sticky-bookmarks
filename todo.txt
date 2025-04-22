@@ -3,41 +3,13 @@ vsce package
 
 bugs
   junk in keyboard shortcuts menu
-  loading is slow
   removing workspace folder gives inifinite loop removing one mark
   clear all files slow -- need busy indicator
   get tree runs four times on item click
       throttle updateSidebar
 
-why gen2
-  sticky
-  smart sidebar
-    line numbers
-    breadcrumbs
-    compressed code
-  auto bookmark suggestions
-  smart scrolling
-
-TOKENS IN TEXT ARE GODS
-  clean all files -- refresh menu on sidebar top
-    1 repair duplicate tokens, names have priority
-    2 align tokens
-    3 remove multiple tokens from same line
-        clean trailing empty comments and whitespace
-    4 remove global marks with no tokens
-        keeping names & suggestions
-        only delete named tokens when X menu used
-  implementation
-    scan all files with tokens in text or in global marks
-    regex search in file
-      store all marks to later use logic
-        remember all marks with locs
-        note non-aligned
-      choose multiples to keep
-      choose duplicates to rename
-      find global marks to delete
-
 todo
+  remove multiple tokens from same line on delete token
   separate breadcrumbs with \n
   don't show bookmarks in compressed label text
   always open view, folder, or file when new mark
@@ -61,8 +33,8 @@ todo
   add mark to global marks on boot when token in text
   add names to marks
     edit menu
-    don't delete marks so names preserved
-    remove old marks on x menu delete
+    don't delete named marks so names preserved
+    delete named tokens when X menu used
   put refresh menu item on files and folders
   test moving a project folder
   show marks in gutter
@@ -72,6 +44,15 @@ impossible?
   invisible tokens
   toggle collapsed/expanded on file item click
   remove sidebar highlight when selection changes
+
+why gen2
+  sticky
+  smart sidebar
+    line numbers
+    breadcrumbs
+    compressed code
+  auto bookmark suggestions
+  smart scrolling
 
 file types to add
   plaintext

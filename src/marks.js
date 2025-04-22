@@ -2,18 +2,17 @@ const vscode = require('vscode');
 const utils  = require('./utils.js');
 const {log, start, end} = utils.getLog('mark');
 
-// const DEBUG_REMOVE_MARKS_ON_START = true;
-const DEBUG_REMOVE_MARKS_ON_START = false;
+// const DONT_LOAD_MARKS_ON_START = true;
+const DONT_LOAD_MARKS_ON_START = false;
 
-let globalMarks;
-let context, updateSidebar, addMarksForTokens;
+let globalMarks = {};
+let context, updateSidebar;
 let initFinished = false;
 
-async function init(contextIn, updateSidebarIn, addMarksForTokensIn) {
+async function init(contextIn, updateSidebarIn) {
   start('init marks');
   context           = contextIn;
   updateSidebar     = updateSidebarIn;
-  addMarksForTokens = addMarksForTokensIn;
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders || workspaceFolders.length === 0) {
     globalMarks = {};
@@ -21,24 +20,32 @@ async function init(contextIn, updateSidebarIn, addMarksForTokensIn) {
     log('no workspace folders found');
     return {};
   }
-  if(DEBUG_REMOVE_MARKS_ON_START)
-       await context.workspaceState.update('globalMarks', {});
-  globalMarks = context.workspaceState.get('globalMarks', {});
-  for(const folder of workspaceFolders)
-    await utils.runOnAllFilesInFolder(addMarksForTokens, folder.uri.fsPath);
+  if(!DONT_LOAD_MARKS_ON_START)
+    globalMarks = context.workspaceState.get('globalMarks', {});
+
+  const docsByFsPath = {};
+  const checkedFiles = new Set();
+  const badFiles     = new Set();
   for(const [token, mark] of Object.entries(globalMarks)) {
-    const markUri    = vscode.Uri.file(mark.fileFsPath)
-    const folder     = vscode.workspace.getWorkspaceFolder(markUri);
-    const document   = await vscode.workspace.openTextDocument(markUri);
     const fileFsPath = mark.fileFsPath;
-    if(!folder || !document || 
-                  !await utils.fileExists(fileFsPath)) {
-      log(`folder ${mark.folderName}, document, `+
-          `or file ${mark.fileName} missing, removing ${token}`);
+    if(badFiles.has(fileFsPath)) {
       delete globalMarks[token];
       continue;
     }
-    mark.document = document;
+    if(!checkedFiles.has(fileFsPath)) {
+      checkedFiles.add(fileFsPath);
+      const uri      = vscode.Uri.file(fileFsPath);
+      const folder   = vscode.workspace.getWorkspaceFolder(uri);
+      const document = await vscode.workspace.openTextDocument(uri);
+      if(document) docsByFsPath[fileFsPath] = document;
+      if(!folder || !document || !await utils.fileExists(fileFsPath)) {
+        log(`folder ${mark.folderName} or file ${mark.fileName} missing`);
+        badFiles.add(fileFsPath);
+        delete globalMarks[token];
+        continue;
+      }
+    }
+    mark.document = docsByFsPath[fileFsPath];
     mark.inWorkspace = true;
   }
   await context.workspaceState.update('globalMarks', globalMarks);

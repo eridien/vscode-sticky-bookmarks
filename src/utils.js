@@ -325,10 +325,12 @@ function debounce(fn, delay = 100) {
   };
 }
 
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)) }
+
 module.exports = {
   init, getLog, fnv1aHash, loadStickyBookmarksJson,
   commentsByLang, keywords, fileExists, getLineFromTextAtOffset,
-  deleteLine, insertLine, replaceLine, debounce,
+  deleteLine, insertLine, replaceLine, debounce, sleep,
   getPathsFromWorkspaceFolder, getPathsFromFileDoc,
   runOnAllFilesInFolder, getFocusedWorkspaceFolder
 }

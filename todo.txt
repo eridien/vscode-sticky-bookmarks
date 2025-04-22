@@ -77,10 +77,6 @@ settings
     gutter color
   show in scrollbar
     scrollbar color
-  
-  sticky-bookmarks.json
-    comments by langs
-    keywords
 
 
 ############################### NOTES ######################################

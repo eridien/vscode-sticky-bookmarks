@@ -234,6 +234,11 @@ async function updateSidebar(textEditor) {
     const fsPath = textEditor.document.uri.fsPath;
     for(let rootItem of itemTree) {
       if(rootItem.type == 'file' && rootItem.fileFsPath == fsPath) {
+        // const savedChildren = rootItem.children;
+        // rootItem.children = [];
+        // provider._onDidChangeTreeData.fire(rootItem);
+        // rootItem.children = savedChildren;
+        // // await utils.sleep(1000);
         await updatePointers(textEditor);
         provider._onDidChangeTreeData.fire(rootItem);
         return;

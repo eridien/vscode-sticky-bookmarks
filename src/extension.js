@@ -34,7 +34,7 @@ async function activate(context) {
     'sticky-bookmarks.deleteItemXCmd', (item) => commands.deleteItemXCmd(item)
   );
   const clearAllSavedDataCmd = vscode.commands.registerCommand(
-   'sticky-bookmarks.clearAllSavedData', async () => {
+    'sticky-bookmarks.clearAllSavedData', async () => {
       for (const key of context.workspaceState.keys()) {
         await context.workspaceState.update(key, undefined);
       }
@@ -43,6 +43,15 @@ async function activate(context) {
       }
       vscode.window.showInformationMessage(
             'Sticky Bookmarks: All saved data has been cleared.');
+    });
+
+    const resetAllCmd = vscode.commands.registerCommand(
+      'sticky-bookmarks.resetAll', async () => {
+      for (const key of context.workspaceState.keys()) 
+        await context.workspaceState.update(key, undefined);
+      for (const key of context.globalState.keys()) 
+        await context.globalState.update(key, undefined);
+      vscode.window.showInformationMessage('Sticky Bookmarks keybindings reset.');
     });
 
   const sidebarProvider = new sidebar.SidebarProvider();
@@ -95,7 +104,7 @@ async function activate(context) {
                              clearFileCmd, clearAllFilesCmd,
                              cleanFileCmd, cleanAllFilesCmd, 
                              itemClickCmd, contextMenuCmd,
-                             clearAllSavedDataCmd);
+                             clearAllSavedDataCmd, resetAllCmd);
 
   end('activating extension');
 }

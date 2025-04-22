@@ -3,8 +3,7 @@ vsce package
 
 bugs
   junk in keyboard shortcuts menu
-  removing workspace folder gives inifinite loop removing one mark
-  clear all files slow -- need busy indicator
+  deleting mark requires two undos
 
 todo
   clean newly opened editors

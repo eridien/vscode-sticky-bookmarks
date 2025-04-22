@@ -50,17 +50,16 @@ async function activate(context) {
     treeDataProvider: sidebarProvider,
   });
 
-  commands.init(sidebarProvider);
-  sidebar.init(sidebarProvider);
+  utils.initProvider(sidebarProvider);
   text.init();
   await marks.init(context, sidebarProvider);
 
   treeView.onDidChangeVisibility(async event => {
-    await commands.sidebarVisibleChange(event.visible);
+    await commands.changedSidebarVisiblitiy(event.visible);
   });
   vscode.window.onDidChangeVisibleTextEditors(async editors => {
     console.log('Currently visible editors:', editors);
-    await commands.changeVisEditors(editors);
+    await commands.changedVisEditors(editors);
   });
   vscode.workspace.onDidChangeTextDocument(async event => {
     const document = event.document;
@@ -71,10 +70,10 @@ async function activate(context) {
       // console.log('Ignored non-file changeTextDocument', uri.path);
       return;
     }
-    await commands.changeDocument(document);
+    await commands.changedDocument(document);
   });
   vscode.window.onDidChangeActiveTextEditor(async editor => {
-    await commands.changeEditor(editor);
+    await commands.changedEditor(editor);
   });
   vscode.window.onDidChangeTextEditorSelection(async event => {
     const editor = event.textEditor;
@@ -85,11 +84,11 @@ async function activate(context) {
       // console.log('Ignored non-file changeTextDocument', uri.path);
       return;
     }
-    await commands.changeSelection(event);
+    await commands.changedSelection(event);
   });
 
   vscode.workspace.onDidChangeTextDocument(async event => {
-    await commands.textEdited(event);
+    await commands.changedText(event);
   });
 
   context.subscriptions.push(toggleCmd, prevCmd, nextCmd, 

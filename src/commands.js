@@ -3,14 +3,6 @@ const text    = require('./text.js');
 const utils   = require('./utils.js');
 const {log}   = utils.getLog('cmds');
 
-let sidebarProvider;
-
-function init(contextIn, sidebarProviderIn) {
-  sidebarProvider = sidebarProviderIn;
-}
-
-function updateSidebar() { sidebarProvider._onDidChangeTreeData.fire() }
-
 async function toggleCmd() {
   // log('toggle command called');
   await text.toggle();
@@ -37,7 +29,6 @@ async function clearFileCmd(document) {
 }
 
 async function deleteItemXCmd(item) {
-  // log('deleteItemXCmd command, X menu');
   switch (item.type) {
     case 'folder': await clearAllFilesCmd(item.folderPath); break;
     case 'file':   await clearFileCmd(item.document);       break;
@@ -56,7 +47,7 @@ async function cleanFileCmd(document) {
   await text.cleanFile(document)
 }
 
-async function clearAllFilesCmd() {                          //
+async function clearAllFilesCmd() {
   // log('clearAllFilesCmd command called');
   await utils.runOnAllFilesInFolder(clearFileCmd);
 }
@@ -67,64 +58,64 @@ async function cleanAllFilesCmd() {
 }
 
 let sidebarIsVisible = false;
-let firstVisible     = true;
 
-async function sidebarVisibleChange(visible) {
-  // log('sidebarVisibleChange', visible);
+async function changedSidebarVisiblitiy(visible) {
+  // log('changedSidebarVisiblitiy', visible);
   if(visible && !sidebarIsVisible) {
-    if(firstVisible) {
-      firstVisible = false;
-      await cleanAllFilesCmd();
-    }
-   updateSidebar();
+    // if(firstVisible) {
+    //   firstVisible = false;
+    //   await cleanAllFilesCmd();
+    // }
+   utils.updateSidebar();
   }
   sidebarIsVisible = visible;
+   utils.updateSidebar();
 }
 
-async function changeDocument() {
-  // log('changeDocument', document.uri.path);
- updateSidebar();
+async function changedDocument() {
+  // log('changedDocument', document.uri.path);
+ utils.updateSidebar();
 }
 
-async function changeEditor(editor) {
+async function changedEditor(editor) {
   if(!editor || !editor.document) {
     return;
   }
-  // log('changeEditor', editor.document.uri.path);
- updateSidebar();
+  // log('changedEditor', editor.document.uri.path);
+ utils.updateSidebar();
 }
 
-async function changeVisEditors() {
-  // log('changeVisEditors', editors.length);
- updateSidebar();
+async function changedVisEditors() {
+  // log('changedVisEditors', editors.length);
+ utils.updateSidebar();
 }  
 
-const changeSelection = utils.debounce(async (event) => {
+const changedSelection = utils.debounce(async (event) => {
   const {textEditor} = event;
   text.clearDecoration();
   await text.cleanFile(textEditor.document);
-  await updateSidebar(textEditor);
+  utils.updateSidebar();
 }, 200);
 
-// document: [TextDocument],
-// contentChanges: [
-//   { range: Range { start: [Position], end: [Position] },
-//     rangeLength: 0,
-//     text: 'a' }
-// ],
-// reason: undefined
-async function textEdited (event) {
-  const {textEditor} = event;
-  text.clearDecoration();
-  await text.cleanFile(textEditor.document);
-  await updateSidebar(textEditor);
-}
+const changedText = utils.debounce(async (event) => {
+  // document: [TextDocument],
+  // contentChanges: [
+  //   { range: Range { start: [Position], end: [Position] },
+  //     rangeLength: 0,
+  //     text: 'a' }
+  // ],
+  // reason: undefined
+  // const {document} = event;
+  // text.clearDecoration();
+  // await text.cleanFile(event.document);
+  // utils.updateSidebar();
+}, 200);
 
 module.exports = { toggleCmd, prevCmd, nextCmd,
-                   deleteItemXCmd, init,
+                   deleteItemXCmd,
                    clearFileCmd, clearAllFilesCmd,
                    cleanFileCmd, cleanAllFilesCmd,
-                   sidebarVisibleChange, textEdited,
-                   changeDocument, changeEditor, 
-                   changeVisEditors, changeSelection };
+                   changedSidebarVisiblitiy, changedText,
+                   changedDocument, changedEditor, 
+                   changedVisEditors, changedSelection };
 

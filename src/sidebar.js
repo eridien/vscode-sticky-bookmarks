@@ -6,13 +6,9 @@ const {log, start, end}  = utils.getLog('side');
 
 const showPointers = true;
 
-let sidebarProvider, itemTree = [];
+let itemTree = [];
 
 const closedFolders = new Set();
-
-function init(sidebarProviderIn) {
-  sidebarProvider = sidebarProviderIn;
-}
 
 async function getNewFolderItem(mark) {
   const {folderIndex, folderName, folderFsPath, folderUriPath} = mark;
@@ -65,65 +61,9 @@ async function getNewMarkItem(mark) {
   return item;
 };
 
-// let fileWithPtrFsPath = null;
-
-//bookmark:d6bh;
-async function updatePointers(editor) {
-  if(showPointers) {
-    const fsPath        = editor.document.uri.fsPath;
-    const selectionLine = editor.selection.active.line;
-    let itemDown  = null;
-    let itemExact = null;
-    let itemUp    = null;
-    for(const item of itemTree) {
-      if(item.type === 'file' && !closedFolders.has(item.folderFsPath) && 
-              item.children.length > 0) {
-        // if (fsPath !== fileWithPtrFsPath && 
-        //     item.fileFsPath === fileWithPtrFsPath) {
-        //   for (const bookmarkItem of item.children)
-        //       delete bookmarkItem.iconPath;
-        //   continue;
-        // }
-        if(item.fileFsPath === fsPath) {
-          for (const bookmarkItem of item.children)
-              delete bookmarkItem.iconPath;
-          for (const bookmarkItem of item.children) {
-            const bookmarkLine = bookmarkItem.mark.lineNumber;
-            if(selectionLine === bookmarkLine) {
-              itemExact = bookmarkItem;
-              break;
-            }
-            else if(selectionLine < bookmarkLine)  {
-              itemUp = bookmarkItem;
-              break;
-            }
-            else if(selectionLine > bookmarkLine) {
-              itemDown = bookmarkItem;
-            }
-          }
-        }
-      }
-    }
-    if(itemExact) {
-      // fileWithPtrFsPath  = itemExact.fileFsPath;
-      itemExact.iconPath = new vscode.ThemeIcon("triangle-right");
-    }
-    else {
-      if(itemUp) {
-        // fileWithPtrFsPath = itemUp.fileFsPath;
-        itemUp.iconPath   = new vscode.ThemeIcon("triangle-up");
-      }
-      if(itemDown) {
-        // fileWithPtrFsPath =  itemDown.fileFsPath;
-        itemDown.iconPath = new vscode.ThemeIcon("triangle-down");
-      }
-    }
-  }
-}
-
 let logIdx = 0;
 
-//bookmark:w2jy;
+//bookmark:7b3s;
 async function getItemTree() {
   start('getItemTree');
   log('getItemTree', logIdx++);
@@ -193,10 +133,46 @@ async function getItemTree() {
     }
     bookmarks.push(await getNewMarkItem(mark));
   }
-  //bookmark:jt4x;
-  itemTree = rootItems;
   const editor = vscode.window.activeTextEditor;
-  if (editor) await updatePointers(editor);
+  if (editor) {
+    const document          = editor.document;
+    const editorFileUriPath = document.uri.path;
+    const editorLine        = editor.selection.active.line;
+    if(showPointers) {
+      let haveDown  = null;
+      let haveExact = null;
+      let haveUp    = null;
+      for(const item of rootItems) {
+        if(item.type === 'file' &&
+           item.fileUriPath === editorFileUriPath    &&
+           item.children && item.children.length > 0 &&
+           !closedFolders.has(item.folderUriPath)) {
+          for (const bookmarkItem of item.children) {
+            const markLine = bookmarkItem.mark.lineNumber;
+            if(editorLine === markLine) {
+              haveExact = bookmarkItem;
+              break;
+            }
+            else if(editorLine < markLine)  {
+              haveUp = bookmarkItem;
+              break;
+            }
+            else if(editorLine > markLine) {
+              haveDown = bookmarkItem;
+            }
+          }
+        }
+      }
+      if(haveExact)
+        haveExact.iconPath  = new vscode.ThemeIcon("triangle-right");
+      else {
+        if(haveUp)
+          haveUp.iconPath   = new vscode.ThemeIcon("triangle-up");
+        if(haveDown)
+          haveDown.iconPath = new vscode.ThemeIcon("triangle-down");
+      }
+    }
+  }
   let wsFolder = allWsFolders.shift();
   while(wsFolder) {
     rootItems.push(await getNewFolderItem(
@@ -206,7 +182,9 @@ async function getItemTree() {
     wsFolder = allWsFolders.shift();
   }
   end('getItemTree');
+  itemTree = rootItems;
   return rootItems;
+//bookmark:mtqt;
 }
 
 async function itemClickCmd(item) {
@@ -219,17 +197,13 @@ async function itemClickCmd(item) {
          closedFolders.delete(folderItem.folderFsPath);
       else
          closedFolders.add(folderItem.folderFsPath);
-      updateSidebar();
+      utils.updateSidebar();
     }
     return;
   }
   if(item.type === 'bookmark') {
     await text.bookmarkClick(item);
   }
-}
-
-function updateSidebar() {
-  sidebarProvider._onDidChangeTreeData.fire();
 }
 
 class SidebarProvider {
@@ -249,6 +223,6 @@ class SidebarProvider {
   }
 }
 
-module.exports = { init, SidebarProvider, itemClickCmd};
+module.exports = {SidebarProvider, itemClickCmd};
 
 

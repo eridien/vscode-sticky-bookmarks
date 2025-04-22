@@ -3,13 +3,23 @@ const path   = require('path');
 const fs     = require('fs').promises;
 const {log, start, end}  = getLog('util');
 
-const timers = {};
+let context, sidebarProvider;
 
 function init(contextIn) {
   context = contextIn;
-  log('utils initialized');
-  return {};
 }
+
+function initProvider(sidebarProviderIn) {
+  sidebarProvider = sidebarProviderIn;
+}
+
+function updateSidebar() {
+  sidebarProvider._onDidChangeTreeData.fire();
+}
+
+const closedFolders = new Set();
+
+const timers = {};
 
 let comsByLang = [];
 function commentsByLang(langId) {
@@ -332,6 +342,7 @@ module.exports = {
   commentsByLang, keywords, fileExists, getLineFromTextAtOffset,
   deleteLine, insertLine, replaceLine, debounce, sleep,
   getPathsFromWorkspaceFolder, getPathsFromFileDoc,
-  runOnAllFilesInFolder, getFocusedWorkspaceFolder
+  runOnAllFilesInFolder, getFocusedWorkspaceFolder, initProvider,
+  updateSidebar
 }
 

@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const marks  = require('./marks.js');
 const utils  = require('./utils.js');
-const {log}  = utils.getLog('file');
+const {log, start, end}  = utils.getLog('file');
 
 const showLineNumbers    = true;
 const showBreadCrumbs    = true;
@@ -160,7 +160,7 @@ let justDecorated     = false;
 async function gotoAndDecorate(document, lineNumber) {
   clearDecoration();
   justDecorated = true;
-  setTimeout(() => {justDecorated = false}, 200);
+  setTimeout(() => {justDecorated = false}, 300);
   const doc = await vscode.workspace.openTextDocument(document.uri);
   tgtEditor = await vscode.window.showTextDocument(doc, {preview: false});
   // const ranges = tgtEditor.visibleRanges;
@@ -375,6 +375,7 @@ async function clearFile(document, saveMarks = true) {
 
 //bookmark:51ha;
 async function cleanFile(document) {
+  start('cleanFile');
   const fileFsPath = document.uri.fsPath;
   let haveMarkChg = false;
   const fileMarksByToken = {};
@@ -410,6 +411,7 @@ async function cleanFile(document) {
     }
   }
   if(haveMarkChg) await marks.saveGlobalMarks();
+  end('cleanFile');
 }
 
 module.exports = {init, getLabel, bookmarkClick,

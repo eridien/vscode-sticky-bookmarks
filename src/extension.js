@@ -72,8 +72,7 @@ async function activate(context) {
   });
   vscode.workspace.onDidChangeTextDocument(async event => {
     const document = event.document;
-    const uri = document.uri;
-    if (uri.scheme !== 'file') { 
+    if (event.document.uri.scheme !== 'file') { 
       // ignore virtual/extension docs like output channel write
       // must use console.log here or we get an infinite loop
       // console.log('Ignored non-file changeTextDocument', uri.path);
@@ -81,6 +80,7 @@ async function activate(context) {
     }
     await commands.changedDocument(document);
   });
+
   vscode.window.onDidChangeActiveTextEditor(async editor => {
     await commands.changedEditor(editor);
   });
@@ -94,10 +94,6 @@ async function activate(context) {
       return;
     }
     await commands.changedSelection(event);
-  });
-
-  vscode.workspace.onDidChangeTextDocument(async event => {
-    await commands.changedText(event);
   });
 
   context.subscriptions.push(toggleCmd, prevCmd, nextCmd, 

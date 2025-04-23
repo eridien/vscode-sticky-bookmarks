@@ -98,6 +98,7 @@ const changedSelection = utils.debounce(async (event) => {
 }, 200);
 
 const changedText = utils.debounce(async (event) => {
+
   // document: [TextDocument],
   // contentChanges: [
   //   { range: Range { start: [Position], end: [Position] },
@@ -105,10 +106,11 @@ const changedText = utils.debounce(async (event) => {
   //     text: 'a' }
   // ],
   // reason: undefined
-  // const {document} = event;
-  // text.clearDecoration();
-  // await text.cleanFile(event.document);
-  // utils.updateSidebar();
+
+  const {document} = event;
+  text.clearDecoration();
+  await text.cleanFile(event.document);
+  utils.updateSidebar();
 }, 200);
 
 module.exports = { toggleCmd, prevCmd, nextCmd,

@@ -2,11 +2,12 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-  junk in keyboard shortcuts menu
   deleting mark requires two undos
+  prev/next broken
 
 todo
   clean newly opened editors
+  remove dupe symbols
   remove multiple tokens from same line on delete token
   always open view, folder, or file when new mark
   hide all marks, restore on any edit

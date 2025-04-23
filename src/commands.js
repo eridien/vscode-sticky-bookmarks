@@ -4,23 +4,19 @@ const utils   = require('./utils.js');
 const {log}   = utils.getLog('cmds');
 
 async function toggleCmd() {
-  // log('toggle command called');
   await text.toggle();
 }
 
 async function prevCmd() {
-  // log('prevCmd command called');
   await text.scrollToPrevNext(false);
 }
 
 async function nextCmd() {
-  // log('nextCmd command called');
   await text.scrollToPrevNext(true);
 }
 
 async function clearFileCmd(document) {
   if(!document) {
-    // log('clearFileCmd command called');
     const editor = vscode.window.activeTextEditor;
     if (!editor) { log('info', 'clearFileCmd, No active editor'); return; }
     document = editor.document;
@@ -39,7 +35,6 @@ async function deleteItemXCmd(item) {
 
 async function cleanFileCmd(document) {
   if(!document) {
-    // log('cleanFileCmd command called');
     const editor = vscode.window.activeTextEditor;
     if (!editor) { log('info', 'cleanFileCmd, No active editor'); return; }
     document = editor.document;
@@ -48,46 +43,37 @@ async function cleanFileCmd(document) {
 }
 
 async function clearAllFilesCmd() {
-  // log('clearAllFilesCmd command called');
   await utils.runOnAllFilesInFolder(clearFileCmd);
 }
 
 async function cleanAllFilesCmd() {
-  // log('cleanAllFilesCmd command called');
   await utils.runOnAllFilesInFolder(cleanFileCmd);
 }
 
 let sidebarIsVisible = false;
 
 async function changedSidebarVisiblitiy(visible) {
-  // log('changedSidebarVisiblitiy', visible);
   if(visible && !sidebarIsVisible) {
-    // if(firstVisible) {
-    //   firstVisible = false;
-    //   await cleanAllFilesCmd();
-    // }
-   utils.updateSidebar();
+    utils.updateSidebar();
   }
   sidebarIsVisible = visible;
-   utils.updateSidebar();
+  utils.updateSidebar();
 }
 
 async function changedDocument() {
-  // log('changedDocument', document.uri.path);
- utils.updateSidebar();
+  utils.updateSidebar();
 }
 
+//bookmark:5y7l;
 async function changedEditor(editor) {
   if(!editor || !editor.document) {
     return;
   }
-  // log('changedEditor', editor.document.uri.path);
- utils.updateSidebar();
+  utils.updateSidebar();
 }
 
 async function changedVisEditors() {
-  // log('changedVisEditors', editors.length);
- utils.updateSidebar();
+  utils.updateSidebar();
 }  
 
 const changedSelection = utils.debounce(async (event) => {
@@ -98,15 +84,6 @@ const changedSelection = utils.debounce(async (event) => {
 }, 200);
 
 const changedText = utils.debounce(async (event) => {
-
-  // document: [TextDocument],
-  // contentChanges: [
-  //   { range: Range { start: [Position], end: [Position] },
-  //     rangeLength: 0,
-  //     text: 'a' }
-  // ],
-  // reason: undefined
-
   const {document} = event;
   text.clearDecoration();
   await text.cleanFile(event.document);

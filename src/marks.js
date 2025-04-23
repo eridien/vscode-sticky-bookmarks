@@ -13,7 +13,7 @@ let initFinished = false;
 //bookmark:tkpj;
 async function init(contextIn) {
   start('init marks');
-  context         = contextIn;
+  context = contextIn;
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders || workspaceFolders.length === 0) {
     globalMarks = {};
@@ -117,8 +117,7 @@ function dumpGlobalMarks(caller, list, dump) {
 }
 
 function getRandomToken() {
-  const hashDigit = () => 
-           Math.floor(Math.random()*36).toString(36);
+  const hashDigit = () => Math.floor(Math.random()*36).toString(36);
   let randHash;
   do {  
     randHash = ''; 
@@ -143,11 +142,6 @@ async function newGlobalMark(document, lineNumber, token, save) {
   return mark;
 }
 
-async function addGlobalMarkIfMissing(token, document, lineNumber) {
-  if(globalMarks[token]) return;
-  await newGlobalMark(document, lineNumber, token);
-}
-
 async function replaceGlobalMark(oldToken, newToken) {
   globalMarks[newToken] = globalMarks[oldToken];
   delete globalMarks[oldToken];
@@ -168,8 +162,7 @@ async function delGlobalMarksForFile(document) {
 module.exports = {init, waitForInit, dumpGlobalMarks, replaceGlobalMark, 
                   getGlobalMarks, getMarksForFile, saveGlobalMarks,
                   getGlobalMark,  putGlobalMark,   delGlobalMark,
-                  newGlobalMark,  delGlobalMarksForFile, 
-                  addGlobalMarkIfMissing};
+                  newGlobalMark,  delGlobalMarksForFile};
 
 
 

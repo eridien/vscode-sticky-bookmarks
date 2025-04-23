@@ -4,18 +4,16 @@ const marks  = require('./marks.js');
 const utils  = require('./utils.js');
 const {log, start, end}  = utils.getLog('side');
 
-const showPointers = true;
-
-let itemTree = [];
-
+const showPointers  = true;
+let itemTree        = [];
 const closedFolders = new Set();
 
 async function getNewFolderItem(mark) {
   const {folderIndex, folderName, folderFsPath, folderUriPath} = mark;
   const id    = utils.fnv1aHash(folderUriPath);
   const label = '📂 ' + folderName;
-  const item  = new vscode.TreeItem(label,
-                    vscode.TreeItemCollapsibleState.None);
+  const item  = new vscode.TreeItem(
+                       label, vscode.TreeItemCollapsibleState.None);
   Object.assign(item, {id, type:'folder', label,
                        folderIndex, folderName, folderFsPath, folderUriPath});
   if(closedFolders.has(folderFsPath))
@@ -32,8 +30,9 @@ async function getNewFolderItem(mark) {
 
 async function getNewFileItem(mark, children) { 
   const label =  '📄 ' + mark.fileRelUriPath;
-  const {folderIndex, folderName, folderFsPath, folderUriPath, 
-         document, fileName, fileFsPath, fileUriPath, fileRelUriPath} = mark;
+  const {folderIndex, folderName,  document, fileName, 
+         folderFsPath, folderUriPath,
+         fileFsPath,   fileUriPath, fileRelUriPath} = mark;
   const item = new vscode.TreeItem(label,
                    vscode.TreeItemCollapsibleState.Expanded);
   item.id = utils.fnv1aHash(fileUriPath);
@@ -90,12 +89,11 @@ async function getItemTree() {
   let bookmarks;
   let lastFolderUriPath = null, lastFileFsPath;
   for(const mark of marksArray) {
-    // log('mark of marksArray', mark);
     if(closedFolders.has(mark.folderFsPath)) continue;
     if(!mark.inWorkspace || 
        !await utils.fileExists(mark.folderFsPath)) {
-      log('Folder missing or mark not in workspace(1), '+
-          'deleting globalMark:', mark.token, mark.folderName);
+       log('Folder not in workspace, '+
+           'deleting globalMark:', mark.token, mark.folderName);
       marks.delGlobalMark[mark.token];
       await marks.saveGlobalMarks();
       continue;
@@ -105,7 +103,6 @@ async function getItemTree() {
       lastFolderUriPath = markFolderUriPath;
       let wsFolder = null;
       while(wsFolder = allWsFolders.shift()) {
-        // log('wsFolder = allWsFolders.shift()', wsFolder);
         if(wsFolder.uri.path === markFolderUriPath) {
           const {folderIndex, folderName, folderFsPath, folderUriPath} = mark;
           rootItems.push(await getNewFolderItem(
@@ -118,7 +115,7 @@ async function getItemTree() {
             folderFsPath:uri.fsPath, folderUriPath:uri.path}));
       }
       if(!wsFolder) {
-        log('Folder missing or mark not in workspace(2), '+
+        log('Folder missing, '+
             'deleting globalMark:', mark.token, mark.folderName);
         marks.delGlobalMark[mark.token];
         await marks.saveGlobalMarks();
@@ -183,15 +180,13 @@ async function getItemTree() {
   }
   end('getItemTree');
   itemTree = rootItems;
-  return rootItems;
-//bookmark:mtqt;
+  return itemTree;
 }
 
 async function itemClickCmd(item) {
   text.clearDecoration();
   if(item.type === 'folder') {
-    const folderItem = 
-           itemTree.find(rootItem => rootItem.id === item.id);
+    const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
     if(folderItem) {
       if(closedFolders.has(folderItem.folderFsPath))
          closedFolders.delete(folderItem.folderFsPath);
@@ -201,9 +196,7 @@ async function itemClickCmd(item) {
     }
     return;
   }
-  if(item.type === 'bookmark') {
-    await text.bookmarkClick(item);
-  }
+  if(item.type === 'bookmark') await text.bookmarkClick(item);
 }
 
 class SidebarProvider {

@@ -59,7 +59,7 @@ async function getCompText(mark) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
   let regxEmptyComm;
   if(commRgt !== '') regxEmptyComm = new RegExp(
-        `\\s*${commLft}\\s*?${commRgt}\\s*`, 'g');
+        `\\s*${commLft}\\s*?${commRgt}\\s*&`, 'g');
   else regxEmptyComm = new RegExp(
         `\\s*${commLft}\\s*?$`, 'g');
   let compText = '';
@@ -143,8 +143,7 @@ async function getLabel(mark) {
       crumbStr = crumbSepLft +  crumbStr + crumbSepRgt;
       crumbStr = labelWithLineNum(lineNumber, crumbStr);
     }
-    if(showCodeWhenCrumbs && crumbStr.length > 0)
-       return crumbStr + compText;
+    if(showCodeWhenCrumbs && crumbStr.length > 0) return crumbStr + compText;
     return crumbStr;
   }
   catch (error) {
@@ -166,7 +165,8 @@ async function gotoAndDecorate(document, lineNumber) {
   // const ranges = tgtEditor.visibleRanges;
   const lineRange  = doc.lineAt(lineNumber).range;
   tgtEditor.selection = new vscode.Selection(lineRange.start, lineRange.start);
-  tgtEditor.revealRange(lineRange, vscode.TextEditorRevealType.InCenter);
+  tgtEditor.revealRange(lineRange, 
+                        vscode.TextEditorRevealType.InCenterIfOutsideViewport);
   tgtDecorationType = vscode.window.createTextEditorDecorationType({
     backgroundColor: new vscode.ThemeColor('editor.selectionHighlightBackground'),
     // or use a custom color like 'rgba(255, 200, 0, 0.2)'
@@ -188,8 +188,8 @@ const clearDecoration = () => {
 };
 
 async function bookmarkClick(item) {
-  const mark = item.mark;
-  const lineRange = await gotoAndDecorate(mark.document, mark.lineNumber);
+  const mark         = item.mark;
+  const lineRange    = await gotoAndDecorate(mark.document, mark.lineNumber);
   const lineSel      = new vscode.Selection(lineRange.start, lineRange.end);
   const lineText     = tgtEditor.document.getText(lineSel);
   const tokenMatches = await getTokensInLine(lineText);
@@ -202,9 +202,6 @@ async function bookmarkClick(item) {
   else {
     while(tokenMatches.length > 1 && tokenMatches[0][0] !== mark.token) {
       const foundToken = tokenMatches[0][0];
-
-      // remove token from line also
-
       marks.delGlobalMark[foundToken];
       await marks.saveGlobalMarks();
       tokenMatches.shift();
@@ -226,7 +223,7 @@ function getNewTokenLine(indentLen, token, languageId) {
 
 async function replaceLineInDocument(document, lineNumber, newText) {
   if (lineNumber < 0 || lineNumber >= document.lineCount) return;
-  const uri = document.uri;
+  const uri  = document.uri;
   const edit = new vscode.WorkspaceEdit();
   const line = document.lineAt(lineNumber);
   edit.replace(uri, line.range, newText);
@@ -325,6 +322,7 @@ async function toggle() {
   marks.dumpGlobalMarks('toggle');
 }
 
+//bookmark:gqf4;
 async function scrollToPrevNext(fwd) {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {log('info', 'scrollToPrevNext, no active editor'); return; }
@@ -385,8 +383,7 @@ async function cleanFile(document) {
     const globalMark = marks.getGlobalMark(token);
     if(globalMark && (globalMark.fileFsPath != fileFsPath || 
                       globalMark.lineNumber != lineNumber)) {
-      const newMark = await marks.newGlobalMark(
-                                      document, lineNumber);
+      const newMark  = await marks.newGlobalMark(document, lineNumber);
       const newToken = newMark.token;
       fileMarksByToken[newToken] = fileMark;
       const newLineText = lineText.replace(token, newToken);

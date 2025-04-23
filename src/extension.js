@@ -28,7 +28,7 @@ async function activate(context) {
 	const cleanAllFilesCmd = vscode.commands.registerCommand(
                 'sticky-bookmarks.cleanAllFilesCmd', commands.cleanAllFilesCmd);
   const itemClickCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.itemClickCmd', (item) => sidebar.itemClickCmd(item)
+    'sticky-bookmarks.itemClickCmd', (item) =>   sidebar.itemClickCmd(item)
   );
   const contextMenuCmd = vscode.commands.registerCommand(
     'sticky-bookmarks.deleteItemXCmd', (item) => commands.deleteItemXCmd(item)
@@ -61,7 +61,7 @@ async function activate(context) {
 
   utils.initProvider(sidebarProvider);
   text.init();
-  await marks.init(context, sidebarProvider);
+  await marks.init(context);
 
   treeView.onDidChangeVisibility(async event => {
     await commands.changedSidebarVisiblitiy(event.visible);
@@ -85,9 +85,7 @@ async function activate(context) {
     await commands.changedEditor(editor);
   });
   vscode.window.onDidChangeTextEditorSelection(async event => {
-    const editor = event.textEditor;
-    const uri    = editor.document.uri;
-    if (uri.scheme !== 'file') { 
+    if (event.document.uri.scheme !== 'file') { 
       // ignore virtual/extension docs like output channel write
       // must use console.log here or we get an infinite loop
       // console.log('Ignored non-file changeTextDocument', uri.path);

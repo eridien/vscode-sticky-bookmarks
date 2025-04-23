@@ -35,8 +35,7 @@ function installBookmarksJson(configText) {
   let configObj;
   try {configObj = JSON.parse(configText)}
   catch(error) {
-    logErr(`Error parsing default sticky-bookmarks.json, aborting`,
-            error);
+    logErr(`Error parsing default sticky-bookmarks.json, aborting`, error);
     return false;
   }
   comsByLang = configObj.commentsByLangs;
@@ -49,7 +48,7 @@ function installBookmarksJson(configText) {
   return true;
 }
 
-function getFocusedWorkspaceFolder() {                                 //
+function getFocusedWorkspaceFolder() {
   const editor = vscode.window.activeTextEditor;
   if (!editor) return null;
   return vscode.workspace.getWorkspaceFolder(editor.document.uri);
@@ -143,7 +142,7 @@ function getLineFromTextAtOffset(text, offset) {
   const before = text.lastIndexOf('\n', offset - 1);
   const after  = text.indexOf('\n', offset);
   const lineStart = before === -1 ? 0 : before + 1;
-  const lineEnd = after === -1 ? text.length : after;
+  const lineEnd   = after  === -1 ? text.length : after;
   return text.slice(lineStart, lineEnd);
 }
 
@@ -160,7 +159,7 @@ function getPathsFromWorkspaceFolder(folder) {
 
 function getPathsFromFileDoc(doc) {
   if(!doc) return null;
-  const uri = doc.uri;
+  const uri         = doc.uri;
   const fileFsPath  = uri.fsPath;
   const fileName    = path.basename(fileFsPath);
   const fileUriPath = uri.path;
@@ -239,22 +238,22 @@ function getLog(module) {
       console.log(line);
       return;
     }
-    const endTime = Date.now();
+    const endTime  = Date.now();
     const duration = endTime - timers[name];
-    const line      = `${module}: ${name} ended, ${timeInSecs(duration)}s`;
+    const line     = `${module}: ${name} ended, ${timeInSecs(duration)}s`;
     outputChannel.appendLine(line);
     console.log(line);
   }
   const log = function(...args) {
-    let errFlag    = false;
-    let infoFlag   = false;
+    let errFlag   = false;
+    let infoFlag  = false;
     let nomodFlag = false;
     if(typeof args[0] == 'string') {
-      errFlag    = args[0].includes('err');
-      infoFlag   = args[0].includes('info');
+      errFlag   = args[0].includes('err');
+      infoFlag  = args[0].includes('info');
       nomodFlag = infoFlag || args[0].includes('nomod');
     }
-    if(errFlag || infoFlag) args = args.slice(1);
+    if(errFlag || infoFlag || nomodFlag) args = args.slice(1);
     const par = args.map(a => {
       if(typeof a === 'object') {
         try{ return JSON.stringify(a, null, 2); }

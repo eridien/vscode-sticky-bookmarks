@@ -17,16 +17,6 @@
   "contributes": {
     "commands": [
       {
-        "command": "sticky-bookmarks.clearAllSavedData",
-        "title": "-- Do Not Use -- Internal Debug",
-        "category": "Sticky Bookmarks"
-      },
-      {
-        "command": "sticky-bookmarks.resetAll",
-        "title": "-- Do Not Use -- Internal Debug",
-        "category": "Sticky Bookmarks"
-      },
-      {
         "command": "sticky-bookmarks.toggleCmd",
         "title": "Toggle Bookmark On/Off",
         "category": "Sticky Bookmarks"
@@ -63,14 +53,23 @@
       },
       {
         "command": "sticky-bookmarks.itemClickCmd",
-        "title": "-- Do Not Use -- Internal Treeview Menu",
-        "category": "Sticky Bookmarks"
+        "title": "-- Do Not Use -- Internal Treeview Menu"
       },
       {
         "command": "sticky-bookmarks.deleteItemXCmd",
-        "title": "-- Do Not Use -- Internal Treeview Menu",
+        "title": "-- Do Not Use -- Internal Treeview Menu"
+      },
+      {
+        "command": "sticky-bookmarks.clearAllSavedData",
+        "title": "-- Do Not Use -- Internal Debug",
         "category": "Sticky Bookmarks"
-      }
+      },
+      {
+        "command": "sticky-bookmarks.resetAll",
+        "title": "-- Do Not Use -- Internal Debug",
+        "category": "Sticky Bookmarks"
+      },
+      {
     ],
     "keybindings": [ {
         "command": "sticky-bookmarks.toggleCmd",

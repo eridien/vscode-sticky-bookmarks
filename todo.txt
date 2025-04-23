@@ -3,9 +3,11 @@ vsce package
 
 bugs
   deleting mark requires two undos
-  prev/next broken
+  delete (X) moves line numbers in file 
+     and numbers in sidebar items don't change
 
 todo
+  collapse long runs of a single char
   clean newly opened editors
   remove dupe symbols
   remove multiple tokens from same line on delete token
@@ -112,6 +114,8 @@ item.iconPath = { light: lightUri, dark: darkUri };
 //     25: "operator",    26: "typeparameter"
 // }
 
+// ❌	✖
+
 // const unicodeIcons = {
 //   file: "📄",          // U+1F4C4
 //   function: "ƒ ",      // U+0192
@@ -141,6 +145,11 @@ item.iconPath = { light: lightUri, dark: darkUri };
 //   // return char ?? new vscode.ThemeIcon(codicon);
 //   return char ?? '  ';
 // };
+
+'$(x)' → ❌
+'$(trash)' → 🗑️
+'$(close)' → ⨉
+'$(remove)' → ⛔
 
 ⚙ U+2699  Gear
 ⌘ U+2318  Place of Interest Sign (Command)

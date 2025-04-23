@@ -20,56 +20,45 @@
         "command": "sticky-bookmarks.toggleCmd",
         "title": "Toggle Bookmark On/Off",
         "category": "Sticky Bookmarks"
-      },
-      {
+      }, {
         "command": "sticky-bookmarks.prevCmd",
         "title": "Go To Previous Bookmark",
         "category": "Sticky Bookmarks"
-      },
-      {
+      }, {
         "command": "sticky-bookmarks.nextCmd",
         "title": "Go To Next Bookmark",
         "category": "Sticky Bookmarks"
-      },
-      {
+      }, {
         "command": "sticky-bookmarks.clearFileCmd",
         "title": "Remove All Marks From File",
         "category": "Sticky Bookmarks"
-      },
-      {
+      }, {
         "command": "sticky-bookmarks.clearAllFilesCmd",
         "title": "Remove All Marks From All Files",
         "category": "Sticky Bookmarks"
-      },
-      {
+      }, {
         "command": "sticky-bookmarks.cleanFileCmd",
         "title": "Cleanup Marks In File",
         "category": "Sticky Bookmarks"
-      },
-      {
+      }, {
         "command": "sticky-bookmarks.cleanAllFilesCmd",
         "title": "Cleanup All Marks In All Files",
         "category": "Sticky Bookmarks"
-      },
-      {
+      }, {
         "command": "sticky-bookmarks.itemClickCmd",
-        "title": "-- Do Not Use -- Internal Treeview Menu"
-      },
-      {
+        "title":  "-- Do Not Use -- Internal"
+      }, {
         "command": "sticky-bookmarks.deleteItemXCmd",
-        "title": "-- Do Not Use -- Internal Treeview Menu"
-      },
-      {
+        "title": "❌"
+      }, {
         "command": "sticky-bookmarks.clearAllSavedData",
         "title": "-- Do Not Use -- Internal Debug",
         "category": "Sticky Bookmarks"
-      },
-      {
+      }, {
         "command": "sticky-bookmarks.resetAll",
         "title": "-- Do Not Use -- Internal Debug",
         "category": "Sticky Bookmarks"
-      },
-      {
+      }
     ],
     "keybindings": [ {
         "command": "sticky-bookmarks.toggleCmd",

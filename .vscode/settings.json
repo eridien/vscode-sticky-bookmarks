@@ -1,5 +1,11 @@
 {
   "eslint.useFlatConfig": true,
   "eslint.validate": ["javascript"],
-  "eslint.enable": true
+  "eslint.enable": true,
+  "github.copilot.enable": {
+    "*": false,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false
+  }
 }

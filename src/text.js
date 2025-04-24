@@ -93,7 +93,9 @@ async function getCompText(mark) {
       if(bookmarkToken !== '') 
         lineText = lineText.replace(bookmarkToken, '');
       const matches = lineText.matchAll(/\b\w+?\b/g);
-      for(const match of matches) {
+      const matchArr = [...matches];
+      matchArr.reverse();
+      for(const match of matchArr) {
         const word = match[0];
         if(isKeyWord(languageId, word)) {
           const strtIdx = match.index;
@@ -134,7 +136,6 @@ function labelWithLineNum(lineNumber, label) {
   return label;
 }
 
-//bookmark:ybf0;
 async function getLabel(mark) {
   try {
     const {document, lineNumber} = mark;

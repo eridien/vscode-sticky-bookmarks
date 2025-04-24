@@ -228,20 +228,20 @@ function getLog(module) {
     const startTime = Date.now();
     timers[name]    = startTime;
     const line      = `${module}: ${name} started`;
-    outputChannel.appendLine(line);
+    // outputChannel.appendLine(line);
     console.log(line);
   }
   const end = function(name) {
     if(!timers[name]) {
       const line = `${module}: ${name} ended`;
-      outputChannel.appendLine(line);
+      // outputChannel.appendLine(line);
       console.log(line);
       return;
     }
     const endTime  = Date.now();
     const duration = endTime - timers[name];
     const line     = `${module}: ${name} ended, ${timeInSecs(duration)}s`;
-    outputChannel.appendLine(line);
+    // outputChannel.appendLine(line);
     console.log(line);
   }
   const log = function(...args) {
@@ -263,7 +263,7 @@ function getLog(module) {
     });
     const line = (nomodFlag ? '' : module + ': ') +
                  (errFlag    ? ' error, ' : '') + par.join(' ')
-    outputChannel.appendLine(line);
+    // outputChannel.appendLine(line);
     if(errFlag) console.error(line);
     else        console.log(line);
     if(infoFlag) vscode.window.showInformationMessage(line);

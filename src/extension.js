@@ -70,9 +70,10 @@ async function activate(context) {
     console.log('Currently visible editors:', editors);
     await commands.changedVisEditors(editors);
   });
+  //bookmark:bsqe;
   vscode.workspace.onDidChangeTextDocument(async event => {
     const document = event.document;
-    if (event.document.uri.scheme !== 'file') { 
+    if (event?.document?.uri?.scheme !== 'file') { 
       // ignore virtual/extension docs like output channel write
       // must use console.log here or we get an infinite loop
       // console.log('Ignored non-file changeTextDocument', uri.path);
@@ -85,12 +86,7 @@ async function activate(context) {
     await commands.changedEditor(editor);
   });
   vscode.window.onDidChangeTextEditorSelection(async event => {
-    if (event.document.uri.scheme !== 'file') { 
-      // ignore virtual/extension docs like output channel write
-      // must use console.log here or we get an infinite loop
-      // console.log('Ignored non-file changeTextDocument', uri.path);
-      return;
-    }
+    if (!event?.textEditor) return;
     await commands.changedSelection(event);
   });
 

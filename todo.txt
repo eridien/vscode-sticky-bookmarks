@@ -2,9 +2,6 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-  deleting mark requires two undos
-  delete (X) moves line numbers in file 
-     and numbers in sidebar items don't change
 
 todo
   collapse long runs of a single char

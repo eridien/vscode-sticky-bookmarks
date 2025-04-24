@@ -62,10 +62,10 @@ async function getNewMarkItem(mark) {
 
 let logIdx = 0;
 
-//bookmark:7b3s;
+//bookmark:b7kc;
 async function getItemTree() {
-  start('getItemTree');
-  log('getItemTree', logIdx++);
+  // start('getItemTree');
+  // log('getItemTree', logIdx++);
   const allWsFolders = vscode.workspace.workspaceFolders;
   if (!allWsFolders) {
     log('getItemTree, No folders in workspace');
@@ -178,7 +178,7 @@ async function getItemTree() {
          folderUriPath:wsFolder.uri.path}));
     wsFolder = allWsFolders.shift();
   }
-  end('getItemTree');
+  // end('getItemTree');
   itemTree = rootItems;
   return itemTree;
 }
@@ -208,7 +208,8 @@ class SidebarProvider {
     return item;
   }
   async getChildren(item) {
-    if(!item) {
+    
+  if(!item) {
       await marks.waitForInit();
       return await getItemTree();
     }

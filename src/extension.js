@@ -60,7 +60,7 @@ async function activate(context) {
   });
 
   utils.initProvider(sidebarProvider);
-  text.init();
+  text.init(context);
   await marks.init(context);
 
   treeView.onDidChangeVisibility(async event => {
@@ -70,7 +70,6 @@ async function activate(context) {
     console.log('Currently visible editors:', editors);
     await commands.changedVisEditors(editors);
   });
-  //bookmark:bsqe;
   vscode.workspace.onDidChangeTextDocument(async event => {
     const document = event.document;
     if (event?.document?.uri?.scheme !== 'file') { 
@@ -81,7 +80,6 @@ async function activate(context) {
     }
     await commands.changedDocument(document);
   });
-
   vscode.window.onDidChangeActiveTextEditor(async editor => {
     await commands.changedEditor(editor);
   });

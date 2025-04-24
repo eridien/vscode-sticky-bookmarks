@@ -21,7 +21,6 @@ todo
     click on sidebar to accept and create bookmark
     limit suggestions (setting)
   busy indicator
-  open sidebar on mark creation
   remove hashing
   add names to marks
     edit menu

@@ -71,12 +71,9 @@ function delGlobalMark(token) {delete globalMarks[token]}
 function getGlobalMark(token) {return globalMarks[token]}
 function getGlobalMarks()     {return globalMarks}
 
-function getMarksForFile(fileUriPath) {
-  const marksByToken = {};
-  for(const [token, mark] of Object.entries(globalMarks)) {
-    if(mark.fileUriPath === fileUriPath) marksByToken[token] = mark;
-  }
-  return marksByToken;
+function getMarksForFile(fileFsPath) {
+  return Object.values(globalMarks).filter(
+                mark => mark.fileFsPath === fileFsPath);
 }
 
 async function saveGlobalMarks() {

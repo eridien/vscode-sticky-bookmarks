@@ -1,4 +1,5 @@
 const vscode = require('vscode');
+const path   = require('path');
 const marks  = require('./marks.js');
 const utils  = require('./utils.js');
 const {log, start, end}  = utils.getLog('file');
@@ -7,10 +8,19 @@ const showLineNumbers    = true;
 const showBreadCrumbs    = true;
 const showCodeWhenCrumbs = true;
 
-function init() {
+let context, gutterDecoration = null;
+
+function init(contextIn) {
+  context = contextIn;
   for(const [lang, keywords] of Object.entries(utils.keywords())) {
     keywordSetsByLang[lang] = new Set(keywords);
   }
+  gutterDecoration = vscode.window.createTextEditorDecorationType({ 
+    gutterIconPath: vscode.Uri.file(path.join(
+                  context.extensionPath, 'resources', 'bookmark.svg')),
+    gutterIconSize: 'contain',
+});
+
 }
 
 const crumbSepLft     = '● ';
@@ -34,6 +44,16 @@ function lineRegEx(languageId) {
     return new RegExp(
           `^(.*?)${commLft}(.*?)((bookmark)?\\:[0-9a-z]{4};)(.*)$`);
   }
+}
+
+function updateGutter() {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) return;
+  const filePath = editor.document.uri.fsPath;
+  const globalMarks = marks.getMarksForFile(filePath);
+  const decorations = globalMarks.map(globalMark => ({range: new vscode.Range(
+                      globalMark.lineNumber, 0, globalMark.lineNumber, 0)}));
+  editor.setDecorations(gutterDecoration, decorations);
 }
 
 function getJunkAndBookmarkToken(lineText, languageId) {
@@ -322,7 +342,7 @@ async function toggle() {
   marks.dumpGlobalMarks('toggle');
 }
 
-//bookmark:gqf4;
+//bookmark:a0wl;
 async function scrollToPrevNext(fwd) {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {log('info', 'scrollToPrevNext, no active editor'); return; }
@@ -371,7 +391,7 @@ async function clearFile(document, saveMarks = true) {
   if(haveDel && saveMarks) await marks.saveGlobalMarks();
 }
 
-//bookmark:51ha;
+//bookmark:sf0i;
 async function cleanFile(document) {
   start('cleanFile');
   const fileFsPath = document.uri.fsPath;
@@ -394,25 +414,28 @@ async function cleanFile(document) {
     }
     fileMarksByToken[fileMark.token] = fileMark;
   });
-  const globalMarksByToken = marks.getMarksForFile(document.uri.path);
+  const globalMarksInFile = marks.getMarksForFile(document.uri.fsPath);
   for(const [token, fileMark] of Object.entries(fileMarksByToken)) {
-    if(!globalMarksByToken[token]) {
+    if(globalMarksInFile.findIndex(
+          (globalMark) => globalMark.token === token) === -1) {
       await marks.newGlobalMark(document, fileMark.position.line, token);
       haveMarkChg = true;
     }
   }
-  for(const token of Object.keys(globalMarksByToken)) {
+  for(const globalMark of globalMarksInFile) {
+    const token = globalMark.token;
     if(!fileMarksByToken[token]) {
       await marks.delGlobalMark(token);
       haveMarkChg = true;
     }
   }
   if(haveMarkChg) await marks.saveGlobalMarks();
+  updateGutter();
   end('cleanFile');
 }
 
 module.exports = {init, getLabel, bookmarkClick,
-                  clearDecoration, justDecorated,
+                  clearDecoration, justDecorated, updateGutter,
                   toggle, scrollToPrevNext, delMarkFromLineAndGlobal,    
                   clearFile, cleanFile};
 

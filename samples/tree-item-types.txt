@@ -42,6 +42,6 @@ mark: document: TextDocument(file:///c%3A/Users/mark/apps/test-app/src/srvr.js)
       inWorkspace: true
       languageId: 'javascript'
       lineNumber: 7
-      token: ':cpix;'
+      token: ':aopj;'
 type: 'bookmark'
 

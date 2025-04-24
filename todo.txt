@@ -28,7 +28,6 @@ todo
     delete named tokens when X menu used
   put refresh menu item on files and folders
   test moving a project folder
-  show marks in gutter
   undo?
   
 impossible?
@@ -54,6 +53,7 @@ top of sidebar
   refresh    (cleanAllFilesCmd on all folders)
 
 settings
+  fall back to gen1 line number tracking
   max suggestion count
   smart scroll 
     scroll to top for functions
@@ -205,3 +205,37 @@ calls
   marks
     text.glblFuncs.addMarksForTokens *
     sidebar.glblFuncs.updateSidebar  *
+
+--- hover over bookmark ----------
+
+const markdown = new vscode.MarkdownString(`[Delete Bookmark](command:sticky-bookmarks.deleteItemCmd?${encodeURIComponent(JSON.stringify([lineNumber]))})`);
+markdown.isTrusted = true;
+
+editor.setDecorations(decorationType, [
+  {
+    range: new vscode.Range(lineNumber, 0, lineNumber, 0),
+    hoverMessage: markdown
+  }
+]);
+
+--- show codelens with no bookmark ---
+
+provideCodeLenses(document) {
+  const lenses = [];
+  const markedLines = new Set(marks.getMarksForFile(document.uri.fsPath).map(m => m.lineNumber));
+  for (let i = 0; i < document.lineCount; i++) {
+    if (!markedLines.has(i)) {
+      lenses.push(new vscode.CodeLens(
+        new vscode.Range(i, 0, i, 0),
+        {
+          title: '➕ Add Bookmark',
+          command: 'sticky-bookmarks.addBookmark',
+          arguments: [document.uri, i]
+        }
+      ));
+    }
+  }
+
+  return lenses;
+}
+

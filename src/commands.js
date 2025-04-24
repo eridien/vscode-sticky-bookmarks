@@ -57,14 +57,14 @@ async function changedSidebarVisiblitiy(visible) {
     utils.updateSidebar();
   }
   sidebarIsVisible = visible;
-  utils.updateSidebar();
+  utils.updateSidebar(); 
 }
 
 async function changedDocument() {
   utils.updateSidebar();
 }
 
-//bookmark:5y7l;
+//bookmark:jq3f;
 async function changedEditor(editor) {
   if(!editor || !editor.document) {
     return;
@@ -80,14 +80,16 @@ const changedSelection = utils.debounce(async (event) => {
   const {textEditor} = event;
   text.clearDecoration();
   await text.cleanFile(textEditor.document);
-  utils.updateSidebar();
+  utils.updateSidebar(); 
+  text.updateGutter();
 }, 200);
 
 const changedText = utils.debounce(async (event) => {
   const {document} = event;
   text.clearDecoration();
   await text.cleanFile(event.document);
-  utils.updateSidebar();
+  utils.updateSidebar(); 
+  text.updateGutter();
 }, 200);
 
 module.exports = { toggleCmd, prevCmd, nextCmd,

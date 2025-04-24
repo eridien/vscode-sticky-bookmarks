@@ -180,6 +180,7 @@ async function getItemTree() {
   }
   // end('getItemTree');
   itemTree = rootItems;
+  text.updateGutter();
   return itemTree;
 }
 

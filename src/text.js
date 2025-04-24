@@ -393,6 +393,7 @@ async function clearFile(document, saveMarks = true) {
 
 //bookmark:sf0i;
 async function cleanFile(document) {
+  //bookmark:jj3u;
   start('cleanFile');
   const fileFsPath = document.uri.fsPath;
   let haveMarkChg = false;
@@ -430,7 +431,6 @@ async function cleanFile(document) {
     }
   }
   if(haveMarkChg) await marks.saveGlobalMarks();
-  updateGutter();
   end('cleanFile');
 }
 

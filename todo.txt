@@ -3,45 +3,43 @@ vsce package
 
 bugs
 
-todo
+todo easy
   collapse long runs of a single char
-  clean newly opened editors
   remove dupe symbols
-  remove multiple tokens from same line on delete token
-  always open view, folder, or file when new mark
-  hide all marks, restore on any edit
-  command to go to last file on prev/next
+  busy indicator
+  remove hashing
+  put refresh menu item on files and folders
+  top of sidebar
+    delete all (clearAllFilesCmd on all folders)
+    refresh    (cleanAllFilesCmd on all folders)
+
+ todo hard
   auto scroll
     scroll to top for functions
     min top and bottom border lines
     don't scroll if mark visible in window
+  hide all marks, restore on any edit
+  add names to marks
+    edit menu
+    don't delete named marks so names preserved
+    delete named tokens when X menu used
+
+ todo impossible?
+  invisible tokens
+  toggle collapsed/expanded on file item click
+  remove sidebar highlight when selection changes
+
+not needed?
+  command to go to last file on prev/next
+  undo
   automatic suggestions based on visits
     count visits in each symbol block
     show in sidebar with question mark
     click on sidebar to accept and create bookmark
     limit suggestions (setting)
-  busy indicator
-  remove hashing
-  add names to marks
-    edit menu
-    don't delete named marks so names preserved
-    delete named tokens when X menu used
-  put refresh menu item on files and folders
-  test moving a project folder
-  undo?
   
-impossible?
-  invisible tokens
-  toggle collapsed/expanded on file item click
-  remove sidebar highlight when selection changes
-
 file types to add
-  plaintext
   markdown
-
-top of sidebar
-  delete all (clearAllFilesCmd on all folders)
-  refresh    (cleanAllFilesCmd on all folders)
 
 settings
   fall back to gen1 line number tracking
@@ -54,23 +52,25 @@ settings
   max num of enclosing folder names
   clean trailing empty comments and whitespace
   open sidebar when adding mark
-  min line len
   files to ignore
+  language types to ignore
   ignore .gitignore
   show in gutter
     gutter color
   show in scrollbar
     scrollbar color
 
+testing
+  moving a project folder
+
 why gen2
   sticky
   smart sidebar
+    pointers
     line numbers
     breadcrumbs
     compressed code
-  auto bookmark suggestions
   smart scrolling
-
 
 
 ############################### ICONS ######################################

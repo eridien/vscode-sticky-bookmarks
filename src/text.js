@@ -4,9 +4,10 @@ const marks  = require('./marks.js');
 const utils  = require('./utils.js');
 const {log, start, end}  = utils.getLog('file');
 
-const showLineNumbers    = true;
-const showBreadCrumbs    = true;
-const showCodeWhenCrumbs = true;
+const showLineNumbers      = true;
+const showBreadCrumbs      = true;
+const showCodeWhenCrumbs   = true;
+const openSideBarOnNewMark = true;
 
 let context, gutterDecoration = null;
 
@@ -338,6 +339,9 @@ async function toggle() {
     editor.selection = new vscode.Selection(position, position);
     editor.revealRange(new vscode.Range(position, position), 
             vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+    if(openSideBarOnNewMark) 
+      await vscode.commands.executeCommand(
+                                'workbench.view.extension.stickyBookmarks');
   }
   marks.dumpGlobalMarks('toggle');
 }

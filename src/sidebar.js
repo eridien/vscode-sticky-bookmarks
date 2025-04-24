@@ -62,7 +62,6 @@ async function getNewMarkItem(mark) {
 
 let logIdx = 0;
 
-//bookmark:b7kc;
 async function getItemTree() {
   // start('getItemTree');
   // log('getItemTree', logIdx++);

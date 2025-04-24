@@ -10,7 +10,6 @@ let context;
 
 let initFinished = false;
 
-//bookmark:tkpj;
 async function init(contextIn) {
   start('init marks');
   context = contextIn;

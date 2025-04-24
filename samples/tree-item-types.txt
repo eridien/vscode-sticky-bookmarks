@@ -28,7 +28,6 @@ type: 'file'
 collapsibleState: 0
 command: {command: 'sticky-bookmarks.itemClickCmd', title: 'Item Clicked', arguments: Array(1)}
 iconPath: ui {id: 'triangle-up', color: undefined}
-id: ':cpix;'
 label: '  8  haveSocket=fal\\n waitingSends=[];\\n ws.onmessage=(event)=>{\\n x=0;'
 mark: document: TextDocument(file:///c%3A/Users/mark/apps/test-app/src/srvr.js)
       fileFsPath: 'c:\\Users\\mark\\apps\\test-app\\src\\srvr.js'
@@ -42,6 +41,5 @@ mark: document: TextDocument(file:///c%3A/Users/mark/apps/test-app/src/srvr.js)
       inWorkspace: true
       languageId: 'javascript'
       lineNumber: 7
-      token: ':aopj;'
 type: 'bookmark'
 

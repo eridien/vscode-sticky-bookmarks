@@ -64,7 +64,6 @@ async function changedDocument() {
   utils.updateSidebar();
 }
 
-//bookmark:jq3f;
 async function changedEditor(editor) {
   if(!editor || !editor.document) {
     return;

@@ -342,7 +342,6 @@ async function toggle() {
   marks.dumpGlobalMarks('toggle');
 }
 
-//bookmark:a0wl;
 async function scrollToPrevNext(fwd) {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {log('info', 'scrollToPrevNext, no active editor'); return; }
@@ -391,9 +390,7 @@ async function clearFile(document, saveMarks = true) {
   if(haveDel && saveMarks) await marks.saveGlobalMarks();
 }
 
-//bookmark:sf0i;
 async function cleanFile(document) {
-  //bookmark:jj3u;
   start('cleanFile');
   const fileFsPath = document.uri.fsPath;
   let haveMarkChg = false;

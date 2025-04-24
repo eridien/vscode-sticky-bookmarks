@@ -35,15 +35,6 @@ impossible?
   toggle collapsed/expanded on file item click
   remove sidebar highlight when selection changes
 
-why gen2
-  sticky
-  smart sidebar
-    line numbers
-    breadcrumbs
-    compressed code
-  auto bookmark suggestions
-  smart scrolling
-
 file types to add
   plaintext
   markdown
@@ -71,17 +62,24 @@ settings
   show in scrollbar
     scrollbar color
 
+why gen2
+  sticky
+  smart sidebar
+    line numbers
+    breadcrumbs
+    compressed code
+  auto bookmark suggestions
+  smart scrolling
 
-############################### NOTES ######################################
 
-testing
-  https://code.visualstudio.com/api/working-with-extensions/testing-extension
+
+############################### ICONS ######################################
 
 const vscode   = require('vscode');
 const utils    = require('./utils.js');
 const {log} = utils.getLog('labl');
 
-/*
+
 settings: workbench.colorTheme   auto-detect color scheme
 https://code.visualstudio.com/api/references/icons-in-labels
 "https://github.com/microsoft/vscode-codicons/tree/main/src/icons"
@@ -169,6 +167,7 @@ codicons:
   close-dirty debug-step-into debug-step-out export
   fold-down fold-up grabber layout-panel
 
+--------------------- module calls --------------------
 requires: cmd sidebar text marks utils
 
 init:        provides glblFuncs ...
@@ -201,14 +200,17 @@ calls
     marks.dumpGlobalMarks
     marks.addGlobalMarkIfMissing
     marks.delGlobalMarksForFile
-    
+  
   marks
     text.glblFuncs.addMarksForTokens *
     sidebar.glblFuncs.updateSidebar  *
 
+
 --- hover over bookmark ----------
 
-const markdown = new vscode.MarkdownString(`[Delete Bookmark](command:sticky-bookmarks.deleteItemCmd?${encodeURIComponent(JSON.stringify([lineNumber]))})`);
+const markdown = new vscode.MarkdownString(
+       `[Delete Bookmark](command:sticky-bookmarks`+
+       `.deleteItemCmd?${encodeURIComponent(JSON.stringify([lineNumber]))})`);
 markdown.isTrusted = true;
 
 editor.setDecorations(decorationType, [
@@ -217,6 +219,7 @@ editor.setDecorations(decorationType, [
     hoverMessage: markdown
   }
 ]);
+
 
 --- show codelens with no bookmark ---
 

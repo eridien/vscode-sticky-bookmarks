@@ -86,6 +86,7 @@ async function getCompText(mark) {
   let compText = '';
   do {
     let lineText = document.lineAt(lineNumber).text;
+    lineText = lineText.replace(/(.)\1{3,}/g, (_, char) => char.repeat(3));
     const {junk, bookmarkToken, noMatch} = 
                     getJunkAndBookmarkToken(lineText, languageId)
     if(noMatch || junk !== '') {
@@ -133,6 +134,7 @@ function labelWithLineNum(lineNumber, label) {
   return label;
 }
 
+//bookmark:ybf0;
 async function getLabel(mark) {
   try {
     const {document, lineNumber} = mark;

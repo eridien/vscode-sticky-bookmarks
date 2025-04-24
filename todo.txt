@@ -4,7 +4,7 @@ vsce package
 bugs
 
 todo easy
-  collapse long runs of a single char
+  click in token to remove mark
   remove dupe symbols
   busy indicator
   remove hashing
@@ -42,6 +42,7 @@ file types to add
   markdown
 
 settings
+  show bookmark word in token
   fall back to gen1 line number tracking
   max suggestion count
   smart scroll 

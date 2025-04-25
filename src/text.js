@@ -342,9 +342,14 @@ async function toggle() {
     editor.selection = new vscode.Selection(position, position);
     editor.revealRange(new vscode.Range(position, position), 
             vscode.TextEditorRevealType.InCenterIfOutsideViewport);
-    if(openSideBarOnNewMark) 
+    if(openSideBarOnNewMark)  {
       await vscode.commands.executeCommand(
-                                'workbench.view.extension.stickyBookmarks');
+                           'workbench.view.extension.stickyBookmarks');
+      await utils.sleep(100);
+      await vscode.commands.executeCommand(
+                            'workbench.action.focusActiveEditorGroup');
+    }
+
   }
   marks.dumpGlobalMarks('toggle');
 }

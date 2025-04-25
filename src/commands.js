@@ -50,6 +50,10 @@ async function cleanAllFilesCmd() {
   await utils.runOnAllFilesInFolder(cleanFileCmd);
 }
 
+async function hideAllCmd() {
+  log('hideAllCmd');
+}
+
 let sidebarIsVisible = false;
 
 async function changedSidebarVisiblitiy(visible) {
@@ -92,7 +96,7 @@ const changedText = utils.debounce(async (event) => {
 }, 200);
 
 module.exports = { toggleCmd, prevCmd, nextCmd,
-                   deleteItemXCmd,
+                   deleteItemXCmd, hideAllCmd,
                    clearFileCmd, clearAllFilesCmd,
                    cleanFileCmd, cleanAllFilesCmd,
                    changedSidebarVisiblitiy, changedText,

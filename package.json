@@ -38,7 +38,10 @@
         "category": "Sticky Bookmarks"
       }, {
         "command": "sticky-bookmarks.clearAllFilesMenuCmd",
-        "title": "✖"
+        "title": "Remove all ✖"
+      }, {
+        "command": "sticky-bookmarks.cleanAllFilesMenuCmd",
+        "title": "Refresh ⟳"
       }, {
         "command": "sticky-bookmarks.cleanFileCmd",
         "title": "Cleanup Marks In File",
@@ -53,6 +56,9 @@
       }, {
         "command": "sticky-bookmarks.deleteItemXCmd",
         "title": "❌"
+      }, {
+        "command": "sticky-bookmarks.hideAllMenuCmd",
+        "title": "Hide 👁️‍🗨️"
       }, {
         "command": "sticky-bookmarks.clearAllSavedData",
         "title": "-- Do Not Use -- Internal Debug",
@@ -129,6 +135,14 @@
       "view/title": [
         {
           "command": "sticky-bookmarks.clearAllFilesMenuCmd",
+          "when":    "view == sidebarView",
+          "group":   "navigation"
+        }, {
+          "command": "sticky-bookmarks.cleanAllFilesMenuCmd",
+          "when":    "view == sidebarView",
+          "group":   "navigation"
+        }, {
+          "command": "sticky-bookmarks.hideAllMenuCmd",
           "when":    "view == sidebarView",
           "group":   "navigation"
         }

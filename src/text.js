@@ -60,14 +60,14 @@ function updateGutter() {
 function getJunkAndBookmarkToken(lineText, languageId) {
   const lineRegX      = lineRegEx(languageId);
   const match         = lineRegX.exec(lineText);
-  if(!match) return {junk:'', bookmarkToken:'', noMatch:true};
+  if(!match) return {junk:'', token:'', noMatch:true};
   const junk1         = (match[1] ?? '').replaceAll(/\s/g, '');
   const junk2         = (match[2] ?? '').replaceAll(/\s/g, '');
   const junk5         = (match[5] ?? '').replaceAll(/\s/g, '');
   const junk6         = (match[6] ?? '').replaceAll(/\s/g, '');
   const junk          = junk1 + junk2 + junk5 + junk6;
-  const bookmarkToken = (match[3] ?? '')
-  return {junk, bookmarkToken};
+  const token = (match[3] ?? '')
+  return {junk, token};
 }
 
 function isKeyWord(languageId, word) {
@@ -87,11 +87,11 @@ async function getCompText(mark) {
   do {
     let lineText = document.lineAt(lineNumber).text;
     lineText = lineText.replace(/(.)\1{3,}/g, (_, char) => char.repeat(3));
-    const {junk, bookmarkToken, noMatch} = 
+    const {junk, token, noMatch} = 
                     getJunkAndBookmarkToken(lineText, languageId)
     if(noMatch || junk !== '') {
-      if(bookmarkToken !== '') 
-        lineText = lineText.replace(bookmarkToken, '');
+      if(token !== '') 
+        lineText = lineText.replace(token, '');
       const matches = lineText.matchAll(/\b\w+?\b/g);
       const matchArr = [...matches];
       matchArr.reverse();
@@ -303,21 +303,21 @@ async function delMarkFromLineAndGlobal(document, lineNumber, save = true) {
   const languageId = document.languageId;
   const tokenMatch = tokenRegEx.exec(lineText);
   if(tokenMatch) {
-    const token = tokenMatch[0];
-    const {junk, bookmarkToken} = 
+    const tokenMtch = tokenMatch[0];
+    const {junk, token} = 
                      getJunkAndBookmarkToken(lineText, languageId);
     if(junk.length > 0) {
       log('delMarkFromLineAndGlobal, line has token and junk, '+
-          'removing only token', document.uri.path, lineNumber, token);
-      const newLineText = lineText.replace(bookmarkToken, '');
+          'removing only token', document.uri.path, lineNumber, tokenMtch);
+      const newLineText = lineText.replace(token, '');
       await utils.replaceLine(document, lineNumber, newLineText);
     }
     else {
       log('delMarkFromLineAndGlobal, line has token and no junk, '+
-          'removing line', document.uri.path, lineNumber, token);
+          'removing line', document.uri.path, lineNumber, tokenMtch);
       await utils.deleteLine(document, lineNumber);
     }
-    marks.delGlobalMark(token);
+    marks.delGlobalMark(tokenMtch);
     if(save) await marks.saveGlobalMarks();
     return true;
   }

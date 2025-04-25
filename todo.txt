@@ -10,8 +10,7 @@ todo easy
   remove hashing
   put refresh menu item on files and folders
   top of sidebar
-    delete all (clearAllFilesCmd on all folders)
-    refresh    (cleanAllFilesCmd on all folders)
+    refresh (cleanAllFilesCmd on all folders)
 
  todo hard
   auto scroll

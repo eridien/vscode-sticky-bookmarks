@@ -37,6 +37,9 @@
         "title": "Remove All Marks From All Files",
         "category": "Sticky Bookmarks"
       }, {
+        "command": "sticky-bookmarks.clearAllFilesMenuCmd",
+        "title": "✖"
+      }, {
         "command": "sticky-bookmarks.cleanFileCmd",
         "title": "Cleanup Marks In File",
         "category": "Sticky Bookmarks"
@@ -119,8 +122,15 @@
       "view/item/context": [
         {
           "command": "sticky-bookmarks.deleteItemXCmd",
-          "when": "view == sidebarView",
-          "group": "inline"
+          "when":    "view == sidebarView",
+          "group":   "inline"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "sticky-bookmarks.clearAllFilesMenuCmd",
+          "when":    "view == sidebarView",
+          "group":   "navigation"
         }
       ]
     }

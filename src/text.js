@@ -39,11 +39,11 @@ function lineRegEx(languageId) {
   if(commRgt !== '') {
     return new RegExp(
       `^(.*?)${commLft}(.*?)`+
-      `((bookmark)?\\:[0-9a-z]{4};)(.*?)${commRgt}(.*)$`);
+      `(\\:[0-9a-z]{4};)(.*?)${commRgt}(.*)$`);
   }
   else {
     return new RegExp(
-          `^(.*?)${commLft}(.*?)((bookmark)?\\:[0-9a-z]{4};)(.*)$`);
+          `^(.*?)${commLft}(.*?)(\\:[0-9a-z]{4};)(.*)$`);
   }
 }
 
@@ -57,7 +57,7 @@ function updateGutter() {
   editor.setDecorations(gutterDecoration, decorations);
 }
 
-function getJunkAndBookmarkToken(lineText, languageId) {
+function getJunkAndToken(lineText, languageId) {
   const lineRegX      = lineRegEx(languageId);
   const match         = lineRegX.exec(lineText);
   if(!match) return {junk:'', token:'', noMatch:true};
@@ -88,7 +88,7 @@ async function getCompText(mark) {
     let lineText = document.lineAt(lineNumber).text;
     lineText = lineText.replace(/(.)\1{3,}/g, (_, char) => char.repeat(3));
     const {junk, token, noMatch} = 
-                    getJunkAndBookmarkToken(lineText, languageId)
+                    getJunkAndToken(lineText, languageId)
     if(noMatch || junk !== '') {
       if(token !== '') 
         lineText = lineText.replace(token, '');
@@ -242,7 +242,7 @@ async function bookmarkClick(item) {
 
 function getNewTokenLine(indentLen, token, languageId) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
-  return ' '.repeat(indentLen) + commLft + 'bookmark' + token + commRgt;
+  return ' '.repeat(indentLen) + commLft + token + commRgt;
 }
 
 async function replaceLineInDocument(document, lineNumber, newText) {
@@ -305,7 +305,7 @@ async function delMarkFromLineAndGlobal(document, lineNumber, save = true) {
   if(tokenMatch) {
     const tokenMtch = tokenMatch[0];
     const {junk, token} = 
-                     getJunkAndBookmarkToken(lineText, languageId);
+                     getJunkAndToken(lineText, languageId);
     if(junk.length > 0) {
       log('delMarkFromLineAndGlobal, line has token and junk, '+
           'removing only token', document.uri.path, lineNumber, tokenMtch);

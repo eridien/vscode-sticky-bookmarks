@@ -1,4 +1,5 @@
 const vscode  = require('vscode');
+const sidebar = require('./sidebar.js');
 const text    = require('./text.js');
 const utils   = require('./utils.js');
 const {log}   = utils.getLog('cmds');
@@ -43,15 +44,21 @@ async function cleanFileCmd(document) {
 }
 
 async function clearAllFilesCmd() {
+  sidebar.setTreeViewBusyState(true);
   await utils.runOnAllFilesInFolder(clearFileCmd);
+  sidebar.setTreeViewBusyState(false);
 }
 
 async function cleanAllFilesCmd() {
+  sidebar.setTreeViewBusyState(true);
   await utils.runOnAllFilesInFolder(cleanFileCmd);
+  sidebar.setTreeViewBusyState(false);
 }
 
 async function hideAllCmd() {
+  sidebar.setTreeViewBusyState(true);
   log('hideAllCmd');
+  sidebar.setTreeViewBusyState(false);
 }
 
 let sidebarIsVisible = false;
@@ -79,6 +86,7 @@ async function changedVisEditors() {
   utils.updateSidebar();
 }  
 
+//bookmark:puv3;
 const changedSelection = utils.debounce(async (event) => {
   const {textEditor} = event;
   text.clearDecoration();

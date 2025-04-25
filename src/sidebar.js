@@ -4,9 +4,29 @@ const marks  = require('./marks.js');
 const utils  = require('./utils.js');
 const {log, start, end}  = utils.getLog('side');
 
-const showPointers  = true;
-let itemTree        = [];
-const closedFolders = new Set();
+const showPointers   = true;
+let itemTree         = [];
+const closedFolders  = new Set();
+let   treeViewIsBusy = false;
+let   treeView;
+
+function init(treeViewIn) {
+  treeView = treeViewIn;
+  // setTimeout(() => {
+  //   setTreeViewBusyState(true);
+  //   setTimeout(() => {
+  //     setTreeViewBusyState(false);
+  //   }, 3000);
+  // }, 3000);
+}
+
+//bookmark:6k22;
+function setTreeViewBusyState(busy) {
+  treeViewIsBusy = busy;
+  if (treeView) 
+      treeView.message = treeViewIsBusy ? '⟳ Processing Bookmarks ...' : '';
+  utils.updateSidebar();
+}
 
 async function getNewFolderItem(mark) {
   const {folderIndex, folderName, folderFsPath, folderUriPath} = mark;
@@ -211,9 +231,10 @@ class SidebarProvider {
   getTreeItem(item) {
     return item;
   }
+  //bookmark:7ei8;
   async getChildren(item) {
-    
-  if(!item) {
+    if (treeViewIsBusy) return [];
+    if(!item) {
       await marks.waitForInit();
       return await getItemTree();
     }
@@ -221,6 +242,6 @@ class SidebarProvider {
   }
 }
 
-module.exports = {SidebarProvider, itemClickCmd};
+module.exports = {SidebarProvider, init, setTreeViewBusyState, itemClickCmd};
 
 

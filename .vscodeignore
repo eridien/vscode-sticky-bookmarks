@@ -1,10 +1,65 @@
 .vscode/**
 .vscode-test/**
 test/**
+samples/**
+prism/**
+tools/**
 .gitignore
 .yarnrc
 vsc-extension-quickstart.md
+*.vsix
+**/*.txt
 **/jsconfig.json
 **/*.map
 **/eslint.config.mjs
 **/.vscode-test.*
+# Ignore node_modules except production dependencies
+**/node_modules/**
+
+# Ignore test files
+**/test/**
+**/tests/**
+**/__tests__/**
+
+# Ignore scripts and tooling
+**/scripts/**
+**/*.ts
+**/*.map
+**/*.tsbuildinfo
+
+# Ignore configs and local settings
+.vscode/
+*.log
+*.md.backup
+*.old
+*.bak
+
+# Ignore system junk files
+.DS_Store
+Thumbs.db
+
+# Ignore build artifacts
+out/
+dist/
+coverage/
+build/
+
+# Ignore personal or CI/CD folders
+.idea/
+.env
+.gitignore
+.vscodeignore
+.editorconfig
+
+# Explicit files you might not want packaged
+.eslintrc.js
+eslint.config.mjs
+tsconfig.json
+tsconfig.build.json
+package-lock.json
+yarn.lock
+.npmrc
+
+# You can allow specific resources if needed
+!images/**
+!LICENSE.txt

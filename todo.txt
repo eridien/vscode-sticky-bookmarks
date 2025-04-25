@@ -6,7 +6,6 @@ bugs
 
 todo easy
   remove dupe symbols
-  busy indicator
   remove hashing
   put refresh menu item on files and folders
 

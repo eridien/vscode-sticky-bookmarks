@@ -18,10 +18,9 @@ function init(contextIn) {
   }
   gutterDecoration = vscode.window.createTextEditorDecorationType({ 
     gutterIconPath: vscode.Uri.file(path.join(
-                  context.extensionPath, 'resources', 'bookmark.svg')),
+                       context.extensionPath, 'images', 'bookmark.svg')),
     gutterIconSize: 'contain',
-});
-
+  });
 }
 
 const crumbSepLft     = '● ';

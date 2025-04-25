@@ -69,6 +69,7 @@ async function activate(context) {
     treeDataProvider: sidebarProvider,
   });
 
+  sidebar.init(treeView);
   utils.initProvider(sidebarProvider);
   text.init(context);
   await marks.init(context);

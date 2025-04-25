@@ -2,8 +2,8 @@ const vscode = require('vscode');
 const utils  = require('./utils.js');
 const {log, start, end} = utils.getLog('mark');
 
-const DONT_LOAD_MARKS_ON_START = true;
-// const DONT_LOAD_MARKS_ON_START = false;
+// const DONT_LOAD_MARKS_ON_START = true;
+const DONT_LOAD_MARKS_ON_START = false;
 
 let globalMarks = {};
 let context;
@@ -50,6 +50,7 @@ async function init(contextIn) {
   }
   await context.workspaceState.update('globalMarks', globalMarks);
   initFinished = true;
+  utils.updateSidebar(); 
   dumpGlobalMarks('init');
   end('init marks');
 }

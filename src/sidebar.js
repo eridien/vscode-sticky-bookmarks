@@ -7,25 +7,39 @@ const {log, start, end}  = utils.getLog('side');
 const showPointers   = true;
 let itemTree         = [];
 const closedFolders  = new Set();
-let   treeViewIsBusy = false;
 let   treeView;
 
 function init(treeViewIn) {
   treeView = treeViewIn;
-  // setTimeout(() => {
-  //   setTreeViewBusyState(true);
-  //   setTimeout(() => {
-  //     setTreeViewBusyState(false);
-  //   }, 3000);
-  // }, 3000);
 }
 
-//bookmark:6k22;
-function setTreeViewBusyState(busy) {
-  treeViewIsBusy = busy;
+let intervalId  = null;
+let timeoutId   = null;
+let showingBusy = false;
+
+function setTreeViewBusyState(busy, blinking) {
   if (treeView) 
-      treeView.message = treeViewIsBusy ? '⟳ Processing Bookmarks ...' : '';
+      treeView.message = busy ? '⟳ Processing Bookmarks ...' : '';
   utils.updateSidebar();
+  if(blinking) return;
+  if(busy && !showingBusy) {
+    showingBusy = true;
+    intervalId = setInterval(() => {
+      setTreeViewBusyState(true, true);
+        timeoutId = setTimeout(() => {
+          setTreeViewBusyState(false, true);
+        }, 1000);
+    }, 2000);
+    setTreeViewBusyState(true);
+  }
+  if(!busy && showingBusy) {
+    showingBusy = false;
+    clearInterval(intervalId);
+    clearTimeout(timeoutId);
+    intervalId = null;
+    timeoutId  = null;
+    setTreeViewBusyState(false, true);
+  }
 }
 
 async function getNewFolderItem(mark) {
@@ -231,9 +245,9 @@ class SidebarProvider {
   getTreeItem(item) {
     return item;
   }
-  //bookmark:7ei8;
+  //bookmark
   async getChildren(item) {
-    if (treeViewIsBusy) return [];
+    if (showingBusy) return [];
     if(!item) {
       await marks.waitForInit();
       return await getItemTree();

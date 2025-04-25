@@ -86,7 +86,7 @@ async function changedVisEditors() {
   utils.updateSidebar();
 }  
 
-//bookmark:puv3;
+//bookmark
 const changedSelection = utils.debounce(async (event) => {
   const {textEditor} = event;
   text.clearDecoration();

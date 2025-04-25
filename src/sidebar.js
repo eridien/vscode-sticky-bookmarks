@@ -185,18 +185,22 @@ async function getItemTree() {
 
 async function itemClickCmd(item) {
   text.clearDecoration();
-  if(item.type === 'folder') {
-    const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
-    if(folderItem) {
-      if(closedFolders.has(folderItem.folderFsPath))
-         closedFolders.delete(folderItem.folderFsPath);
-      else
-         closedFolders.add(folderItem.folderFsPath);
-      utils.updateSidebar();
-    }
-    return;
+  switch(item.type) {
+    case 'folder': 
+      const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
+      if(folderItem) {
+        if(closedFolders.has(folderItem.folderFsPath))
+          closedFolders.delete(folderItem.folderFsPath);
+        else
+          closedFolders.add(folderItem.folderFsPath);
+        utils.updateSidebar();
+      }
+      break;
+    case 'file':
+      await vscode.window.showTextDocument(item.document, {preview: false});
+      break;
+    case 'bookmark': await text.bookmarkClick(item); break;
   }
-  if(item.type === 'bookmark') await text.bookmarkClick(item);
 }
 
 class SidebarProvider {

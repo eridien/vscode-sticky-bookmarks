@@ -2,9 +2,9 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
+  one toggle creates two bookmarks
 
 todo easy
-  click in token to remove mark
   remove dupe symbols
   busy indicator
   remove hashing
@@ -28,6 +28,7 @@ todo easy
   invisible tokens
   toggle collapsed/expanded on file item click
   remove sidebar highlight when selection changes
+  click in token to remove mark
 
 not needed?
   command to go to last file on prev/next

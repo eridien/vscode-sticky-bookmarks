@@ -23,6 +23,9 @@ async function activate(context) {
                 'sticky-bookmarks.clearFileCmd',     commands.clearFileCmd);
 	const clearAllFilesCmd = vscode.commands.registerCommand(
                 'sticky-bookmarks.clearAllFilesCmd', commands.clearAllFilesCmd);
+  const clearAllFilesMenuCmd = vscode.commands.registerCommand(
+                'sticky-bookmarks.clearAllFilesMenuCmd', 
+                                                     commands.clearAllFilesCmd);
 	const cleanFileCmd = vscode.commands.registerCommand(
                 'sticky-bookmarks.cleanFileCmd',     commands.cleanFileCmd);
 	const cleanAllFilesCmd = vscode.commands.registerCommand(
@@ -33,6 +36,7 @@ async function activate(context) {
   const contextMenuCmd = vscode.commands.registerCommand(
     'sticky-bookmarks.deleteItemXCmd', (item) => commands.deleteItemXCmd(item)
   );
+
   const clearAllSavedDataCmd = vscode.commands.registerCommand(
     'sticky-bookmarks.clearAllSavedData', async () => {
       for (const key of context.workspaceState.keys()) {
@@ -92,7 +96,8 @@ async function activate(context) {
                              clearFileCmd, clearAllFilesCmd,
                              cleanFileCmd, cleanAllFilesCmd, 
                              itemClickCmd, contextMenuCmd,
-                             clearAllSavedDataCmd, resetAllCmd);
+                             clearAllSavedDataCmd, resetAllCmd,
+                             clearAllFilesMenuCmd);
 
   end('activating extension');
 }

@@ -94,7 +94,7 @@ async function activate(context) {
     await commands.changedEditor(editor);
   });
   vscode.window.onDidChangeTextEditorSelection(async event => {
-    if (!event?.textEditor) return;
+    if (event?.textEditor?.document?.uri?.scheme !== 'file') return;
     await commands.changedSelection(event);
   });
 

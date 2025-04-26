@@ -4,6 +4,12 @@ const text    = require('./text.js');
 const utils   = require('./utils.js');
 const {log}   = utils.getLog('cmds');
 
+let context;
+
+function init(contextIn) {
+  context = contextIn;
+}
+
 async function toggleKeyCmd() {
   log('toggleKeyCmd');
   await text.toggle();
@@ -118,10 +124,11 @@ async function clearAllSavedDataCmd() {
   for (const key of context.globalState.keys()) {
     await context.globalState.update(key, undefined);
   }
-  log('info', 'Sticky Bookmarks: All saved data has been cleared.');
+  log('info', 'All Sticky Bookmarks data has been cleared.');
 }
 
 async function resetAllKeysCmd() {
+  log('resetAllKeysCmd');
   for (const key of context.workspaceState.keys()) 
     await context.workspaceState.update(key, undefined);
   for (const key of context.globalState.keys()) 
@@ -171,7 +178,7 @@ const changedText = utils.debounce(async (event) => {
   text.updateGutter();
 }, 200);
 
-module.exports = { toggleKeyCmd, prevKeyCmd, nextKeyCmd,
+module.exports = { init, toggleKeyCmd, prevKeyCmd, nextKeyCmd,
                    refreshFileKeyCmd, refreshAllFilesKeyCmd,
                    deleteFileKeyCmd, deleteAllFilesKeyCmd,
                    hideAllTitleCmd, refreshAllTitleCmd, deleteAllTitleCmd,

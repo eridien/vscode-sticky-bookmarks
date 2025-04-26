@@ -75,7 +75,7 @@
         "command": "sticky-bookmarks.clickItemCmd",
         "title":  "-- Do Not Use -- Internal"
       }, {
-        "command": "sticky-bookmarks.clearAllSavedData",
+        "command": "sticky-bookmarks.clearAllSavedDataCmd",
         "title": "-- Do Not Use -- Internal Debug",
         "category": "Sticky Bookmarks"
       }, {

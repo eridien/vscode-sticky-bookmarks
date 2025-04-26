@@ -251,7 +251,7 @@ function getLog(module) {
     if(typeof args[0] == 'string') {
       errFlag   = args[0].includes('err');
       infoFlag  = args[0].includes('info');
-      nomodFlag = infoFlag || args[0].includes('nomod');
+      nomodFlag = args[0].includes('nomod');
     }
     if(errFlag || infoFlag || nomodFlag) args = args.slice(1);
     const par = args.map(a => {
@@ -263,10 +263,11 @@ function getLog(module) {
     });
     const line = (nomodFlag ? '' : module + ': ') +
                  (errFlag    ? ' error, ' : '') + par.join(' ')
+    const infoLine = (errFlag ? ' error, ' : '') + par.join(' ')
     outputChannel.appendLine(line);
     if(errFlag) console.error(line);
     else        console.log(line);
-    if(infoFlag) vscode.window.showInformationMessage(line);
+    if(infoFlag) vscode.window.showInformationMessage(infoLine);
   }
   return {log, start, end};
 }

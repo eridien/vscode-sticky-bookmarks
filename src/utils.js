@@ -255,14 +255,15 @@ function getLog(module) {
     }
     if(errFlag || infoFlag || nomodFlag) args = args.slice(1);
     const par = args.map(a => {
-      if(typeof a === 'object') {
+      if(getTokenRegEx().test(a)) a = tokenToDigits(a);
+      else if(typeof a === 'object') {
         try{ return JSON.stringify(a, null, 2); }
         catch(e) { return JSON.stringify(Object.keys(a)) + e.message }
       }
       else return a;
     });
-    const line = (nomodFlag ? '' : module + ': ') +
-                 (errFlag    ? ' error, ' : '') + par.join(' ')
+    const line = (nomodFlag   ? '' : module + ': ') +
+                 (errFlag     ? ' error, ' : '') + par.join(' ')
     const infoLine = (errFlag ? ' error, ' : '') + par.join(' ')
     outputChannel.appendLine(line);
     if(errFlag) console.error(line);
@@ -372,6 +373,10 @@ function getUniqueToken() {
   return numberToInvBase4(++uniqueIdNum)+'.';
 }
 
+function getUniqueIdStr() {
+  return (++uniqueIdNum).toString();
+}
+
 function tokenToDigits(token) {
   const map = {
     '\u200B': '0', // Zero Width Space
@@ -384,15 +389,15 @@ function tokenToDigits(token) {
       if (!(c in map)) throw new Error('Invalid base-4 character');
       return map[c];
     })
-    .join('').padStart(4, ' ');
+    .join('').padStart(4, '0');
 }
 
 function getTokenRegEx() {
-  return new regExp("[\\u200B\\u200C\\u200D\\u2060]+\\.");
+  return new RegExp("[\\u200B\\u200C\\u200D\\u2060]+\\.");
 }
 
 function getTokenRegExG() {
-  return new regExp("[\\u200B\\u200C\\u200D\\u2060]+\\.", 'g');
+  return new RegExp("[\\u200B\\u200C\\u200D\\u2060]+\\.", 'g');
 }
 
 module.exports = {
@@ -402,6 +407,6 @@ module.exports = {
   deleteLine, insertLine, replaceLine, debounce, sleep,
   getPathsFromWorkspaceFolder, getPathsFromFileDoc,
   runOnAllFilesInFolder, getFocusedWorkspaceFolder, initProvider,
-  updateSidebar
+  updateSidebar, getUniqueIdStr
 }
 

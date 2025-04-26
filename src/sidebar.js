@@ -44,7 +44,7 @@ function setTreeViewBusyState(busy, blinking) {
 
 async function getNewFolderItem(mark) {
   const {folderIndex, folderName, folderFsPath, folderUriPath} = mark;
-  const id    = utils.fnv1aHash(folderUriPath);
+  const id    = utils.getUniqueIdStr();
   const label = '📂 ' + folderName;
   const item  = new vscode.TreeItem(
                        label, vscode.TreeItemCollapsibleState.None);
@@ -70,7 +70,7 @@ async function getNewFileItem(mark, children) {
          fileFsPath,   fileUriPath, fileRelUriPath} = mark;
   const item = new vscode.TreeItem(label,
                    vscode.TreeItemCollapsibleState.Expanded);
-  item.id = utils.fnv1aHash(fileUriPath);
+  item.id = utils.getUniqueIdStr();
   Object.assign(item, {type:'file', contextValue:'file', document, children, 
                        folderIndex, folderName, folderFsPath, folderUriPath,
                        fileName,    fileFsPath, fileUriPath,  fileRelUriPath});
@@ -86,7 +86,7 @@ async function getNewMarkItem(mark) {
   const label = await text.getLabel(mark);
   const item  = new vscode.TreeItem(label,
                     vscode.TreeItemCollapsibleState.None);
-  Object.assign(item, {id:mark.token, type:'bookmark', 
+  Object.assign(item, {id:getUniqueIdStr(), type:'bookmark', 
                               contextValue:'bookmark', mark});
   item.command = {
     command: 'sticky-bookmarks.clickItemCmd',

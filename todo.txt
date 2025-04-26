@@ -3,7 +3,8 @@ vsce package
 
 bugs
   click item broken
-  
+  deleting mark doesn't delete gutter
+
 todo 
   auto scroll
     scroll to top for functions
@@ -31,7 +32,6 @@ not needed?
     click on sidebar to accept and create bookmark
     limit suggestions (setting)
   remove dupe symbols
-  remove hashing
   
 file types to add
   markdown

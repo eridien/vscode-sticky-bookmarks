@@ -112,18 +112,7 @@ function dumpGlobalMarks(caller, list, dump) {
   }
 }
 
-function getRandomToken() {
-  const hashDigit = () => Math.floor(Math.random()*36).toString(36);
-  let randHash;
-  do {  
-    randHash = ''; 
-    for(let i = 0; i < 4; i++) randHash += hashDigit()
-  }
-  while(randHash in globalMarks);
-  return `:${randHash};`;
-}
-
-//:om83;
+//:f6j4;
 async function newGlobalMark(document, lineNumber, token, save) {
   token ??= utils.getUniqueToken();
   const mark  = {token, document, lineNumber,

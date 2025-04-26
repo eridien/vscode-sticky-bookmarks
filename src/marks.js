@@ -96,18 +96,17 @@ function dumpGlobalMarks(caller, list, dump) {
             a[1].lineNumber - b[1].lineNumber));
     let str = "\n";
     for(let [token, mark] of sortedMarks) {
-      token = token.replace(/:/g, '').replace(/;/g, '');
-      str += `${token} -> ${mark.fileRelUriPath} ` +
+      str += `${utils.tokenToDigits(token)} -> ${mark.fileRelUriPath} ` +
              `${mark.lineNumber.toString().padStart(3, ' ')} `+
-             `${mark.languageId.slice(0,3)}\n`;
+             `${mark.languageId}\n`;
     }
     log(caller, str.slice(0,-1));
   }
   else {
     let str = "";
     for(let token of Object.keys(globalMarks)) {
-      token = token.replace(/:/g, '').replace(/;/g, '');
-      str += token + ' ';;
+      token = utils.tokenToDigits(token);
+      str += token + ' ';
     }
     log(caller, str);
   }
@@ -124,8 +123,9 @@ function getRandomToken() {
   return `:${randHash};`;
 }
 
+//:om83;
 async function newGlobalMark(document, lineNumber, token, save) {
-  token ??= getRandomToken();
+  token ??= utils.getUniqueToken();
   const mark  = {token, document, lineNumber,
                  languageId: document.languageId};
   const filePaths = utils.getPathsFromFileDoc(document); 

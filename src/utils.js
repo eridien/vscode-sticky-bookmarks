@@ -366,28 +366,39 @@ function numberToInvBase4(num) {
   return result;
 }
 
-function getEmptyToken() {
-  return "\u200B.";
+let uniqueIdNum = 0;
+
+function getUniqueToken() {
+  return numberToInvBase4(++uniqueIdNum)+'.';
 }
 
-let uniqueId = 0;
-
-function getUniqueInvBase4Token(comLft, comRgt) {
-  return numberToInvBase4(++uniqueId)+'.';
+function tokenToDigits(token) {
+  const map = {
+    '\u200B': '0', // Zero Width Space
+    '\u200C': '1', // Zero Width Non-Joiner
+    '\u200D': '2', // Zero Width Joiner
+    '\u2060': '3'  // Word Joiner
+  };
+  return [...token.slice(0,-1)]
+    .map(c => {
+      if (!(c in map)) throw new Error('Invalid base-4 character');
+      return map[c];
+    })
+    .join('').padStart(4, ' ');
 }
 
-function getInvBase4RegEx() {
+function getTokenRegEx() {
   return new regExp("[\\u200B\\u200C\\u200D\\u2060]+\\.");
 }
 
-function getInvBase4RegExG() {
+function getTokenRegExG() {
   return new regExp("[\\u200B\\u200C\\u200D\\u2060]+\\.", 'g');
 }
 
 module.exports = {
   init, getLog, fnv1aHash, loadStickyBookmarksJson,
   commentsByLang, keywords, fileExists, getLineFromTextAtOffset,
-  getEmptyToken, getUniqueInvBase4Token, getInvBase4RegEx, getInvBase4RegExG,
+  getUniqueToken, tokenToDigits, getTokenRegEx, getTokenRegExG,
   deleteLine, insertLine, replaceLine, debounce, sleep,
   getPathsFromWorkspaceFolder, getPathsFromFileDoc,
   runOnAllFilesInFolder, getFocusedWorkspaceFolder, initProvider,

@@ -2,7 +2,8 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-
+  click item broken
+  
 todo 
   auto scroll
     scroll to top for functions

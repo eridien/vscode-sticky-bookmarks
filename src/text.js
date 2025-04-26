@@ -29,8 +29,8 @@ const lineSep         = '\x00';
 
 const keywordSetsByLang = {};
 
-const tokenRegEx  = new RegExp('\\:[0-9a-z]{4};');
-const tokenRegExG = new RegExp('\\:[0-9a-z]{4};', 'g');
+const tokenRegEx  = new RegExp('[\\u200B\\u200C\\u200D\\u2060]+\\.');
+const tokenRegExG = new RegExp('[\\u200B\\u200C\\u200D\\u2060]+\\.', 'g');
 const indentRegEx = /^(\s*)\S/;
 
 function lineRegEx(languageId) {
@@ -38,11 +38,11 @@ function lineRegEx(languageId) {
   if(commRgt !== '') {
     return new RegExp(
       `^(.*?)${commLft}(.*?)`+
-      `(\\:[0-9a-z]{4};)(.*?)${commRgt}(.*)$`);
+      `(\\[\\u200B\\u200C\\u200D\\u2060]+\\.)(.*?)${commRgt}(.*)$`);
   }
   else {
     return new RegExp(
-          `^(.*?)${commLft}(.*?)(\\:[0-9a-z]{4};)(.*)$`);
+          `^(.*?)${commLft}(.*?)([\\u200B\\u200C\\u200D\\u2060]+\\.)(.*)$`);
   }
 }
 

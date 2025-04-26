@@ -2,15 +2,8 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-  one toggle creates two bookmarks
 
-todo easy
-  need title menu funcs
-  remove dupe symbols
-  remove hashing
-  put refresh menu item on files and folders
-
- todo hard
+todo 
   auto scroll
     scroll to top for functions
     min top and bottom border lines
@@ -20,8 +13,9 @@ todo easy
     edit menu
     don't delete named marks so names preserved
     delete named tokens when X menu used
+  settings
 
- todo impossible?
+todo impossible?
   invisible tokens
   toggle collapsed/expanded on file item click
   remove sidebar highlight when selection changes
@@ -35,6 +29,8 @@ not needed?
     show in sidebar with question mark
     click on sidebar to accept and create bookmark
     limit suggestions (setting)
+  remove dupe symbols
+  remove hashing
   
 file types to add
   markdown
@@ -152,6 +148,27 @@ item.iconPath = { light: lightUri, dark: darkUri };
 ⊕ U+2295  Circled Plus
 ⋆ U+22C6  Star Operator
 ⎈ U+2388  Helm Symbol
+
+invisible chars
+---------------
+\u0020   (space)
+\u00A0   (non-breaking space)
+\u2000   (en quad)
+\u2001   (em quad)
+\u2002   (en space)
+\u2003   (em space)
+\u2004   (three-per-em space)
+\u2005   (four-per-em space)
+\u2006   (six-per-em space)
+\u2007   (figure space)
+\u2008   (punctuation space)
+\u2009   (thin space)
+\u200A   (hair space)
+\u200B   (zero-width space)
+\u200C   (zero-width non-joiner)
+\u200D   (zero-width joiner)
+\u2060   (zero-width word joiner)
+\uFEFF   (zero-width no-break space / BOM)
 
 If you're using SVGs as iconPath, color is respected unless overridden by the theme.
 But if you're using a ThemeIcon,

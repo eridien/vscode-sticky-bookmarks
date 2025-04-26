@@ -217,7 +217,7 @@ async function bookmarkClick(item) {
   const lineText     = tgtEditor.document.getText(lineSel);
   const tokenMatches = await getTokensInLine(lineText);
   if(tokenMatches.length === 0) {
-    log('itemClickCmd, no token in line', mark.lineNumber,
+    log('bookmarkClick, no token in line', mark.lineNumber,
         'of', mark.fileName, ', removing GlobalMark', mark.token);
     marks.delGlobalMark[mark.token];
     await marks.saveGlobalMarks();
@@ -231,8 +231,9 @@ async function bookmarkClick(item) {
     }
     const foundToken = tokenMatches[0][0];
     if(foundToken !== mark.token) {
-      log(`wrong token found in line ${mark.lineNumber} of ${mark.fileName}, `+
-          `found: ${foundToken}, expected: ${mark.token}, fixing GlobalMark`);
+      log(`bookmarkClick, wrong token found in line ${mark.lineNumber} `+
+      `of ${mark.fileName}, found: ${foundToken}, expected: ${mark.token}, `+
+      `fixing GlobalMark`);
       await marks.replaceGlobalMark(mark.token, foundToken);
     }
   }
@@ -401,8 +402,8 @@ async function clearFile(document, saveMarks = true) {
   if(haveDel && saveMarks) await marks.saveGlobalMarks();
 }
 
-async function cleanFile(document) {
-  start('cleanFile');
+async function refreshFile(document) {
+  start('refreshFile');
   const fileFsPath = document.uri.fsPath;
   let haveMarkChg = false;
   const fileMarksByToken = {};
@@ -418,7 +419,7 @@ async function cleanFile(document) {
       const newLineText = lineText.replace(token, newToken);
       await replaceLineInDocument(document, lineNumber, newLineText);
       haveMarkChg = true;
-      log(`cleanFile, replaced duplicate token, ${token} -> ${newMark.token}`);    
+      log(`refreshFile, replaced duplicate token, ${token} -> ${newMark.token}`);    
       return;
     }
     fileMarksByToken[fileMark.token] = fileMark;
@@ -439,12 +440,12 @@ async function cleanFile(document) {
     }
   }
   if(haveMarkChg) await marks.saveGlobalMarks();
-  end('cleanFile');
+  end('refreshFile');
 }
 
 module.exports = {init, getLabel, bookmarkClick,
                   clearDecoration, justDecorated, updateGutter,
                   toggle, scrollToPrevNext, delMarkFromLineAndGlobal,    
-                  clearFile, cleanFile};
+                  clearFile, refreshFile};
 
 

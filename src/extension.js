@@ -19,51 +19,42 @@ async function activate(context) {
      'sticky-bookmarks.prevKeyCmd',                       commands.prevKeyCmd);
 	const nextKeyCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.nextKeyCmd',                       commands.nextKeyCmd);
-	const clearFileKeyCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.clearFileKeyCmd',             commands.clearFileKeyCmd);
-	const clearAllFilesKeyCmd = vscode.commands.registerCommand(
-         'sticky-bookmarks.clearAllFilesKeyCmd', commands.clearAllFilesKeyCmd);
-  const cleanFileKeyCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.cleanFileKeyCmd',             commands.cleanFileKeyCmd);
-  const cleanAllFilesKeyCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.cleanAllFilesKeyCmd',     commands.cleanAllFilesKeyCmd);
+  const refreshFileKeyCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.refreshFileKeyCmd',         commands.refreshFileKeyCmd);
+  const refreshAllFilesKeyCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.refreshAllFilesKeyCmd', commands.refreshAllFilesKeyCmd);
+	const deleteFileKeyCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.deleteFileKeyCmd',           commands.deleteFileKeyCmd);
+  const deleteAllFilesKeyCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.deleteAllFilesKeyCmd',   commands.deleteAllFilesKeyCmd);
 
   const hideAllTitleCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.hideAllTitleCmd',             commands.hideAllTitleCmd);
-	const cleanAllFilesTitleCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.cleanAllFilesTitleCmd', commands.cleanAllFilesTitleCmd);
-	const clearAllFilesTitleCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.clearAllFilesTitleCmd', commands.clearAllFilesTitleCmd);
+	const refreshAllTitleCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.refreshAllTitleCmd',       commands.refreshAllTitleCmd);
+	const deleteAllTitleCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.deleteAllTitleCmd',         commands.deleteAllTitleCmd);
 
-  const cleanFldrFilesItemCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.cleanFldrFilesItemCmd', 
-                                (item) => sidebar.cleanFldrFilesItemCmd(item));
-  const cleanFileItemCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.cleanFileItemCmd', 
-                                    (item) => commands.cleanFileItemCmd(item));
-  const cleanItemCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.cleanItemCmd',   (item) => commands.cleanItemCmd(item));
+  const eraseNameItemCmd = vscode.commands.registerCommand(
+    'sticky-bookmarks.eraseNameItemCmd',   
+                                    (item) => commands.eraseNameItemCmd(item));
+  const editNameItemCmd = vscode.commands.registerCommand(
+    'sticky-bookmarks.editNameItemCmd',   
+                                     (item) => commands.editNameItemCmd(item));
+  const refreshItemCmd = vscode.commands.registerCommand(
+    'sticky-bookmarks.refreshItemCmd',(item) => commands.refreshItemCmd(item));
+  const deleteItemCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.deleteItemCmd', 
+                                       (item) => commands.deleteItemCmd(item));
+
+  const clickItemCmd = vscode.commands.registerCommand(
+    'sticky-bookmarks.clickItemCmd',    (item) => commands.clickItemCmd(item));
 
   const clearAllSavedDataCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.clearAllSavedData', async () => {
-      for (const key of context.workspaceState.keys()) {
-        await context.workspaceState.update(key, undefined);
-      }
-      for (const key of context.globalState.keys()) {
-        await context.globalState.update(key, undefined);
-      }
-      vscode.window.showInformationMessage(
-            'Sticky Bookmarks: All saved data has been cleared.');
-    });
+     'sticky-bookmarks.clearAllSavedDataCmd',   commands.clearAllSavedDataCmd);
 
-    const resetAllCmd = vscode.commands.registerCommand(
-      'sticky-bookmarks.resetAll', async () => {
-      for (const key of context.workspaceState.keys()) 
-        await context.workspaceState.update(key, undefined);
-      for (const key of context.globalState.keys()) 
-        await context.globalState.update(key, undefined);
-      vscode.window.showInformationMessage('Sticky Bookmarks keybindings reset.');
-    });
+  const resetAllKeysCmd = vscode.commands.registerCommand(
+    'sticky-bookmarks.resetAllKeysCmd',              commands.resetAllKeysCmd);
 
   const sidebarProvider = new sidebar.SidebarProvider();
   const treeView = vscode.window.createTreeView('sidebarView', {
@@ -100,15 +91,14 @@ async function activate(context) {
     await commands.changedSelection(event);
   });
 
-  context.subscriptions.push(toggleKeyCmd, prevKeyCmd, nextKeyCmd, 
-                             clearFileKeyCmd, clearAllFilesKeyCmd,
-                             cleanFileKeyCmd, cleanAllFilesKeyCmd, 
-                             itemClickCmd, 
-                             cleanItemCmd,
-                             clearAllSavedDataCmd, resetAllCmd,
-                             clearAllFilesTitleCmd, cleanAllFilesTitleCmd,
-                             hideAllTitleCmd);
-
+  context.subscriptions.push(toggleKeyCmd, prevKeyCmd, nextKeyCmd,
+                             refreshFileKeyCmd, refreshAllFilesKeyCmd,
+                             deleteFileKeyCmd, deleteAllFilesKeyCmd,
+                             hideAllTitleCmd, refreshAllTitleCmd, deleteAllTitleCmd,
+                             eraseNameItemCmd, editNameItemCmd,
+                             refreshItemCmd, deleteItemCmd,
+                             clickItemCmd, clearAllSavedDataCmd, resetAllKeysCmd);
+    
   end('activating extension');
 }
 

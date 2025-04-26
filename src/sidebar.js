@@ -55,7 +55,7 @@ async function getNewFolderItem(mark) {
   else
     item.iconPath = new vscode.ThemeIcon("chevron-down");
   item.command = {
-    command:   'sticky-bookmarks.itemClickCmd',
+    command:   'sticky-bookmarks.clickItemCmd',
     title:     'Item Clicked',
     arguments: [item],
   }
@@ -75,16 +75,10 @@ async function getNewFileItem(mark, children) {
                        folderIndex, folderName, folderFsPath, folderUriPath,
                        fileName,    fileFsPath, fileUriPath,  fileRelUriPath});
   item.command = {
-    command:   'sticky-bookmarks.itemClickCmd',
+    command:   'sticky-bookmarks.clickItemCmd',
     title:     'Item Clicked',
     arguments: [item],
   }
-  item.command = {
-    command: 'sticky-bookmarks.itemClickCmd',
-    title:   'Item Clicked',
-    arguments: [item],
-  }
-
   return item;
 };
 
@@ -92,9 +86,10 @@ async function getNewMarkItem(mark) {
   const label = await text.getLabel(mark);
   const item  = new vscode.TreeItem(label,
                     vscode.TreeItemCollapsibleState.None);
-  Object.assign(item, {id:mark.token, type:'bookmark', mark});
+  Object.assign(item, {id:mark.token, type:'bookmark', 
+                              contextValue:'bookmark', mark});
   item.command = {
-    command: 'sticky-bookmarks.itemClickCmd',
+    command: 'sticky-bookmarks.clickItemCmd',
     title:   'Item Clicked',
     arguments: [item],
   }
@@ -224,7 +219,7 @@ async function getItemTree() {
   return itemTree;
 }
 
-async function itemClickCmd(item) {
+async function clickItemCmd(item) {
   text.clearDecoration();
   switch(item.type) {
     case 'folder': 
@@ -263,6 +258,6 @@ class SidebarProvider {
   }
 }
 
-module.exports = {SidebarProvider, init, setTreeViewBusyState, itemClickCmd};
+module.exports = {SidebarProvider, init, setTreeViewBusyState, clickItemCmd};
 
 

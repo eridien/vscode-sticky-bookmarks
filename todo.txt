@@ -5,6 +5,7 @@ bugs
   one toggle creates two bookmarks
 
 todo easy
+  need title menu funcs
   remove dupe symbols
   remove hashing
   put refresh menu item on files and folders

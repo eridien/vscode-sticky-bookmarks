@@ -17,48 +17,60 @@
   "contributes": {
     "commands": [
       {
-        "command": "sticky-bookmarks.toggleCmd",
+        "command": "sticky-bookmarks.toggleKeyCmd",
         "title": "Toggle Bookmark On/Off",
         "category": "Sticky Bookmarks"
       }, {
-        "command": "sticky-bookmarks.prevCmd",
+        "command": "sticky-bookmarks.prevKeyCmd",
         "title": "Go To Previous Bookmark",
         "category": "Sticky Bookmarks"
       }, {
-        "command": "sticky-bookmarks.nextCmd",
+        "command": "sticky-bookmarks.nextKeyCmd",
         "title": "Go To Next Bookmark",
         "category": "Sticky Bookmarks"
       }, {
-        "command": "sticky-bookmarks.clearFileCmd",
+        "command": "sticky-bookmarks.clearFileKeyCmd",
         "title": "Remove All Marks From File",
         "category": "Sticky Bookmarks"
       }, {
-        "command": "sticky-bookmarks.clearAllFilesCmd",
+        "command": "sticky-bookmarks.clearAllFilesKeyCmd",
         "title": "Remove All Marks From All Files",
         "category": "Sticky Bookmarks"
       }, {
-        "command": "sticky-bookmarks.hideAllMenuCmd",
-        "title": " 👁️‍🗨️ "
-      }, {
-        "command": "sticky-bookmarks.cleanAllFilesMenuCmd",
-        "title": " ⟳ "
-      }, {
-        "command": "sticky-bookmarks.clearAllFilesMenuCmd",
-        "title": " ✖ "
-      }, {
-        "command": "sticky-bookmarks.cleanFileCmd",
-        "title": "Cleanup Marks In File",
-        "category": "Sticky Bookmarks"
-      }, {
-        "command": "sticky-bookmarks.cleanAllFilesCmd",
+        "command": "sticky-bookmarks.cleanFileKeyCmd",
         "title": "Cleanup All Marks In All Files",
         "category": "Sticky Bookmarks"
       }, {
+        "command": "sticky-bookmarks.cleanAllFilesKeyCmd",
+        "title": "Cleanup All Marks In All Files",
+        "category": "Sticky Bookmarks"
+      }, 
+
+      {
+        "command": "sticky-bookmarks.hideAllTitleCmd",
+        "title": " 👁️‍🗨️ "
+      }, {
+        "command": "sticky-bookmarks.cleanAllFilesTitleCmd",
+        "title": " ⟳ "
+      }, {
+        "command": "sticky-bookmarks.clearAllFilesTitleCmd",
+        "title": " ✖ "
+      }, 
+
+      {
+        "command": "sticky-bookmarks.cleanFldrFilesItemCmd",
+        "title": " ⟳ "
+      }, {
+        "command": "sticky-bookmarks.cleanFileItemCmd",
+        "title": " ⟳ "
+      }, {
+        "command": "sticky-bookmarks.cleanItemCmd",
+        "title": "❌"
+      }, 
+
+      {
         "command": "sticky-bookmarks.itemClickCmd",
         "title":  "-- Do Not Use -- Internal"
-      }, {
-        "command": "sticky-bookmarks.deleteItemXCmd",
-        "title": "❌"
       }, {
         "command": "sticky-bookmarks.clearAllSavedData",
         "title": "-- Do Not Use -- Internal Debug",
@@ -70,37 +82,37 @@
       }
     ],
     "keybindings": [ {
-        "command": "sticky-bookmarks.toggleCmd",
+        "command": "sticky-bookmarks.toggleKeyCmd",
         "key": "ctrl+shift+alt+/",
         "mac": "cmd+shift+alt+/",
         "when": "editorTextFocus"
       },{
-        "command": "sticky-bookmarks.prevCmd",
+        "command": "sticky-bookmarks.prevKeyCmd",
         "key": "ctrl+shift+alt+,",
         "mac": "cmd+shift+alt+,",
         "when": "editorTextFocus"
       },{
-        "command": "sticky-bookmarks.nextCmd",
+        "command": "sticky-bookmarks.nextKeyCmd",
         "key": "ctrl+shift+alt+.",
         "mac": "cmd+shift+alt+.",
         "when": "editorTextFocus"
       },{
-        "command": "sticky-bookmarks.clearFileCmd",
+        "command": "sticky-bookmarks.clearFileKeyCmd",
         "key": "ctrl+shift+alt+'",
         "mac": "cmd+shift+alt+'",
         "when": "editorTextFocus"
       },{
-        "command": "sticky-bookmarks.clearAllFilesCmd",
+        "command": "sticky-bookmarks.clearAllFilesKeyCmd",
         "key": "ctrl+shift+alt+;",
         "mac": "cmd+shift+alt+;",
         "when": "editorTextFocus"
       },{
-        "command": "sticky-bookmarks.cleanFileCmd",
+        "command": "sticky-bookmarks.cleanFileKeyCmd",
         "key": "ctrl+shift+alt+]",
         "mac": "cmd+shift+alt+]",
         "when": "editorTextFocus"
       },{
-        "command": "sticky-bookmarks.cleanAllFilesCmd",
+        "command": "sticky-bookmarks.cleanAllFilesKeyCmd",
         "key": "ctrl+shift+alt+[",
         "mac": "cmd+shift+alt+[",
         "when": "editorTextFocus"
@@ -125,26 +137,35 @@
       ]
     },
     "menus": {
-      "view/item/context": [
-        {
-          "command": "sticky-bookmarks.deleteItemXCmd",
-          "when":    "view == sidebarView",
-          "group":   "inline"
-        }
-      ],
       "view/title": [
         {
-          "command": "sticky-bookmarks.clearAllFilesMenuCmd",
+          "command": "sticky-bookmarks.hideAllTitleCmd",
           "when":    "view == sidebarView",
-          "group":   "navigation@3"
+          "group":   "navigation@1"
         }, {
-          "command": "sticky-bookmarks.cleanAllFilesMenuCmd",
+          "command": "sticky-bookmarks.cleanAllFilesTitleCmd",
           "when":    "view == sidebarView",
           "group":   "navigation@2"
         }, {
-          "command": "sticky-bookmarks.hideAllMenuCmd",
+          "command": "sticky-bookmarks.clearAllFilesTitleCmd",
           "when":    "view == sidebarView",
-          "group":   "navigation@1"
+          "group":   "navigation@3"
+        }
+      ],
+
+      "view/item/context": [
+        {
+          "command": "sticky-bookmarks.cleanFldrFilesItemCmd",
+          "when":    "view == sidebarView && viewItem == folder",
+          "group":   "inline@1"
+        },{
+          "command": "sticky-bookmarks.cleanFileItemCmd",
+          "when":    "view == sidebarView && viewItem == file",
+          "group":   "inline@2"
+        },{
+          "command": "sticky-bookmarks.cleanItemCmd",
+          "when":    "view == sidebarView",
+          "group":   "inline@3"
         }
       ]
     }

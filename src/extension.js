@@ -13,35 +13,36 @@ async function activate(context) {
     end('extension');
     return;
   }
-	const toggleCmd = vscode.commands.registerCommand(
-                'sticky-bookmarks.toggleCmd',        commands.toggleCmd);
-	const prevCmd = vscode.commands.registerCommand(
-                'sticky-bookmarks.prevCmd',          commands.prevCmd);
-	const nextCmd = vscode.commands.registerCommand(
-                'sticky-bookmarks.nextCmd',          commands.nextCmd);
-	const clearFileCmd = vscode.commands.registerCommand(
-                'sticky-bookmarks.clearFileCmd',     commands.clearFileCmd);
-	const clearAllFilesCmd = vscode.commands.registerCommand(
-                'sticky-bookmarks.clearAllFilesCmd', commands.clearAllFilesCmd);
-  const clearAllFilesMenuCmd = vscode.commands.registerCommand(
-                'sticky-bookmarks.clearAllFilesMenuCmd', 
-                                                     commands.clearAllFilesCmd);
-  const cleanAllFilesMenuCmd = vscode.commands.registerCommand(
-                'sticky-bookmarks.cleanAllFilesMenuCmd', 
-                                                     commands.cleanAllFilesCmd);
-  const hideAllMenuCmd = vscode.commands.registerCommand(
-                'sticky-bookmarks.hideAllMenuCmd', 
-                                                     commands.hideAllCmd);
-	const cleanFileCmd = vscode.commands.registerCommand(
-                'sticky-bookmarks.cleanFileCmd',     commands.cleanFileCmd);
-	const cleanAllFilesCmd = vscode.commands.registerCommand(
-                'sticky-bookmarks.cleanAllFilesCmd', commands.cleanAllFilesCmd);
-  const itemClickCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.itemClickCmd', (item) =>   sidebar.itemClickCmd(item)
-  );
-  const contextMenuCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.deleteItemXCmd', (item) => commands.deleteItemXCmd(item)
-  );
+	const toggleKeyCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.toggleKeyCmd',                   commands.toggleKeyCmd);
+	const prevKeyCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.prevKeyCmd',                       commands.prevKeyCmd);
+	const nextKeyCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.nextKeyCmd',                       commands.nextKeyCmd);
+	const clearFileKeyCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.clearFileKeyCmd',             commands.clearFileKeyCmd);
+	const clearAllFilesKeyCmd = vscode.commands.registerCommand(
+         'sticky-bookmarks.clearAllFilesKeyCmd', commands.clearAllFilesKeyCmd);
+  const cleanFileKeyCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.cleanFileKeyCmd',             commands.cleanFileKeyCmd);
+  const cleanAllFilesKeyCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.cleanAllFilesKeyCmd',     commands.cleanAllFilesKeyCmd);
+
+  const hideAllTitleCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.hideAllTitleCmd',             commands.hideAllTitleCmd);
+	const cleanAllFilesTitleCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.cleanAllFilesTitleCmd', commands.cleanAllFilesTitleCmd);
+	const clearAllFilesTitleCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.clearAllFilesTitleCmd', commands.clearAllFilesTitleCmd);
+
+  const cleanFldrFilesItemCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.cleanFldrFilesItemCmd', 
+                                (item) => sidebar.cleanFldrFilesItemCmd(item));
+  const cleanFileItemCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.cleanFileItemCmd', 
+                                    (item) => commands.cleanFileItemCmd(item));
+  const cleanItemCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.cleanItemCmd',   (item) => commands.cleanItemCmd(item));
 
   const clearAllSavedDataCmd = vscode.commands.registerCommand(
     'sticky-bookmarks.clearAllSavedData', async () => {
@@ -99,13 +100,14 @@ async function activate(context) {
     await commands.changedSelection(event);
   });
 
-  context.subscriptions.push(toggleCmd, prevCmd, nextCmd, 
-                             clearFileCmd, clearAllFilesCmd,
-                             cleanFileCmd, cleanAllFilesCmd, 
-                             itemClickCmd, contextMenuCmd,
+  context.subscriptions.push(toggleKeyCmd, prevKeyCmd, nextKeyCmd, 
+                             clearFileKeyCmd, clearAllFilesKeyCmd,
+                             cleanFileKeyCmd, cleanAllFilesKeyCmd, 
+                             itemClickCmd, 
+                             cleanItemCmd,
                              clearAllSavedDataCmd, resetAllCmd,
-                             clearAllFilesMenuCmd, cleanAllFilesMenuCmd,
-                             hideAllMenuCmd);
+                             clearAllFilesTitleCmd, cleanAllFilesTitleCmd,
+                             hideAllTitleCmd);
 
   end('activating extension');
 }

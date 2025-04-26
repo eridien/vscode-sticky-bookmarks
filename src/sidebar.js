@@ -48,7 +48,7 @@ async function getNewFolderItem(mark) {
   const label = '📂 ' + folderName;
   const item  = new vscode.TreeItem(
                        label, vscode.TreeItemCollapsibleState.None);
-  Object.assign(item, {id, type:'folder', label,
+  Object.assign(item, {id, type:'folder', contextValue:'folder', label,
                        folderIndex, folderName, folderFsPath, folderUriPath});
   if(closedFolders.has(folderFsPath))
     item.iconPath = new vscode.ThemeIcon("chevron-right");
@@ -59,6 +59,7 @@ async function getNewFolderItem(mark) {
     title:     'Item Clicked',
     arguments: [item],
   }
+  
   return item;
 }
 
@@ -70,7 +71,7 @@ async function getNewFileItem(mark, children) {
   const item = new vscode.TreeItem(label,
                    vscode.TreeItemCollapsibleState.Expanded);
   item.id = utils.fnv1aHash(fileUriPath);
-  Object.assign(item, {type:'file', document, children, 
+  Object.assign(item, {type:'file', contextValue:'file', document, children, 
                        folderIndex, folderName, folderFsPath, folderUriPath,
                        fileName,    fileFsPath, fileUriPath,  fileRelUriPath});
   item.command = {
@@ -78,6 +79,12 @@ async function getNewFileItem(mark, children) {
     title:     'Item Clicked',
     arguments: [item],
   }
+  item.command = {
+    command: 'sticky-bookmarks.itemClickCmd',
+    title:   'Item Clicked',
+    arguments: [item],
+  }
+
   return item;
 };
 

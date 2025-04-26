@@ -4,15 +4,15 @@ const text    = require('./text.js');
 const utils   = require('./utils.js');
 const {log}   = utils.getLog('cmds');
 
-async function toggleCmd() {
+async function toggleKeyCmd() {
   await text.toggle();
 }
 
-async function prevCmd() {
+async function prevKeyCmd() {
   await text.scrollToPrevNext(false);
 }
 
-async function nextCmd() {
+async function nextKeyCmd() {
   await text.scrollToPrevNext(true);
 }
 
@@ -25,7 +25,7 @@ async function clearFileCmd(document) {
   await text.clearFile(document);
 }
 
-async function deleteItemXCmd(item) {
+async function cleanItemCmd(item) {
   switch (item.type) {
     case 'folder': await clearAllFilesCmd(item.folderPath); break;
     case 'file':   await clearFileCmd(item.document);       break;
@@ -40,7 +40,12 @@ async function cleanFileCmd(document) {
     if (!editor) { log('info', 'cleanFileCmd, No active editor'); return; }
     document = editor.document;
   }
-  await text.cleanFile(document)
+  switch (item.type) {
+    case 'folder': await clearAllFilesCmd(item.folderPath); break;
+    case 'file':   await text.cleanFile(document);          break;
+    case 'bookmark': await text.delMarkFromLineAndGlobal(
+                 item.mark.document, item.mark.lineNumber); break;
+  }
 }
 
 async function clearAllFilesCmd() {
@@ -103,8 +108,8 @@ const changedText = utils.debounce(async (event) => {
   text.updateGutter();
 }, 200);
 
-module.exports = { toggleCmd, prevCmd, nextCmd,
-                   deleteItemXCmd, hideAllCmd,
+module.exports = { toggleKeyCmd, prevKeyCmd, nextKeyCmd,
+                   cleanItemCmd, hideAllCmd,
                    clearFileCmd, clearAllFilesCmd,
                    cleanFileCmd, cleanAllFilesCmd,
                    changedSidebarVisiblitiy, changedText,

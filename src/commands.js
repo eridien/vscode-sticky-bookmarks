@@ -1,31 +1,19 @@
-const vscode  = require('vscode');
-const sidebar = require('./sidebar.js');
-const text    = require('./text.js');
-const utils   = require('./utils.js');
-const {log}   = utils.getLog('cmds');
+const vscode            = require('vscode');
+const sidebar           = require('./sidebar.js');
+const text              = require('./text.js');
+const utils             = require('./utils.js');
+const {log, start, end} = utils.getLog('cmds');
 
-let context;
+let context, treeView;
 
-function init(contextIn) {
-  context = contextIn;
+function init(contextIn, treeViewIn) {
+  context  = contextIn;
+  treeView = treeViewIn;
 }
 
-async function toggleCmd() {
-  log('toggleCmd');
-  await text.toggle();
-}
+////////////////////////////////  ACTIONS  ////////////////////////////////////
 
-async function prevCmd() {
-  log('prevCmd');
-  await text.scrollToPrevNext(false);
-}
-
-async function nextCmd() {
-  log('nextCmd');
-  await text.scrollToPrevNext(true);
-}
-
-//:986b;
+//:cjjr;
 async function refreshMark(params) {
   log('refreshMark');
   const {document, position, lineText, token} = params;
@@ -46,58 +34,147 @@ async function refreshMark(params) {
   return {position, token, markChg:false};
 }
 
-//:ijoi;
 async function refreshFile(fileFsPath) {
   log('refreshFile');
-  const uri       = vscode.Uri.file(fileFsPath);
-  const document  = await vscode.workspace.openTextDocument(uri);
-  const fileMarks = await runOnAllBookmarksInFile(refreshMark, fileFsPath);
-  const globalMarksInFile = marks.getMarksForFile(fileFsPath);
-  const tokens = new Set();
-  let haveMarkChg = false;
-  for(const fileMark of fileMarks) {
-    const {position, token, markChg} = fileMark;
-    haveMarkChg ||= markChg;
-    tokens.add(token);
-    if(globalMarksInFile.findIndex(
-          (globalMark) => globalMark.token === token) === -1) {
-      await marks.newGlobalMark(document, position.line, token);
-      haveMarkChg = true;
-    }
-  }
-  for(const globalMark of globalMarksInFile) {
-    const token = globalMark.token;
-    if(!tokens.has(token)) {
-      await marks.delGlobalMark(token);
-      haveMarkChg = true;
-    }
-  }
-  if(haveMarkChg) await marks.saveGlobalMarks();
+  // const uri       = vscode.Uri.file(fileFsPath);
+  // const document  = await vscode.workspace.openTextDocument(uri);
+  // const fileMarks = await runOnAllBookmarksInFile(refreshMark, fileFsPath);
+  // const globalMarksInFile = marks.getMarksForFile(fileFsPath);
+  // const tokens = new Set();
+  // let haveMarkChg = false;
+  // for(const fileMark of fileMarks) {
+  //   const {position, token, markChg} = fileMark;
+  //   haveMarkChg ||= markChg;
+  //   tokens.add(token);
+  //   if(globalMarksInFile.findIndex(
+  //         (globalMark) => globalMark.token === token) === -1) {
+  //     await marks.newGlobalMark(document, position.line, token);
+  //     haveMarkChg = true;
+  //   }
+  // }
+  // for(const globalMark of globalMarksInFile) {
+  //   const token = globalMark.token;
+  //   if(!tokens.has(token)) {
+  //     await marks.delGlobalMark(token);
+  //     haveMarkChg = true;
+  //   }
+  // }
+  // if(haveMarkChg) await marks.saveGlobalMarks();
 }
 
-//:ckek;
-async function refreshCmd() {
-  log('refreshCmd');
-  const editor = vscode.window.activeTextEditor;
-  if (!editor) { log('info', 'No active text editor'); return; }
-  refreshFile(editor.document.uri.fsPath);
+////////////////////////////////  COMMANDS  ///////////////////////////////////
+
+async function toggleCmd() {
+  log('toggleCmd');
+  await text.toggle();
 }
 
-async function refreshWorkspaceKeyCmd() {
+async function prevCmd() {
+  log('prevCmd');
+  await text.scrollToPrevNext(false);
+}
+
+async function nextCmd() {
+  log('nextCmd');
+  await text.scrollToPrevNext(true);
+}
+
+async function hideCmd() {
+  log('hideCmd');
+  
+}
+
+async function refreshMenuCmd() {
+  log('refreshMenuCmd');
   start('refreshWorkspaceKeyCmd');
   await runOnAllFoldersInWorkspace(refreshFile, true);
   end('refreshWorkspaceKeyCmd');
 }
 
-async function deleteWorkspaceKeyCmd() {
-  log('deleteWorkspaceKeyCmd');
+async function deleteMenuCmd() {
+  log('deleteMenuCmd');
+
+}
+
+async function deleteIconCmd(item) {
+  log('deleteIconCmd');
+  if(item === undefined) {
+    item = treeView.selection[0];
+    if (!item) { log('info err', 'No Bookmark Selected For Deletion'); return; }
+  }
+  
+  ///////// TODO /////////
+  
+  // sidebar.setTreeViewBusyState(true);
+  // switch (item.type) {
+  //   case 'folder':   await utils.runOnAllFilesInFolder(hideCmd); break;
+  //   case 'file':     await utils.runOnAllFilesInFolder(hideCmd); break;
+  //   case 'bookmark': await text.delMarkFromLineAndGlobal(
+  //                       item.mark.document, item.mark.lineNumber); break;
+  // }
+  // sidebar.setTreeViewBusyState(false);
+}
+
+async function nameCmd(item) {
+  log('nameCmd');
+
+}
+
+async function eraseCmd(item) {
+  log('eraseCmd');
+
+}
+
+async function gotoCmd(item) {
+  log('gotoCmd');
+  if(item === undefined) {
+    item = treeView.selection[0];
+    if (!item) { log('info err', 'No Bookmark Selected To Go To'); return; }
+  }
+  text.clearDecoration();
+  switch(item.type) {
+    case 'folder': 
+      const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
+      if(folderItem) {
+        if(closedFolders.has(folderItem.folderFsPath))
+           closedFolders.delete(folderItem.folderFsPath);
+        else
+           closedFolders.add(folderItem.folderFsPath);
+        utils.updateSidebar();
+      }
+      break;
+    case 'file':
+      await vscode.window.showTextDocument(item.document, {preview: false});
+      break;
+    case 'bookmark': await text.bookmarkClick(item); break;
+  }
+}
+
+async function clearAllSavedDataCmd() {
+  log('clearAllSavedDataCmd');
+
+  ///////// TODO /////////
+
+  log('info', 'All Sticky Bookmarks data has been cleared.');
+}
+
+async function resetAllKeysCmd() {
+  log('resetAllKeysCmd');
+  for (const key of context.workspaceState.keys()) 
+    await context.workspaceState.update(key, undefined);
+  for (const key of context.globalState.keys()) 
+    await context.globalState.update(key, undefined);
+  log('info', 'Sticky Bookmarks keybindings reset.');
+}
+
+async function refreshWorkspaceKeyCmd() {
+  log('refreshWorkspaceKeyCmd');
 
 }
 
 async function hideCmd() {
   log('hideCmd');
-  // sidebar.setTreeViewBusyState(true);
-  // sidebar.setTreeViewBusyState(false);
+
 }
 
 async function refreshAllTitleCmd() {
@@ -120,61 +197,9 @@ async function nameCmd(item) {
 
 }
 
-async function refreshItemCmd(item) {
-  log('refreshItemCmd');
-  if(!document) {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) { log('info', 'refreshItemCmd, No active editor'); return; }
-    document = editor.document;
-  }
-  sidebar.setTreeViewBusyState(true);
-  switch (item.type) {
-    // case 'folder':   await deleteFolderFilesCmd(item.folderPath); break;
-    // case 'file':     await text.refreshFile(document);            break;
-  }
-  sidebar.setTreeViewBusyState(false);
-}
+////////////////////////////////  HELPERS  //////////////////////////////////
 
-async function deleteItemCmd(item) {
-  log('deleteItemCmd');
-
-  if(!document) {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) { log('info', 'hideCmd, No active editor'); return; }
-    document = editor.document;
-  }
-  sidebar.setTreeViewBusyState(true);
-  switch (item.type) {
-    case 'folder':   await utils.runOnAllFilesInFolder(hideCmd); break;
-    case 'file':     await utils.runOnAllFilesInFolder(hideCmd); break;
-    case 'bookmark': await text.delMarkFromLineAndGlobal(
-                        item.mark.document, item.mark.lineNumber); break;
-  }
-  sidebar.setTreeViewBusyState(false);
-}
-
-async function clickItemCmd(item) {
-  log('clickItemCmd');
-  text.clearDecoration();
-  switch(item.type) {
-    case 'folder': 
-      const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
-      if(folderItem) {
-        if(closedFolders.has(folderItem.folderFsPath))
-          closedFolders.delete(folderItem.folderFsPath);
-        else
-          closedFolders.add(folderItem.folderFsPath);
-        utils.updateSidebar();
-      }
-      break;
-    case 'file':
-      await vscode.window.showTextDocument(item.document, {preview: false});
-      break;
-    case 'bookmark': await text.bookmarkClick(item); break;
-  }
-}
-
-//:5vcc;
+//:pzzo;
 async function runOnAllFoldersInWorkspace(func, runOnFiles, runOnBookmarks) {
   const folders = vscode.workspace.workspaceFolders;
   if (!folders) {
@@ -193,7 +218,7 @@ async function runOnAllFoldersInWorkspace(func, runOnFiles, runOnBookmarks) {
   else return folders;
 }
 
-//:i2pk;
+//:rn7l;
 async function runOnAllFilesInFolder(func, folderFsPath, runOnBookmarks) {
   folderFsPath ??= getFocusedWorkspaceFolder()?.uri.fsPath;
   if (!folderFsPath) { 
@@ -218,7 +243,7 @@ async function runOnAllFilesInFolder(func, folderFsPath, runOnBookmarks) {
   else return files;
 }
 
-//:jx04;
+//:pa5m;
 async function runOnAllBookmarksInFile(func, fileFsPath) {
   const uri      = vscode.Uri.file(fsPath);
   const document = await vscode.workspace.openTextDocument(uri);
@@ -236,26 +261,7 @@ async function runOnAllBookmarksInFile(func, fileFsPath) {
   return funcRes;
 }
 
-async function clearAllSavedDataCmd() {
-  log('clearAllSavedDataCmd');
-  for (const key of context.workspaceState.keys()) {
-    await context.workspaceState.update(key, undefined);
-  }
-  for (const key of context.globalState.keys()) {
-    await context.globalState.update(key, undefined);
-  }
-  log('info', 'All Sticky Bookmarks data has been cleared.');
-}
-
-async function resetAllKeysCmd() {
-  log('resetAllKeysCmd');
-  for (const key of context.workspaceState.keys()) 
-    await context.workspaceState.update(key, undefined);
-  for (const key of context.globalState.keys()) 
-    await context.globalState.update(key, undefined);
-  log('info', 'Sticky Bookmarks keybindings reset.');
-};
-
+////////////////////////////////  CALLBACKS  //////////////////////////////////
 let sidebarIsVisible = false;
 
 async function changedSidebarVisiblitiy(visible) {
@@ -284,26 +290,24 @@ async function changedVisEditors() {
 //bookmark
 const changedSelection = utils.debounce(async (event) => {
   const {textEditor} = event;
-  text.deleteDecoration();
-  await text.refreshFile(textEditor.document);
+  text.clearDecoration();
+  //:7zga;
+  await refreshFile(textEditor.document);
   utils.updateSidebar(); 
   text.updateGutter();
 }, 200);
 
 const changedText = utils.debounce(async (event) => {
   const {document} = event;
-  text.deleteDecoration();
-  await text.refreshFile(event.document);
+  text.clearDecoration();
+  await refreshFile(event.document);
   utils.updateSidebar(); 
   text.updateGutter();
 }, 200);
 
-module.exports = { init, toggleCmd, prevCmd, nextCmd,
-                   refreshCmd, refreshWorkspaceKeyCmd,
-                   hideCmd, deleteWorkspaceKeyCmd,
-                   hideCmd, refreshAllTitleCmd, deleteAllTitleCmd,
-                   eraseCmd, nameCmd,
-                   refreshItemCmd, deleteItemCmd, clickItemCmd,
+module.exports = { init, toggleCmd, prevCmd, nextCmd, 
+                   hideCmd, refreshMenuCmd, deleteMenuCmd, 
+                   gotoCmd, nameCmd, eraseCmd, deleteIconCmd,
                    clearAllSavedDataCmd, resetAllKeysCmd,
                    changedSidebarVisiblitiy, changedText,
                    changedDocument, changedEditor, 

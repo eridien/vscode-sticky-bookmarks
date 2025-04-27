@@ -55,7 +55,7 @@ async function getNewFolderItem(mark) {
   else
     item.iconPath = new vscode.ThemeIcon("chevron-down");
   item.command = {
-    command:   'sticky-bookmarks.clickItemCmd',
+    command:   'sticky-bookmarks.gotoCmd',
     title:     'Item Clicked',
     arguments: [item],
   }
@@ -75,7 +75,7 @@ async function getNewFileItem(mark, children) {
                        folderIndex, folderName, folderFsPath, folderUriPath,
                        fileName,    fileFsPath, fileUriPath,  fileRelUriPath});
   item.command = {
-    command:   'sticky-bookmarks.clickItemCmd',
+    command:   'sticky-bookmarks.gotoCmd',
     title:     'Item Clicked',
     arguments: [item],
   }
@@ -89,7 +89,7 @@ async function getNewMarkItem(mark) {
   Object.assign(item, {id:utils.getUniqueIdStr(), type:'bookmark', 
                                           contextValue:'bookmark', mark});
   item.command = {
-    command: 'sticky-bookmarks.clickItemCmd',
+    command: 'sticky-bookmarks.gotoCmd',
     title:   'Item Clicked',
     arguments: [item],
   }

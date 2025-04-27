@@ -2,7 +2,7 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-  click item broken
+  delete icon broken
   deleting mark doesn't delete gutter
 
 todo 

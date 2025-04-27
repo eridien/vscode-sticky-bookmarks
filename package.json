@@ -33,7 +33,7 @@
         "title":    "Hide All In Workspace",
         "category": "Sticky Bookmarks"
       }, {
-        "command":  "sticky-bookmarks.refreshCmd",
+        "command":  "sticky-bookmarks.refreshMenuCmd",
         "title":    "Refresh Sidebar",
         "category": "Sticky Bookmarks"
       }, {
@@ -44,10 +44,6 @@
         "command":  "sticky-bookmarks.deleteIconCmd",
         "title":    "❌",
         "category": "Sticky Bookmarks: Delete Bookmark"
-      }, {
-        "command":  "sticky-bookmarks.deleteKeyCmd",
-        "title":    "Delete All Bookmarks In File",
-        "category": "Sticky Bookmarks"
       }, {
         "command": "sticky-bookmarks.nameCmd",
         "title": "🖉",
@@ -90,14 +86,13 @@
         "mac":     "cmd+shift+alt+.",
         "when":    "editorTextFocus"
       },{
-        "command": "sticky-bookmarks.deleteKeyCmd",
-        "key":     "ctrl+shift+alt+;",
-        "mac":     "cmd+shift+alt+;",
-        "when":     "editorTextFocus"
-      },{
         "command": "sticky-bookmarks.hideCmd",
         "key":     "ctrl+shift+alt+'",
         "mac":     "cmd+shift+alt+'"
+      },{
+        "command": "sticky-bookmarks.deleteIconCmd",
+        "key":     "ctrl+shift+alt+;",
+        "mac":     "cmd+shift+alt+;"
       }
     ],
     "viewsContainers": {
@@ -126,7 +121,7 @@
           "group":   "navigation@1",
           "arguments": ["title"]
         }, {
-          "command": "sticky-bookmarks.refreshCmd",
+          "command": "sticky-bookmarks.refreshMenuCmd",
           "when":    "view == sidebarView",
           "group":   "help@2"
         }, {

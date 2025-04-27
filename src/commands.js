@@ -110,13 +110,13 @@ async function deleteAllTitleCmd() {
 
 }
 
-async function eraseNameItemCmd(item) {
-  log('eraseNameItemCmd');
+async function eraseCmd(item) {
+  log('eraseCmd');
 
 }
 
-async function editNameItemCmd(item) {
-  log('editNameItemCmd');
+async function nameCmd(item) {
+  log('nameCmd');
 
 }
 
@@ -302,7 +302,7 @@ module.exports = { init, toggleCmd, prevCmd, nextCmd,
                    refreshCmd, refreshWorkspaceKeyCmd,
                    hideCmd, deleteWorkspaceKeyCmd,
                    hideCmd, refreshAllTitleCmd, deleteAllTitleCmd,
-                   eraseNameItemCmd, editNameItemCmd,
+                   eraseCmd, nameCmd,
                    refreshItemCmd, deleteItemCmd, clickItemCmd,
                    clearAllSavedDataCmd, resetAllKeysCmd,
                    changedSidebarVisiblitiy, changedText,

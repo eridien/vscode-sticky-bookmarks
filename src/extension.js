@@ -13,23 +13,21 @@ async function activate(context) {
     end('extension');
     return;
   }
-	const toggleKeyCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.toggleKeyCmd',                   commands.toggleKeyCmd);
-	const prevKeyCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.prevKeyCmd',                       commands.prevKeyCmd);
-	const nextKeyCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.nextKeyCmd',                       commands.nextKeyCmd);
-  const refreshFileKeyCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.refreshFileKeyCmd',         commands.refreshFileKeyCmd);
+	const toggleCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.toggleCmd',                   commands.toggleCmd);
+	const prevCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.prevCmd',                       commands.prevCmd);
+	const nextCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.nextCmd',                       commands.nextCmd);
+  const refreshCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.refreshCmd',         commands.refreshCmd);
   const refreshWorkspaceKeyCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.refreshWorkspaceKeyCmd', commands.refreshWorkspaceKeyCmd);
-	const deleteFileKeyCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.deleteFileKeyCmd',           commands.deleteFileKeyCmd);
+	const hideCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.hideCmd',           commands.hideCmd);
   const deleteWorkspaceKeyCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.deleteWorkspaceKeyCmd',   commands.deleteWorkspaceKeyCmd);
 
-  const hideAllCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.hideAllCmd',             commands.hideAllCmd);
 	const refreshAllTitleCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.refreshAllTitleCmd',       commands.refreshAllTitleCmd);
 	const deleteAllTitleCmd = vscode.commands.registerCommand(
@@ -92,10 +90,10 @@ async function activate(context) {
     await commands.changedSelection(event);
   });
 
-  context.subscriptions.push(toggleKeyCmd, prevKeyCmd, nextKeyCmd,
-                             refreshFileKeyCmd, refreshWorkspaceKeyCmd,
-                             deleteFileKeyCmd, deleteWorkspaceKeyCmd,
-                             hideAllCmd, refreshAllTitleCmd, deleteAllTitleCmd,
+  context.subscriptions.push(toggleCmd, prevCmd, nextCmd,
+                             refreshCmd, refreshWorkspaceKeyCmd,
+                             hideCmd, deleteWorkspaceKeyCmd,
+                             hideCmd, refreshAllTitleCmd, deleteAllTitleCmd,
                              eraseNameItemCmd, editNameItemCmd,
                              refreshItemCmd, deleteItemCmd,
                              clickItemCmd, clearAllSavedDataCmd, resetAllKeysCmd);

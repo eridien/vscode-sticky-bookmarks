@@ -10,18 +10,18 @@ function init(contextIn) {
   context = contextIn;
 }
 
-async function toggleKeyCmd() {
-  log('toggleKeyCmd');
+async function toggleCmd() {
+  log('toggleCmd');
   await text.toggle();
 }
 
-async function prevKeyCmd() {
-  log('prevKeyCmd');
+async function prevCmd() {
+  log('prevCmd');
   await text.scrollToPrevNext(false);
 }
 
-async function nextKeyCmd() {
-  log('nextKeyCmd');
+async function nextCmd() {
+  log('nextCmd');
   await text.scrollToPrevNext(true);
 }
 
@@ -76,8 +76,8 @@ async function refreshFile(fileFsPath) {
 }
 
 //:ckek;
-async function refreshFileKeyCmd() {
-  log('refreshFileKeyCmd');
+async function refreshCmd() {
+  log('refreshCmd');
   const editor = vscode.window.activeTextEditor;
   if (!editor) { log('info', 'No active text editor'); return; }
   refreshFile(editor.document.uri.fsPath);
@@ -89,18 +89,13 @@ async function refreshWorkspaceKeyCmd() {
   end('refreshWorkspaceKeyCmd');
 }
 
-async function deleteFileKeyCmd() {
-  log('deleteFileKeyCmd');
-
-}
-
 async function deleteWorkspaceKeyCmd() {
   log('deleteWorkspaceKeyCmd');
 
 }
 
-async function hideAllCmd() {
-  log('hideAllCmd');
+async function hideCmd() {
+  log('hideCmd');
   // sidebar.setTreeViewBusyState(true);
   // sidebar.setTreeViewBusyState(false);
 }
@@ -145,13 +140,13 @@ async function deleteItemCmd(item) {
 
   if(!document) {
     const editor = vscode.window.activeTextEditor;
-    if (!editor) { log('info', 'deleteCmd, No active editor'); return; }
+    if (!editor) { log('info', 'hideCmd, No active editor'); return; }
     document = editor.document;
   }
   sidebar.setTreeViewBusyState(true);
   switch (item.type) {
-    case 'folder':   await utils.runOnAllFilesInFolder(deleteCmd); break;
-    case 'file':     await utils.runOnAllFilesInFolder(deleteCmd); break;
+    case 'folder':   await utils.runOnAllFilesInFolder(hideCmd); break;
+    case 'file':     await utils.runOnAllFilesInFolder(hideCmd); break;
     case 'bookmark': await text.delMarkFromLineAndGlobal(
                         item.mark.document, item.mark.lineNumber); break;
   }
@@ -179,7 +174,7 @@ async function clickItemCmd(item) {
   }
 }
 
-//:qnez;
+//:5vcc;
 async function runOnAllFoldersInWorkspace(func, runOnFiles, runOnBookmarks) {
   const folders = vscode.workspace.workspaceFolders;
   if (!folders) {
@@ -198,7 +193,7 @@ async function runOnAllFoldersInWorkspace(func, runOnFiles, runOnBookmarks) {
   else return folders;
 }
 
-//:3tp8;
+//:i2pk;
 async function runOnAllFilesInFolder(func, folderFsPath, runOnBookmarks) {
   folderFsPath ??= getFocusedWorkspaceFolder()?.uri.fsPath;
   if (!folderFsPath) { 
@@ -223,7 +218,7 @@ async function runOnAllFilesInFolder(func, folderFsPath, runOnBookmarks) {
   else return files;
 }
 
-//:qf4s;
+//:jx04;
 async function runOnAllBookmarksInFile(func, fileFsPath) {
   const uri      = vscode.Uri.file(fsPath);
   const document = await vscode.workspace.openTextDocument(uri);
@@ -303,10 +298,10 @@ const changedText = utils.debounce(async (event) => {
   text.updateGutter();
 }, 200);
 
-module.exports = { init, toggleKeyCmd, prevKeyCmd, nextKeyCmd,
-                   refreshFileKeyCmd, refreshWorkspaceKeyCmd,
-                   deleteFileKeyCmd, deleteWorkspaceKeyCmd,
-                   hideAllCmd, refreshAllTitleCmd, deleteAllTitleCmd,
+module.exports = { init, toggleCmd, prevCmd, nextCmd,
+                   refreshCmd, refreshWorkspaceKeyCmd,
+                   hideCmd, deleteWorkspaceKeyCmd,
+                   hideCmd, refreshAllTitleCmd, deleteAllTitleCmd,
                    eraseNameItemCmd, editNameItemCmd,
                    refreshItemCmd, deleteItemCmd, clickItemCmd,
                    clearAllSavedDataCmd, resetAllKeysCmd,

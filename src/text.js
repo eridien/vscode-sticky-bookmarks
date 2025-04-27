@@ -33,6 +33,10 @@ const tokenRegEx  = new RegExp('[\\u200B\\u200C\\u200D\\u2060]+\\.');
 const tokenRegExG = new RegExp('[\\u200B\\u200C\\u200D\\u2060]+\\.', 'g');
 const indentRegEx = /^(\s*)\S/;
 
+function getTokenRegExG() {
+  return tokenRegExG;
+}
+
 function lineRegEx(languageId) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
   if(commRgt !== '') {
@@ -297,7 +301,8 @@ async function getTokensInLine(lineText) {
   return [...lineText.matchAll(tokenRegExG)];
 }
 
-async function delMarkFromLineAndGlobal(document, lineNumber, save = true) {
+async function delMarkFromLineAndGlobal(document, position, token) {
+  //:tmly;
   const line       = document.lineAt(lineNumber);
   const lineText   = line.text.trimEnd();
   const languageId = document.languageId;
@@ -402,50 +407,10 @@ async function clearFile(document, saveMarks = true) {
   if(haveDel && saveMarks) await marks.saveGlobalMarks();
 }
 
-async function refreshFile(document) {
-  start('refreshFile');
-  const fileFsPath = document.uri.fsPath;
-  let haveMarkChg = false;
-  const fileMarksByToken = {};
-  await runOnAllTokensInDoc(document, true, true, async (fileMark) => {
-    const {position, lineText, token} = fileMark;
-    const lineNumber = position.line;
-    const globalMark = marks.getGlobalMark(token);
-    if(globalMark && (globalMark.fileFsPath != fileFsPath || 
-                      globalMark.lineNumber != lineNumber)) {
-      const newMark  = await marks.newGlobalMark(document, lineNumber);
-      const newToken = newMark.token;
-      fileMarksByToken[newToken] = fileMark;
-      const newLineText = lineText.replace(token, newToken);
-      await replaceLineInDocument(document, lineNumber, newLineText);
-      haveMarkChg = true;
-      log(`refreshFile, replaced duplicate token, ${token} -> ${newMark.token}`);    
-      return;
-    }
-    fileMarksByToken[fileMark.token] = fileMark;
-  });
-  const globalMarksInFile = marks.getMarksForFile(document.uri.fsPath);
-  for(const [token, fileMark] of Object.entries(fileMarksByToken)) {
-    if(globalMarksInFile.findIndex(
-          (globalMark) => globalMark.token === token) === -1) {
-      await marks.newGlobalMark(document, fileMark.position.line, token);
-      haveMarkChg = true;
-    }
-  }
-  for(const globalMark of globalMarksInFile) {
-    const token = globalMark.token;
-    if(!fileMarksByToken[token]) {
-      await marks.delGlobalMark(token);
-      haveMarkChg = true;
-    }
-  }
-  if(haveMarkChg) await marks.saveGlobalMarks();
-  end('refreshFile');
-}
 
 module.exports = {init, getLabel, bookmarkClick,
                   clearDecoration, justDecorated, updateGutter,
                   toggle, scrollToPrevNext, delMarkFromLineAndGlobal,    
-                  clearFile, refreshFile};
+                  clearFile};
 
 

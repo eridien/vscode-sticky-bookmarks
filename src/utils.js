@@ -88,26 +88,6 @@ async function workspaceFileExists(relativePath) {
   return fileExists(filePath);
 }
 
-async function runOnAllFilesInFolder(func, folderFsPath) {
-  folderFsPath ??= getFocusedWorkspaceFolder()?.uri.fsPath;
-  if (!folderFsPath) { 
-    log('info err', 'Folder not found in workspace'); 
-    return; 
-  }
-  const folderUri = vscode.Uri.file(folderFsPath);
-  const pattern   = new vscode.RelativePattern(folderUri, '**/*');
-  const files     = await vscode.workspace
-                                .findFiles(pattern, '**/node_modules/**');
-  for(const file of files) {
-    const uri = vscode.Uri.file(file.fsPath);
-    let document;
-    try {
-      document = await vscode.workspace.openTextDocument(uri);
-    } catch(_e) {continue}
-    await func(document);
-  }
-}
-
 async function readWorkspaceFile(relativePath) {
   const filePath = await workspaceFilePath(relativePath);
   if (!filePath) {
@@ -406,7 +386,7 @@ module.exports = {
   getUniqueToken, tokenToDigits, getTokenRegEx, getTokenRegExG,
   deleteLine, insertLine, replaceLine, debounce, sleep,
   getPathsFromWorkspaceFolder, getPathsFromFileDoc,
-  runOnAllFilesInFolder, getFocusedWorkspaceFolder, initProvider,
+  getFocusedWorkspaceFolder, initProvider,
   updateSidebar, getUniqueIdStr
 }
 

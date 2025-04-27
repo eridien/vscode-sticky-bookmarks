@@ -25,14 +25,70 @@ async function nextKeyCmd() {
   await text.scrollToPrevNext(true);
 }
 
+//:986b;
+async function refreshMark(params) {
+  log('refreshMark');
+  const {document, position, lineText, token} = params;
+  const fileMarksByToken = {};
+  const fileFsPath       = document.uri.fsPath;
+  const lineNumber       = position.line;
+  const globalMark       = marks.getGlobalMark(token);
+  if(globalMark && (globalMark.fileFsPath != fileFsPath || 
+                    globalMark.lineNumber != lineNumber)) {
+    const newMark     = await marks.newGlobalMark(document, lineNumber);
+    const newToken    = newMark.token;
+    const newLineText = lineText.replace(token, newToken);
+    await replaceLineInDocument(document, lineNumber, newLineText);
+    haveMarkChg = true;
+    log(`refreshMark, replaced duplicate token, ` + 
+        `${utils.tokenToDigits(token)} -> `       +
+        `${utils.tokenToDigits(newMark.token)}`);    
+    return {position, token:newToken};
+  }
+  return {position, token};
+}
+
+//:tuvf;
+async function refreshFile(fileFsPath) {
+  log('refreshFile');
+  const uri      = vscode.Uri.file(fileFsPath);
+  const document = await vscode.workspace.openTextDocument(uri);
+  let haveMarkChg = false;
+  const fileMarks = await runOnAllBookmarksInFile(refreshMark, fileFsPath);
+  const globalMarksInFile = marks.getMarksForFile(fileFsPath);
+  const tokens = new Set();
+  for(const fileMark of fileMarks) {
+    const {position, token} = fileMark;
+    tokens.add(token);
+    if(globalMarksInFile.findIndex(
+          (globalMark) => globalMark.token === token) === -1) {
+      await marks.newGlobalMark(document, position.line, token);
+      haveMarkChg = true;
+    }
+  }
+  for(const globalMark of globalMarksInFile) {
+    const token = globalMark.token;
+    if(!tokens.has(token)) {
+      await marks.delGlobalMark(token);
+      haveMarkChg = true;
+    }
+  }
+  if(haveMarkChg) await marks.saveGlobalMarks();
+}
+
+//:drpa;
 async function refreshFileKeyCmd() {
   log('refreshFileKeyCmd');
-
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) { log('info', 'No active text editor'); return; }
+  document = editor.document;
+  refreshFile(document.uri.fsPath);
 }
 
 async function refreshAllFilesKeyCmd() {
-  log('refreshAllFilesKeyCmd');
-
+  start('refreshAllFilesKeyCmd');
+  await runOnAllFoldersInWorkspace(refreshFile, true);
+  end('refreshAllFilesKeyCmd');
 }
 
 async function deleteFileKeyCmd() {
@@ -73,47 +129,114 @@ async function editNameItemCmd(item) {
 
 async function refreshItemCmd(item) {
   log('refreshItemCmd');
-  // if(!document) {
-  //   const editor = vscode.window.activeTextEditor;
-  //   if (!editor) { log('info', 'refreshFileCmd, No active editor'); return; }
-  //   document = editor.document;
-  // }
-
-  // // file
-  // sidebar.setTreeViewBusyState(true);
-  // await utils.runOnAllFilesInFolder(refreshFileCmd);
-  // sidebar.setTreeViewBusyState(false);
-
-  // switch (item.type) {
-  //   case 'folder':   await deleteAllFilesCmd(item.folderPath); break;
-  //   case 'file':     await text.refreshFile(document);          break;
-  //   case 'bookmark': await text.delMarkFromLineAndGlobal(
-  //                item.mark.document, item.mark.lineNumber); break;
-  // }
+  if(!document) {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) { log('info', 'refreshItemCmd, No active editor'); return; }
+    document = editor.document;
+  }
+  sidebar.setTreeViewBusyState(true);
+  switch (item.type) {
+    // case 'folder':   await deleteFolderFilesCmd(item.folderPath); break;
+    // case 'file':     await text.refreshFile(document);            break;
+  }
+  sidebar.setTreeViewBusyState(false);
 }
 
 async function deleteItemCmd(item) {
   log('deleteItemCmd');
 
-  // if(!document) {
-  //   const editor = vscode.window.activeTextEditor;
-  //   if (!editor) { log('info', 'deleteCmd, No active editor'); return; }
-  //   document = editor.document;
-  // }
-
-  // // folder
-  // sidebar.setTreeViewBusyState(true);
-  // await utils.runOnAllFilesInFolder(deleteCmd);
-  // sidebar.setTreeViewBusyState(false);
-
-  // // file
-  // await text.deleteFile(document);
-
+  if(!document) {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) { log('info', 'deleteCmd, No active editor'); return; }
+    document = editor.document;
+  }
+  sidebar.setTreeViewBusyState(true);
+  switch (item.type) {
+    case 'folder':   await utils.runOnAllFilesInFolder(deleteCmd); break;
+    case 'file':     await utils.runOnAllFilesInFolder(deleteCmd); break;
+    case 'bookmark': await text.delMarkFromLineAndGlobal(
+                        item.mark.document, item.mark.lineNumber); break;
+  }
+  sidebar.setTreeViewBusyState(false);
 }
 
 async function clickItemCmd(item) {
   log('clickItemCmd');
+  text.clearDecoration();
+  switch(item.type) {
+    case 'folder': 
+      const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
+      if(folderItem) {
+        if(closedFolders.has(folderItem.folderFsPath))
+          closedFolders.delete(folderItem.folderFsPath);
+        else
+          closedFolders.add(folderItem.folderFsPath);
+        utils.updateSidebar();
+      }
+      break;
+    case 'file':
+      await vscode.window.showTextDocument(item.document, {preview: false});
+      break;
+    case 'bookmark': await text.bookmarkClick(item); break;
+  }
+}
 
+//:i0cp;
+async function runOnAllFoldersInWorkspace(func, runOnFiles, runOnBookmarks) {
+  const folders = vscode.workspace.workspaceFolders;
+  if (!folders) {
+    log('info err', 'No Folders found in workspace'); 
+    return; 
+  }
+  if(runOnFiles) {
+    const funcRes = [];
+    for (const folder of folders)
+     funcRes.push(await runOnAllFilesInFolder(
+                                     func, folder.uri.fsPath, runOnBookmarks));
+    return funcRes;
+  }
+  else return folders;
+}
+
+//:n762;
+async function runOnAllFilesInFolder(func, folderFsPath, runOnBookmarks) {
+  folderFsPath ??= getFocusedWorkspaceFolder()?.uri.fsPath;
+  if (!folderFsPath) { 
+    log('info err', 'Folder not found in workspace'); 
+    return; 
+  }
+  const folderUri = vscode.Uri.file(folderFsPath);
+  const pattern   = new vscode.RelativePattern(folderUri, '**/*');
+  const files     = await vscode.workspace
+                                .findFiles(pattern, '**/node_modules/**');
+  if(runOnBookmarks) {
+    const funcRes = [];
+    for(const file of files) {
+      try {
+        funcRes.push(await runOnAllBookmarksInFile(func, file.fsPath));
+      } catch(_e) {continue}
+    }
+    return funcRes;
+  }
+  else return files;
+}
+
+//:6d96;
+async function runOnAllBookmarksInFile(func, fileFsPath) {
+  const uri      = vscode.Uri.file(fsPath);
+  const document = await vscode.workspace.openTextDocument(uri);
+  const docText  = document.getText();
+  const matches  = [...docText.matchAll(text.getTokenRegExG())];
+  matches.reverse();
+  const funcRes = [];
+  for (const match of matches) {
+    const offset   = match.index;
+    const position = document.positionAt(offset); 
+    const lineText = document.lineAt(position.line);
+    const token    = match[0];
+    funcRes.push(await func({document, docText, position, lineText, token}));
+  }
+  return funcRes;
 }
 
 async function clearAllSavedDataCmd() {

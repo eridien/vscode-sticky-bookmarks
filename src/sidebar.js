@@ -86,8 +86,8 @@ async function getNewMarkItem(mark) {
   const label = await text.getLabel(mark);
   const item  = new vscode.TreeItem(label,
                     vscode.TreeItemCollapsibleState.None);
-  Object.assign(item, {id:getUniqueIdStr(), type:'bookmark', 
-                              contextValue:'bookmark', mark});
+  Object.assign(item, {id:utils.getUniqueIdStr(), type:'bookmark', 
+                                          contextValue:'bookmark', mark});
   item.command = {
     command: 'sticky-bookmarks.clickItemCmd',
     title:   'Item Clicked',

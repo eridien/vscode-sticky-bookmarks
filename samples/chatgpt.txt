@@ -1,0 +1,235 @@
+commands ...
+{
+  "command": "sticky-bookmarks.hideCmd",
+  "title":    "Hide All Bookmarks",
+  "category": "Sticky Bookmarks"
+},
+
+keybinding ...
+{
+  "command": "sticky-bookmarks.hideCmd",
+  "key":     "ctrl+shift+alt+;",
+  "mac":     "cmd+shift+alt+;",
+  "when":    "editorTextFocus"
+}
+
+view/title ...
+{
+  "command": "sticky-bookmarks.hideCmd",
+  "when":    "view == sidebarView",
+  "group":   "help@1"
+}
+
+
+=========== OLD IDEAS ==========
+
+commands ...
+{
+  "command":  "sticky-bookmarks.hideKeyCmd",
+  "title":    "Hide All Bookmarks",
+  "category": "Sticky Bookmarks"
+}, {
+  "command": "sticky-bookmarks.hideMenuCmd",
+  "title":    "👁️‍🗨️",
+  "category": "Sticky Bookmarks: Hide All Bookmarks"
+}
+
+keybinding ...
+{
+  "command": "sticky-bookmarks.hideKeyCmd",
+  "key":     "ctrl+shift+alt+;",
+  "mac":     "cmd+shift+alt+;",
+  "when":    "editorTextFocus"
+}
+
+view/title ...
+{
+  "command": "sticky-bookmarks.hideMenuCmd",
+  "when":    "view == sidebarView",
+  "group":   "navigation@1"
+}
+
+======= OR ========
+commands ...
+{
+  "command":  "sticky-bookmarks.hideKeyCmd",
+  "title":    "Hide All Bookmarks",
+  "category": "Sticky Bookmarks"
+},
+{
+  "command": "sticky-bookmarks.hideMenuCmd",
+  "title":    "Hide All Bookmarks",
+  "category": "Sticky Bookmarks"
+},
+
+keybinding ...
+{
+  "command": "sticky-bookmarks.hideKeyCmd",
+  "key":     "ctrl+shift+alt+;",
+  "mac":     "cmd+shift+alt+;",
+  "when":     "editorTextFocus"
+}
+
+view/title ...
+{
+  "command": "sticky-bookmarks.hideMenuCmd",
+  "when":    "view == sidebarView",
+  "group":   "help@1"
+},
+
+
+
+===== 2 take-aways =====
+
+1) In package.json view/title and view/item/context items can have "arguments": ["fromViewTitle"]
+If you specify arguments in package.json 
+      Those arguments are passed to the command, instead of the TreeItem
+If you do not specify arguments 
+      VS Code automatically passes the clicked TreeItem
+It's either manual arguments OR automatic TreeItem.
+
+2) explanation of view/title and view/item/context menu items 
+       sometimes showing ctr+shift+alt+; 
+       instead of the contributes.command.title ...
+VS Code automatically surfaces keybindings for commands shown in view/title menus.
+If you define a keybinding for a command, VS Code tries to help users 
+       discover the shortcut by appending or replacing the button tooltip/label.
+If the title is super short (like ✖ or $(trash)), 
+       VS Code sometimes shows only the keybinding visibly 
+       (depending on theme, available space, platform).
+
+how to keep a clean short button ...
+Create a separate dummy command without keybinding just for the button
+Leave keybinding only on the real full-named command
+Carefully separate button commands vs shortcut commands
+
+
+===== hover over bookmark =====
+
+const markdown = new vscode.MarkdownString(
+       `[Delete Bookmark](command:sticky-bookmarks`+
+       `.deleteItemCmd?${encodeURIComponent(JSON.stringify([lineNumber]))})`);
+markdown.isTrusted = true;
+
+editor.setDecorations(decorationType, [
+  {
+    range: new vscode.Range(lineNumber, 0, lineNumber, 0),
+    hoverMessage: markdown
+  }
+]);
+
+
+--- show codelens with no bookmark ---
+
+provideCodeLenses(document) {
+  const lenses = [];
+  const markedLines = new Set(marks.getMarksForFile(document.uri.fsPath).map(m => m.lineNumber));
+  for (let i = 0; i < document.lineCount; i++) {
+    if (!markedLines.has(i)) {
+      lenses.push(new vscode.CodeLens(
+        new vscode.Range(i, 0, i, 0),
+        {
+          title: '➕ Add Bookmark',
+          command: 'sticky-bookmarks.addBookmark',
+          arguments: [document.uri, i]
+        }
+      ));
+    }
+  }
+
+  return lenses;
+}
+
+====== dynamic item label and item command title changing =====
+
+In package.json contribute.commands I have:
+  {
+    "command": "sticky-bookmarks.deleteCmd",
+    "title": "Delete Bookmark",
+    "category": "Sticky Bookmarks"
+  } 
+In my code to create the treeitem I have the item.command:
+  {
+    command: 'sticky-bookmarks.deleteCmd',
+    title: 'x',
+    arguments: [item],
+  } 
+On the actual visible treeitem does the 'X' show or "Delete Bookmark" show.  Also, which shows in the keyboard shortcuts ui?
+
+--- in package.json ---
+"commands": [
+  {
+    "command": "sticky-bookmarks.deleteCmd",
+    "title": "Delete Bookmark",
+    "category": "Sticky Bookmarks"
+  }
+]
+--- in getNewFolderItem ---
+item.command = {
+  command: 'sticky-bookmarks.deleteCmd',
+  title: '✖', // or 'Del', 'Erase', 'X', whatever you like
+  arguments: [item],
+};
+
+====== dynamic item label and item command title changing =====
+
+1) Listen for TreeView selection changes
+2) When an item is focused/selected, update its label/icon/title
+3) Call .refresh() to redraw the updated items
+ 
+--- in extensions.js ---
+treeView.onDidChangeSelection(event => {
+  const selectedItem = event.selection[0];
+  if (selectedItem) {
+    setFocusState(selectedItem, true);
+  }
+});
+treeView.onDidChangeVisibility(event => {
+  if (!event.visible) {
+    clearFocusState();
+  }
+});
+
+--- in sidebar.js ---
+let focusedItemId = undefined;
+
+function setFocusState(item, isFocused) {
+  focusedItemId = item.id;  // You should set unique IDs on your items
+  treeDataProvider.refresh();
+}
+function clearFocusState() {
+  focusedItemId = undefined;
+  treeDataProvider.refresh();
+
+ getTreeItem(element) {
+  const treeItem = new vscode.TreeItem(element.label);
+
+  treeItem.id = element.id; // very important!
+
+  if (element.id === focusedItemId) {
+    treeItem.label = '✎ ' + element.label; // Pencil icon when focused
+    treeItem.command = {
+      command: 'sticky-bookmarks.deleteCmd',
+      title: 'Del',
+      arguments: [element],
+    };
+  } else {
+    treeItem.label = element.label;
+    treeItem.command = {
+      command: 'sticky-bookmarks.deleteCmd',
+      title: '✖',
+      arguments: [element],
+    };
+  }
+
+  return treeItem;
+}
+
+vscode.window.onDidChangeActiveTextEditor(editor => {
+  if (editor) {
+    // User focused back to an editor
+    focusedItemId = undefined;
+    treeDataProvider.refresh();
+  }
+});
+

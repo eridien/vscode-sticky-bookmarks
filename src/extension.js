@@ -14,43 +14,27 @@ async function activate(context) {
     return;
   }
 	const toggleCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.toggleCmd',                   commands.toggleCmd);
+     'sticky-bookmarks.toggleCmd',                         commands.toggleCmd);
 	const prevCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.prevCmd',                       commands.prevCmd);
+     'sticky-bookmarks.prevCmd',                             commands.prevCmd);
 	const nextCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.nextCmd',                       commands.nextCmd);
-  const refreshCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.refreshCmd',         commands.refreshCmd);
-  const refreshWorkspaceKeyCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.refreshWorkspaceKeyCmd', commands.refreshWorkspaceKeyCmd);
-	const hideCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.hideCmd',           commands.hideCmd);
-  const deleteWorkspaceKeyCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.deleteWorkspaceKeyCmd',   commands.deleteWorkspaceKeyCmd);
-
-	const refreshAllTitleCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.refreshAllTitleCmd',       commands.refreshAllTitleCmd);
-	const deleteAllTitleCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.deleteAllTitleCmd',         commands.deleteAllTitleCmd);
-
+     'sticky-bookmarks.nextCmd',                             commands.nextCmd);
+ 	const hideCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.hideCmd',                             commands.hideCmd);
+ const refreshCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.refreshCmd',                       commands.refreshCmd);
+	const deleteMenuCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.deleteMenuCmd',                 commands.deleteMenuCmd);
+	const deleteIconCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.deleteIconCmd',       (item) => commands.deleteIconCmd);
+	const nameCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.nameCmd',                   (item) => commands.nameCmd);
   const eraseCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.eraseCmd',   
-                                    (item) => commands.eraseCmd(item));
-  const nameCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.nameCmd',   
-                                     (item) => commands.nameCmd(item));
-  const refreshItemCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.refreshItemCmd',(item) => commands.refreshItemCmd(item));
-  const deleteItemCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.deleteItemCmd', 
-                                       (item) => commands.deleteItemCmd(item));
-
-  const clickItemCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.clickItemCmd',    (item) => commands.clickItemCmd(item));
-
+    'sticky-bookmarks.eraseCmd',            (item) => commands.eraseCmd(item));
+  const gotoCmd = vscode.commands.registerCommand(
+    'sticky-bookmarks.gotoCmd',              (item) => commands.gotoCmd(item));
   const clearAllSavedDataCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.clearAllSavedDataCmd',   commands.clearAllSavedDataCmd);
-
   const resetAllKeysCmd = vscode.commands.registerCommand(
     'sticky-bookmarks.resetAllKeysCmd',              commands.resetAllKeysCmd);
 
@@ -91,12 +75,9 @@ async function activate(context) {
   });
 
   context.subscriptions.push(toggleCmd, prevCmd, nextCmd,
-                             refreshCmd, refreshWorkspaceKeyCmd,
-                             hideCmd, deleteWorkspaceKeyCmd,
-                             hideCmd, refreshAllTitleCmd, deleteAllTitleCmd,
-                             eraseCmd, nameCmd,
-                             refreshItemCmd, deleteItemCmd,
-                             clickItemCmd, clearAllSavedDataCmd, resetAllKeysCmd);
+                             hideCmd, refreshCmd, deleteMenuCmd,
+                             gotoCmd, nameCmd, eraseCmd, 
+                             clearAllSavedDataCmd, resetAllKeysCmd);
     
   end('activating extension');
 }

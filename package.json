@@ -33,21 +33,29 @@
         "title":    "Refresh All Marks In File",
         "category": "Sticky Bookmarks"
       }, {
-        "command":  "sticky-bookmarks.refreshAllFilesKeyCmd",
-        "title":    "Cleanup All Marks In All Files",
+        "command":  "sticky-bookmarks.refreshFolderKeyCmd",
+        "title":    "Refresh All Marks In Folder",
+        "category": "Sticky Bookmarks"
+      }, {
+        "command":  "sticky-bookmarks.refreshWorkspaceKeyCmd",
+        "title":    "Refresh All Marks In Workspace",
         "category": "Sticky Bookmarks"
       }, {
         "command":  "sticky-bookmarks.deleteFileKeyCmd",
         "title":    "Remove All Marks From File",
         "category": "Sticky Bookmarks"
       }, {
-        "command":  "sticky-bookmarks.deleteAllFilesKeyCmd",
-        "title":    "Remove All Marks From All Files",
+        "command":  "sticky-bookmarks.deleteFolderKeyCmd",
+        "title":    "Remove All Marks From Folder",
+        "category": "Sticky Bookmarks"
+      }, {
+        "command":  "sticky-bookmarks.deleteWorkspaceKeyCmd",
+        "title":    "Remove All Marks From Workspace",
         "category": "Sticky Bookmarks"
       }, 
 
       {
-        "command": "sticky-bookmarks.hideAllTitleCmd",
+        "command": "sticky-bookmarks.hideAllCmd",
         "title": " 👁️‍🗨️ "
       }, {
         "command": "sticky-bookmarks.refreshAllTitleCmd",
@@ -105,20 +113,25 @@
         "mac":     "cmd+shift+alt+]",
         "when":    "editorTextFocus"
       },{
-        "command": "sticky-bookmarks.refreshAllFilesKeyCmd",
+        "command": "sticky-bookmarks.refreshFolderKeyCmd",
         "key":     "ctrl+shift+alt+[",
         "mac":     "cmd+shift+alt+[",
-        "when":     "editorTextFocus"
+        "when":    "editorTextFocus"
       },{
         "command": "sticky-bookmarks.deleteFileKeyCmd",
         "key":     "ctrl+shift+alt+'",
         "mac":     "cmd+shift+alt+'",
         "when":     "editorTextFocus"
       },{
-        "command": "sticky-bookmarks.deleteAllFilesKeyCmd",
+        "command": "sticky-bookmarks.deleteFolderKeyCmd",
         "key":     "ctrl+shift+alt+;",
         "mac":     "cmd+shift+alt+;",
-        "when":    "editorTextFocus"
+        "when":     "editorTextFocus"
+      },{
+        "command": "sticky-bookmarks.hideAllCmd",
+        "key":     "ctrl+shift+alt+;",
+        "mac":     "cmd+shift+alt+;",
+        "when":     "editorTextFocus"
       }
     ],
     "viewsContainers": {
@@ -142,7 +155,7 @@
     "menus": {
       "view/title": [
         {
-          "command": "sticky-bookmarks.hideAllTitleCmd",
+          "command": "sticky-bookmarks.hideAllCmd",
           "when":    "view == sidebarView",
           "group":   "navigation@1"
         }, {

@@ -21,15 +21,15 @@ async function activate(context) {
      'sticky-bookmarks.nextKeyCmd',                       commands.nextKeyCmd);
   const refreshFileKeyCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.refreshFileKeyCmd',         commands.refreshFileKeyCmd);
-  const refreshAllFilesKeyCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.refreshAllFilesKeyCmd', commands.refreshAllFilesKeyCmd);
+  const refreshWorkspaceKeyCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.refreshWorkspaceKeyCmd', commands.refreshWorkspaceKeyCmd);
 	const deleteFileKeyCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.deleteFileKeyCmd',           commands.deleteFileKeyCmd);
-  const deleteAllFilesKeyCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.deleteAllFilesKeyCmd',   commands.deleteAllFilesKeyCmd);
+  const deleteWorkspaceKeyCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.deleteWorkspaceKeyCmd',   commands.deleteWorkspaceKeyCmd);
 
-  const hideAllTitleCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.hideAllTitleCmd',             commands.hideAllTitleCmd);
+  const hideAllCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.hideAllCmd',             commands.hideAllCmd);
 	const refreshAllTitleCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.refreshAllTitleCmd',       commands.refreshAllTitleCmd);
 	const deleteAllTitleCmd = vscode.commands.registerCommand(
@@ -93,9 +93,9 @@ async function activate(context) {
   });
 
   context.subscriptions.push(toggleKeyCmd, prevKeyCmd, nextKeyCmd,
-                             refreshFileKeyCmd, refreshAllFilesKeyCmd,
-                             deleteFileKeyCmd, deleteAllFilesKeyCmd,
-                             hideAllTitleCmd, refreshAllTitleCmd, deleteAllTitleCmd,
+                             refreshFileKeyCmd, refreshWorkspaceKeyCmd,
+                             deleteFileKeyCmd, deleteWorkspaceKeyCmd,
+                             hideAllCmd, refreshAllTitleCmd, deleteAllTitleCmd,
                              eraseNameItemCmd, editNameItemCmd,
                              refreshItemCmd, deleteItemCmd,
                              clickItemCmd, clearAllSavedDataCmd, resetAllKeysCmd);

@@ -113,7 +113,7 @@ function dumpGlobalMarks(caller, list, dump) {
 }
 
 //:f6j4;
-async function newGlobalMark(document, lineNumber, token, save) {
+async function newGlobalMark(document, lineNumber, token) {
   token ??= utils.getUniqueToken();
   const mark  = {token, document, lineNumber,
                  languageId: document.languageId};
@@ -121,10 +121,6 @@ async function newGlobalMark(document, lineNumber, token, save) {
   if(!filePaths?.inWorkspace) return null;
   Object.assign(mark, filePaths);
   globalMarks[token] = mark;
-  if (save) {
-    await saveGlobalMarks();
-    dumpGlobalMarks('newGlobalMark');
-  }
   return mark;
 }
 

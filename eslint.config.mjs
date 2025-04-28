@@ -7,7 +7,7 @@ export default [
     ignores: [
       "node_modules/**",
       "out/**",
-      "samples/**",
+      "notes/**",
       "prism/languages/**",
       "**/*.min.js",
       "**/extensionHostProcess.js",
@@ -46,8 +46,7 @@ export default [
           caughtErrorsIgnorePattern: "^_"
         }
       ],
-      "@typescript-eslint/no-floating-promises": "error",
-      "no-await-outside-async": "error"
+      "@typescript-eslint/no-floating-promises": "error"
     },
   },
 ];

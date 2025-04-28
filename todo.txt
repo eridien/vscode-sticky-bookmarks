@@ -17,7 +17,12 @@ todo
     delete named tokens when X menu used
   settings
 
-todo impossible?
+???
+  back to adding to end of line
+  don't insert new line if toggling on a blank line
+
+
+impossible?
   invisible tokens
   toggle collapsed/expanded on file item click
   remove sidebar highlight when selection changes

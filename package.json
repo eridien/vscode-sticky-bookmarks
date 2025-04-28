@@ -83,31 +83,31 @@
     "keybindings": [
       {
         "command": "sticky-bookmarks.toggleCmd",
-        "key": "ctrl+shift+alt+/",
-        "mac": "cmd+shift+alt+/",
+        "key": "ctrl+alt+\\",
+        "mac": "cmd+alt+\\",
         "when": "editorTextFocus"
       },
       {
         "command": "sticky-bookmarks.prevCmd",
-        "key": "ctrl+shift+alt+,",
-        "mac": "cmd+shift+alt+,",
+        "key": "ctrl+alt+[",
+        "mac": "cmd+alt+[",
         "when": "editorTextFocus"
       },
       {
         "command": "sticky-bookmarks.nextCmd",
-        "key": "ctrl+shift+alt+.",
-        "mac": "cmd+shift+alt+.",
+        "key": "ctrl+alt+]",
+        "mac": "cmd+alt+]",
         "when": "editorTextFocus"
       },
       {
         "command": "sticky-bookmarks.hideCmd",
-        "key": "ctrl+shift+alt+'",
-        "mac": "cmd+shift+alt+'"
+        "key": "ctrl+alt+p",
+        "mac": "cmd+alt+p"
       },
       {
         "command": "sticky-bookmarks.deleteIconCmd",
-        "key": "ctrl+shift+alt+;",
-        "mac": "cmd+shift+alt+;"
+        "key": "ctrl+shift+alt+\\",
+        "mac": "cmd+shift+alt+\\"
       }
     ],
     "viewsContainers": {

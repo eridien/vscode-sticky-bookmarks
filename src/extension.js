@@ -22,11 +22,11 @@ async function activate(context) {
  	const hideCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.hideCmd',                             commands.hideCmd);
  const refreshMenuCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.refreshMenuCmd',                       commands.refreshMenuCmd);
+     'sticky-bookmarks.refreshMenuCmd',               commands.refreshMenuCmd);
 	const deleteMenuCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.deleteMenuCmd',                 commands.deleteMenuCmd);
 	const deleteIconCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.deleteIconCmd',       (item) => commands.deleteIconCmd);
+     'sticky-bookmarks.deleteIconCmd',     (item) => commands.deleteIconCmd());
 	const nameCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.nameCmd',                   (item) => commands.nameCmd);
   const eraseCmd = vscode.commands.registerCommand(

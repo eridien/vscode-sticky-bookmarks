@@ -263,6 +263,5 @@ class SidebarProvider {
   }
 }
 
-module.exports = {SidebarProvider, init, setBusy, 
-                  goto, clickItemCmd};
+module.exports = {SidebarProvider, init, setBusy, goto};
 

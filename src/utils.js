@@ -163,6 +163,12 @@ function getPathsFromFileDoc(doc) {
   }
 }
 
+//:2v5k;
+async function getFileLineDisplay(document, lineNumber) {
+  const {fileRelUriPath} = getPathsFromFileDoc(document);
+  return `File: ${fileRelUriPath}, Line: ${lineNumber.padStart(3, ' ')}`;
+}
+
 async function loadStickyBookmarksJson() {
   start('loadStickyBookmarksJson');
   async function readDefaultConfig() {
@@ -288,9 +294,10 @@ async function deleteLine(document, lineNumber) {
   await vscode.workspace.applyEdit(edit);
 }
 
+//:vxzq;
 async function insertLine(document, lineNumber, lineText) {
   const position = new vscode.Position(lineNumber, 0);
-  const edit = new vscode.WorkspaceEdit();
+  const edit     = new vscode.WorkspaceEdit();
   edit.insert(document.uri, position, lineText + '\n');
   return await vscode.workspace.applyEdit(edit);
 }
@@ -352,14 +359,17 @@ function numberToInvBase4(num) {
 
 let uniqueIdNum = 0;
 
-function getUniqueToken() {
-  return numberToInvBase4(++uniqueIdNum)+'.';
+//:cdnz;
+function getUniqueToken(document) {
+  const [commLft, commRgt] = commentsByLang(document.languageId);
+  return commLft + numberToInvBase4(++uniqueIdNum) + '.' + commRgt;
 }
 
 function getUniqueIdStr() {
   return (++uniqueIdNum).toString();
 }
 
+//:s9mg;
 function tokenToDigits(token) {
   const map = {
     '\u200B': '0', // Zero Width Space
@@ -373,6 +383,14 @@ function tokenToDigits(token) {
       return map[c];
     })
     .join('').padStart(4, '0');
+}
+
+//:2odn;
+function tokenToStr(token) {
+  return token.replaceAll('\u200B', '0')
+              .replaceAll('\u200C', '1')
+              .replaceAll('\u200D', '2')
+              .replaceAll('\u2060', '3')
 }
 
 function getTokenRegEx() {
@@ -433,6 +451,6 @@ module.exports = {
   deleteLine, insertLine, replaceLine, debounce, sleep,
   getPathsFromWorkspaceFolder, getPathsFromFileDoc,
   getFocusedWorkspaceFolder, runOnAllFoldersInWorkspace,
-  updateSidebar, getUniqueIdStr
+  updateSidebar, getUniqueIdStr, tokenToStr
 }
 

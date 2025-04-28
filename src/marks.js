@@ -82,6 +82,7 @@ async function saveGlobalMarks() {
   dumpGlobalMarks('saveGlobalMarks');
 }
 
+//:6l4i;
 function dumpGlobalMarks(caller, list, dump) {
   caller = caller + ' marks: ';
   if(Object.keys(globalMarks).length === 0) {
@@ -96,7 +97,7 @@ function dumpGlobalMarks(caller, list, dump) {
             a[1].lineNumber - b[1].lineNumber));
     let str = "\n";
     for(let [token, mark] of sortedMarks) {
-      str += `${utils.tokenToDigits(token)} -> ${mark.fileRelUriPath} ` +
+      str += `${utils.tokenToStr(token)} -> ${mark.fileRelUriPath} ` +
              `${mark.lineNumber.toString().padStart(3, ' ')} `+
              `${mark.languageId}\n`;
     }
@@ -105,7 +106,7 @@ function dumpGlobalMarks(caller, list, dump) {
   else {
     let str = "";
     for(let token of Object.keys(globalMarks)) {
-      token = utils.tokenToDigits(token);
+      token = utils.tokenToStr(token);
       str += token + ' ';
     }
     log(caller, str);
@@ -113,9 +114,9 @@ function dumpGlobalMarks(caller, list, dump) {
 }
 
 async function newGlobalMark(document, lineNumber, token) {
-  token ??= utils.getUniqueToken();
-  const mark  = {token, document, lineNumber,
-                 languageId: document.languageId};
+  token ??= utils.getUniqueToken(document);
+  const mark = {token, document, lineNumber,
+                languageId: document.languageId};
   const filePaths = utils.getPathsFromFileDoc(document); 
   if(!filePaths?.inWorkspace) return null;
   Object.assign(mark, filePaths);

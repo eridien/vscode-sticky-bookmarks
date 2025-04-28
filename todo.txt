@@ -57,6 +57,7 @@ settings
     scrollbar color
 
 testing
+  text dark theme: settings:  "window detect color"
   moving a project folder
 
 why gen2

@@ -29,25 +29,13 @@ const lineSep         = '\x00';
 
 const keywordSetsByLang = {};
 
-const tokenRegEx  = new RegExp('[\\u200B\\u200C\\u200D\\u2060]+\\.');
-const tokenRegExG = new RegExp('[\\u200B\\u200C\\u200D\\u2060]+\\.', 'g');
-const indentRegEx = /^(\s*)\S/;
-
-function getTokenRegExG() {
-  return tokenRegExG;
-}
-
-function lineRegEx(languageId) {
+//:qmb7;
+function tokenRegEx(languageId, global = false, eol = true) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
-  if(commRgt !== '') {
-    return new RegExp(
-      `^(.*?)${commLft}(.*?)`+
-      `(\\[\\u200B\\u200C\\u200D\\u2060]+\\.)(.*?)${commRgt}(.*)$`);
-  }
-  else {
-    return new RegExp(
-          `^(.*?)${commLft}(.*?)([\\u200B\\u200C\\u200D\\u2060]+\\.)(.*)$`);
-  }
+  const regxStr = `${commLft}(\\[\\u200B\\u200C\\u200D\\u2060]+\\.`+
+                  `${eol ? '$' : ''})${commRgt}`;
+  if(global) return new RegExp(regxStr, 'g');
+  else       return new RegExp(regxStr);
 }
 
 function updateGutter() {
@@ -60,63 +48,56 @@ function updateGutter() {
   editor.setDecorations(gutterDecoration, decorations);
 }
 
-function getJunkAndToken(lineText, languageId) {
-  const lineRegX      = lineRegEx(languageId);
-  const match         = lineRegX.exec(lineText);
-  if(!match) return {junk:'', token:'', noMatch:true};
-  const junk1         = (match[1] ?? '').replaceAll(/\s/g, '');
-  const junk2         = (match[2] ?? '').replaceAll(/\s/g, '');
-  const junk5         = (match[5] ?? '').replaceAll(/\s/g, '');
-  const junk6         = (match[6] ?? '').replaceAll(/\s/g, '');
-  const junk          = junk1 + junk2 + junk5 + junk6;
-  const token = (match[3] ?? '')
-  return {junk, token};
-}
-
 function isKeyWord(languageId, word) {
   if(!keywordSetsByLang[languageId]) return false;
   return keywordSetsByLang[languageId].has(word);
 }
 
+//:863c;
+function removeTokenFromLine(lineText, languageId) {
+  const tokenRegx = tokenRegEx(languageId);
+  return lineText.replace(tokenRegx, '');
+}
+
 async function getCompText(mark) {
   let   {document, lineNumber, languageId} = mark;
+  const tokenRegx = tokenRegEx(languageId);
   const [commLft, commRgt] = utils.commentsByLang(languageId);
-  let regxEmptyComm;
-  if(commRgt !== '') regxEmptyComm = new RegExp(
-        `\\s*${commLft}\\s*?${commRgt}\\s*&`, 'g');
-  else regxEmptyComm = new RegExp(
-        `\\s*${commLft}\\s*?$`, 'g');
-  let compText = '';
+  const regxEmptyComm = (commRgt !== '') 
+             ? new RegExp(`\\s*${commLft}\\s*?${commRgt}\\s*`, 'g')
+             : new RegExp(`\\s*${commLft}\\s*?$`,              'g');
+  // go through lines until we have enough text
+  let   compText = '';
   do {
     let lineText = document.lineAt(lineNumber).text;
+    // remove token
+    lineText = lineText.replace(tokenRegx, '');
+    // shrink long runs of the same char
     lineText = lineText.replace(/(.)\1{3,}/g, (_, char) => char.repeat(3));
-    const {junk, token, noMatch} = 
-                    getJunkAndToken(lineText, languageId)
-    if(noMatch || junk !== '') {
-      if(token !== '') 
-        lineText = lineText.replace(token, '');
-      const matches = lineText.matchAll(/\b\w+?\b/g);
-      const matchArr = [...matches];
-      matchArr.reverse();
-      for(const match of matchArr) {
-        const word = match[0];
-        if(isKeyWord(languageId, word)) {
-          const strtIdx = match.index;
-          const endIdx  = strtIdx + word.length;
-          lineText = lineText.slice(0, strtIdx) +
-                     lineText.slice(endIdx);
-        }
+    // remove keywords
+    const matches = lineText.matchAll(/\b\w+?\b/g);
+    const matchArr = [...matches];
+    matchArr.reverse();
+    for(const match of matchArr) {
+      const word = match[0];
+      if(isKeyWord(languageId, word)) {
+        const strtIdx = match.index;
+        const endIdx  = strtIdx + word.length;
+        lineText = lineText.slice(0, strtIdx) +
+                    lineText.slice(endIdx);
       }
-      lineText = lineText.replaceAll(/\B\s+?|\s+?\B/g, '');
-      let lastLen;
-      do {
-        lastLen = lineText.length;
-        lineText = lineText.replaceAll(regxEmptyComm, ' ');
-      }
-      while(lineText.length != lastLen);
-      compText += ' ' + lineText + lineSep;
     }
-    lineNumber++;
+    // remove whitespace not separating words
+    lineText = lineText.replaceAll(/\B\s+?|\s+?\B/g, '');
+    // remove empty comments
+    let lastLen;
+    do {
+      lastLen = lineText.length;
+      lineText = lineText.replaceAll(regxEmptyComm, ' ');
+    }
+    while(lineText.length != lastLen);
+    // add cleaned line to comptext with line sep
+    compText += ' ' + lineText + lineSep;
   }
   while(compText.length < 60 && lineNumber < document.lineCount);
   return compText.slice(0, -1).replaceAll(/\s+/g, ' ').trim()
@@ -244,6 +225,7 @@ async function bookmarkClick(item) {
   return;
 }
 
+//:6eh5;
 function getNewTokenLine(indentLen, token, languageId) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
   return ' '.repeat(indentLen) + commLft + token + commRgt;
@@ -258,89 +240,44 @@ async function replaceLineInDocument(document, lineNumber, newText) {
   await vscode.workspace.applyEdit(edit);
 }
 
-async function addTokenAtLine(mark) {
+async function addTokenToLine(mark) {
   let   lineNumber = mark.lineNumber; 
   const line       = mark.document.lineAt(lineNumber);
-  let   indentLen  = 0;
-  let   lineText   = line.text;
-  const lineRegx   = lineRegEx(mark.languageId);
-  let   match      = lineRegx.exec(lineText);
-  if(match) {
-    log('err', `addTokenAtLine, line ${lineNumber} already has token`);
-    return null;
-  }
-  match = indentRegEx.exec(lineText);
-  if(!match) {
-    log('addTokenAtLine, blank line, checking next line');
-    lineNumber = lineNumber + 1;
-    if(lineNumber >= mark.document.lineCount) {
-      lineNumber = mark.lineNumber;
-      log('addTokenAtLine, no more lines in document');
-    }
-    else {
-      const nextLineText = mark.document.lineAt(lineNumber).text;
-      match = indentRegEx.exec(nextLineText);
-      if(!match) {
-        log('addTokenAtLine, next line is blank');
-        lineNumber = mark.lineNumber;
-      }
-      else {
-        indentLen = match[1].length;
-      }
-    }
-  }
-  else 
-    indentLen = match[1].length;
-  lineText = getNewTokenLine(indentLen, mark.token, mark.languageId);
-  await utils.insertLine(mark.document, lineNumber, lineText);
-  return lineNumber;
+  let   lineText   = line.text + mark.token;
+  await utils.replaceLine(mark.document, lineNumber, lineText);
 }
 
-async function getTokensInLine(lineText) {
-  tokenRegExG.index = 0;
-  return [...lineText.matchAll(tokenRegExG)];
-}
-
+//:w3d3;
 async function delMarkFromLineAndGlobal(document, lineNumber) {
-  const line       = document.lineAt(lineNumber);
-  const lineText   = line.text.trimEnd();
-  const languageId = document.languageId;
-  const tokenMatch = tokenRegEx.exec(lineText);
-  if(tokenMatch) {
-    const tokenMtch = tokenMatch[0];
-    const {junk, token} = getJunkAndToken(lineText, languageId);
-    if(junk.length > 0) {
-      log('delMarkFromLineAndGlobal, line has token and junk, '+
-          'removing only token', document.uri.path, lineNumber, tokenMtch);
-      const newLineText = lineText.replace(token, '');
-      await utils.replaceLine(document, lineNumber, newLineText);
-    }
-    else {
-      log('delMarkFromLineAndGlobal, line has token and no junk, '+
-          'removing line', document.uri.path, lineNumber, tokenMtch);
-      await utils.deleteLine(document, lineNumber);
-    }
-    marks.delGlobalMark(tokenMtch);
-    return true;
-  }
-  else return false;
+  const languageId   = document.languageId;
+  const line         = document.lineAt(lineNumber);
+  const lineText     = line.text;
+  const tokenMatches = tokenRegEx(languageId, true).exec(lineText);
+  if(!tokenMatches) return;
+  const token = tokenMatches[0];
+  if (token.length > lineText.length) return;
+  const end       = line.range.end;
+  const newEndPos = end.translate(0, -token.length);
+  const edit      = new vscode.WorkspaceEdit();
+  edit.delete(document.uri, new vscode.Range(newEndPos, end));
+  await vscode.workspace.applyEdit(edit);
+  marks.delGlobalMark(token);
 }
 
+//:vk9d;
 async function toggle() {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor) { log('info', 'Toggle, no active editor'); return; }
+  const editor   = vscode.window.activeTextEditor;
   const document = editor.document;
   if(document.lineCount == 0) return;
   const lineNumber = editor.selection.active.line;
   const line       = document.lineAt(lineNumber);
-  const lineText   = line.text.trimEnd();
-  if(tokenRegEx.test(lineText)) 
-                  await delMarkFromLineAndGlobal(document, lineNumber);
+  const regex      = tokenRegEx(document.languageId, true);
+  if(regex.test(line.text))
+    await delMarkFromLineAndGlobal(document, lineNumber);
   else {
     const mark = await marks.newGlobalMark(document, lineNumber);
     if(!mark) return;
-    const tokenLineNumber = await addTokenAtLine(mark);
-    const position   = new vscode.Position(tokenLineNumber, 0);
+    const position   = new vscode.Position(lineNumber, 0);
     editor.selection = new vscode.Selection(position, position);
     editor.revealRange(new vscode.Range(position, position), 
             vscode.TextEditorRevealType.InCenterIfOutsideViewport);
@@ -351,7 +288,6 @@ async function toggle() {
       await vscode.commands.executeCommand(
                             'workbench.action.focusActiveEditorGroup');
     }
-
   }
   marks.dumpGlobalMarks('toggle');
 }

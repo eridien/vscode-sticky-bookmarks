@@ -44,9 +44,9 @@ async function activate(context) {
   });
 
   commands.init(context, treeView);
-  sidebar.init(treeView);
+  await sidebar.init(treeView);
   utils.initProvider(sidebarProvider);
-  text.init(context);
+  await text.init(context);
   await marks.init(context);
 
   treeView.onDidChangeVisibility(async event => {

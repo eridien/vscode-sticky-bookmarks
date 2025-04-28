@@ -17,7 +17,7 @@ let intervalId  = null;
 let timeoutId   = null;
 let showingBusy = false;
 
-function setTreeViewBusyState(busy, blinking) {
+function setTreeViewBusyState(busy, blinking = false) {
   if (treeView) 
       treeView.message = busy ? '⟳ Processing Bookmarks ...' : '';
   utils.updateSidebar();
@@ -239,6 +239,31 @@ async function clickItemCmd(item) {
   }
 }
 
+async function goto(item) {
+  log('goto');
+  if(item === undefined) {
+    item = treeView.selection[0];
+    if (!item) { log('info err', 'No Bookmark Selected To Go To'); return; }
+  }
+  text.clearDecoration();
+  switch(item.type) {
+    case 'folder': 
+      const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
+      if(folderItem) {
+        if(closedFolders.has(folderItem.folderFsPath))
+           closedFolders.delete(folderItem.folderFsPath);
+        else
+           closedFolders.add(folderItem.folderFsPath);
+        utils.updateSidebar();
+      }
+      break;
+    case 'file':
+      await vscode.window.showTextDocument(item.document, {preview: false});
+      break;
+    case 'bookmark': await text.bookmarkClick(item); break;
+  }
+}
+
 class SidebarProvider {
   constructor() {
     this._onDidChangeTreeData = new vscode.EventEmitter();
@@ -258,6 +283,6 @@ class SidebarProvider {
   }
 }
 
-module.exports = {SidebarProvider, init, setTreeViewBusyState, clickItemCmd};
-
+module.exports = {SidebarProvider, init, setTreeViewBusyState, 
+                  goto, clickItemCmd};
 

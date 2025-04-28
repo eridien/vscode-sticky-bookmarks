@@ -301,16 +301,14 @@ async function getTokensInLine(lineText) {
   return [...lineText.matchAll(tokenRegExG)];
 }
 
-async function delMarkFromLineAndGlobal(document, position, token) {
-  //:tmly;
+async function delMarkFromLineAndGlobal(document, lineNumber) {
   const line       = document.lineAt(lineNumber);
   const lineText   = line.text.trimEnd();
   const languageId = document.languageId;
   const tokenMatch = tokenRegEx.exec(lineText);
   if(tokenMatch) {
     const tokenMtch = tokenMatch[0];
-    const {junk, token} = 
-                     getJunkAndToken(lineText, languageId);
+    const {junk, token} = getJunkAndToken(lineText, languageId);
     if(junk.length > 0) {
       log('delMarkFromLineAndGlobal, line has token and junk, '+
           'removing only token', document.uri.path, lineNumber, tokenMtch);
@@ -323,7 +321,6 @@ async function delMarkFromLineAndGlobal(document, position, token) {
       await utils.deleteLine(document, lineNumber);
     }
     marks.delGlobalMark(tokenMtch);
-    if(save) await marks.saveGlobalMarks();
     return true;
   }
   else return false;
@@ -407,8 +404,81 @@ async function clearFile(document, saveMarks = true) {
   if(haveDel && saveMarks) await marks.saveGlobalMarks();
 }
 
+async function refreshMark(params) {
+  log('refreshMark');
+  const {document, position, lineText, token} = params;
+  const fileFsPath = document.uri.fsPath;
+  const lineNumber = position.line;
+  const globalMark = marks.getGlobalMark(token);
+  if(globalMark && (globalMark.fileFsPath != fileFsPath || 
+                    globalMark.lineNumber != lineNumber)) {
+    const newMark     = await marks.newGlobalMark(document, lineNumber);
+    const newToken    = newMark.token;
+    const newLineText = lineText.replace(token, newToken);
+    await replaceLineInDocument(document, lineNumber, newLineText);
+    log(`refreshMark, replaced duplicate token, ` + 
+        `${utils.tokenToDigits(token)} -> `       +
+        `${utils.tokenToDigits(newMark.token)}`);    
+    return {position, token:newToken, markChg:true};
+  }
+  return {position, token, markChg:false};
+}
 
-module.exports = {init, getLabel, bookmarkClick,
+async function refreshFile(fileFsPath) {
+  log('refreshFile');
+  const uri       = vscode.Uri.file(fileFsPath);
+  const document  = await vscode.workspace.openTextDocument(uri);
+  const fileMarks = await runOnAllBookmarksInFile(
+                             refreshMark, fileFsPath, runOnAllBookmarksInFile);
+  const globalMarksInFile = marks.getMarksForFile(fileFsPath);
+  const tokens = new Set();
+  let haveMarkChg = false;
+  for(const fileMark of fileMarks) {
+    const {position, token, markChg} = fileMark;
+    haveMarkChg ||= markChg;
+    tokens.add(token);
+    if(globalMarksInFile.findIndex(
+          (globalMark) => globalMark.token === token) === -1) {
+      await marks.newGlobalMark(document, position.line, token);
+      haveMarkChg = true;
+    }
+  }
+  for(const globalMark of globalMarksInFile) {
+    const token = globalMark.token;
+    if(!tokens.has(token)) {
+      await marks.delGlobalMark(token);
+      haveMarkChg = true;
+    }
+  }
+  if(haveMarkChg) await marks.saveGlobalMarks();
+}
+
+async function refreshMenu() {
+  log('refreshMenu');
+  start('refreshMenu');
+  await utils.runOnAllFoldersInWorkspace(refreshFile, true);
+  end('refreshMenu');
+}
+
+//:pa5m;
+async function runOnAllBookmarksInFile(func, fileFsPath) {
+  const uri      = vscode.Uri.file(fileFsPath);
+  const document = await vscode.workspace.openTextDocument(uri);
+  const docText  = document.getText();
+  const matches  = [...docText.matchAll(getTokenRegExG())];
+  matches.reverse();
+  const funcRes = [];
+  for (const match of matches) {
+    const offset   = match.index;
+    const position = document.positionAt(offset); 
+    const lineText = document.lineAt(position.line);
+    const token    = match[0];
+    funcRes.push(await func({document, docText, position, lineText, token}));
+  }
+  return funcRes;
+}
+
+module.exports = {init, getLabel, bookmarkClick, refreshMenu,
                   clearDecoration, justDecorated, updateGutter,
                   toggle, scrollToPrevNext, delMarkFromLineAndGlobal,    
                   clearFile};

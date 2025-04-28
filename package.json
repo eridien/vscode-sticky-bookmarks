@@ -17,97 +17,112 @@
   "contributes": {
     "commands": [
       {
-        "command":  "sticky-bookmarks.toggleCmd",
-        "title":    "Toggle Bookmark On/Off",
+        "command": "sticky-bookmarks.toggleCmd",
+        "title": "Toggle Bookmark On/Off",
         "category": "Sticky Bookmarks"
-      }, {
-        "command":  "sticky-bookmarks.prevCmd",
-        "title":    "Go To Previous Bookmark",
+      },
+      {
+        "command": "sticky-bookmarks.prevCmd",
+        "title": "Go To Previous Bookmark",
         "category": "Sticky Bookmarks"
-      }, {
-        "command":  "sticky-bookmarks.nextCmd",
-        "title":    "Go To Next Bookmark",
+      },
+      {
+        "command": "sticky-bookmarks.nextCmd",
+        "title": "Go To Next Bookmark",
         "category": "Sticky Bookmarks"
-      }, {
-        "command":  "sticky-bookmarks.hideCmd",
-        "title":    "Hide All In Workspace",
+      },
+      {
+        "command": "sticky-bookmarks.hideCmd",
+        "title": "Hide All In Workspace",
         "category": "Sticky Bookmarks"
-      }, {
-        "command":  "sticky-bookmarks.refreshMenuCmd",
-        "title":    "Refresh Sidebar",
+      },
+      {
+        "command": "sticky-bookmarks.refreshMenuCmd",
+        "title": "Refresh Sidebar",
         "category": "Sticky Bookmarks"
-      }, {
-        "command":  "sticky-bookmarks.deleteMenuCmd",
-        "title":    "Delete All Bookmarks In Workspace",
+      },
+      {
+        "command": "sticky-bookmarks.deleteMenuCmd",
+        "title": "Delete All Bookmarks In Workspace",
         "category": "Sticky Bookmarks"
-      }, {
-        "command":  "sticky-bookmarks.deleteIconCmd",
-        "title":    "❌",
+      },
+      {
+        "command": "sticky-bookmarks.deleteIconCmd",
+        "title": "❌",
         "category": "Sticky Bookmarks: Delete Bookmark"
-      }, {
+      },
+      {
         "command": "sticky-bookmarks.nameCmd",
         "title": "🖉",
         "category": "Sticky Bookmarks: Add Name To Bookmark"
-      }, {
+      },
+      {
         "command": "sticky-bookmarks.eraseCmd",
         "title": "∅",
         "category": "Sticky Bookmarks: Remove Name From Bookmark"
-      }, {
-        "command":   "sticky-bookmarks.gotoCmd",
-        "title":     "Go To Bookmark",
-        "category":  "Sticky Bookmarks",
-        "arguments": ["sidebar"]
-      }, 
-      
+      },
       {
-        "command":  "sticky-bookmarks.clearAllSavedDataCmd",
-        "title":    "-- Do Not Use -- Internal Debug",
+        "command": "sticky-bookmarks.gotoCmd",
+        "title": "Go To Bookmark",
+        "category": "Sticky Bookmarks",
+        "arguments": [
+          "sidebar"
+        ]
+      },
+      {
+        "command": "sticky-bookmarks.clearAllSavedDataCmd",
+        "title": "-- Do Not Use -- Internal Debug",
         "category": "Sticky Bookmarks"
-      }, {
-        "command":  "sticky-bookmarks.resetAllKeysCmd",
-        "title":    "-- Do Not Use -- Internal Debug",
+      },
+      {
+        "command": "sticky-bookmarks.resetAllKeysCmd",
+        "title": "-- Do Not Use -- Internal Debug",
         "category": "Sticky Bookmarks"
       }
     ],
-    
-    "keybindings": [ {
+    "keybindings": [
+      {
         "command": "sticky-bookmarks.toggleCmd",
-        "key":     "ctrl+shift+alt+/",
-        "mac":     "cmd+shift+alt+/",
-        "when":    "editorTextFocus"
-      },{
+        "key": "ctrl+shift+alt+/",
+        "mac": "cmd+shift+alt+/",
+        "when": "editorTextFocus"
+      },
+      {
         "command": "sticky-bookmarks.prevCmd",
-        "key":     "ctrl+shift+alt+,",
-        "mac":     "cmd+shift+alt+,",
-        "when":    "editorTextFocus"
-      },{
+        "key": "ctrl+shift+alt+,",
+        "mac": "cmd+shift+alt+,",
+        "when": "editorTextFocus"
+      },
+      {
         "command": "sticky-bookmarks.nextCmd",
-        "key":     "ctrl+shift+alt+.",
-        "mac":     "cmd+shift+alt+.",
-        "when":    "editorTextFocus"
-      },{
+        "key": "ctrl+shift+alt+.",
+        "mac": "cmd+shift+alt+.",
+        "when": "editorTextFocus"
+      },
+      {
         "command": "sticky-bookmarks.hideCmd",
-        "key":     "ctrl+shift+alt+'",
-        "mac":     "cmd+shift+alt+'"
-      },{
+        "key": "ctrl+shift+alt+'",
+        "mac": "cmd+shift+alt+'"
+      },
+      {
         "command": "sticky-bookmarks.deleteIconCmd",
-        "key":     "ctrl+shift+alt+;",
-        "mac":     "cmd+shift+alt+;"
+        "key": "ctrl+shift+alt+;",
+        "mac": "cmd+shift+alt+;"
       }
     ],
     "viewsContainers": {
       "activitybar": [
         {
-          "id":    "stickyBookmarks",
+          "id": "stickyBookmarks",
           "title": "Sticky Bookmarks",
-          "icon":  "images/activity-icon.png"
+          "icon": "images/activity-icon.png"
         }
       ]
     },
     "views": {
       "stickyBookmarks": [
-        {  
-          "id":   "sidebarView",
+        {
+          "id": "sidebarView",
           "name": "Sticky Bookmarks",
           "icon": "images/activity-icon.png"
         }
@@ -117,33 +132,38 @@
       "view/title": [
         {
           "command": "sticky-bookmarks.hideCmd",
-          "when":    "view == sidebarView",
-          "group":   "navigation@1",
-          "arguments": ["title"]
-        }, {
+          "when": "view == sidebarView",
+          "group": "navigation@1",
+          "arguments": [
+            "title"
+          ]
+        },
+        {
           "command": "sticky-bookmarks.refreshMenuCmd",
-          "when":    "view == sidebarView",
-          "group":   "help@2"
-        }, {
+          "when": "view == sidebarView",
+          "group": "help@2"
+        },
+        {
           "command": "sticky-bookmarks.deleteMenuCmd",
-          "when":    "view == sidebarView",
-          "group":   "help@3"
+          "when": "view == sidebarView",
+          "group": "help@3"
         }
       ],
-
       "view/item/context": [
         {
           "command": "sticky-bookmarks.eraseCmd",
-          "when":    "view == sidebarView && viewItem == bookmark",
-          "group":   "inline@1"
-        },{
+          "when": "view == sidebarView && viewItem == bookmark",
+          "group": "inline@1"
+        },
+        {
           "command": "sticky-bookmarks.nameCmd",
-          "when":    "view == sidebarView && viewItem == bookmark",
-          "group":   "inline@2"
-        },{
+          "when": "view == sidebarView && viewItem == bookmark",
+          "group": "inline@2"
+        },
+        {
           "command": "sticky-bookmarks.deleteIconCmd",
-          "when":    "view == sidebarView",
-          "group":   "inline@4"
+          "when": "view == sidebarView",
+          "group": "inline@4"
         }
       ]
     }

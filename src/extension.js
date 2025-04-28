@@ -8,7 +8,7 @@ const {start, end} = utils.getLog('extn');
 
 async function activate(context) {
   start('activating extension');
-  utils.init(context);
+  utils.initContext(context);
   if(!await utils.loadStickyBookmarksJson()) {
     end('extension');
     return;
@@ -45,7 +45,7 @@ async function activate(context) {
 
   commands.init(context, treeView);
   await sidebar.init(treeView);
-  utils.initProvider(sidebarProvider);
+  utils.init(sidebarProvider, sidebar);
   await text.init(context);
   await marks.init(context);
 

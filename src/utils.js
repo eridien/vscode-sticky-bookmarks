@@ -3,21 +3,24 @@ const path   = require('path');
 const fs     = require('fs').promises;
 const {log, start, end}  = getLog('util');
 
-let context, sidebarProvider;
+let context, sidebarProvider, sidebar;
 
-function init(contextIn) {
+function initContext(contextIn) {
   context = contextIn;
 }
 
-function initProvider(sidebarProviderIn) {
+function init(sidebarProviderIn, sidebarIn) {
   sidebarProvider = sidebarProviderIn;
+  sidebar         = sidebarIn;
 }
 
 function updateSidebar() {
   sidebarProvider._onDidChangeTreeData.fire();
 }
 
-const closedFolders = new Set();
+async function setTreeViewBusyState(busy) {
+   await setTreeViewBusyState(busy);
+}
 
 const timers = {};
 
@@ -380,13 +383,57 @@ function getTokenRegExG() {
   return new RegExp("[\\u200B\\u200C\\u200D\\u2060]+\\.", 'g');
 }
 
+async function runOnAllFoldersInWorkspace(func, runOnFiles, runOnBookmarks) {
+  const folders = vscode.workspace.workspaceFolders;
+  if (!folders) {
+    log('info err', 'No Folders found in workspace'); 
+    return; 
+  }
+  if(runOnFiles) {
+    await setTreeViewBusyState(true);
+    const funcRes = [];
+    for (const folder of folders)
+     funcRes.push(await runOnAllFilesInFolder(
+                                     func, folder.uri.fsPath, runOnBookmarks));
+    await setTreeViewBusyState(false);
+    return funcRes;
+  }
+  else return folders;
+}
+
+//:rn7l;
+async function runOnAllFilesInFolder(func, folderFsPath, runOnAllBookmarksInFile) {
+  folderFsPath ??= getFocusedWorkspaceFolder()?.uri.fsPath;
+  if (!folderFsPath) { 
+    log('info err', 'Folder not found in workspace'); 
+    return; 
+  }
+  const folderUri = vscode.Uri.file(folderFsPath);
+  const pattern   = new vscode.RelativePattern(folderUri, '**/*');
+  const files     = await vscode.workspace
+                                .findFiles(pattern, '**/node_modules/**');
+  if(runOnAllBookmarksInFile) {
+    await setTreeViewBusyState(true);
+    const funcRes = [];
+    for(const file of files) {
+      try {
+        funcRes.push(await runOnAllBookmarksInFile(func, file.fsPath));
+      } catch(_e) {continue}
+    }
+    await setTreeViewBusyState(false);
+    return funcRes;
+  }
+  else return files;
+}
+
+
 module.exports = {
-  init, getLog, fnv1aHash, loadStickyBookmarksJson,
+  initContext, init, getLog, fnv1aHash, loadStickyBookmarksJson,
   commentsByLang, keywords, fileExists, getLineFromTextAtOffset,
   getUniqueToken, tokenToDigits, getTokenRegEx, getTokenRegExG,
   deleteLine, insertLine, replaceLine, debounce, sleep,
   getPathsFromWorkspaceFolder, getPathsFromFileDoc,
-  getFocusedWorkspaceFolder, initProvider,
+  getFocusedWorkspaceFolder, runOnAllFoldersInWorkspace,
   updateSidebar, getUniqueIdStr
 }
 

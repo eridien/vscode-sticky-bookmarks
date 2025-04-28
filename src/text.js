@@ -460,7 +460,6 @@ async function refreshMenu() {
   end('refreshMenu');
 }
 
-//:pa5m;
 async function runOnAllBookmarksInFile(func, fileFsPath) {
   const uri      = vscode.Uri.file(fileFsPath);
   const document = await vscode.workspace.openTextDocument(uri);

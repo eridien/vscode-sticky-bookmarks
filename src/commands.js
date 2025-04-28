@@ -11,10 +11,6 @@ function init(contextIn, treeViewIn) {
   treeView = treeViewIn;
 }
 
-////////////////////////////////  ACTIONS  ////////////////////////////////////
-
-//:cjjr;
-
 ////////////////////////////////  COMMANDS  ///////////////////////////////////
 
 async function toggleCmd() {
@@ -58,9 +54,6 @@ async function deleteIconCmd(item) {
     item = treeView.selection[0];
     if (!item) { log('info err', 'No Bookmark Selected For Deletion'); return; }
   }
-  
-  ///////// TODO /////////
-  
   // switch (item.type) {
   //   case 'folder':   await utils.runOnAllFilesInFolder(hideCmd); break;
   //   case 'file':     await utils.runOnAllFilesInFolder(hideCmd); break;
@@ -87,8 +80,6 @@ async function gotoCmd(item) {
 async function clearAllSavedDataCmd() {
   log('clearAllSavedDataCmd');
 
-  ///////// TODO /////////
-
   log('info', 'All Sticky Bookmarks data has been cleared.');
 }
 
@@ -101,39 +92,6 @@ async function resetAllKeysCmd() {
   log('info', 'Sticky Bookmarks keybindings reset.');
 }
 
-async function refreshWorkspaceKeyCmd() {
-  log('refreshWorkspaceKeyCmd');
-
-}
-
-async function hideCmd() {
-  log('hideCmd');
-
-}
-
-async function refreshAllTitleCmd() {
-  log('refreshAllTitleCmd');
-
-}
-
-async function deleteAllTitleCmd() {
-  log('deleteAllTitleCmd');
-
-}
-
-async function eraseCmd(item) {
-  log('eraseCmd');
-
-}
-
-async function nameCmd(item) {
-  log('nameCmd');
-
-}
-
-////////////////////////////////  HELPERS  //////////////////////////////////
-
-//:cx05;
 ////////////////////////////////  CALLBACKS  //////////////////////////////////
 let sidebarIsVisible = false;
 
@@ -160,11 +118,9 @@ async function changedVisEditors() {
   utils.updateSidebar();
 }  
 
-//bookmark
 const changedSelection = utils.debounce(async (event) => {
   const {textEditor} = event;
   text.clearDecoration();
-  //:c626;
   await text.refreshFile(textEditor.document);
   utils.updateSidebar(); 
   text.updateGutter();

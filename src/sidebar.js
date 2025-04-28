@@ -17,7 +17,7 @@ let intervalId  = null;
 let timeoutId   = null;
 let showingBusy = false;
 
-function setTreeViewBusyState(busy, blinking = false) {
+function setBusy(busy, blinking = false) {
   if (treeView) 
       treeView.message = busy ? '⟳ Processing Bookmarks ...' : '';
   utils.updateSidebar();
@@ -25,12 +25,12 @@ function setTreeViewBusyState(busy, blinking = false) {
   if(busy && !showingBusy) {
     showingBusy = true;
     intervalId = setInterval(() => {
-      setTreeViewBusyState(true, true);
+      setBusy(true, true);
         timeoutId = setTimeout(() => {
-          setTreeViewBusyState(false, true);
+          setBusy(false, true);
         }, 1000);
     }, 2000);
-    setTreeViewBusyState(true);
+    setBusy(true);
   }
   if(!busy && showingBusy) {
     showingBusy = false;
@@ -38,7 +38,7 @@ function setTreeViewBusyState(busy, blinking = false) {
     clearTimeout(timeoutId);
     intervalId = null;
     timeoutId  = null;
-    setTreeViewBusyState(false, true);
+    setBusy(false, true);
   }
 }
 
@@ -219,26 +219,6 @@ async function getItemTree() {
   return itemTree;
 }
 
-async function clickItemCmd(item) {
-  text.clearDecoration();
-  switch(item.type) {
-    case 'folder': 
-      const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
-      if(folderItem) {
-        if(closedFolders.has(folderItem.folderFsPath))
-          closedFolders.delete(folderItem.folderFsPath);
-        else
-          closedFolders.add(folderItem.folderFsPath);
-        utils.updateSidebar();
-      }
-      break;
-    case 'file':
-      await vscode.window.showTextDocument(item.document, {preview: false});
-      break;
-    case 'bookmark': await text.bookmarkClick(item); break;
-  }
-}
-
 async function goto(item) {
   log('goto');
   if(item === undefined) {
@@ -272,7 +252,7 @@ class SidebarProvider {
   getTreeItem(item) {
     return item;
   }
-  //bookmark
+
   async getChildren(item) {
     if (showingBusy) return [];
     if(!item) {
@@ -283,6 +263,6 @@ class SidebarProvider {
   }
 }
 
-module.exports = {SidebarProvider, init, setTreeViewBusyState, 
+module.exports = {SidebarProvider, init, setBusy, 
                   goto, clickItemCmd};
 

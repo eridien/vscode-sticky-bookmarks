@@ -112,7 +112,6 @@ function dumpGlobalMarks(caller, list, dump) {
   }
 }
 
-//:f6j4;
 async function newGlobalMark(document, lineNumber, token) {
   token ??= utils.getUniqueToken();
   const mark  = {token, document, lineNumber,

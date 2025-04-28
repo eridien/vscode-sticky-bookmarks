@@ -18,8 +18,8 @@ function updateSidebar() {
   sidebarProvider._onDidChangeTreeData.fire();
 }
 
-async function setTreeViewBusyState(busy) {
-   await setTreeViewBusyState(busy);
+async function setBusy(busy) {
+   await setBusy(busy);
 }
 
 const timers = {};
@@ -390,18 +390,17 @@ async function runOnAllFoldersInWorkspace(func, runOnFiles, runOnBookmarks) {
     return; 
   }
   if(runOnFiles) {
-    await setTreeViewBusyState(true);
+    await setBusy(true);
     const funcRes = [];
     for (const folder of folders)
      funcRes.push(await runOnAllFilesInFolder(
                                      func, folder.uri.fsPath, runOnBookmarks));
-    await setTreeViewBusyState(false);
+    await setBusy(false);
     return funcRes;
   }
   else return folders;
 }
 
-//:rn7l;
 async function runOnAllFilesInFolder(func, folderFsPath, runOnAllBookmarksInFile) {
   folderFsPath ??= getFocusedWorkspaceFolder()?.uri.fsPath;
   if (!folderFsPath) { 
@@ -413,14 +412,14 @@ async function runOnAllFilesInFolder(func, folderFsPath, runOnAllBookmarksInFile
   const files     = await vscode.workspace
                                 .findFiles(pattern, '**/node_modules/**');
   if(runOnAllBookmarksInFile) {
-    await setTreeViewBusyState(true);
+    await setBusy(true);
     const funcRes = [];
     for(const file of files) {
       try {
         funcRes.push(await runOnAllBookmarksInFile(func, file.fsPath));
       } catch(_e) {continue}
     }
-    await setTreeViewBusyState(false);
+    await setBusy(false);
     return funcRes;
   }
   else return files;

@@ -2,9 +2,9 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-  deleting mark doesn't delete gutter
 
 todo 
+  expand all in title menu (toggle folder)
   auto scroll
     scroll to top for functions
     min top and bottom border lines
@@ -35,11 +35,7 @@ not needed?
     show in sidebar with question mark
     click on sidebar to accept and create bookmark
     limit suggestions (setting)
-  remove dupe symbols
   
-file types to add
-  markdown
-
 settings
   show bookmark word in token
   fall back to gen1 line number tracking

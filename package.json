@@ -37,7 +37,11 @@
         "category": "Sticky Bookmarks"
       },
       {
-        "command": "sticky-bookmarks.refreshMenuCmd",
+        "command": "sticky-bookmarks.expandCmd",
+        "title": "Expand All",
+        "category": "Sticky Bookmarks"
+      }, {
+        "command": "sticky-bookmarks.refreshCmd",
         "title": "Refresh Sidebar",
         "category": "Sticky Bookmarks"
       },
@@ -139,7 +143,12 @@
           ]
         },
         {
-          "command": "sticky-bookmarks.refreshMenuCmd",
+          "command": "sticky-bookmarks.expandCmd",
+          "when": "view == sidebarView",
+          "group": "help@1"
+        },
+        {
+          "command": "sticky-bookmarks.refreshCmd",
           "when": "view == sidebarView",
           "group": "help@2"
         },

@@ -37,8 +37,13 @@ async function hideCmd() {
   
 }
 
-async function refreshMenuCmd() {
-  log('refreshMenuCmd');
+async function expandCmd() {
+  log('expandCmd');
+
+}
+
+async function refreshCmd() {
+  log('refreshCmd');
   await text.refreshMenu();
 }
 
@@ -128,7 +133,7 @@ async function nameCmd(item) {
 
 ////////////////////////////////  HELPERS  //////////////////////////////////
 
-//:pzzo;
+//:cx05;
 ////////////////////////////////  CALLBACKS  //////////////////////////////////
 let sidebarIsVisible = false;
 
@@ -159,7 +164,7 @@ async function changedVisEditors() {
 const changedSelection = utils.debounce(async (event) => {
   const {textEditor} = event;
   text.clearDecoration();
-  //:7zga;
+  //:c626;
   await text.refreshFile(textEditor.document);
   utils.updateSidebar(); 
   text.updateGutter();
@@ -174,7 +179,7 @@ const changedText = utils.debounce(async (event) => {
 }, 200);
 
 module.exports = { init, toggleCmd, prevCmd, nextCmd, 
-                   hideCmd, refreshMenuCmd, deleteMenuCmd, 
+                   hideCmd, refreshCmd, expandCmd, deleteMenuCmd, 
                    gotoCmd, nameCmd, eraseCmd, deleteIconCmd,
                    clearAllSavedDataCmd, resetAllKeysCmd,
                    changedSidebarVisiblitiy, changedText,

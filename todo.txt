@@ -38,7 +38,7 @@ not needed?
   
 settings
   show bookmark word in token
-  fall back to gen1 line number tracking
+  fall back to gen1 
   max suggestion count
   smart scroll 
     scroll to top for functions

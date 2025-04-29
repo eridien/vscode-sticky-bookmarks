@@ -19,7 +19,7 @@ function init(contextIn) {
   }
   gutterDecoration = vscode.window.createTextEditorDecorationType({ 
     gutterIconPath: vscode.Uri.file(path.join(
-                       context.extensionPath, 'images', 'bookmark.svg')),
+                       context.extensionPath, 'images', 'bookmarkGen2.svg')),
     gutterIconSize: 'contain',
   });
 }

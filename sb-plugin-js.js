@@ -1,15 +1,17 @@
-// find first line >= toggle click line and doesn't end inside template string
+// find first line >= toggle click line that doesn't end inside template string
 // this is fast but speed isn't that important. Only runs on toggle click
 function findSafeLine(text, toggleLineNum) {
-  const lines  = text.split(/\r?\n/);
-  if(toggleLineNum >= lines.length) return lines.length-1;
+  const lines       = text.split(/\r?\n/);
+  const lastLineNum = lines.length-1;
+  const eofResult   = [lastLineNum, lines[lastLineNum]];
+  if(toggleLineNum >= lines.length) return eofResult;
   let checking = false;
   let insideSingle, insideDouble;
   let insideTemplate = false, insideBlock = false;
-  for (let lineNumber = 0; lineNumber < lines.length; lineNumber++) {
+  for (let lineNumber = 0; lineNumber <= lastLineNum; lineNumber++) {
     let line = lines[lineNumber];
     // combine lines that are split by a backslash
-    while(line.slice(-1) === '\\' && lineNumber < lines.length-1)
+    while(line.slice(-1) === '\\' && lineNumber < lastLineNum)
       line = line.slice(0, -1) + lines[++lineNumber];
     if(lineNumber >= toggleLineNum) checking = true;
     insideSingle = false; 
@@ -40,12 +42,11 @@ function findSafeLine(text, toggleLineNum) {
       if (char === '`') { insideTemplate = true; continue; }
     }
     // end of line
-    if(checking && !insideTemplate) return lineNumber;
+    if(checking && !insideTemplate) return [lineNumber, lines[lineNumber]];
   }
-  // end of file
-  // template string or block comment is still open
-  // in either case it is safe to add token
-  return lines.length - 1;
+  // end of file, template string or block comment is still open
+  // in either case it is always safe to add token to eof
+  return eofResult;
 }
 
 module.exports = { findSafeLine }

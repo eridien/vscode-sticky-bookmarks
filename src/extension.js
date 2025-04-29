@@ -55,7 +55,7 @@ async function activate(context) {
     await commands.changedSidebarVisiblitiy(event.visible);
   });
   vscode.window.onDidChangeVisibleTextEditors(async editors => {
-    console.log('Currently visible editors:', editors);
+    // console.log('Currently visible editors:', editors);
     await commands.changedVisEditors(editors);
   });
   vscode.workspace.onDidChangeTextDocument(async event => {

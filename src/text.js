@@ -8,6 +8,7 @@ const showLineNumbers      = true;
 const showBreadCrumbs      = true;
 const showCodeWhenCrumbs   = true;
 const openSideBarOnNewMark = true;
+const maxLinesInCompText   = 6;
 
 let context, gutterDecoration = null;
 
@@ -29,7 +30,7 @@ const lineSep         = '\x00';
 
 const keywordSetsByLang = {};
 
-//:qmb7;
+//:7e3a;
 function tokenRegEx(languageId, eol = true, global = false) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
   const regxStr = `${commLft}([\\u200B\\u200C\\u200D\\u2060]+\\.`+
@@ -53,6 +54,7 @@ function isKeyWord(languageId, word) {
   return keywordSetsByLang[languageId].has(word);
 }
 
+//:kcp7;
 async function getCompText(mark) {
   let   {document, lineNumber, languageId} = mark;
   const tokenRegx = tokenRegEx(languageId);
@@ -61,7 +63,8 @@ async function getCompText(mark) {
              ? new RegExp(`\\s*${commLft}\\s*?${commRgt}\\s*`, 'g')
              : new RegExp(`\\s*${commLft}\\s*?$`,              'g');
   // go through lines until we have enough text
-  let   compText = '';
+  let compText = '';
+  let lineCount = 0;
   do {
     let lineText = document.lineAt(lineNumber).text;
     // remove token
@@ -88,12 +91,15 @@ async function getCompText(mark) {
     do {
       lastLen = lineText.length;
       lineText = lineText.replaceAll(regxEmptyComm, ' ');
-    }
-    while(lineText.length != lastLen);
+    } while(lineText.length != lastLen);
     // add cleaned line to comptext with line sep
+    // but only if not empty
+    if(lineText.length == 0) continue
     compText += ' ' + lineText + lineSep;
   }
-  while(compText.length < 60 && lineNumber < document.lineCount);
+  while(compText.length < 60 && 
+        ++lineNumber < document.lineCount &&
+        ++lineCount  < maxLinesInCompText);
   return compText.slice(0, -1).replaceAll(/\s+/g, ' ').trim()
                               .replaceAll('\x00', '\\n');
 }
@@ -228,7 +234,7 @@ async function replaceLineInDocument(document, lineNumber, newText) {
   await vscode.workspace.applyEdit(edit);
 }
 
-//:dcuy;
+//:433b;
 async function delMarkFromLineAndGlobal(document, lineNumber) {
   const languageId   = document.languageId;
   const line         = document.lineAt(lineNumber);
@@ -245,7 +251,7 @@ async function delMarkFromLineAndGlobal(document, lineNumber) {
   marks.delGlobalMark(token);
 }
 
-//:73fa;
+//:892c;
 async function toggle() {
   const editor   = vscode.window.activeTextEditor;
   const document = editor.document;
@@ -303,7 +309,7 @@ async function scrollToPrevNext(fwd) {
   }
 }
 
-//:f0kr;
+//:m342;
 async function runOnAllTokensInDoc(document, getPos, getLine, func) {
   const text = document.getText();
   const tokenRegExG = tokenRegEx(document.languageId, false, true);

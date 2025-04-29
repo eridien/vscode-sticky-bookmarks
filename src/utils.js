@@ -379,13 +379,14 @@ function tokenToDigits(token) {
   };
   return [...token.slice(0,-1)]
     .map(c => {
-      if (!(c in map)) throw new Error('Invalid base-4 character');
+      if (!(c in map)) return null;
       return map[c];
     })
+    .filter(c => c !== null)
     .join('').padStart(4, '0');
 }
 
-//:2odn;
+//:f9zh;
 function tokenToStr(token) {
   return token.replaceAll('\u200B', '0')
               .replaceAll('\u200C', '1')

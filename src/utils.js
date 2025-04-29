@@ -121,14 +121,6 @@ async function writeWorkspaceFile(relativePath, textData) {
   return true;
 }
 
-function getLineFromTextAtOffset(text, offset) {
-  const before = text.lastIndexOf('\n', offset - 1);
-  const after  = text.indexOf('\n', offset);
-  const lineStart = before === -1 ? 0 : before + 1;
-  const lineEnd   = after  === -1 ? text.length : after;
-  return text.slice(lineStart, lineEnd);
-}
-
 function getPathsFromWorkspaceFolder(folder) {   
   if(!folder) return null;
   const uri                = folder.uri;
@@ -163,7 +155,7 @@ function getPathsFromFileDoc(doc) {
   }
 }
 
-//:2v5k;
+//:mxoo;
 async function getFileLineDisplay(document, lineNumber) {
   const {fileRelUriPath} = getPathsFromFileDoc(document);
   return `File: ${fileRelUriPath}, Line: ${lineNumber.padStart(3, ' ')}`;
@@ -294,7 +286,7 @@ async function deleteLine(document, lineNumber) {
   await vscode.workspace.applyEdit(edit);
 }
 
-//:vxzq;
+//:su2y;
 async function insertLine(document, lineNumber, lineText) {
   const position = new vscode.Position(lineNumber, 0);
   const edit     = new vscode.WorkspaceEdit();
@@ -359,7 +351,7 @@ function numberToInvBase4(num) {
 
 let uniqueIdNum = 0;
 
-//:cdnz;
+//:npub;
 function getUniqueToken(document) {
   const [commLft, commRgt] = commentsByLang(document.languageId);
   return commLft + numberToInvBase4(++uniqueIdNum) + '.' + commRgt;
@@ -369,7 +361,7 @@ function getUniqueIdStr() {
   return (++uniqueIdNum).toString();
 }
 
-//:s9mg;
+//:ppaz;
 function tokenToDigits(token) {
   const map = {
     '\u200B': '0', // Zero Width Space
@@ -386,7 +378,7 @@ function tokenToDigits(token) {
     .join('').padStart(4, '0');
 }
 
-//:f9zh;
+//:9har;
 function tokenToStr(token) {
   return token.replaceAll('\u200B', '0')
               .replaceAll('\u200C', '1')
@@ -445,7 +437,7 @@ async function runOnAllFilesInFolder(func, folderFsPath, runOnAllBookmarksInFile
 
 module.exports = {
   initContext, init, getLog, fnv1aHash, loadStickyBookmarksJson,
-  commentsByLang, keywords, fileExists, getLineFromTextAtOffset,
+  commentsByLang, keywords, fileExists,
   getUniqueToken, tokenToDigits, getTokenRegEx, getTokenRegExG,
   deleteLine, insertLine, replaceLine, debounce, sleep,
   getPathsFromWorkspaceFolder, getPathsFromFileDoc,

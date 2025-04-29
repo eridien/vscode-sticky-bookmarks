@@ -309,22 +309,6 @@ async function scrollToPrevNext(fwd) {
   }
 }
 
-//:m342;
-async function runOnAllTokensInDoc(document, getPos, getLine, func) {
-  const text = document.getText();
-  const tokenRegExG = tokenRegEx(document.languageId, false, true);
-  const matches = [...text.matchAll(tokenRegExG)];
-  matches.reverse();
-  for (const match of matches) {
-    const offset = match.index;
-    const token  = match[0];
-    const res    = {token};
-    if(getPos)  res.position = document.positionAt(offset); 
-    if(getLine) res.lineText = utils.getLineFromTextAtOffset(text, offset);
-    await func(res);
-  }
-}
-
 async function clearFile(document, saveMarks = true) {
   let haveDel = false;
   await runOnAllTokensInDoc(document, true, false, async (params) => {

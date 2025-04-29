@@ -4,6 +4,7 @@ vsce package
 bugs
 
 todo 
+  add bookmark past \ at eol and past template strings
   expand all in title menu (toggle folder)
   auto scroll
     scroll to top for functions
@@ -59,6 +60,7 @@ settings
 testing
   text dark theme: settings:  "window detect color"
   moving a project folder
+  mark after an unclosed string
 
 why gen2
   sticky

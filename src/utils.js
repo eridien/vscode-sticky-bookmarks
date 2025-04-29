@@ -19,7 +19,7 @@ function updateSidebar() {
 }
 
 async function setBusy(busy) {
-   await setBusy(busy);
+   await sidebar.setBusy(busy);
 }
 
 const timers = {};
@@ -404,7 +404,7 @@ function getTokenRegExG() {
 
 async function runOnAllFoldersInWorkspace(func, runOnFiles, runOnBookmarks) {
   const folders = vscode.workspace.workspaceFolders;
-  if (!folders) {
+  if (!folders || folders.length === 0) {
     log('info err', 'No Folders found in workspace'); 
     return; 
   }
@@ -430,20 +430,18 @@ async function runOnAllFilesInFolder(func, folderFsPath, runOnAllBookmarksInFile
   const pattern   = new vscode.RelativePattern(folderUri, '**/*');
   const files     = await vscode.workspace
                                 .findFiles(pattern, '**/node_modules/**');
-  if(runOnAllBookmarksInFile) {
-    await setBusy(true);
-    const funcRes = [];
-    for(const file of files) {
-      try {
-        funcRes.push(await runOnAllBookmarksInFile(func, file.fsPath));
-      } catch(_e) {continue}
-    }
-    await setBusy(false);
-    return funcRes;
+  await setBusy(true);
+  const funcRes = [];
+  for(const file of files) {
+    try {
+      if(runOnAllBookmarksInFile) 
+           funcRes.push(await runOnAllBookmarksInFile(func, file.fsPath));
+      else funcRes.push(await func({document, docText, position, lineText, token}));
+    } catch(_e) {continue}
   }
-  else return files;
+  await setBusy(false);
+  return funcRes;
 }
-
 
 module.exports = {
   initContext, init, getLog, fnv1aHash, loadStickyBookmarksJson,

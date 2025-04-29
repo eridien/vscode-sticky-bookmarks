@@ -40,6 +40,7 @@ async function expandCmd() {
 
 async function refreshCmd() {
   log('refreshCmd');
+  //:meo4;
   await text.refreshMenu();
 }
 

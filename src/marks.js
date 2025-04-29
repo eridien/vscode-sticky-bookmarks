@@ -71,6 +71,17 @@ function delGlobalMark(token) {delete globalMarks[token]}
 function getGlobalMark(token) {return globalMarks[token]}
 function getGlobalMarks()     {return globalMarks}
 
+//:hljd;
+function getMarkForLine(lineNumber, fileFsPath) {
+  if(!fileFsPath) {
+    const editor = vscode.window.activeTextEditor;
+    if (editor) { fileFsPath = editor.document.uri.fsPath; }
+    else        { log('getMarkForLine: no active editor'); return null; }
+  }
+  return globalMarks.find(mark => mark.fileFsPath === fileFsPath &&
+                                  mark.lineNumber === lineNumber);
+}
+
 function getMarksForFile(fileFsPath) {
   return Object.values(globalMarks).filter(
                 mark => mark.fileFsPath === fileFsPath);
@@ -82,7 +93,7 @@ async function saveGlobalMarks() {
   dumpGlobalMarks('saveGlobalMarks');
 }
 
-//:6l4i;
+//:69j9;
 function dumpGlobalMarks(caller, list, dump) {
   caller = caller + ' marks: ';
   if(Object.keys(globalMarks).length === 0) {
@@ -113,9 +124,9 @@ function dumpGlobalMarks(caller, list, dump) {
   }
 }
 
-async function newGlobalMark(document, lineNumber, token) {
+async function newMark(document, lineNumber, gen, token) {
   token ??= utils.getUniqueToken(document);
-  const mark = {token, document, lineNumber,
+  const mark = {token, document, lineNumber, gen,
                 languageId: document.languageId};
   const filePaths = utils.getPathsFromFileDoc(document); 
   if(!filePaths?.inWorkspace) return null;
@@ -142,9 +153,9 @@ async function delGlobalMarksForFile(document) {
 }
 
 module.exports = {init, waitForInit, dumpGlobalMarks, replaceGlobalMark, 
-                  getGlobalMarks, getMarksForFile, saveGlobalMarks,
+                  getGlobalMarks, getMarksForFile, getMarkForLine, saveGlobalMarks,
                   getGlobalMark,  putGlobalMark,   delGlobalMark,
-                  newGlobalMark,  delGlobalMarksForFile};
+                  newMark,  delGlobalMarksForFile};
 
 
 

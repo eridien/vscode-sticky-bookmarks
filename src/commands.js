@@ -15,7 +15,12 @@ function init(contextIn, treeViewIn) {
 
 async function toggleCmd() {
   log('toggleCmd');
-  await text.toggle();
+  await text.toggle(2);
+}
+
+async function toggleGen1Cmd() {
+  log('toggleGen1Cmd');
+  await text.toggle(1);
 }
 
 async function prevCmd() {
@@ -40,7 +45,7 @@ async function expandCmd() {
 
 async function refreshCmd() {
   log('refreshCmd');
-  //:meo4;
+  //:yusi;
   await text.refreshMenu();
 }
 
@@ -135,7 +140,7 @@ const changedText = utils.debounce(async (event) => {
   text.updateGutter();
 }, 200);
 
-module.exports = { init, toggleCmd, prevCmd, nextCmd, 
+module.exports = { init, toggleCmd, toggleGen1Cmd, prevCmd, nextCmd, 
                    hideCmd, refreshCmd, expandCmd, deleteMenuCmd, 
                    gotoCmd, nameCmd, eraseCmd, deleteIconCmd,
                    clearAllSavedDataCmd, resetAllKeysCmd,

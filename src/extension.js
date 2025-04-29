@@ -15,6 +15,8 @@ async function activate(context) {
   }
 	const toggleCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.toggleCmd',                         commands.toggleCmd);
+	const toggleGen1Cmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.toggleGen1Cmd',                 commands.toggleGen1Cmd);
 	const prevCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.prevCmd',                             commands.prevCmd);
 	const nextCmd = vscode.commands.registerCommand(
@@ -76,7 +78,7 @@ async function activate(context) {
     await commands.changedSelection(event);
   });
 
-  context.subscriptions.push(toggleCmd, prevCmd, nextCmd,
+  context.subscriptions.push(toggleCmd, toggleGen1Cmd, prevCmd, nextCmd,
                              hideCmd, refreshCmd, expandCmd, deleteMenuCmd,
                              deleteIconCmd, gotoCmd, nameCmd, eraseCmd, 
                              clearAllSavedDataCmd, resetAllKeysCmd);

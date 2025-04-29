@@ -22,6 +22,11 @@
         "category": "Sticky Bookmarks"
       },
       {
+        "command": "sticky-bookmarks.toggleGen1Cmd",
+        "title": "Toggle Gen1Bookmark On/Off",
+        "category": "Sticky Bookmarks"
+      },
+      {
         "command": "sticky-bookmarks.prevCmd",
         "title": "Go To Previous Bookmark",
         "category": "Sticky Bookmarks"
@@ -89,6 +94,12 @@
         "command": "sticky-bookmarks.toggleCmd",
         "key": "ctrl+alt+\\",
         "mac": "cmd+alt+\\",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "sticky-bookmarks.toggleGen1Cmd",
+        "key": "ctrl+alt+/",
+        "mac": "cmd+alt+/",
         "when": "editorTextFocus"
       },
       {

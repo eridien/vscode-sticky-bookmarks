@@ -34,11 +34,71 @@ function keywords() {
   return keywordsStore;
 }
 
+function getLog(module) {
+  const start = function(name) {
+    const startTime = Date.now();
+    timers[name]    = startTime;
+    const line      = `${module}: ${name} started`;
+    outputChannel.appendLine(line);
+    console.log(line);
+  }
+  const end = function(name) {
+    if(!timers[name]) {
+      const line = `${module}: ${name} ended`;
+      outputChannel.appendLine(line);
+      console.log(line);
+      return;
+    }
+    const endTime  = Date.now();
+    const duration = endTime - timers[name];
+    const line     = `${module}: ${name} ended, ${timeInSecs(duration)}s`;
+    outputChannel.appendLine(line);
+    console.log(line);
+  }
+  const log = function(...args) {
+    let errFlag    = false;
+    let errMsgFlag = false;
+    let infoFlag   = false;
+    let nomodFlag  = false;
+    if(typeof args[0] == 'string') {
+      errFlag    = args[0].includes('err');
+      infoFlag   = args[0].includes('info');
+      nomodFlag  = args[0].includes('nomod');
+      errMsgFlag = args[0].includes('errmsg');
+    }
+    if(errFlag || infoFlag || nomodFlag || errMsgFlag) args = args.slice(1);
+    let errMsg;
+    if(errMsgFlag) {
+      errMsg  = args[0]?.message;
+      args    = args.slice(1); 
+      errFlag = true;
+    }
+    const par = args.map(a => {
+      if(getTokenRegEx().test(a)) a = tokenToDigits(a);
+      else if(typeof a === 'object') {
+        try{ return JSON.stringify(a, null, 2); }
+        catch(e) { return JSON.stringify(Object.keys(a)) + e.message }
+      }
+      else return a;
+    });
+    const line = (nomodFlag            ? ''         : module + ': ') +
+                 (errFlag              ? ' error, ' : ''           ) + 
+                 (errMsg !== undefined ? errMsg     : ''           ) + 
+                 par.join(' ');
+    const infoLine = (errFlag ? ' error, ' : '') + par.join(' ')
+    outputChannel.appendLine(line);
+    if(errFlag) console.error(line);
+    else        console.log(line);
+    if(infoFlag) vscode.window.showInformationMessage(infoLine);
+  }
+  return {log, start, end};
+}
+
 function installBookmarksJson(configText) {
   let configObj;
   try {configObj = JSON.parse(configText)}
   catch(error) {
-    logErr(`Error parsing default sticky-bookmarks.json, aborting`, error);
+    log('errmsg', error, `Error parsing default sticky-bookmarks.json, aborting`);
     return false;
   }
   comsByLang = configObj.commentsByLangs;
@@ -101,7 +161,7 @@ async function readWorkspaceFile(relativePath) {
   try {
     contents = await fs.readFile(filePath, 'utf8');
   } catch (error) {
-    logErr(`Error reading file ${relativePath}`, error);
+    log('errmsg', error, `Error reading file ${relativePath}`);
   }
   return contents;
 }
@@ -115,7 +175,7 @@ async function writeWorkspaceFile(relativePath, textData) {
   try {
     await vscode.workspace.fs.writeFile(fileUri, content);
   } catch (err) {
-    logErr(`Error writing ${relativePath}.`, err);
+    log('errmsg', err, `Error writing ${relativePath}.`);
     return false;
   }
   return true;
@@ -155,7 +215,7 @@ function getPathsFromFileDoc(doc) {
   }
 }
 
-//:mxoo;
+//:ejcq;
 async function getFileLineDisplay(document, lineNumber) {
   const {fileRelUriPath} = getPathsFromFileDoc(document);
   return `File: ${fileRelUriPath}, Line: ${lineNumber.padStart(3, ' ')}`;
@@ -204,61 +264,6 @@ function timeInSecs(ms) {
   return (ms / 1000).toFixed(2);
 }
 
-function getLog(module) {
-  const start = function(name) {
-    const startTime = Date.now();
-    timers[name]    = startTime;
-    const line      = `${module}: ${name} started`;
-    outputChannel.appendLine(line);
-    console.log(line);
-  }
-  const end = function(name) {
-    if(!timers[name]) {
-      const line = `${module}: ${name} ended`;
-      outputChannel.appendLine(line);
-      console.log(line);
-      return;
-    }
-    const endTime  = Date.now();
-    const duration = endTime - timers[name];
-    const line     = `${module}: ${name} ended, ${timeInSecs(duration)}s`;
-    outputChannel.appendLine(line);
-    console.log(line);
-  }
-  const log = function(...args) {
-    let errFlag   = false;
-    let infoFlag  = false;
-    let nomodFlag = false;
-    if(typeof args[0] == 'string') {
-      errFlag   = args[0].includes('err');
-      infoFlag  = args[0].includes('info');
-      nomodFlag = args[0].includes('nomod');
-    }
-    if(errFlag || infoFlag || nomodFlag) args = args.slice(1);
-    const par = args.map(a => {
-      if(getTokenRegEx().test(a)) a = tokenToDigits(a);
-      else if(typeof a === 'object') {
-        try{ return JSON.stringify(a, null, 2); }
-        catch(e) { return JSON.stringify(Object.keys(a)) + e.message }
-      }
-      else return a;
-    });
-    const line = (nomodFlag   ? '' : module + ': ') +
-                 (errFlag     ? ' error, ' : '') + par.join(' ')
-    const infoLine = (errFlag ? ' error, ' : '') + par.join(' ')
-    outputChannel.appendLine(line);
-    if(errFlag) console.error(line);
-    else        console.log(line);
-    if(infoFlag) vscode.window.showInformationMessage(infoLine);
-  }
-  return {log, start, end};
-}
-
-function logErr(message, event) {
-  log('info err', message);
-  log('err', event.message);
-}
-
 async function readExtensionFile(filename) {
   const filePath = path.join(context.extensionPath, ".", filename);
   const fileUri = vscode.Uri.file(filePath);
@@ -270,15 +275,6 @@ async function readExtensionFile(filename) {
   }
 }
 
-function fnv1aHash(str) {
-  let hash = 2166136261;
-  for (let i = 0; i < str.length; i++) {
-    hash ^= str.charCodeAt(i);
-    hash = (hash * 16777619) >>> 0;
-  }
-  return hash.toString();
-}
-
 async function deleteLine(document, lineNumber) {
   const line = document.lineAt(lineNumber); 
   const edit = new vscode.WorkspaceEdit();
@@ -286,7 +282,7 @@ async function deleteLine(document, lineNumber) {
   await vscode.workspace.applyEdit(edit);
 }
 
-//:su2y;
+//:lp79;
 async function insertLine(document, lineNumber, lineText) {
   const position = new vscode.Position(lineNumber, 0);
   const edit     = new vscode.WorkspaceEdit();
@@ -299,6 +295,13 @@ async function replaceLine(document, lineNumber, lineText) {
   const edit = new vscode.WorkspaceEdit();
   edit.replace(document.uri, line.range, lineText);
   return await vscode.workspace.applyEdit(edit);
+}
+
+//:obtt;
+function getDocument(document) {
+    if (document) return document;
+    const editor = vscode.window.activeTextEditor;
+    return editor ? editor.document : undefined;
 }
 
 function debounce(fn, delay = 100) {
@@ -351,7 +354,7 @@ function numberToInvBase4(num) {
 
 let uniqueIdNum = 0;
 
-//:npub;
+//:fnrw;
 function getUniqueToken(document) {
   const [commLft, commRgt] = commentsByLang(document.languageId);
   return commLft + numberToInvBase4(++uniqueIdNum) + '.' + commRgt;
@@ -361,7 +364,7 @@ function getUniqueIdStr() {
   return (++uniqueIdNum).toString();
 }
 
-//:ppaz;
+//:379a;
 function tokenToDigits(token) {
   const map = {
     '\u200B': '0', // Zero Width Space
@@ -378,7 +381,7 @@ function tokenToDigits(token) {
     .join('').padStart(4, '0');
 }
 
-//:9har;
+//:62tk;
 function tokenToStr(token) {
   return token.replaceAll('\u200B', '0')
               .replaceAll('\u200C', '1')
@@ -436,12 +439,12 @@ async function runOnAllFilesInFolder(func, folderFsPath, runOnAllBookmarksInFile
 }
 
 module.exports = {
-  initContext, init, getLog, fnv1aHash, loadStickyBookmarksJson,
+  initContext, init, getLog, loadStickyBookmarksJson,
   commentsByLang, keywords, fileExists,
   getUniqueToken, tokenToDigits, getTokenRegEx, getTokenRegExG,
   deleteLine, insertLine, replaceLine, debounce, sleep,
   getPathsFromWorkspaceFolder, getPathsFromFileDoc,
   getFocusedWorkspaceFolder, runOnAllFoldersInWorkspace,
-  updateSidebar, getUniqueIdStr, tokenToStr
+  updateSidebar, getUniqueIdStr, tokenToStr, getDocument
 }
 

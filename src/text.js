@@ -35,7 +35,7 @@ const lineSep         = '\x00';
 
 const keywordSetsByLang = {};
 
-//:7e3a;
+//:lefv;
 function tokenRegEx(languageId, eol = true, global = false) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
   const regxStr = `${commLft}([\\u200B\\u200C\\u200D\\u2060]+\\.`+
@@ -60,10 +60,9 @@ function updateGutter() {
   const filePath = editor.document.uri.fsPath;
   const gen1DecRanges = [];
   const gen2DecRanges = [];
-  const globalMarks = marks.getMarksForFile(filePath);
-  for(const mark of globalMarks) {
-    let {gen, lineNumber} = mark;
-    gen = lineNumber % 2 + 1;
+  const marks = marks.getMarksForFile(filePath);
+  for(const mark of marks) {
+    const {gen, lineNumber} = mark;
     const range = new vscode.Range(lineNumber, 0, lineNumber, 0);
     switch(gen) {
       case 1: gen1DecRanges.push({range}); break;
@@ -79,7 +78,7 @@ function isKeyWord(languageId, word) {
   return keywordSetsByLang[languageId].has(word);
 }
 
-//:kcp7;
+//:woch;
 async function getCompText(mark) {
   let   {document, lineNumber, languageId} = mark;
   const tokenRegx = tokenRegEx(languageId);
@@ -259,33 +258,58 @@ async function replaceLineInDocument(document, lineNumber, newText) {
   await vscode.workspace.applyEdit(edit);
 }
 
-//:433b;
-async function delMarkFromLineAndGlobal(document, lineNumber) {
-  const languageId   = document.languageId;
-  const line         = document.lineAt(lineNumber);
-  const lineText     = line.text;
-  const tokenMatches = tokenRegEx(languageId, false).exec(lineText);
-  if(!tokenMatches) return;
-  const token = tokenMatches[0];
-  if (token.length > lineText.length) return;
-  const end       = line.range.end;
-  const newEndPos = end.translate(0, -token.length);
-  const edit      = new vscode.WorkspaceEdit();
-  edit.delete(document.uri, new vscode.Range(newEndPos, end));
-  await vscode.workspace.applyEdit(edit);
-  marks.delGlobalMark(token);
+//:3rg9;`
+async function delMarkFromLineAndGlobal(document, lineNumber, lineText) {
+  const languageId = document.languageId;
+  const line       = document.lineAt(lineNumber);
+  // remove token from line
+  if(line) {
+    lineText ??= line.text;
+    const tokenMatches = tokenRegEx(languageId, false).exec(lineText);
+    if(tokenMatches) {
+      const token      = tokenMatches[0];
+      const end        = line.range.end;
+      const newEndPos  = end.translate(0, -token.length);
+      const tokenRange = new vscode.Range(newEndPos, end);
+      const edit       = new vscode.WorkspaceEdit();
+      edit.delete(document.uri, tokenRange);
+      await vscode.workspace.applyEdit(edit);
+      marks.delGlobalMark(token);
+    }
+  }
+  // remove token from globalMarks
+  
 }
 
-//:892c;
-async function toggle() {
+//:viqw;
+async function toggle(gen) {
   const editor   = vscode.window.activeTextEditor;
+  if(!editor) {log('info', 'toggle, no active editor'); return;}
   const document = editor.document;
   if(document.lineCount == 0) return;
   const lineNumber = editor.selection.active.line;
+  let mark = marks.getMarkForLine(lineNumber);
+  let lineText     = undefined;
+  let haveMark1or2 = true;
+  if(!mark) {
+    lineText     = document.lineAt(lineNumber)?.text ?? '';
+    haveMark1or2 = tokenRegEx(document.languageId, false).test(lineText);
+  }
+  if(haveMark1or2) {
+    await delMarkFromLineAndGlobal(document, lineNumber, lineText);
+    return;
+  }
+  mark ??= await marks.newMark(document, lineNumber, gen);
+
+
+
+  if(!mark) return;
+  lineText += mark.token;
+  await utils.replaceLine(document, lineNumber, lineText);
+  }
   const line       = document.lineAt(lineNumber);
   let   lineText   = line.text;
   const regex      = tokenRegEx(document.languageId, false);
-  log('toggle, lineText.length', lineText.length);
   if(regex.test(lineText))
     await delMarkFromLineAndGlobal(document, lineNumber);
   else {
@@ -335,13 +359,13 @@ async function scrollToPrevNext(fwd) {
 }
 
 async function clearFile(document, saveMarks = true) {
-  let haveDel = false;
-  await runOnAllTokensInDoc(document, true, false, async (params) => {
-    const {position} = params;
-    await delMarkFromLineAndGlobal(document, position.line, false);
-    haveDel = true;
-  });
-  if(haveDel && saveMarks) await marks.saveGlobalMarks();
+  // let haveDel = false;
+  // await runOnAllTokensInDoc(document, true, false, async (params) => {
+  //   const {position} = params;
+  //   await delMarkFromLineAndGlobal(document, position.line, false);
+  //   haveDel = true;
+  // });
+  // if(haveDel && saveMarks) await marks.saveGlobalMarks();
 }
 
 async function refreshMark(params) {

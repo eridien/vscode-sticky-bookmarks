@@ -30,7 +30,7 @@ async function nextCmd() {
 
 async function hideCmd() {
   log('hideCmd');
-  
+  text.updateGutter();
 }
 
 async function expandCmd() {

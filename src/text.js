@@ -10,14 +10,19 @@ const showCodeWhenCrumbs   = true;
 const openSideBarOnNewMark = true;
 const maxLinesInCompText   = 6;
 
-let context, gutterDecoration = null;
+let context, gutterDecGen1 = null, gutterDecGen2 = null;
 
 function init(contextIn) {
   context = contextIn;
   for(const [lang, keywords] of Object.entries(utils.keywords())) {
     keywordSetsByLang[lang] = new Set(keywords);
   }
-  gutterDecoration = vscode.window.createTextEditorDecorationType({ 
+  gutterDecGen1 = vscode.window.createTextEditorDecorationType({ 
+    gutterIconPath: vscode.Uri.file(path.join(
+                       context.extensionPath, 'images', 'bookmarkGen1.svg')),
+    gutterIconSize: 'contain',
+  });
+  gutterDecGen2 = vscode.window.createTextEditorDecorationType({ 
     gutterIconPath: vscode.Uri.file(path.join(
                        context.extensionPath, 'images', 'bookmarkGen2.svg')),
     gutterIconSize: 'contain',
@@ -39,14 +44,34 @@ function tokenRegEx(languageId, eol = true, global = false) {
   else       return new RegExp(regxStr);
 }
 
+const decorationType = vscode.window.createTextEditorDecorationType({
+  gutterIconSize: 'contain',
+  light: {
+    gutterIconPath: vscode.Uri.file('/path/to/icon-light.svg')
+  },
+  dark: {
+    gutterIconPath: vscode.Uri.file('/path/to/icon-dark.svg')
+  }
+});
+
 function updateGutter() {
   const editor = vscode.window.activeTextEditor;
   if (!editor) return;
   const filePath = editor.document.uri.fsPath;
+  const gen1DecRanges = [];
+  const gen2DecRanges = [];
   const globalMarks = marks.getMarksForFile(filePath);
-  const decorations = globalMarks.map(globalMark => ({range: new vscode.Range(
-                      globalMark.lineNumber, 0, globalMark.lineNumber, 0)}));
-  editor.setDecorations(gutterDecoration, decorations);
+  for(const mark of globalMarks) {
+    let {gen, lineNumber} = mark;
+    gen = lineNumber % 2 + 1;
+    const range = new vscode.Range(lineNumber, 0, lineNumber, 0);
+    switch(gen) {
+      case 1: gen1DecRanges.push({range}); break;
+      case 2: gen2DecRanges.push({range}); break;
+    }
+  }
+  editor.setDecorations(gutterDecGen1, gen1DecRanges);
+  editor.setDecorations(gutterDecGen2, gen2DecRanges);
 }
 
 function isKeyWord(languageId, word) {

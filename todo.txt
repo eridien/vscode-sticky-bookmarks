@@ -4,7 +4,7 @@ vsce package
 bugs
 
 todo 
-  add bookmark past \ at eol and past template strings
+  add plugin support, findSafeLine for now
   expand all in title menu (toggle folder)
   auto scroll
     scroll to top for functions
@@ -18,8 +18,6 @@ todo
   settings
 
 ???
-  back to adding to end of line
-  don't insert new line if toggling on a blank line
 
 
 impossible?

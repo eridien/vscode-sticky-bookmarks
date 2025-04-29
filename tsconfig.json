@@ -10,5 +10,5 @@
     "allowJs": true,
     "checkJs": false
   },
-  "include": ["**/*.js"]
+  "include": ["**/*.js", ".bookmarksgen2/bmg2-javascript-eolIsSafe.js"]
 }

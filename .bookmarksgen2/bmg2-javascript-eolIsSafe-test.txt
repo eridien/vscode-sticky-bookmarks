@@ -1,0 +1,48 @@
+
+// some comment with "fake quotes" and 'single quotes'
+a zero-length line ...
+
+a blank line with white-space...
+    
+\
+const f = 123; // real code \
+const f = 123; // real code
+const f = 123; \
+line ends with \ and a space \ 
+line ends with \ and two spaces \  
+// real code
+const a = "string with a ' single quote inside";
+const b = 'string with a " double quote inside';
+const c = "string with escaped \"double quote\" properly handled";
+const d = 'string with escaped \'single quote\' properly handled';
+const e = `template
+  still template // this is not a real comment
+  inside template /* also not a block comment */
+  with escaped backtick \` and real text
+  ending here`;
+const f = 123; // real code
+/* block comment with "quotes" and 'single quotes' */
+/* block wraps lines
+    const g = "ends properly";
+    const h = `open template
+      with escaped \\` fake backtick
+      still inside template string`;
+    const i = "weird \\"text\\" inside double";
+    const j = 'weird \\'text\\' inside single';
+    const k = `template with ${'embedded string with "quotes" and \'single quotes\''} inside`;
+    const l = `another template \${5+5}`;
+    const m = "simple string";
+    const n = 'simple single string';
+    const o = 5; /* end of file comment with "quotes" */
+                                                               */  
+const g = "ends properly";
+const h = `open template
+  with escaped \\` fake backtick
+  still inside template string`;
+const i = "weird \\"text\\" inside double";
+const j = 'weird \\'text\\' inside single';
+const k = `template with ${'embedded string with "quotes" and \'single quotes\''} inside`;
+const l = `another template \${5+5}`;
+const m = "simple string";
+const n = 'simple single string';
+const o = 5; /* end of file comment with "quotes" */

@@ -4,7 +4,8 @@ vsce package
 bugs
 
 todo 
-  add plugin support, findSafeLine for now
+  support gen1 marks
+  add plugin support, eolIsSafe for now
   expand all in title menu (toggle folder)
   auto scroll
     scroll to top for functions

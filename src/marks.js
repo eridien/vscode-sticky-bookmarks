@@ -12,12 +12,11 @@ let initFinished = false;
 
 // markByLoc holds all global marks
 let markByLoc       = new Map(); 
-// these have a value of a set of marks for entry
 let markSetByToken  = new Map();
 let markSetByFsPath = new Map();
 
 async function addMarkToStorage(mark, save = true) {
-  markByLoc.add(mark.loc, mark);
+  markByLoc.set(mark.loc, mark);
   let tokenMarkSet = markSetByToken.get(mark.token);
   if (!tokenMarkSet) {
     tokenMarkSet = new Set();
@@ -27,7 +26,7 @@ async function addMarkToStorage(mark, save = true) {
   let fileMarkSet = markSetByFsPath.get(mark.fsPath);
   if (!fileMarkSet) {
     fileMarkSet = new Set();
-    markSetByFsPath.set(mark.fsPath, fileMarkSet);
+    markSetByFsPath.set(mark.document.uri.fsPath, fileMarkSet);
   }
   fileMarkSet.add(mark);
   if(save) await saveMarkStorage();
@@ -64,13 +63,14 @@ async function deleteMarkFromTokenSet(mark) {
   }
 }
 
-async function deleteMark(mark, save = true) {
+async function deleteMark(mark, save = true, update = true) {
   markByLoc.delete(mark.loc);
   await deleteMarkFromFileSet(mark);  
   await deleteMarkFromTokenSet(mark);  
   const [fsPath, lineNumber] = mark.loc.split('\x00');
   utils.deleteMarkFromText(fsPath, +lineNumber);
-  if(save) await saveMarkStorage();
+  if(save)   await saveMarkStorage();
+  if(update) utils.updateSide(); 
 }
 
 async function deleteMarksFromFile(fsPath) {
@@ -84,42 +84,7 @@ async function deleteMarksFromFile(fsPath) {
 async function init(contextIn) {
   start('init marks');
   context = contextIn;
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-  if (!workspaceFolders || workspaceFolders.length === 0) {
-    globalMarks = {};
-    await context.workspaceState.update('globalMarks', globalMarks);
-    log('no workspace folders found');
-    return {};
-  }
-  if(!DONT_LOAD_MARKS_ON_START)
-    globalMarks = context.workspaceState.get('globalMarks', {});
-
-  const docsByFsPath = {};
-  const checkedFiles = new Set();
-  const badFiles     = new Set();
-  for(const [token, mark] of Object.entries(globalMarks)) {
-    const fileFsPath = mark.fileFsPath;
-    if(badFiles.has(fileFsPath)) {
-      delete globalMarks[token];
-      continue;
-    }
-    if(!checkedFiles.has(fileFsPath)) {
-      checkedFiles.add(fileFsPath);
-      const uri      = vscode.Uri.file(fileFsPath);
-      const folder   = vscode.workspace.getWorkspaceFolder(uri);
-      const document = await vscode.workspace.openTextDocument(uri);
-      if(document) docsByFsPath[fileFsPath] = document;
-      if(!folder || !document || !await utils.fileExists(fileFsPath)) {
-        log(`folder ${mark.folderName} or file ${mark.fileName} missing`);
-        badFiles.add(fileFsPath);
-        delete globalMarks[token];
-        continue;
-      }
-    }
-    mark.document = docsByFsPath[fileFsPath];
-    mark.inWorkspace = true;
-  }
-  await context.workspaceState.update('globalMarks', globalMarks);
+  await loadMarkStorage();
   initFinished = true;
   utils.updateSide(); 
   dumpGlobalMarks('init');
@@ -143,9 +108,9 @@ function getGlobalMarks()     {return globalMarks}
 
 function getMarkForLine(document, lineNumber) {
   const fileFsPath = document.uri.fsPath;
-  return Object.values(globalMarks).
-            find(mark => mark.fileFsPath === fileFsPath &&
-                         mark.lineNumber === lineNumber);
+  const loc = document.uri.fsPath + '\x00' + 
+              lineNumber.toString().padStart(6, '0');
+  return markByLoc.get(loc);
 }
 
 function delMarkForLine(document, lineNumber) {
@@ -166,18 +131,18 @@ async function saveGlobalMarks() {
 
 function dumpGlobalMarks(caller, list, dump) {
   caller = caller + ' marks: ';
-  if(Object.keys(globalMarks).length === 0) {
-    log(caller, '<no globalMarks>');
+  let marks = Array.from(markByLoc.values());
+  if(marks.length === 0) {
+    log(caller, '<no marks>');
     return;
   }
-  if(dump) log(caller, 'globalMarks', globalMarks);
+  if(dump) log(caller, 'all marks', marks);
   else if(list) {
-    let sortedMarks = Object.entries(globalMarks)
-       .sort((a, b) => ( 
-            a[1].fileRelUriPath.localeCompare(b[1].fileRelUriPath) ||
-            a[1].lineNumber - b[1].lineNumber));
+    marks.sort((a, b) => ( 
+      a[1].fileRelUriPath.localeCompare(b[1].fileRelUriPath) ||
+      a[1].lineNumber - b[1].lineNumber));
     let str = "\n";
-    for(let [token, mark] of sortedMarks) {
+    for(let [token, mark] of marks) {
       str += `${utils.tokenToStr(token)} -> ${mark.fileRelUriPath} ` +
              `${mark.lineNumber.toString().padStart(3, ' ')} `+
              `${mark.languageId}\n`;
@@ -186,24 +151,20 @@ function dumpGlobalMarks(caller, list, dump) {
   }
   else {
     let str = "";
-    for(let token of Object.keys(globalMarks)) {
-      token = utils.tokenToStr(token);
-      str += token + ' ';
+    for(const mark of marks) {
+      str += utils.tokenToStr(mark.token) + ' ';
     }
     log(caller, str);
   }
 }
 
 async function newMark(document, lineNumber, gen, token) {
-  const filePaths = utils.getPathsFromDoc(document); 
-  if(!filePaths?.inWorkspace) return null;
   token ??= utils.getUniqueToken(document);
-  const mark = {token, document, lineNumber, gen,
-                languageId: document.languageId};
-  Object.assign(mark, filePaths);
+  const mark = {document, lineNumber, gen, token};
   mark.loc = document.uri.fsPath + '\x00' + 
              lineNumber.toString().padStart(6, '0');
-  globalMarks[token] = mark;
+  mark.fileRelUriPath = await utils.getfileRelUriPath(document);
+  await addMarkToStorage(mark);
   return mark;
 }
 

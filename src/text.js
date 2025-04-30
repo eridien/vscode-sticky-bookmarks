@@ -271,28 +271,19 @@ async function delMarkFromLineAndGlobal(document, lineNumber, lineText) {
 }
 
 async function toggle(gen) {
-  const editor   = vscode.window.activeTextEditor;
-  if(!editor) {log('info', 'no active editor'); return;}
+  const editor = vscode.window.activeTextEditor;
+  if(!editor) {log('info', 'No active editor.'); return;}
   const document = editor.document;
   if(document.lineCount == 0) return;
   const lineNumber = editor.selection.active.line;
   let mark = marks.getMarkForLine(document, lineNumber);
-  let lineText = undefined;
-  let haveMark1or2 = true;
-  if(!mark) {
-    lineText = document.lineAt(lineNumber)?.text ?? '';
-    haveMark1or2 = tokenRegEx(document.languageId, false).test(lineText);
-  }
-  if(haveMark1or2) {
-    await delMarkFromLineAndGlobal(document, lineNumber, lineText);
-    utils.updateSide(); 
+  if(mark) {
+    await marks.deleteMark(mark, true, true);
     return;
   }
   mark ??= await marks.newMark(document, lineNumber, gen);
   if(gen == 2) {
-    const token = mark.token;
-    lineText ??= document.lineAt(lineNumber).text;
-    lineText += mark.token;
+    let lineText = document.lineAt(lineNumber).text + mark.token;
     await utils.replaceLine(document, lineNumber, lineText);
   }
   if(openSideBarOnNewMark)  {
@@ -302,7 +293,6 @@ async function toggle(gen) {
     await vscode.commands.executeCommand(
                           'workbench.action.focusActiveEditorGroup');
   }
-  utils.updateSide(); 
   marks.dumpGlobalMarks('toggle');
 }
 

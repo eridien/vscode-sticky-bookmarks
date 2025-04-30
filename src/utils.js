@@ -202,19 +202,26 @@ function getPathsFromDoc(doc) {
   const fileUriPath = uri.path;
   const filePaths   = {fileFsPath, fileName, fileUriPath};
   const wsFolder    = vscode.workspace.getWorkspaceFolder(uri);
-  const inWorkspace = !!wsFolder;
-  if(!inWorkspace) {
-    filePaths.inWorkspace = false;
-    return filePaths;
-  }
+  filePaths.inWorkspace = !!wsFolder;
+  if(!filePaths.inWorkspace) return filePaths;
   else {
     const wsPaths           = getPathsFromWorkspaceFolder(wsFolder);
     const folderUriPath     = wsPaths.folderUriPath;
     const fileRelUriPath    = fileUriPath.slice( folderUriPath.length + 1);
-    const relFilePaths      = {inWorkspace, fileRelUriPath};
+    const relFilePaths      = {fileRelUriPath};
     Object.assign(filePaths, wsPaths, relFilePaths);
     return filePaths;
   }
+}
+
+function getfileRelUriPath(document) {
+  if(!document) return null;
+  const uri         = document.uri;
+  const fileUriPath = uri.path;
+  const folder      = vscode.workspace.getWorkspaceFolder(uri);
+  if(!folder) return null;
+  const folderUriPath = folder.uri.path;
+  return fileUriPath.slice( folderUriPath.length + 1);
 }
 
 async function getFileLineDisplay(document, lineNumber) {
@@ -290,11 +297,12 @@ async function insertLine(document, lineNumber, lineText) {
   return await vscode.workspace.applyEdit(edit);
 }
 
-async function replaceLine(document, lineNumber, lineText) {
+async function replaceLine(document, lineNumber, lineText, update = true) {
   const line = document.lineAt(lineNumber);
   const edit = new vscode.WorkspaceEdit();
   edit.replace(document.uri, line.range, lineText);
-  return await vscode.workspace.applyEdit(edit);
+  await vscode.workspace.applyEdit(edit);
+  if(update) updateSide(); 
 }
 
 function getDocument(document) {
@@ -435,7 +443,7 @@ module.exports = {
   commentsByLang, keywords, fileExists, deleteMarkFromText,
   getUniqueToken, tokenToDigits, getTokenRegEx, getTokenRegExG,
   deleteLine, insertLine, replaceLine, debounce, sleep,
-  getPathsFromWorkspaceFolder, getPathsFromDoc,
+  getPathsFromWorkspaceFolder, getPathsFromDoc, getfileRelUriPath,
   getFocusedWorkspaceFolder, runOnAllFoldersInWorkspace,
   updateSide, getUniqueIdStr, tokenToStr, getDocument
 }

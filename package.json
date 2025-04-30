@@ -18,12 +18,12 @@
     "commands": [
       {
         "command": "sticky-bookmarks.toggleCmd",
-        "title": "Toggle Bookmark On/Off",
+        "title": "Toggle Gen1 Bookmark On/Off",
         "category": "Sticky Bookmarks"
       },
       {
         "command": "sticky-bookmarks.toggleGen1Cmd",
-        "title": "Toggle Gen1Bookmark On/Off",
+        "title": "Toggle Gen1 Bookmark On/Off",
         "category": "Sticky Bookmarks"
       },
       {
@@ -98,8 +98,8 @@
       },
       {
         "command": "sticky-bookmarks.toggleGen1Cmd",
-        "key": "ctrl+alt+/",
-        "mac": "cmd+alt+/",
+        "key": "ctrl+alt+shift+/",
+        "mac": "cmd+alt+shift+/",
         "when": "editorTextFocus"
       },
       {

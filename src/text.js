@@ -57,11 +57,11 @@ const decorationType = vscode.window.createTextEditorDecorationType({
 function updateGutter() {
   const editor = vscode.window.activeTextEditor;
   if (!editor) return;
-  const filePath = editor.document.uri.fsPath;
+  const fsPath = editor.document.uri.fsPath;
   const gen1DecRanges = [];
   const gen2DecRanges = [];
-  const marks = marks.getMarksForFile(filePath);
-  for(const mark of marks) {
+  const marksForFile  = marks.getMarksForFile(fsPath);
+  for(const mark of marksForFile) {
     const {gen, lineNumber} = mark;
     const range = new vscode.Range(lineNumber, 0, lineNumber, 0);
     switch(gen) {
@@ -262,7 +262,6 @@ async function replaceLineInDocument(document, lineNumber, newText) {
 async function delMarkFromLineAndGlobal(document, lineNumber, lineText) {
   const languageId = document.languageId;
   const line       = document.lineAt(lineNumber);
-  // remove token from line
   if(line) {
     lineText ??= line.text;
     const tokenMatches = tokenRegEx(languageId, false).exec(lineText);
@@ -274,61 +273,47 @@ async function delMarkFromLineAndGlobal(document, lineNumber, lineText) {
       const edit       = new vscode.WorkspaceEdit();
       edit.delete(document.uri, tokenRange);
       await vscode.workspace.applyEdit(edit);
-      marks.delGlobalMark(token);
     }
   }
-  // remove token from globalMarks
-  
+  marks.delMarkForLine(document, lineNumber);
 }
 
-//:viqw;
+//:6p59;
 async function toggle(gen) {
   const editor   = vscode.window.activeTextEditor;
-  if(!editor) {log('info', 'toggle, no active editor'); return;}
+  if(!editor) {log('info', 'no active editor'); return;}
   const document = editor.document;
   if(document.lineCount == 0) return;
   const lineNumber = editor.selection.active.line;
-  let mark = marks.getMarkForLine(lineNumber);
-  let lineText     = undefined;
+  let mark = marks.getMarkForLine(document, lineNumber);
+  let lineText = undefined;
   let haveMark1or2 = true;
   if(!mark) {
-    lineText     = document.lineAt(lineNumber)?.text ?? '';
+    lineText = document.lineAt(lineNumber)?.text ?? '';
     haveMark1or2 = tokenRegEx(document.languageId, false).test(lineText);
   }
   if(haveMark1or2) {
     await delMarkFromLineAndGlobal(document, lineNumber, lineText);
-    return;
+    utils.updateSidebar(); 
+    updateGutter();
+   return;
   }
   mark ??= await marks.newMark(document, lineNumber, gen);
-
-
-
-  if(!mark) return;
-  lineText += mark.token;
-  await utils.replaceLine(document, lineNumber, lineText);
-  }
-  const line       = document.lineAt(lineNumber);
-  let   lineText   = line.text;
-  const regex      = tokenRegEx(document.languageId, false);
-  if(regex.test(lineText))
-    await delMarkFromLineAndGlobal(document, lineNumber);
-  else {
-    const mark = await marks.newGlobalMark(document, lineNumber);
-    if(!mark) return;
+  if(gen == 2) {
+    const token = mark.token;
+    lineText ??= document.lineAt(lineNumber).text;
     lineText += mark.token;
     await utils.replaceLine(document, lineNumber, lineText);
-    const position   = new vscode.Position(lineNumber, 0);
-    editor.selection = new vscode.Selection(position, position);
-    editor.revealRange(new vscode.Range(position, position), 
-            vscode.TextEditorRevealType.InCenterIfOutsideViewport);
-    if(openSideBarOnNewMark)  {
-      await vscode.commands.executeCommand(
-                           'workbench.view.extension.stickyBookmarks');
-      await utils.sleep(100);
-      await vscode.commands.executeCommand(
-                            'workbench.action.focusActiveEditorGroup');
-    }
   }
+  if(openSideBarOnNewMark)  {
+    await vscode.commands.executeCommand(
+                          'workbench.view.extension.stickyBookmarks');
+    await utils.sleep(100);
+    await vscode.commands.executeCommand(
+                          'workbench.action.focusActiveEditorGroup');
+  }
+  utils.updateSidebar(); 
+  updateGutter();
   marks.dumpGlobalMarks('toggle');
 }
 

@@ -72,14 +72,16 @@ function getGlobalMark(token) {return globalMarks[token]}
 function getGlobalMarks()     {return globalMarks}
 
 //:hljd;
-function getMarkForLine(lineNumber, fileFsPath) {
-  if(!fileFsPath) {
-    const editor = vscode.window.activeTextEditor;
-    if (editor) { fileFsPath = editor.document.uri.fsPath; }
-    else        { log('getMarkForLine: no active editor'); return null; }
-  }
-  return globalMarks.find(mark => mark.fileFsPath === fileFsPath &&
-                                  mark.lineNumber === lineNumber);
+function getMarkForLine(document, lineNumber) {
+  const fileFsPath = document.uri.fsPath;
+  return Object.values(globalMarks).
+            find(mark => mark.fileFsPath === fileFsPath &&
+                         mark.lineNumber === lineNumber);
+}
+
+function delMarkForLine(document, lineNumber) {
+  const mark = getMarkForLine(document, lineNumber);
+  if(mark) delete globalMarks[mark.token];
 }
 
 function getMarksForFile(fileFsPath) {
@@ -93,7 +95,7 @@ async function saveGlobalMarks() {
   dumpGlobalMarks('saveGlobalMarks');
 }
 
-//:69j9;
+//:wbbf;
 function dumpGlobalMarks(caller, list, dump) {
   caller = caller + ' marks: ';
   if(Object.keys(globalMarks).length === 0) {
@@ -124,12 +126,13 @@ function dumpGlobalMarks(caller, list, dump) {
   }
 }
 
+//:0whm;
 async function newMark(document, lineNumber, gen, token) {
+  const filePaths = utils.getPathsFromDoc(document); 
+  if(!filePaths?.inWorkspace) return null;
   token ??= utils.getUniqueToken(document);
   const mark = {token, document, lineNumber, gen,
                 languageId: document.languageId};
-  const filePaths = utils.getPathsFromFileDoc(document); 
-  if(!filePaths?.inWorkspace) return null;
   Object.assign(mark, filePaths);
   globalMarks[token] = mark;
   return mark;
@@ -152,8 +155,8 @@ async function delGlobalMarksForFile(document) {
   await saveGlobalMarks();
 }
 
-module.exports = {init, waitForInit, dumpGlobalMarks, replaceGlobalMark, 
-                  getGlobalMarks, getMarksForFile, getMarkForLine, saveGlobalMarks,
+module.exports = {init, waitForInit, dumpGlobalMarks, replaceGlobalMark, saveGlobalMarks,
+                  getGlobalMarks, getMarksForFile, getMarkForLine, delMarkForLine,
                   getGlobalMark,  putGlobalMark,   delGlobalMark,
                   newMark,  delGlobalMarksForFile};
 

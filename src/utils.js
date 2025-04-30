@@ -192,7 +192,7 @@ function getPathsFromWorkspaceFolder(folder) {
   return wsPaths;
 }
 
-function getPathsFromFileDoc(doc) {
+function getPathsFromDoc(doc) {
   if(!doc) return null;
   const uri         = doc.uri;
   const fileFsPath  = uri.fsPath;
@@ -217,7 +217,7 @@ function getPathsFromFileDoc(doc) {
 
 //:ejcq;
 async function getFileLineDisplay(document, lineNumber) {
-  const {fileRelUriPath} = getPathsFromFileDoc(document);
+  const {fileRelUriPath} = getPathsFromDoc(document);
   return `File: ${fileRelUriPath}, Line: ${lineNumber.padStart(3, ' ')}`;
 }
 
@@ -290,6 +290,7 @@ async function insertLine(document, lineNumber, lineText) {
   return await vscode.workspace.applyEdit(edit);
 }
 
+//:xxre;
 async function replaceLine(document, lineNumber, lineText) {
   const line = document.lineAt(lineNumber);
   const edit = new vscode.WorkspaceEdit();
@@ -297,7 +298,7 @@ async function replaceLine(document, lineNumber, lineText) {
   return await vscode.workspace.applyEdit(edit);
 }
 
-//:obtt;
+//:zvd5;
 function getDocument(document) {
     if (document) return document;
     const editor = vscode.window.activeTextEditor;
@@ -354,7 +355,7 @@ function numberToInvBase4(num) {
 
 let uniqueIdNum = 0;
 
-//:fnrw;
+//:x8fp;
 function getUniqueToken(document) {
   const [commLft, commRgt] = commentsByLang(document.languageId);
   return commLft + numberToInvBase4(++uniqueIdNum) + '.' + commRgt;
@@ -364,7 +365,7 @@ function getUniqueIdStr() {
   return (++uniqueIdNum).toString();
 }
 
-//:379a;
+//:zmm7;
 function tokenToDigits(token) {
   const map = {
     '\u200B': '0', // Zero Width Space
@@ -381,7 +382,7 @@ function tokenToDigits(token) {
     .join('').padStart(4, '0');
 }
 
-//:62tk;
+//:eb5o;
 function tokenToStr(token) {
   return token.replaceAll('\u200B', '0')
               .replaceAll('\u200C', '1')
@@ -427,13 +428,13 @@ async function runOnAllFilesInFolder(func, folderFsPath, runOnAllBookmarksInFile
                                 .findFiles(pattern, '**/node_modules/**');
   await setBusy(true);
   const funcRes = [];
-  for(const file of files) {
-    try {
-      if(runOnAllBookmarksInFile) 
-           funcRes.push(await runOnAllBookmarksInFile(func, file.fsPath));
-      else funcRes.push(await func({document, docText, position, lineText, token}));
-    } catch(_e) {continue}
-  }
+  // for(const file of files) {
+  //   try {
+  //     if(runOnAllBookmarksInFile) 
+  //          funcRes.push(await runOnAllBookmarksInFile(func, file.fsPath));
+  //     else funcRes.push(await func({document, docText, position, lineText, token}));
+  //   } catch(_e) {continue}
+  // }
   await setBusy(false);
   return funcRes;
 }
@@ -443,7 +444,7 @@ module.exports = {
   commentsByLang, keywords, fileExists,
   getUniqueToken, tokenToDigits, getTokenRegEx, getTokenRegExG,
   deleteLine, insertLine, replaceLine, debounce, sleep,
-  getPathsFromWorkspaceFolder, getPathsFromFileDoc,
+  getPathsFromWorkspaceFolder, getPathsFromDoc,
   getFocusedWorkspaceFolder, runOnAllFoldersInWorkspace,
   updateSidebar, getUniqueIdStr, tokenToStr, getDocument
 }

@@ -221,13 +221,13 @@ async function bookmarkClick(item) {
   if(tokenMatches.length === 0) {
     log('bookmarkClick, no token in line', mark.lineNumber,
         'of', mark.fileName, ', removing GlobalMark', mark.token);
-    marks.delGlobalMark[mark.token];
+    marks.deleteMark[mark];
     await marks.saveGlobalMarks();
   }
   else {
     while(tokenMatches.length > 1 && tokenMatches[0][0] !== mark.token) {
       const foundToken = tokenMatches[0][0];
-      marks.delGlobalMark[foundToken];
+      marks.deleteMark[foundToken];
       await marks.saveGlobalMarks();
       tokenMatches.shift();
     }
@@ -383,7 +383,7 @@ async function refreshFile(document) {
   for(const globalMark of globalMarksInFile) {
     const token = globalMark.token;
     if(!tokens.has(token)) {
-      await marks.delGlobalMark(token);
+      await marks.deleteMark(token);
       haveMarkChg = true;
     }
   }
@@ -415,9 +415,27 @@ async function runOnAllMarksInFile(func, fileFsPath) {
   return funcRes;
 }
 
+async function deleteMarkFromText(fsPath, lineNumber) {
+  const document = await vscode.workspace.openTextDocument(fsPath);
+  if(!document || lineNumber >= document.lineCount) return;
+  const line       = document.lineAt(lineNumber);
+  const lineText   = line.text;
+  const languageId = document.languageId;
+  const tokenRegx  = tokenRegEx(languageId, true);
+  const matches    = tokenRegx.exec(lineText);
+  if(matches) {
+    const token = matches[0];
+    const newText = lineText.slice(0, -token.length);
+    const edit = new vscode.WorkspaceEdit();
+    edit.replace(document.uri, line.range, newText);
+    await vscode.workspace.applyEdit(edit);
+  }
+}
+
 module.exports = {init, getLabel, bookmarkClick, refreshMenu,
                   clearDecoration, justDecorated, updateGutter,
                   toggle, scrollToPrevNext, delMarkFromLineAndGlobal,    
-                  clearFile, refreshFile};
+                  clearFile, refreshFile, deleteMarkFromText
+                  };
 
 

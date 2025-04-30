@@ -8,75 +8,78 @@ const DONT_LOAD_MARKS_ON_START = false;
 let globalMarks = {};
 
 let context;
-// a loc is {File, lineNumber};
+let initFinished = false;
+
 // markByLoc holds all global marks
-// there can only be one mark per loc
-// so loc is unique in mark
-let markByLoc      = new Map(); 
-// markSetByToken has a value of a weakSet of marks
-let markSetByToken = new Map();
-let initFinished   = false;
+let markByLoc       = new Map(); 
+// these have a value of a set of marks for entry
+let markSetByToken  = new Map();
+let markSetByFsPath = new Map();
 
-function cleanupWeakMap(weakMap) {
-  for (let [loc, markSet] of Array.from(weakMap.entries())) {
-    let isEmpty = true;
-    for (let obj of loc.references || []) {
-      if (markSet.has(obj)) {
-        isEmpty = false;
-        break;
-      }
-    }
-    if (isEmpty) { weakMap.delete(loc); }
+async function addMarkToStorage(mark, save = true) {
+  markByLoc.add(mark.loc, mark);
+  let tokenMarkSet = markSetByToken.get(mark.token);
+  if (!tokenMarkSet) {
+    tokenMarkSet = new Set();
+    markSetByToken.set(mark.token, tokenMarkSet);
   }
-}
-function cleanupMap(markSetByToken) {
-  for (let [token, markSet] of markSetByToken.entries()) {
-    let isEmpty = true;
-    // Check if any tracked references still exist in the markSet
-    for (let obj of key.references || []) {
-      if (markSet.has(obj)) {
-        isEmpty = false;
-        break;
-      }
-    }
-
-    // If the markSet is empty, remove it from the markSetByToken
-    if (isEmpty) {
-      markSetByToken.delete(key);
-    }
+  tokenMarkSet.add(mark);
+  let fileMarkSet = markSetByFsPath.get(mark.fsPath);
+  if (!fileMarkSet) {
+    fileMarkSet = new Set();
+    markSetByFsPath.set(mark.fsPath, fileMarkSet);
   }
+  fileMarkSet.add(mark);
+  if(save) await saveMarkStorage();
 }
 
-console.log("After cleanup:", map.has(objKey)); // Might be false after GC
-async function addMarkToMarkSetByToken(mark) {
-  let markSet = markSetByToken.get(mark.token);
-  if(!markSet) {
-    markSet = new WeakSet();
-    markSetByToken.add(mark.token, markSet);
+async function loadMarkStorage() {
+  if(DONT_LOAD_MARKS_ON_START) return;
+  const marks = context.workspaceState.get('marks', []);
+  for (const mark of marks) {
+    const uri     = vscode.Uri.file(mark.fileFsPath);
+    mark.document = await vscode.workspace.openTextDocument(uri);
+    await addMarkToStorage(mark, false);
   }
-  markSet.add(mark);
+} 
+
+async function saveMarkStorage() {
+  await context.workspaceState.update('marks', Object.values(markByLoc));
 }
 
-// Example Usage
-let map = new Map();
-let objKey = { references: [] }; // Track references manually
-let weakSetValue = new WeakSet();
+async function deleteMarkFromFileSet(mark) {
+  let fileMarkSet = markSetByFsPath.get(mark.fsPath);
+  if (fileMarkSet) {
+    fileMarkSet.delete(mark);
+    if (fileMarkSet.size === 0) markSetByFsPath.delete(mark.fsPath);
+  }
+}
 
-let trackedObj = { name: "Temporary" };
-objKey.references.push(trackedObj);
-weakSetValue.add(trackedObj);
+async function deleteMarkFromTokenSet(mark) {
+  if(mark.gen === 1) return;
+  let tokenMarkSet = markSetByToken.get(mark.token);
+  if (tokenMarkSet) {
+    tokenMarkSet.delete(mark);
+    if (tokenMarkSet.size === 0) markSetByToken.delete(mark.token);
+  }
+}
 
-map.set(objKey, weakSetValue);
+async function deleteMark(mark, save = true) {
+  markByLoc.delete(mark.loc);
+  await deleteMarkFromFileSet(mark);  
+  await deleteMarkFromTokenSet(mark);  
+  const [fsPath, lineNumber] = mark.loc.split('\x00');
+  utils.deleteMarkFromText(fsPath, +lineNumber);
+  if(save) await saveMarkStorage();
+}
 
-console.log("Before cleanup:", map.has(objKey)); // true
-
-// Simulate garbage collection by removing the last reference
-trackedObj = null;
-
-// Cleanup process
-cleanupMap(map);
-
-
+async function deleteMarksFromFile(fsPath) {
+  const markSet = markSetByFsPath.get(fsPath);
+  if (markSet) {
+    for (const mark of markSet) await deleteMark(mark, false);
+  }
+  await saveMarkStorage();
+}
 
 async function init(contextIn) {
   start('init marks');
@@ -135,7 +138,6 @@ function waitForInit() {
 }
 
 function putGlobalMark(token) {globalMarks[token] = token}
-function delGlobalMark(token) {delete globalMarks[token]}
 function getGlobalMark(token) {return globalMarks[token]}
 function getGlobalMarks()     {return globalMarks}
 
@@ -199,6 +201,8 @@ async function newMark(document, lineNumber, gen, token) {
   const mark = {token, document, lineNumber, gen,
                 languageId: document.languageId};
   Object.assign(mark, filePaths);
+  mark.loc = document.uri.fsPath + '\x00' + 
+             lineNumber.toString().padStart(6, '0');
   globalMarks[token] = mark;
   return mark;
 }
@@ -211,7 +215,7 @@ async function replaceGlobalMark(oldToken, newToken) {
   dumpGlobalMarks('replaceGlobalMark');
 }
 
-async function delGlobalMarksForFile(document) {
+async function deleteMarksForFile(document) {
   const docUriPath = document.uri.path;
   for(const [token, mark] of Object.entries(globalMarks)) {
     if(mark.fileUriPath.startsWith(docUriPath)) 
@@ -222,8 +226,8 @@ async function delGlobalMarksForFile(document) {
 
 module.exports = {init, waitForInit, dumpGlobalMarks, replaceGlobalMark, saveGlobalMarks,
                   getGlobalMarks, getMarksForFile, getMarkForLine, delMarkForLine,
-                  getGlobalMark,  putGlobalMark,   delGlobalMark,
-                  newMark,  delGlobalMarksForFile};
+                  getGlobalMark,  putGlobalMark,   deleteMark,
+                  newMark,  deleteMarksForFile};
 
 
 

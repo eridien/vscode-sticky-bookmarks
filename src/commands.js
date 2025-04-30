@@ -35,7 +35,7 @@ async function nextCmd() {
 
 async function hideCmd() {
   log('hideCmd');
-  text.updateGutter();
+  utils.updateSide();
 }
 
 async function expandCmd() {
@@ -45,7 +45,6 @@ async function expandCmd() {
 
 async function refreshCmd() {
   log('refreshCmd');
-  //:yusi;
   await text.refreshMenu();
 }
 
@@ -103,41 +102,39 @@ let sidebarIsVisible = false;
 
 async function changedSidebarVisiblitiy(visible) {
   if(visible && !sidebarIsVisible) {
-    utils.updateSidebar();
+    utils.updateSide();
   }
   sidebarIsVisible = visible;
-  utils.updateSidebar(); 
+  utils.updateSide(); 
 }
 
 async function changedDocument() {
-  utils.updateSidebar();
+  utils.updateSide();
 }
 
 async function changedEditor(editor) {
   if(!editor || !editor.document) {
     return;
   }
-  utils.updateSidebar();
+  utils.updateSide();
 }
 
 async function changedVisEditors() {
-  utils.updateSidebar();
+  utils.updateSide();
 }  
 
 const changedSelection = utils.debounce(async (event) => {
   const {textEditor} = event;
   text.clearDecoration();
   await text.refreshFile(textEditor.document);
-  utils.updateSidebar(); 
-  text.updateGutter();
+  utils.updateSide(); 
 }, 200);
 
 const changedText = utils.debounce(async (event) => {
   const {document} = event;
   text.clearDecoration();
   await text.refreshFile(event.document);
-  utils.updateSidebar(); 
-  text.updateGutter();
+  utils.updateSide(); 
 }, 200);
 
 module.exports = { init, toggleCmd, toggleGen1Cmd, prevCmd, nextCmd, 

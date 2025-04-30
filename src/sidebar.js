@@ -20,7 +20,7 @@ let showingBusy = false;
 function setBusy(busy, blinking = false) {
   if (treeView) 
       treeView.message = busy ? '⟳ Processing Bookmarks ...' : '';
-  utils.updateSidebar();
+  utils.updateSide();
   if(blinking) return;
   if(busy && !showingBusy) {
     showingBusy = true;
@@ -98,7 +98,6 @@ async function getNewMarkItem(mark) {
 
 let logIdx = 0;
 
-//:oyqp;
 async function getItemTree() {
   // start('getItemTree');
   // log('getItemTree', logIdx++);
@@ -216,7 +215,6 @@ async function getItemTree() {
   }
   // end('getItemTree');
   itemTree = rootItems;
-  text.updateGutter();
   return itemTree;
 }
 
@@ -235,7 +233,7 @@ async function goto(item) {
            closedFolders.delete(folderItem.folderFsPath);
         else
            closedFolders.add(folderItem.folderFsPath);
-        utils.updateSidebar();
+        utils.updateSide();
       }
       break;
     case 'file':

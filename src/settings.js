@@ -72,5 +72,10 @@ registerSettingCallback('ignoreFilePatterns', parseAndSaveIgnoreFilePatterns);
 //   parseAndSaveIgnoreFilePatterns(ignoreFilePatternStr);
 // }
 
+async function isFileOk(uri) {
+  return true;
+}
+
+
 module.exports = { init, logSettings, updateSetting,
                    registerSettingCallback };

@@ -10,32 +10,34 @@ const showCodeWhenCrumbs   = true;
 const openSideBarOnNewMark = true;
 const maxLinesInCompText   = 6;
 
-let context, gutterDecGen1 = null, gutterDecGen2 = null;
+let context, gutDecLgt1Uri = null, gutDecLgt2Uri = null,
+             gutDecDrk1Uri = null, gutDecDrk2Uri = null;
 
 function init(contextIn) {
   context = contextIn;
   for(const [lang, keywords] of Object.entries(utils.keywords())) {
     keywordSetsByLang[lang] = new Set(keywords);
   }
-  gutterDecGen1 = vscode.window.createTextEditorDecorationType({ 
-    gutterIconPath: vscode.Uri.file(path.join(
-                       context.extensionPath, 'images', 'bookmarkGen1.svg')),
-    gutterIconSize: 'contain',
-  });
-  gutterDecGen2 = vscode.window.createTextEditorDecorationType({ 
-    gutterIconPath: vscode.Uri.file(path.join(
-                       context.extensionPath, 'images', 'bookmarkGen2.svg')),
-    gutterIconSize: 'contain',
-  });
+  gutDecLgt1Uri = vscode.Uri.file(path.join( 
+                  context.extensionPath, 'images', 'mark-icon-lgt1.svg'));
+  gutDecLgt2Uri = vscode.Uri.file(path.join( 
+                  context.extensionPath, 'images', 'mark-icon-lgt2.svg'));
+  gutDecDrk1Uri = vscode.Uri.file(path.join(
+                  context.extensionPath, 'images', 'mark-icon-drk1.svg'));
+  gutDecDrk2Uri = vscode.Uri.file(path.join(
+                  context.extensionPath, 'images', 'mark-icon-drk2.svg'));
 }
 
-const crumbSepLft     = '● ';
-const crumbSepRgt     = '●';
-const lineSep         = '\x00';
+function getGutterDec(gen) {
+  return vscode.window.createTextEditorDecorationType({
+    gutterIconSize: 'contain',
+    light: { gutterIconPath: gen === 1 ? gutDecLgt1Uri : gutDecLgt2Uri },
+    dark:  { gutterIconPath: gen === 1 ? gutDecDrk1Uri : gutDecDrk2Uri }
+  });
+};
 
 const keywordSetsByLang = {};
 
-//:lefv;
 function tokenRegEx(languageId, eol = true, global = false) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
   const regxStr = `${commLft}([\\u200B\\u200C\\u200D\\u2060]+\\.`+
@@ -44,17 +46,9 @@ function tokenRegEx(languageId, eol = true, global = false) {
   else       return new RegExp(regxStr);
 }
 
-const decorationType = vscode.window.createTextEditorDecorationType({
-  gutterIconSize: 'contain',
-  light: {
-    gutterIconPath: vscode.Uri.file('/path/to/icon-light.svg')
-  },
-  dark: {
-    gutterIconPath: vscode.Uri.file('/path/to/icon-dark.svg')
-  }
-});
-
 function updateGutter() {
+  const gutterDecGen1 = getGutterDec(1);
+  const gutterDecGen2 = getGutterDec(2);
   const editor = vscode.window.activeTextEditor;
   if (!editor) return;
   const fsPath = editor.document.uri.fsPath;
@@ -78,7 +72,6 @@ function isKeyWord(languageId, word) {
   return keywordSetsByLang[languageId].has(word);
 }
 
-//:woch;
 async function getCompText(mark) {
   let   {document, lineNumber, languageId} = mark;
   const tokenRegx = tokenRegEx(languageId);
@@ -119,7 +112,7 @@ async function getCompText(mark) {
     // add cleaned line to comptext with line sep
     // but only if not empty
     if(lineText.length == 0) continue
-    compText += ' ' + lineText + lineSep;
+    compText += ' ' + lineText + '\x00';
   }
   while(compText.length < 60 && 
         ++lineNumber < document.lineCount &&
@@ -171,7 +164,7 @@ async function getLabel(mark) {
         crumbStr = `${sym.name} > ${crumbStr}`;
       }
       crumbStr = crumbStr.slice(0, -2);
-      crumbStr = crumbSepLft +  crumbStr + crumbSepRgt;
+      crumbStr = '● ' +  crumbStr + '●';
       crumbStr = labelWithLineNum(lineNumber, crumbStr);
     }
     if(showCodeWhenCrumbs && crumbStr.length > 0) return crumbStr + compText;
@@ -258,7 +251,6 @@ async function replaceLineInDocument(document, lineNumber, newText) {
   await vscode.workspace.applyEdit(edit);
 }
 
-//:3rg9;`
 async function delMarkFromLineAndGlobal(document, lineNumber, lineText) {
   const languageId = document.languageId;
   const line       = document.lineAt(lineNumber);
@@ -278,7 +270,6 @@ async function delMarkFromLineAndGlobal(document, lineNumber, lineText) {
   marks.delMarkForLine(document, lineNumber);
 }
 
-//:6p59;
 async function toggle(gen) {
   const editor   = vscode.window.activeTextEditor;
   if(!editor) {log('info', 'no active editor'); return;}
@@ -294,9 +285,8 @@ async function toggle(gen) {
   }
   if(haveMark1or2) {
     await delMarkFromLineAndGlobal(document, lineNumber, lineText);
-    utils.updateSidebar(); 
-    updateGutter();
-   return;
+    utils.updateSide(); 
+    return;
   }
   mark ??= await marks.newMark(document, lineNumber, gen);
   if(gen == 2) {
@@ -312,8 +302,7 @@ async function toggle(gen) {
     await vscode.commands.executeCommand(
                           'workbench.action.focusActiveEditorGroup');
   }
-  utils.updateSidebar(); 
-  updateGutter();
+  utils.updateSide(); 
   marks.dumpGlobalMarks('toggle');
 }
 
@@ -376,8 +365,8 @@ async function refreshMark(params) {
 async function refreshFile(document) {
   log('refreshFile');
   const fileFsPath = document.uri.fsPath;
-  const fileMarks = await runOnAllBookmarksInFile(
-                             refreshMark, fileFsPath, runOnAllBookmarksInFile);
+  const fileMarks = await runOnAllMarksInFile(
+                             refreshMark, fileFsPath, runOnAllMarksInFile);
   const globalMarksInFile = marks.getMarksForFile(fileFsPath);
   const tokens = new Set();
   let haveMarkChg = false;
@@ -408,7 +397,7 @@ async function refreshMenu() {
   end('refreshMenu');
 }
 
-async function runOnAllBookmarksInFile(func, fileFsPath) {
+async function runOnAllMarksInFile(func, fileFsPath) {
   const uri      = vscode.Uri.file(fileFsPath);
   const document = await vscode.workspace.openTextDocument(uri);
   const docText  = document.getText();

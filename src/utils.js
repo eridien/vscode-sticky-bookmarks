@@ -3,23 +3,25 @@ const path   = require('path');
 const fs     = require('fs').promises;
 const {log, start, end}  = getLog('util');
 
-let context, sidebarProvider, sidebar;
+const includeFileGlobs = '**/*';
+const excludeFileGlobs = '**/node_modules/**';
 
-function initContext(contextIn) {
-  context = contextIn;
-}
+let context, cmds, sidebar, sidebarProvider, text, marks, settings;
 
-function init(sidebarProviderIn, sidebarIn) {
+function initContext(contextIn) { context = contextIn; }
+function init(commandsIn, sidebarIn, sidebarProviderIn, 
+                          textIn, marksIn, settingsIn) {
+  cmds     = commandsIn;
+  sidebar  = sidebarIn;
+  text     = textIn;
+  marks    = marksIn;
+  settings = settingsIn;
   sidebarProvider = sidebarProviderIn;
-  sidebar         = sidebarIn;
 }
 
-function updateSidebar() {
+function updateSide() {
   sidebarProvider._onDidChangeTreeData.fire();
-}
-
-async function setBusy(busy) {
-   await sidebar.setBusy(busy);
+  text.updateGutter();
 }
 
 const timers = {};
@@ -215,7 +217,6 @@ function getPathsFromDoc(doc) {
   }
 }
 
-//:ejcq;
 async function getFileLineDisplay(document, lineNumber) {
   const {fileRelUriPath} = getPathsFromDoc(document);
   return `File: ${fileRelUriPath}, Line: ${lineNumber.padStart(3, ' ')}`;
@@ -282,7 +283,6 @@ async function deleteLine(document, lineNumber) {
   await vscode.workspace.applyEdit(edit);
 }
 
-//:lp79;
 async function insertLine(document, lineNumber, lineText) {
   const position = new vscode.Position(lineNumber, 0);
   const edit     = new vscode.WorkspaceEdit();
@@ -290,7 +290,6 @@ async function insertLine(document, lineNumber, lineText) {
   return await vscode.workspace.applyEdit(edit);
 }
 
-//:xxre;
 async function replaceLine(document, lineNumber, lineText) {
   const line = document.lineAt(lineNumber);
   const edit = new vscode.WorkspaceEdit();
@@ -298,7 +297,6 @@ async function replaceLine(document, lineNumber, lineText) {
   return await vscode.workspace.applyEdit(edit);
 }
 
-//:zvd5;
 function getDocument(document) {
     if (document) return document;
     const editor = vscode.window.activeTextEditor;
@@ -355,7 +353,6 @@ function numberToInvBase4(num) {
 
 let uniqueIdNum = 0;
 
-//:x8fp;
 function getUniqueToken(document) {
   const [commLft, commRgt] = commentsByLang(document.languageId);
   return commLft + numberToInvBase4(++uniqueIdNum) + '.' + commRgt;
@@ -365,7 +362,6 @@ function getUniqueIdStr() {
   return (++uniqueIdNum).toString();
 }
 
-//:zmm7;
 function tokenToDigits(token) {
   const map = {
     '\u200B': '0', // Zero Width Space
@@ -382,7 +378,6 @@ function tokenToDigits(token) {
     .join('').padStart(4, '0');
 }
 
-//:eb5o;
 function tokenToStr(token) {
   return token.replaceAll('\u200B', '0')
               .replaceAll('\u200C', '1')
@@ -398,45 +393,37 @@ function getTokenRegExG() {
   return new RegExp("[\\u200B\\u200C\\u200D\\u2060]+\\.", 'g');
 }
 
-async function runOnAllFoldersInWorkspace(func, runOnFiles, runOnBookmarks) {
+async function runOnAllFoldersInWorkspace(folderFunc, fileFunc, markFunc) {
   const folders = vscode.workspace.workspaceFolders;
   if (!folders || folders.length === 0) {
-    log('info err', 'No Folders found in workspace'); 
+    log('info', 'No Folders found in workspace'); 
     return; 
   }
-  if(runOnFiles) {
-    await setBusy(true);
-    const funcRes = [];
-    for (const folder of folders)
-     funcRes.push(await runOnAllFilesInFolder(
-                                     func, folder.uri.fsPath, runOnBookmarks));
-    await setBusy(false);
-    return funcRes;
+  await sidebar.setBusy(true);
+  const foldersRes = [];
+  for (const folder of folders) {
+    const folderRes = [];
+    foldersRes.push(folderRes);
+    if (folderFunc) folderRes.push(await folderFunc(folder));
+    else            folderRes.push(null);
+    if(fileFunc || markFunc) {
+      const folderUri = folder.uri;
+      const pattern = 
+               new vscode.RelativePattern(folder.uri, includeFileGlobs);
+      const files = 
+            await vscode.workspace.findFiles(pattern, excludeFileGlobs);
+      for(const file of files()) {
+        const fileRes = [];
+        folderRes.push(fileRes);
+        if (fileFunc) fileRes.push(await fileFunc(file, folder));
+        else          fileRes.push(null);
+        if (markFunc)
+          fileRes.push(await text.runOnAllMarksInFile(markFunc, file, folder));
+      }
+    }
   }
-  else return folders;
-}
-
-async function runOnAllFilesInFolder(func, folderFsPath, runOnAllBookmarksInFile) {
-  folderFsPath ??= getFocusedWorkspaceFolder()?.uri.fsPath;
-  if (!folderFsPath) { 
-    log('info err', 'Folder not found in workspace'); 
-    return; 
-  }
-  const folderUri = vscode.Uri.file(folderFsPath);
-  const pattern   = new vscode.RelativePattern(folderUri, '**/*');
-  const files     = await vscode.workspace
-                                .findFiles(pattern, '**/node_modules/**');
-  await setBusy(true);
-  const funcRes = [];
-  // for(const file of files) {
-  //   try {
-  //     if(runOnAllBookmarksInFile) 
-  //          funcRes.push(await runOnAllBookmarksInFile(func, file.fsPath));
-  //     else funcRes.push(await func({document, docText, position, lineText, token}));
-  //   } catch(_e) {continue}
-  // }
-  await setBusy(false);
-  return funcRes;
+  await sidebar.setBusy(false);
+  return foldersRes;
 }
 
 module.exports = {
@@ -446,6 +433,6 @@ module.exports = {
   deleteLine, insertLine, replaceLine, debounce, sleep,
   getPathsFromWorkspaceFolder, getPathsFromDoc,
   getFocusedWorkspaceFolder, runOnAllFoldersInWorkspace,
-  updateSidebar, getUniqueIdStr, tokenToStr, getDocument
+  updateSide, getUniqueIdStr, tokenToStr, getDocument
 }
 

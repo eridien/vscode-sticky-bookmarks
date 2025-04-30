@@ -2,8 +2,8 @@ const vscode = require('vscode');
 const utils  = require('./utils.js');
 const {log, start, end} = utils.getLog('mark');
 
-const DONT_LOAD_MARKS_ON_START = true;
-// const DONT_LOAD_MARKS_ON_START = false;
+// const DONT_LOAD_MARKS_ON_START = true;
+const DONT_LOAD_MARKS_ON_START = false;
 
 let globalMarks = {};
 let context;
@@ -50,7 +50,7 @@ async function init(contextIn) {
   }
   await context.workspaceState.update('globalMarks', globalMarks);
   initFinished = true;
-  utils.updateSidebar(); 
+  utils.updateSide(); 
   dumpGlobalMarks('init');
   end('init marks');
 }
@@ -71,7 +71,6 @@ function delGlobalMark(token) {delete globalMarks[token]}
 function getGlobalMark(token) {return globalMarks[token]}
 function getGlobalMarks()     {return globalMarks}
 
-//:hljd;
 function getMarkForLine(document, lineNumber) {
   const fileFsPath = document.uri.fsPath;
   return Object.values(globalMarks).
@@ -91,11 +90,10 @@ function getMarksForFile(fileFsPath) {
 
 async function saveGlobalMarks() {
   await context.workspaceState.update('globalMarks', globalMarks);
-  utils.updateSidebar();
+  utils.updateSide();
   dumpGlobalMarks('saveGlobalMarks');
 }
 
-//:wbbf;
 function dumpGlobalMarks(caller, list, dump) {
   caller = caller + ' marks: ';
   if(Object.keys(globalMarks).length === 0) {
@@ -126,7 +124,6 @@ function dumpGlobalMarks(caller, list, dump) {
   }
 }
 
-//:0whm;
 async function newMark(document, lineNumber, gen, token) {
   const filePaths = utils.getPathsFromDoc(document); 
   if(!filePaths?.inWorkspace) return null;
@@ -142,7 +139,7 @@ async function replaceGlobalMark(oldToken, newToken) {
   globalMarks[newToken] = globalMarks[oldToken];
   delete globalMarks[oldToken];
   globalMarks[newToken].token = newToken;
-  utils.updateSidebar();
+  utils.updateSide();
   dumpGlobalMarks('replaceGlobalMark');
 }
 

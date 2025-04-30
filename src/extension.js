@@ -3,6 +3,7 @@ const commands = require('./commands.js');
 const sidebar  = require('./sidebar.js');
 const text     = require('./text.js');
 const marks    = require('./marks.js');
+const settings = null;
 const utils    = require('./utils.js');
 const {start, end} = utils.getLog('extn');
 
@@ -49,10 +50,10 @@ async function activate(context) {
 
   commands.init(context, treeView);
   await sidebar.init(treeView);
-  utils.init(sidebarProvider, sidebar);
+  utils.init(commands, sidebar, sidebarProvider, text, marks, settings);
   await text.init(context);
   await marks.init(context);
-
+  
   treeView.onDidChangeVisibility(async event => {
     await commands.changedSidebarVisiblitiy(event.visible);
   });

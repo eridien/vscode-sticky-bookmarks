@@ -426,6 +426,8 @@ async function runOnAllFoldersInWorkspace(folderFunc, fileFunc, markFunc) {
   return foldersRes;
 }
 
+console.log("After cleanup:", weakMap.has(objKey)); // Might be false after GC
+console.log("After cleanup:", weakMap.has(objKey)); // Could be false if garbage collection has happened
 module.exports = {
   initContext, init, getLog, loadStickyBookmarksJson,
   commentsByLang, keywords, fileExists,

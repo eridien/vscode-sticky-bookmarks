@@ -6,9 +6,77 @@ const {log, start, end} = utils.getLog('mark');
 const DONT_LOAD_MARKS_ON_START = false;
 
 let globalMarks = {};
-let context;
 
-let initFinished = false;
+let context;
+// a loc is {File, lineNumber};
+// markByLoc holds all global marks
+// there can only be one mark per loc
+// so loc is unique in mark
+let markByLoc      = new Map(); 
+// markSetByToken has a value of a weakSet of marks
+let markSetByToken = new Map();
+let initFinished   = false;
+
+function cleanupWeakMap(weakMap) {
+  for (let [loc, markSet] of Array.from(weakMap.entries())) {
+    let isEmpty = true;
+    for (let obj of loc.references || []) {
+      if (markSet.has(obj)) {
+        isEmpty = false;
+        break;
+      }
+    }
+    if (isEmpty) { weakMap.delete(loc); }
+  }
+}
+function cleanupMap(markSetByToken) {
+  for (let [token, markSet] of markSetByToken.entries()) {
+    let isEmpty = true;
+    // Check if any tracked references still exist in the markSet
+    for (let obj of key.references || []) {
+      if (markSet.has(obj)) {
+        isEmpty = false;
+        break;
+      }
+    }
+
+    // If the markSet is empty, remove it from the markSetByToken
+    if (isEmpty) {
+      markSetByToken.delete(key);
+    }
+  }
+}
+
+console.log("After cleanup:", map.has(objKey)); // Might be false after GC
+async function addMarkToMarkSetByToken(mark) {
+  let markSet = markSetByToken.get(mark.token);
+  if(!markSet) {
+    markSet = new WeakSet();
+    markSetByToken.add(mark.token, markSet);
+  }
+  markSet.add(mark);
+}
+
+// Example Usage
+let map = new Map();
+let objKey = { references: [] }; // Track references manually
+let weakSetValue = new WeakSet();
+
+let trackedObj = { name: "Temporary" };
+objKey.references.push(trackedObj);
+weakSetValue.add(trackedObj);
+
+map.set(objKey, weakSetValue);
+
+console.log("Before cleanup:", map.has(objKey)); // true
+
+// Simulate garbage collection by removing the last reference
+trackedObj = null;
+
+// Cleanup process
+cleanupMap(map);
+
+
 
 async function init(contextIn) {
   start('init marks');

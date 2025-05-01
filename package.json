@@ -14,15 +14,16 @@
   "main": "./src/extension.js",
   "repository": "https://github.com/eridien/vscode-sticky-bookmarks",
   "license": "MIT",
+  "activationEvents": ["onStartupFinished"],
   "contributes": {
     "commands": [
       {
-        "command": "sticky-bookmarks.toggleCmd",
+        "command": "sticky-bookmarks.toggleGen1Cmd",
         "title": "Toggle Gen1 Bookmark On/Off",
         "category": "Sticky Bookmarks"
       },
       {
-        "command": "sticky-bookmarks.toggleGen1Cmd",
+        "command": "sticky-bookmarks.toggleGen2Cmd",
         "title": "Toggle Gen1 Bookmark On/Off",
         "category": "Sticky Bookmarks"
       },
@@ -91,7 +92,7 @@
     ],
     "keybindings": [
       {
-        "command": "sticky-bookmarks.toggleCmd",
+        "command": "sticky-bookmarks.toggleGen2Cmd",
         "key": "ctrl+alt+\\",
         "mac": "cmd+alt+\\",
         "when": "editorTextFocus"

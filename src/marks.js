@@ -52,8 +52,7 @@ async function saveMarkStorage() {
 function getMarksForFile(fileFsPath) {
   const fileMarkSet = markSetByFsPath.get(fileFsPath);
   if (fileMarkSet) {
-    const marks = Array.from(fileMarkSet);
-    return marks;
+    return Array.from(fileMarkSet);
   }
   return [];  
 }
@@ -105,7 +104,7 @@ async function init(contextIn) {
   await loadMarkStorage();
   initFinished = true;
   utils.updateSide(); 
-  await dumpGlobalMarks('marks init');
+  await dumpMarks('marks init');
 
   end('init marks');
 }
@@ -140,10 +139,10 @@ function delMarkForLine(document, lineNumber) {
 async function saveGlobalMarks() {
   await context.workspaceState.update('globalMarks', globalMarks);
   utils.updateSide();
-  dumpGlobalMarks('saveGlobalMarks');
+  dumpMarks('saveGlobalMarks');
 }
 
-function dumpGlobalMarks(caller, list, dump) {
+function dumpMarks(caller, list, dump) {
   caller = caller + ' marks: ';
   let marks = Array.from(marksByLoc.values());
   if(marks.length === 0) {
@@ -173,18 +172,27 @@ function dumpGlobalMarks(caller, list, dump) {
   }
 }
 
+let uniqueTokenNum = 0;
+
+function getToken(document, zero = true) {
+  const [commLft, commRgt] = utils.commentsByLang(document.languageId);
+  return commLft + utils.numberToInvBase4(zero ? 0 : ++uniqueTokenNum) + '.'
+       + commRgt;
+}
+
 async function newMark(document, lineNumber, gen, token, save = true) {
-  token ??= utils.getUniqueToken(document);
+  token ??= getToken(document);
   const mark = {document, lineNumber, gen, token};
   mark.loc = document.uri.fsPath + '\x00' + 
              lineNumber.toString().padStart(6, '0');
+  mark.fsPath         = document.uri.fsPath;
   mark.fileRelUriPath = await utils.getfileRelUriPath(document);
   await addMarkToStorage(mark, save);
   return mark;
 }
 
 
-module.exports = {init, waitForInit, dumpGlobalMarks, 
+module.exports = {init, waitForInit, dumpMarks, 
                   getMarksForFile, saveGlobalMarks, saveMarkStorage,
                   getGlobalMarks, getMarkForLine, delMarkForLine,
                   getGlobalMark,  putGlobalMark, deleteMark,

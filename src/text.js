@@ -302,7 +302,7 @@ async function toggle(gen) {
     await vscode.commands.executeCommand(
                           'workbench.action.focusActiveEditorGroup');
   }
-  marks.dumpGlobalMarks('toggle');
+  marks.dumpMarks('toggle');
 }
 
 async function scrollToPrevNext(fwd) {
@@ -400,7 +400,7 @@ async function deleteMarkFromText(fsPath, lineNumber) {
 }
 
 async function refreshFile(document) {
-  log('refreshFile');
+  // log('refreshFile');
   if(!document) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return;
@@ -426,8 +426,7 @@ async function refreshFile(document) {
     }
     if(tokenLineNum < markLineNum) {
       // have mark with no token in line
-      mark.gen = 1;
-      await marks.removeTokenFromMark(mark, false);
+      if(mark.gen == 2) await marks.deleteMark(mark, false, false);
       mark = fileMarks.pop();
       continue;
     }
@@ -437,7 +436,7 @@ async function refreshFile(document) {
   }
   await marks.saveMarkStorage();
   await utils.updateSide();
-  await marks.dumpGlobalMarks('refresh');
+  await marks.dumpMarks('refresh');
 }
 
 module.exports = {init, getLabel, bookmarkClick, refreshMenu,

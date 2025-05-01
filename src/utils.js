@@ -359,17 +359,6 @@ function numberToInvBase4(num) {
   return result;
 }
 
-let uniqueIdNum = 0;
-
-function getUniqueToken(document) {
-  const [commLft, commRgt] = commentsByLang(document.languageId);
-  return commLft + numberToInvBase4(++uniqueIdNum) + '.' + commRgt;
-}
-
-function getUniqueIdStr() {
-  return (++uniqueIdNum).toString();
-}
-
 function tokenToDigits(token) {
   const map = {
     '\u200B': '0', // Zero Width Space
@@ -401,8 +390,7 @@ function getTokenRegExG() {
   return new RegExp("[\\u200B\\u200C\\u200D\\u2060]+\\.", 'g');
 }
 
-async function runOnFilesInFolder(folder, fileFunc, markFunc) {
-  async function doOneFile(document) {
+async function runOnFilesInFolder(folder, fileFunc, markFunc) { async function doOneFile(document) {
     const fileRes = [document];
     if (fileFunc) fileRes.push(await fileFunc(document));
     else          fileRes.push(null);
@@ -475,11 +463,11 @@ function refreshFile(...args) {
 
 module.exports = {
   initContext, init, getLog, loadStickyBookmarksJson,
-  commentsByLang, keywords, fileExists,
-  getUniqueToken, tokenToDigits, getTokenRegEx, getTokenRegExG,
+  commentsByLang, keywords, fileExists, numberToInvBase4,
+  tokenToDigits, getTokenRegEx, getTokenRegExG,
   deleteLine, insertLine, replaceLine, debounce, sleep,
   getPathsFromWorkspaceFolder, getPathsFromDoc, getfileRelUriPath,
-  getFocusedWorkspaceFolder, updateSide, getUniqueIdStr, 
+  getFocusedWorkspaceFolder, updateSide, 
   tokenToStr, getDocument, runOnAllFolders,
   deleteMarkFromText, setBusy, refreshFile
 }

@@ -1,6 +1,7 @@
 const vscode            = require('vscode');
 const sidebar           = require('./sidebar.js');
 const text              = require('./text.js');
+const marks             = require('./marks.js');
 const utils             = require('./utils.js');
 const {log, start, end} = utils.getLog('cmds');
 
@@ -13,14 +14,16 @@ function init(contextIn, treeViewIn) {
 
 ////////////////////////////////  COMMANDS  ///////////////////////////////////
 
-async function toggleCmd() {
-  log('toggleCmd');
-  await text.toggle(2);
-}
-
 async function toggleGen1Cmd() {
   log('toggleGen1Cmd');
   await text.toggle(1);
+  await text.refreshFile();
+}
+
+async function toggleGen2Cmd() {
+  log('toggleGen2Cmd');
+  await text.toggle(2);
+  await text.refreshFile();
 }
 
 async function prevCmd() {
@@ -140,7 +143,7 @@ const changedText = utils.debounce(async (event) => {
   utils.updateSide(); 
 }, 200);
 
-module.exports = { init, toggleCmd, toggleGen1Cmd, prevCmd, nextCmd, 
+module.exports = { init, toggleGen2Cmd, toggleGen1Cmd, prevCmd, nextCmd, 
                    hideCmd, refreshCmd, expandCmd, deleteMenuCmd, 
                    gotoCmd, nameCmd, eraseCmd, deleteIconCmd,
                    clearAllSavedDataCmd, resetAllKeysCmd,

@@ -106,7 +106,7 @@ export default [
       "no-unreachable":       "warn",
       "constructor-super":    "warn",
       "valid-typeof":         "warn",
-
+      "star-activation":      "off",
       "no-unused-vars": [ "off", {
           argsIgnorePattern: "^_",
           caughtErrorsIgnorePattern: "^_"

@@ -437,6 +437,7 @@ async function refreshFile(document) {
   }
   await marks.saveMarkStorage();
   await utils.updateSide();
+  await marks.dumpGlobalMarks('refresh');
 }
 
 module.exports = {init, getLabel, bookmarkClick, refreshMenu,

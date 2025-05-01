@@ -36,14 +36,14 @@ async function loadMarkStorage() {
   if(DONT_LOAD_MARKS_ON_START) return;
   const marks = context.workspaceState.get('marks', []);
   for (const mark of marks) {
-    const uri     = vscode.Uri.file(mark.fileFsPath);
+    const uri     = vscode.Uri.file(mark.document.uri.fsPath);
     mark.document = await vscode.workspace.openTextDocument(uri);
     await addMarkToStorage(mark, false);
   }
 } 
 
 async function saveMarkStorage() {
-  await context.workspaceState.update('marks', Object.values(markByLoc));
+  await context.workspaceState.update('marks', [...markByLoc.values()]);
 }
 
 function getMarksForFile(fileFsPath) {
@@ -102,6 +102,8 @@ async function init(contextIn) {
   await loadMarkStorage();
   initFinished = true;
   utils.updateSide(); 
+  await dumpGlobalMarks('marks init');
+
   end('init marks');
 }
 

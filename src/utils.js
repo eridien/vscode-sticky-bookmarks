@@ -401,7 +401,7 @@ function getTokenRegExG() {
   return new RegExp("[\\u200B\\u200C\\u200D\\u2060]+\\.", 'g');
 }
 
-async function runOnAllFoldersInWorkspace(folderFunc, fileFunc, markFunc) {
+async function runOnFile(fsPath, fileFunc, markFunc) {
   const folders = vscode.workspace.workspaceFolders;
   if (!folders || folders.length === 0) {
     log('info', 'No Folders found in workspace'); 
@@ -434,6 +434,75 @@ async function runOnAllFoldersInWorkspace(folderFunc, fileFunc, markFunc) {
   return foldersRes;
 }
 
+async function runOnFilesInFolder(folder, fileFunc, markFunc) {
+
+  async function doOneFile(document) {
+    const fileRes = [document];
+    if (fileFunc) fileRes.push(await fileFunc(document));
+    else          fileRes.push(null);
+    if(markFunc)
+       fileRes.push( await runOnFilesInFolder(folder, fileFunc, markFunc));
+    return fileRes;
+  }
+  
+  if(markFunc) {
+    const folderUri = folder.uri;
+    const pattern = new vscode.RelativePattern(folder.uri, includeFileGlobs);
+    let files = [...await vscode.workspace.findFiles(pattern, excludeFileGlobs)];
+    const filesRes = [];
+    const editor = vscode.window.activeTextEditor;
+    if(editor) {
+      filesRes.push(await doOneFile(editor.document));
+      const fsPath = editor.document.uri.fsPath;
+      files = files.filter(f => f.uri.fsPath !== fsPath);
+    }
+    for(const file of files()) {
+      const fileRes = [];
+      fileRes.push(fileRes);
+      if (fileFunc) fileRes.push(await fileFunc(file, folder));
+      else          fileRes.push(null);
+      if (markFunc)
+        fileRes.push(await text.runOnAllMarksInFile(markFunc, file, folder));
+    }
+  }
+  return filesRes;
+}
+
+async function runOnAllFolders(folderFunc, fileFunc, markFunc) {
+
+  async function doOneFolder(folder) {
+    const folderRes = [folder];
+    if (folderFunc) folderRes.push(await folderFunc(folder));
+    else            folderRes.push(null);
+    if(fileFunc || markFunc)
+       folderRes.push(await runOnFilesInFolder(folder, fileFunc, markFunc));
+    return folderRes;
+  }
+
+  // foldersRes = [[folder obj, folderFunc res,
+  //                [[document, fileFunc res, 
+  //                     [[mark, markFunc res], [mark, markFunc res] ...
+  let folders = vscode.workspace.workspaceFolders;
+  if (!folders || folders.length === 0) {
+    log('info', 'No Folders found in workspace'); 
+    return; 
+  }
+  await sidebar.setBusy(true);
+  const foldersRes = [];
+  const editor = vscode.window.activeTextEditor;
+  if(editor) {
+    const folder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+    foldersRes.push(await doOneFolder(folder));
+    const fsPath = folder.uri.fsPath;
+    folders = folders.filter(f => f.uri.fsPath !== fsPath);
+  }
+  for (const folder of folders) {
+    foldersRes.push(await doOneFolder(folder));
+  }
+  await sidebar.setBusy(false);
+  return foldersRes;
+}
+
 function deleteMarkFromText(...args) {
     text.deleteMarkFromText(...args);
 }
@@ -444,7 +513,7 @@ module.exports = {
   getUniqueToken, tokenToDigits, getTokenRegEx, getTokenRegExG,
   deleteLine, insertLine, replaceLine, debounce, sleep,
   getPathsFromWorkspaceFolder, getPathsFromDoc, getfileRelUriPath,
-  getFocusedWorkspaceFolder, runOnAllFoldersInWorkspace,
+  getFocusedWorkspaceFolder, runOnFldrsFilesAndMarks,
   updateSide, getUniqueIdStr, tokenToStr, getDocument
 }
 

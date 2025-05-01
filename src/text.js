@@ -355,6 +355,9 @@ async function refreshMark(params) {
 async function refreshFile(document) {
   log('refreshFile');
   const fileFsPath = document.uri.fsPath;
+
+  await utils.runOnFldrsFilesAndMarks(folderFunc, fileFunc, markFunc);
+
   const fileMarks = await runOnAllMarksInFile(
                              refreshMark, fileFsPath, runOnAllMarksInFile);
   const globalMarksInFile = marks.getMarksForFile(fileFsPath);

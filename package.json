@@ -130,7 +130,7 @@
         {
           "id": "stickyBookmarks",
           "title": "Sticky Bookmarks",
-          "icon": "images/activity-icon.png"
+          "icon": "images/activity-icon.svg"
         }
       ]
     },
@@ -139,7 +139,7 @@
         {
           "id": "sidebarView",
           "name": "Sticky Bookmarks",
-          "icon": "images/activity-icon.png"
+          "icon": "images/activity-icon.svg"
         }
       ]
     },

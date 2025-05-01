@@ -412,15 +412,17 @@ async function runOnFilesInFolder(folder, fileFunc, markFunc) {
   }
   const filesRes  = [];
   const pattern   = new vscode.RelativePattern(folder.uri, includeFileGlobs);
-  let files = [...await vscode.workspace.findFiles(pattern, excludeFileGlobs)];
+  let files       = await vscode.workspace.findFiles(pattern, excludeFileGlobs);
   const editor = vscode.window.activeTextEditor;
   if(editor) {
     filesRes.push(await doOneFile(editor.document));
     const fsPath = editor.document.uri.fsPath;
-    files = files.filter(f => f.uri.fsPath !== fsPath);
+    files = files.filter(f => f.fsPath !== fsPath);
   }
-  for(const file of files()) {
-    const document = await vscode.workspace.openTextDocument(file.uri);
+  for(const fileUri of files) {
+    let  document;
+    try{ document = await vscode.workspace.openTextDocument(fileUri); }
+    catch(_e) { continue };
     filesRes.push(await doOneFile(document));
   }
   return filesRes;
@@ -478,7 +480,7 @@ module.exports = {
   deleteLine, insertLine, replaceLine, debounce, sleep,
   getPathsFromWorkspaceFolder, getPathsFromDoc, getfileRelUriPath,
   getFocusedWorkspaceFolder, updateSide, getUniqueIdStr, 
-  tokenToStr, getDocument, 
+  tokenToStr, getDocument, runOnAllFolders,
   deleteMarkFromText, setBusy, refreshFile
 }
 

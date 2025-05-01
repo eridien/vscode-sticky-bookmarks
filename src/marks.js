@@ -10,13 +10,13 @@ let globalMarks = {};
 let context;
 let initFinished = false;
 
-// markByLoc holds all global marks
-let markByLoc       = new Map(); 
+// marksByLoc holds all global marks
+let marksByLoc      = new Map(); 
 let markSetByToken  = new Map();
 let markSetByFsPath = new Map();
 
 async function addMarkToStorage(mark, save = true) {
-  markByLoc.set(mark.loc, mark);
+  marksByLoc.set(mark.loc, mark);
   let tokenMarkSet = markSetByToken.get(mark.token);
   if (!tokenMarkSet) {
     tokenMarkSet = new Set();
@@ -33,7 +33,10 @@ async function addMarkToStorage(mark, save = true) {
 }
 
 async function loadMarkStorage() {
-  if(DONT_LOAD_MARKS_ON_START) return;
+  if(DONT_LOAD_MARKS_ON_START) {
+    await saveMarkStorage()
+    return;
+  }
   const marks = context.workspaceState.get('marks', []);
   for (const mark of marks) {
     const uri     = vscode.Uri.file(mark.document.uri.fsPath);
@@ -43,7 +46,7 @@ async function loadMarkStorage() {
 } 
 
 async function saveMarkStorage() {
-  await context.workspaceState.update('marks', [...markByLoc.values()]);
+  await context.workspaceState.update('marks', [...marksByLoc.values()]);
 }
 
 function getMarksForFile(fileFsPath) {
@@ -79,7 +82,7 @@ async function removeTokenFromMark(mark, save = true) {
 }
 
 async function deleteMark(mark, save = true, update = true) {
-  markByLoc.delete(mark.loc);
+  marksByLoc.delete(mark.loc);
   await deleteMarkFromFileSet(mark);  
   await deleteMarkFromTokenSet(mark);  
   const [fileFsPath, lineNumber] = mark.loc.split('\x00');
@@ -126,7 +129,7 @@ function getMarkForLine(document, lineNumber) {
   const fileFsPath = document.uri.fsPath;
   const loc = document.uri.fsPath + '\x00' + 
               lineNumber.toString().padStart(6, '0');
-  return markByLoc.get(loc);
+  return marksByLoc.get(loc);
 }
 
 function delMarkForLine(document, lineNumber) {
@@ -142,7 +145,7 @@ async function saveGlobalMarks() {
 
 function dumpGlobalMarks(caller, list, dump) {
   caller = caller + ' marks: ';
-  let marks = Array.from(markByLoc.values());
+  let marks = Array.from(marksByLoc.values());
   if(marks.length === 0) {
     log(caller, '<no marks>');
     return;
@@ -163,7 +166,8 @@ function dumpGlobalMarks(caller, list, dump) {
   else {
     let str = "";
     for(const mark of marks) {
-      str += utils.tokenToStr(mark.token) + ' ';
+      str += mark.lineNumber.toString().padStart(3, ' ') + ' ' +
+             utils.tokenToStr(mark.token) +  ' ';
     }
     log(caller, str);
   }

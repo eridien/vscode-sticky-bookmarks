@@ -116,10 +116,13 @@ async function changedEditor(editor) {
   if(!editor || !editor.document) {
     return;
   }
+  await text.refreshFile(editor.document);
   utils.updateSide();
 }
 
-async function changedVisEditors() {
+async function changedVisEditors(editors) {
+  for(const editor of editors)
+    await text.refreshFile(editor.document);
   utils.updateSide();
 }  
 

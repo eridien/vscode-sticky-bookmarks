@@ -84,6 +84,9 @@ async function activate(context) {
                              deleteIconCmd, gotoCmd, nameCmd, eraseCmd, 
                              clearAllSavedDataCmd, resetAllKeysCmd);
     
+  utils.refreshFile();
+  utils.updateSide();
+  
   end('activating extension');
 }
 

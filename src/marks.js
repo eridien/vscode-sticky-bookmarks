@@ -102,7 +102,6 @@ async function init(contextIn) {
   await loadMarkStorage();
   initFinished = true;
   utils.updateSide(); 
-  dumpGlobalMarks('init');
   end('init marks');
 }
 

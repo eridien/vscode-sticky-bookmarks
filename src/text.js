@@ -401,6 +401,11 @@ async function deleteMarkFromText(fsPath, lineNumber) {
 
 async function refreshFile(document) {
   log('refreshFile');
+  if(!document) {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) return;
+    document = editor.document;
+  }
   const tokens     = getTokensInFile(document);
   const fileMarks  = marks.getMarksForFile(document.uri.fsPath);
   if(tokens.length == 0 && fileMarks.length == 0) return;

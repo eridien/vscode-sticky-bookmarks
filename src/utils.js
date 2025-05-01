@@ -467,6 +467,9 @@ function setBusy(...args) {
 function deleteMarkFromText(...args) {
     text.deleteMarkFromText(...args);
 }
+function refreshFile(...args) {
+    text.refreshFile(...args);
+}
 
 module.exports = {
   initContext, init, getLog, loadStickyBookmarksJson,
@@ -476,6 +479,6 @@ module.exports = {
   getPathsFromWorkspaceFolder, getPathsFromDoc, getfileRelUriPath,
   getFocusedWorkspaceFolder, updateSide, getUniqueIdStr, 
   tokenToStr, getDocument, 
-  deleteMarkFromText, setBusy
+  deleteMarkFromText, setBusy, refreshFile
 }
 

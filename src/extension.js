@@ -54,6 +54,9 @@ async function activate(context) {
   await text.init(context);
   await marks.init(context);
   
+  utils.refreshFile();
+  utils.updateSide();
+
   treeView.onDidChangeVisibility(async event => {
     await commands.changedSidebarVisiblitiy(event.visible);
   });
@@ -84,9 +87,6 @@ async function activate(context) {
                              deleteIconCmd, gotoCmd, nameCmd, eraseCmd, 
                              clearAllSavedDataCmd, resetAllKeysCmd);
     
-  utils.refreshFile();
-  utils.updateSide();
-  
   end('activating extension');
 }
 

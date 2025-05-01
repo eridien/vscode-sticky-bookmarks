@@ -131,6 +131,7 @@ async function changedVisEditors(editors) {
 
 const changedSelection = utils.debounce(async (event) => {
   const {textEditor} = event;
+  if(textEditor.document.uri.scheme !== 'file') return;
   text.clearDecoration();
   await text.refreshFile(textEditor.document);
   utils.updateSide(); 

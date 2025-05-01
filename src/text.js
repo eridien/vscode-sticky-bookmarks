@@ -2,7 +2,7 @@ const vscode = require('vscode');
 const path   = require('path');
 const marks  = require('./marks.js');
 const utils  = require('./utils.js');
-const {log, start, end}  = utils.getLog('file');
+const {log, start, end}  = utils.getLog('text');
 
 const showLineNumbers      = true;
 const showBreadCrumbs      = true;
@@ -10,8 +10,9 @@ const showCodeWhenCrumbs   = true;
 const openSideBarOnNewMark = true;
 const maxLinesInCompText   = 6;
 
-let context, gutDecLgt1Uri = null, gutDecLgt2Uri = null,
-             gutDecDrk1Uri = null, gutDecDrk2Uri = null;
+let context;
+let gutDecLgt1Uri = null, gutDecDrk1Uri = null, gutterDecGen1 = null;
+let gutDecLgt2Uri = null, gutDecDrk2Uri = null, gutterDecGen2 = null;
 
 function init(contextIn) {
   context = contextIn;
@@ -26,6 +27,7 @@ function init(contextIn) {
                   context.extensionPath, 'images', 'mark-icon-drk1.svg'));
   gutDecDrk2Uri = vscode.Uri.file(path.join(
                   context.extensionPath, 'images', 'mark-icon-drk2.svg'));
+  loadtGutterDecs();
 }
 
 function getGutterDec(gen) {
@@ -35,6 +37,19 @@ function getGutterDec(gen) {
     dark:  { gutterIconPath: gen === 1 ? gutDecDrk1Uri : gutDecDrk2Uri }
   });
 };
+
+function loadtGutterDecs() {
+  gutterDecGen1 = getGutterDec(1);
+  gutterDecGen2 = getGutterDec(2);
+}
+
+vscode.window.onDidChangeActiveColorTheme((event) => {
+  if(gutterDecGen1) {
+    gutterDecGen1.dispose();
+    gutterDecGen2.dispose();
+  }
+  loadtGutterDecs();
+});
 
 const keywordSetsByLang = {};
 
@@ -47,8 +62,7 @@ function tokenRegEx(languageId, eol = true, global = false) {
 }
 
 function updateGutter() {
-  const gutterDecGen1 = getGutterDec(1);
-  const gutterDecGen2 = getGutterDec(2);
+  start('updateGutter');
   const editor = vscode.window.activeTextEditor;
   if (!editor) return;
   const fsPath = editor.document.uri.fsPath;
@@ -63,8 +77,10 @@ function updateGutter() {
       case 2: gen2DecRanges.push({range}); break;
     }
   }
+  log('gen1DecRanges', gen1DecRanges);
   editor.setDecorations(gutterDecGen1, gen1DecRanges);
   editor.setDecorations(gutterDecGen2, gen2DecRanges);
+  end('updateGutter');
 }
 
 function isKeyWord(languageId, word) {
@@ -400,7 +416,7 @@ async function deleteMarkFromText(fsPath, lineNumber) {
 }
 
 async function refreshFile(document) {
-  // log('refreshFile');
+  start('refreshFile');
   if(!document) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return;
@@ -437,6 +453,7 @@ async function refreshFile(document) {
   await marks.saveMarkStorage();
   await utils.updateSide();
   await marks.dumpMarks('refresh');
+  end('refreshFile');
 }
 
 module.exports = {init, getLabel, bookmarkClick, refreshMenu,

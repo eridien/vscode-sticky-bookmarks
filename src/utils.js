@@ -20,8 +20,10 @@ function init(commandsIn, sidebarIn, sidebarProviderIn,
 }
 
 function updateSide() {
+  start('updateSide');
   sidebarProvider._onDidChangeTreeData.fire();
   text.updateGutter();
+  end('updateSide');
 }
 
 const timers = {};

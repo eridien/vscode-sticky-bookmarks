@@ -3,7 +3,6 @@ vsce package
 
 bugs
   gutter not cleared when mark toggled off
-  editor not refreshing on load
   
 todo 
   support gen1 marks

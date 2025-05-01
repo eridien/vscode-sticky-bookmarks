@@ -470,7 +470,7 @@ function deleteMarkFromText(...args) {
 
 module.exports = {
   initContext, init, getLog, loadStickyBookmarksJson,
-  commentsByLang, keywords, fileExists, ,
+  commentsByLang, keywords, fileExists,
   getUniqueToken, tokenToDigits, getTokenRegEx, getTokenRegExG,
   deleteLine, insertLine, replaceLine, debounce, sleep,
   getPathsFromWorkspaceFolder, getPathsFromDoc, getfileRelUriPath,

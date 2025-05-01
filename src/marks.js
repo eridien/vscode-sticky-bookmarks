@@ -180,9 +180,9 @@ async function newMark(document, lineNumber, gen, token, save = true) {
 
 
 module.exports = {init, waitForInit, dumpGlobalMarks, 
-                  getMarksForFile, saveGlobalMarks,
+                  getMarksForFile, saveGlobalMarks, saveMarkStorage,
                   getGlobalMarks, getMarkForLine, delMarkForLine,
-                  getGlobalMark,  putGlobalMark,   deleteMark,
+                  getGlobalMark,  putGlobalMark, deleteMark,
                   newMark, removeTokenFromMark};
 
 

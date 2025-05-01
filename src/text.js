@@ -357,41 +357,6 @@ function getTokensInFile(document) {
   return tokens;
 }
 
-async function refreshFile(document) {
-  log('refreshFile');
-  const tokens = getTokensInFile(document);
-  const marks  = marks.getMarksForFile(document.uri.fsPath);
-  if(tokens.length == 0 && marks.length == 0) return;
-  marks.sort((a, b) => a.lineNumber - b.lineNumber);
-  // scan file from bottom to top
-  let tokenObj = tokens.pop();
-  let mark     = marks .pop();
-  while(tokenObj || mark) {
-    const tokenLineNum = tokenObj?.lineNumber ?? -1;
-    const markLineNum  = mark    ?.lineNumber ?? -1;
-    if(tokenLineNum == markLineNum) {
-      // mark points to token
-      mark.gen   = 2;
-      mark.token = tokenObj.token;
-      tokenObj   = tokens.pop();
-      mark       = marks .pop();
-      continue;
-    }
-    if(tokenLineNum < markLineNum) {
-      // have mark with no token in line
-      mark.gen = 1;
-      marks.removeTokenFromMark(mark, false);
-      mark = marks.pop();
-      continue;
-    }
-    // have token in line with no mark
-    marks.newMark(document, tokenLineNum, 2, tokenObj.token, false);
-    tokenObj = tokens.pop();
-  }
-  marks.saveMarkStorage()();
-  await utils.updateSide();
-}
-
 async function refreshMenu() {
   log('refreshMenu');
   start('refreshMenu');
@@ -407,12 +372,11 @@ async function runOnAllMarksInFile(document, markFunc) {
   matches.reverse();
   const funcRes = [];
   for (const match of matches) {
-    const offset   = match.index;
-    const position = document.positionAt(offset); 
+    const offset     = match.index;
+    const position   = document.positionAt(offset); 
     const lineNumber = position.line;
-    const lineText = document.lineAt(lineNumber);
-    const lineText = document.lineAt(position.line);
-    const token    = match[0];
+    const lineText   = document.lineAt(lineNumber);
+    const token      = match[0];
     funcRes.push(await markFunc({document, lineNumber, lineText, token}));
   }
   return funcRes;
@@ -433,6 +397,41 @@ async function deleteMarkFromText(fsPath, lineNumber) {
     edit.replace(document.uri, line.range, newText);
     await vscode.workspace.applyEdit(edit);
   }
+}
+
+async function refreshFile(document) {
+  log('refreshFile');
+  const tokens     = getTokensInFile(document);
+  const fileMarks  = marks.getMarksForFile(document.uri.fsPath);
+  if(tokens.length == 0 && fileMarks.length == 0) return;
+  fileMarks.sort((a, b) => a.lineNumber - b.lineNumber);
+  // scan file from bottom to top
+  let tokenObj = tokens   .pop();
+  let mark     = fileMarks.pop();
+  while(tokenObj || mark) {
+    const tokenLineNum = tokenObj?.lineNumber ?? -1;
+    const markLineNum  = mark    ?.lineNumber ?? -1;
+    if(tokenLineNum == markLineNum) {
+      // mark points to token
+      mark.gen   = 2;
+      mark.token = tokenObj.token;
+      tokenObj   = tokens   .pop();
+      mark       = fileMarks.pop();
+      continue;
+    }
+    if(tokenLineNum < markLineNum) {
+      // have mark with no token in line
+      mark.gen = 1;
+      await marks.removeTokenFromMark(mark, false);
+      mark = fileMarks.pop();
+      continue;
+    }
+    // have token in line with no mark
+    await marks.newMark(document, tokenLineNum, 2, tokenObj.token, false);
+    tokenObj = tokens.pop();
+  }
+  await marks.saveMarkStorage();
+  await utils.updateSide();
 }
 
 module.exports = {init, getLabel, bookmarkClick, refreshMenu,

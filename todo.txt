@@ -2,7 +2,8 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-
+  gutter not cleared when mark toggled off
+  
 todo 
   support gen1 marks
   add plugin support, eolIsSafe for now

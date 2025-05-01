@@ -251,6 +251,15 @@ async function replaceLineInDocument(document, lineNumber, newText) {
   await vscode.workspace.applyEdit(edit);
 }
 
+async function addTokenToLine(document, lineNumber, token) {
+  if (lineNumber < 0 || lineNumber >= document.lineCount) return;
+  const line      = document.lineAt(lineNumber);
+  const lineText  = line.text;
+  const edit      = new vscode.WorkspaceEdit();
+  edit.replace(document.uri, line.range, lineText + token);
+  await vscode.workspace.applyEdit(edit);
+}
+
 async function delMarkFromLineAndGlobal(document, lineNumber, lineText) {
   const languageId = document.languageId;
   const line       = document.lineAt(lineNumber);
@@ -332,78 +341,79 @@ async function clearFile(document, saveMarks = true) {
   // if(haveDel && saveMarks) await marks.saveGlobalMarks();
 }
 
-async function refreshMark(params) {
-  log('refreshMark');
-  const {document, position, lineText, token} = params;
-  const fileFsPath = document.uri.fsPath;
-  const lineNumber = position.line;
-  const globalMark = marks.getGlobalMark(token);
-  if(globalMark && (globalMark.fileFsPath != fileFsPath || 
-                    globalMark.lineNumber != lineNumber)) {
-    const newMark     = await marks.newGlobalMark(document, lineNumber);
-    const newToken    = newMark.token;
-    const newLineText = lineText.replace(token, newToken);
-    await replaceLineInDocument(document, lineNumber, newLineText);
-    log(`refreshMark, replaced duplicate token, ` + 
-        `${utils.tokenToDigits(token)} -> `       +
-        `${utils.tokenToDigits(newMark.token)}`);    
-    return {position, token:newToken, markChg:true};
+function getTokensInFile(document) {
+  const docText  = document.getText();
+  const regexG   = tokenRegEx(document.languageId, false, true);
+  const matches  = [...docText.matchAll(regexG)];
+  if(matches.length == 0) return [];
+  const tokens = [];
+  for (const match of matches) {
+    const offset     = match.index;
+    const position   = document.positionAt(offset); 
+    const lineNumber = position.line;
+    const token      = match[0];
+    tokens.push({lineNumber, token});
   }
-  return {position, token, markChg:false};
+  return tokens;
 }
 
 async function refreshFile(document) {
   log('refreshFile');
-  const fileFsPath = document.uri.fsPath;
-
-  await utils.runOnFldrsFilesAndMarks(folderFunc, fileFunc, markFunc);
-
-  const fileMarks = await runOnAllMarksInFile(
-                             refreshMark, fileFsPath, runOnAllMarksInFile);
-  const globalMarksInFile = marks.getMarksForFile(fileFsPath);
-  const tokens = new Set();
-  let haveMarkChg = false;
-  for(const fileMark of fileMarks) {
-    const {position, token, markChg} = fileMark;
-    haveMarkChg ||= markChg;
-    tokens.add(token);
-    if(globalMarksInFile.findIndex(
-          (globalMark) => globalMark.token === token) === -1) {
-      await marks.newGlobalMark(document, position.line, token);
-      haveMarkChg = true;
+  const tokens = getTokensInFile(document);
+  const marks  = marks.getMarksForFile(document.uri.fsPath);
+  if(tokens.length == 0 && marks.length == 0) return;
+  marks.sort((a, b) => a.lineNumber - b.lineNumber);
+  // scan file from bottom to top
+  let tokenObj = tokens.pop();
+  let mark     = marks .pop();
+  while(tokenObj || mark) {
+    const tokenLineNum = tokenObj?.lineNumber ?? -1;
+    const markLineNum  = mark    ?.lineNumber ?? -1;
+    if(tokenLineNum == markLineNum) {
+      // mark points to token
+      mark.gen   = 2;
+      mark.token = tokenObj.token;
+      tokenObj   = tokens.pop();
+      mark       = marks .pop();
+      continue;
     }
-  }
-  for(const globalMark of globalMarksInFile) {
-    const token = globalMark.token;
-    if(!tokens.has(token)) {
-      await marks.deleteMark(token);
-      haveMarkChg = true;
+    if(tokenLineNum < markLineNum) {
+      // have mark with no token in line
+      mark.gen = 1;
+      marks.removeTokenFromMark(mark, false);
+      mark = marks.pop();
+      continue;
     }
+    // have token in line with no mark
+    marks.newMark(document, tokenLineNum, 2, tokenObj.token, false);
+    tokenObj = tokens.pop();
   }
-  if(haveMarkChg) await marks.saveGlobalMarks();
+  marks.saveMarkStorage()();
+  await utils.updateSide();
 }
 
 async function refreshMenu() {
   log('refreshMenu');
   start('refreshMenu');
-  await utils.runOnAllFoldersInWorkspace(refreshFile, true);
+  await utils.runOnAllFolders(null, refreshFile);
   end('refreshMenu');
 }
 
-async function runOnAllMarksInFile(func, fileFsPath) {
-  const uri      = vscode.Uri.file(fileFsPath);
-  const document = await vscode.workspace.openTextDocument(uri);
+async function runOnAllMarksInFile(document, markFunc) {
   const docText  = document.getText();
   const regexG   = tokenRegEx(document.languageId, false, true);
   const matches  = [...docText.matchAll(regexG)];
+  if(matches.length == 0) return;
   matches.reverse();
   const funcRes = [];
   for (const match of matches) {
     const offset   = match.index;
     const position = document.positionAt(offset); 
+    const lineNumber = position.line;
+    const lineText = document.lineAt(lineNumber);
     const lineText = document.lineAt(position.line);
     const token    = match[0];
-    funcRes.push(await func({document, docText, position, lineText, token}));
+    funcRes.push(await markFunc({document, lineNumber, lineText, token}));
   }
   return funcRes;
 }
@@ -428,7 +438,7 @@ async function deleteMarkFromText(fsPath, lineNumber) {
 module.exports = {init, getLabel, bookmarkClick, refreshMenu,
                   clearDecoration, justDecorated, updateGutter,
                   toggle, scrollToPrevNext, delMarkFromLineAndGlobal,    
-                  clearFile, refreshFile, deleteMarkFromText
+                  clearFile, refreshFile, deleteMarkFromText, runOnAllMarksInFile
                   };
 
 

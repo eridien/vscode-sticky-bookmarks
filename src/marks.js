@@ -46,7 +46,16 @@ async function saveMarkStorage() {
   await context.workspaceState.update('marks', Object.values(markByLoc));
 }
 
-async function deleteMarkFromFileSet(mark) {
+function getMarksForFile(fileFsPath) {
+  const fileMarkSet = markSetByFsPath.get(fileFsPath);
+  if (fileMarkSet) {
+    const marks = Array.from(fileMarkSet);
+    return marks;
+  }
+  return [];  
+}
+
+function deleteMarkFromFileSet(mark) {
   let fileMarkSet = markSetByFsPath.get(mark.fsPath);
   if (fileMarkSet) {
     fileMarkSet.delete(mark);
@@ -54,7 +63,7 @@ async function deleteMarkFromFileSet(mark) {
   }
 }
 
-async function deleteMarkFromTokenSet(mark) {
+function deleteMarkFromTokenSet(mark) {
   if(mark.gen === 1) return;
   let tokenMarkSet = markSetByToken.get(mark.token);
   if (tokenMarkSet) {
@@ -63,12 +72,18 @@ async function deleteMarkFromTokenSet(mark) {
   }
 }
 
+async function removeTokenFromMark(mark, save = true) {  
+  deleteMarkFromTokenSet(mark);
+  delete mark.token;
+  if (save) await saveMarkStorage();
+}
+
 async function deleteMark(mark, save = true, update = true) {
   markByLoc.delete(mark.loc);
   await deleteMarkFromFileSet(mark);  
   await deleteMarkFromTokenSet(mark);  
-  const [fsPath, lineNumber] = mark.loc.split('\x00');
-  utils.deleteMarkFromText(fsPath, +lineNumber);
+  const [fileFsPath, lineNumber] = mark.loc.split('\x00');
+  utils.deleteMarkFromText(fileFsPath, +lineNumber);
   if(save)   await saveMarkStorage();
   if(update) utils.updateSide(); 
 }
@@ -118,11 +133,6 @@ function delMarkForLine(document, lineNumber) {
   if(mark) delete globalMarks[mark.token];
 }
 
-function getMarksForFile(fileFsPath) {
-  return Object.values(globalMarks).filter(
-                mark => mark.fileFsPath === fileFsPath);
-}
-
 async function saveGlobalMarks() {
   await context.workspaceState.update('globalMarks', globalMarks);
   utils.updateSide();
@@ -158,37 +168,22 @@ function dumpGlobalMarks(caller, list, dump) {
   }
 }
 
-async function newMark(document, lineNumber, gen, token) {
+async function newMark(document, lineNumber, gen, token, save = true) {
   token ??= utils.getUniqueToken(document);
   const mark = {document, lineNumber, gen, token};
   mark.loc = document.uri.fsPath + '\x00' + 
              lineNumber.toString().padStart(6, '0');
   mark.fileRelUriPath = await utils.getfileRelUriPath(document);
-  await addMarkToStorage(mark);
+  await addMarkToStorage(mark, save);
   return mark;
 }
 
-async function replaceGlobalMark(oldToken, newToken) {
-  globalMarks[newToken] = globalMarks[oldToken];
-  delete globalMarks[oldToken];
-  globalMarks[newToken].token = newToken;
-  utils.updateSide();
-  dumpGlobalMarks('replaceGlobalMark');
-}
 
-async function deleteMarksForFile(document) {
-  const docUriPath = document.uri.path;
-  for(const [token, mark] of Object.entries(globalMarks)) {
-    if(mark.fileUriPath.startsWith(docUriPath)) 
-        delete globalMarks[token];
-  }
-  await saveGlobalMarks();
-}
-
-module.exports = {init, waitForInit, dumpGlobalMarks, replaceGlobalMark, saveGlobalMarks,
-                  getGlobalMarks, getMarksForFile, getMarkForLine, delMarkForLine,
+module.exports = {init, waitForInit, dumpGlobalMarks, 
+                  getMarksForFile, saveGlobalMarks,
+                  getGlobalMarks, getMarkForLine, delMarkForLine,
                   getGlobalMark,  putGlobalMark,   deleteMark,
-                  newMark,  deleteMarksForFile};
+                  newMark, removeTokenFromMark};
 
 
 

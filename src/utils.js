@@ -401,69 +401,27 @@ function getTokenRegExG() {
   return new RegExp("[\\u200B\\u200C\\u200D\\u2060]+\\.", 'g');
 }
 
-async function runOnFile(fsPath, fileFunc, markFunc) {
-  const folders = vscode.workspace.workspaceFolders;
-  if (!folders || folders.length === 0) {
-    log('info', 'No Folders found in workspace'); 
-    return; 
-  }
-  await sidebar.setBusy(true);
-  const foldersRes = [];
-  for (const folder of folders) {
-    const folderRes = [];
-    foldersRes.push(folderRes);
-    if (folderFunc) folderRes.push(await folderFunc(folder));
-    else            folderRes.push(null);
-    if(fileFunc || markFunc) {
-      const folderUri = folder.uri;
-      const pattern = 
-               new vscode.RelativePattern(folder.uri, includeFileGlobs);
-      const files = 
-            await vscode.workspace.findFiles(pattern, excludeFileGlobs);
-      for(const file of files()) {
-        const fileRes = [];
-        folderRes.push(fileRes);
-        if (fileFunc) fileRes.push(await fileFunc(file, folder));
-        else          fileRes.push(null);
-        if (markFunc)
-          fileRes.push(await text.runOnAllMarksInFile(markFunc, file, folder));
-      }
-    }
-  }
-  await sidebar.setBusy(false);
-  return foldersRes;
-}
-
 async function runOnFilesInFolder(folder, fileFunc, markFunc) {
-
   async function doOneFile(document) {
     const fileRes = [document];
     if (fileFunc) fileRes.push(await fileFunc(document));
     else          fileRes.push(null);
-    if(markFunc)
-       fileRes.push( await runOnFilesInFolder(folder, fileFunc, markFunc));
+    if(markFunc)  fileRes.push( 
+                           await text.runOnAllMarksInFile(document, markFunc));
     return fileRes;
   }
-  
-  if(markFunc) {
-    const folderUri = folder.uri;
-    const pattern = new vscode.RelativePattern(folder.uri, includeFileGlobs);
-    let files = [...await vscode.workspace.findFiles(pattern, excludeFileGlobs)];
-    const filesRes = [];
-    const editor = vscode.window.activeTextEditor;
-    if(editor) {
-      filesRes.push(await doOneFile(editor.document));
-      const fsPath = editor.document.uri.fsPath;
-      files = files.filter(f => f.uri.fsPath !== fsPath);
-    }
-    for(const file of files()) {
-      const fileRes = [];
-      fileRes.push(fileRes);
-      if (fileFunc) fileRes.push(await fileFunc(file, folder));
-      else          fileRes.push(null);
-      if (markFunc)
-        fileRes.push(await text.runOnAllMarksInFile(markFunc, file, folder));
-    }
+  const filesRes  = [];
+  const pattern   = new vscode.RelativePattern(folder.uri, includeFileGlobs);
+  let files = [...await vscode.workspace.findFiles(pattern, excludeFileGlobs)];
+  const editor = vscode.window.activeTextEditor;
+  if(editor) {
+    filesRes.push(await doOneFile(editor.document));
+    const fsPath = editor.document.uri.fsPath;
+    files = files.filter(f => f.uri.fsPath !== fsPath);
+  }
+  for(const file of files()) {
+    const document = await vscode.workspace.openTextDocument(file.uri);
+    filesRes.push(await doOneFile(document));
   }
   return filesRes;
 }
@@ -503,17 +461,21 @@ async function runOnAllFolders(folderFunc, fileFunc, markFunc) {
   return foldersRes;
 }
 
+function setBusy(...args) {
+ sidebar.setBusy(...args);
+}
 function deleteMarkFromText(...args) {
     text.deleteMarkFromText(...args);
 }
 
 module.exports = {
   initContext, init, getLog, loadStickyBookmarksJson,
-  commentsByLang, keywords, fileExists, deleteMarkFromText,
+  commentsByLang, keywords, fileExists, ,
   getUniqueToken, tokenToDigits, getTokenRegEx, getTokenRegExG,
   deleteLine, insertLine, replaceLine, debounce, sleep,
   getPathsFromWorkspaceFolder, getPathsFromDoc, getfileRelUriPath,
-  getFocusedWorkspaceFolder, runOnFldrsFilesAndMarks,
-  updateSide, getUniqueIdStr, tokenToStr, getDocument
+  getFocusedWorkspaceFolder, updateSide, getUniqueIdStr, 
+  tokenToStr, getDocument, 
+  deleteMarkFromText, setBusy
 }
 

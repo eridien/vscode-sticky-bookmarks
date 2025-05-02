@@ -2,8 +2,12 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
+  deleteicon broken
+  getlabel series.vue no symbols
+     text: getLabel, No topSymbols found series.vue
 
 todo 
+  sort folders by name or recently used
   commands to go to prev/next item clicks
     add shift key to prev/next keys
   cmd to delete all marks in file
@@ -35,6 +39,7 @@ not needed?
     limit suggestions (setting)
   
 settings
+  sort folders by name or recently used
   show bookmark word in token
   fall back to gen1 
   max suggestion count
@@ -63,12 +68,14 @@ settings
   highlight function same options
 
 testing
-  text dark theme: settings:  "window detect color"
+  find missing awaits from util redirects
+  test dark theme "window color"
   moving a project folder
   mark after an unclosed string
 
 features
   sticky
+  prev/next sidebar item
   smart sidebar
     pointers
     line numbers

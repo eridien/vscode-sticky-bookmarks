@@ -22,7 +22,7 @@ function init(commandsIn, sidebarIn, sidebarProviderIn,
 function updateSide() {
   // start('updateSide');
   sidebarProvider._onDidChangeTreeData.fire();
-  text.updateGutter();
+  updateGutter();
   // end('updateSide');
 }
 
@@ -351,12 +351,12 @@ function getTokenRegExG() {
   return new RegExp("[\\u200B\\u200C\\u200D\\u2060]+\\.", 'g');
 }
 
-async function runOnFilesInFolder(folder, fileFunc, markFunc) { async function doOneFile(document) {
+async function runOnFilesInFolder(folder, fileFunc, markFunc) { 
+  async function doOneFile(document) {
     const fileRes = [document];
     if (fileFunc) fileRes.push(await fileFunc(document));
     else          fileRes.push(null);
-    if(markFunc)  fileRes.push( 
-                           await text.runOnAllMarksInFile(document, markFunc));
+    if(markFunc)  fileRes.push( await runOnAllMarksInFile(document, markFunc));
     return fileRes;
   }
   const filesRes  = [];
@@ -396,7 +396,7 @@ async function runOnAllFolders(folderFunc, fileFunc, markFunc) {
     log('info', 'No Folders found in workspace'); 
     return; 
   }
-  await sidebar.setBusy(true);
+  await setBusy(true);
   const foldersRes = [];
   const editor = vscode.window.activeTextEditor;
   if(editor) {
@@ -408,19 +408,19 @@ async function runOnAllFolders(folderFunc, fileFunc, markFunc) {
   for (const folder of folders) {
     foldersRes.push(await doOneFolder(folder));
   }
-  await sidebar.setBusy(false);
+  await setBusy(false);
   return foldersRes;
 }
 
-function setBusy(...args) {
- sidebar.setBusy(...args);
-}
-function deleteMarkFromText(...args) {
-    text.deleteMarkFromText(...args);
-}
-function refreshFile(...args) {
-    text.refreshFile(...args);
-}
+///////////////////  BACK REFERENCES -- CHECK AWAITS //////////////
+
+function setBusy(...args)         { return sidebar.setBusy(...args); }
+function deleteMarkFromText(...args) 
+                                  { return text.deleteMarkFromText(...args); }
+function refreshFile(...args)     { return text.refreshFile(...args); }
+function updateGutter(...args)    { return text.updateGutter(...args); }
+function runOnAllMarksInFile(...args) 
+                                  { return text.runOnAllMarksInFile(...args); }
 
 module.exports = {
   commentsByLang, deleteLine, deleteMarkFromText, fileExists, 

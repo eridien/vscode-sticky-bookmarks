@@ -5,6 +5,9 @@ const {log, start, end} = utils.getLog('mark');
 // const DONT_LOAD_MARKS_ON_START = true;
 const DONT_LOAD_MARKS_ON_START = false;
 
+const VERIFY_MARKS_IN_DUMP = true;
+// const VERIFY_MARKS_IN_DUMP = false;
+
 let globalMarks = {};
 
 let context;
@@ -20,6 +23,14 @@ async function deleteAllMarks() {
   markSetByToken .clear();
   markSetByFsPath.clear();
   await saveMarkStorage();
+}
+
+async function deleteAllMarksFromFile(document) {
+  const fileMarks = getMarksForFile(document.uri.fsPath);
+  for (const mark of fileMarks)
+    await deleteMark(mark, false, false);
+  await saveMarkStorage();
+  utils.updateSide(); 
 }
 
 async function addMarkToStorage(mark, save = true) {
@@ -59,9 +70,7 @@ async function saveMarkStorage() {
 
 function getMarksForFile(fileFsPath) {
   const fileMarkSet = markSetByFsPath.get(fileFsPath);
-  if (fileMarkSet) {
-    return Array.from(fileMarkSet);
-  }
+  if (fileMarkSet) return Array.from(fileMarkSet);
   return [];  
 }
 
@@ -97,9 +106,10 @@ async function deleteMark(mark, save = true, update = true) {
   await deleteMarkFromFileSet(mark);  
   await deleteMarkFromTokenSet(mark);  
   const [fileFsPath, lineNumber] = mark.loc.split('\x00');
-  utils.deleteMarkFromText(fileFsPath, +lineNumber);
+  await utils.deleteMarkFromText(fileFsPath, +lineNumber);
   if(save)   await saveMarkStorage();
   if(update) utils.updateSide(); 
+  dumpMarks('deleteMark');
 }
 
 async function deleteMarksFromFile(fsPath) {
@@ -115,9 +125,8 @@ async function init(contextIn) {
   context = contextIn;
   await loadMarkStorage();
   initFinished = true;
-  utils.updateSide(); 
+  await utils.refreshFile();
   await dumpMarks('marks init');
-
   end('init marks');
 }
 
@@ -160,16 +169,28 @@ function getMarkTokenRange(mark) {
                           lineNumber, tokenOfs + mark.token.length);
 }
 
-function verifiedMark(mark) {
+function verifyMark(mark) {
   if(!mark) return false;
   const document   = mark.document;
   const lineNumber = mark.lineNumber;
-  if(getMarkForLine(document, lineNumber) === undefined) return false;
+  if(getMarkForLine(document, lineNumber) === undefined) {
+    log('err', 'verifyMark, mark missing', mark.fileRelUriPath, lineNumber);
+    return false;
+  }
   if(mark.gen === 1) return true;
   let line;
   try { line = document.lineAt(lineNumber).text }
-  catch (_) { return false }
-  return (line.indexOf(mark.token) !== -1);
+  catch (_) {
+    log('err', 'verifyMark, document.lineAt() err:', 
+                mark.fileRelUriPath, lineNumber);
+    return false;
+  }
+  const idx = line.indexOf(mark.token);
+  if(idx === -1) {
+    log('verifyMark, token missing', mark.fileRelUriPath, lineNumber);
+    return false;
+  }
+  return true;
 }
 
 async function saveGlobalMarks() {
@@ -192,6 +213,7 @@ function dumpMarks(caller, list, dump) {
       a[1].lineNumber - b[1].lineNumber));
     let str = "\n";
     for(let [token, mark] of marks) {
+      if(VERIFY_MARKS_IN_DUMP) verifyMark(mark);
       str += `${utils.tokenToStr(token)} -> ${mark.fileRelUriPath} ` +
              `${mark.lineNumber.toString().padStart(3, ' ')} `+
              `${mark.languageId}\n`;
@@ -201,6 +223,7 @@ function dumpMarks(caller, list, dump) {
   else {
     let str = "";
     for(const mark of marks) {
+      if(VERIFY_MARKS_IN_DUMP) verifyMark(mark);
       str += mark.lineNumber.toString().padStart(3, ' ') + 
              utils.tokenToStr(mark.token) +  ' ';
     }
@@ -235,11 +258,12 @@ async function newMark(document, lineNumber, gen, token, zero = true, save = tru
 }
 
 
-module.exports = {init, waitForInit, dumpMarks, getAllMarks, verifiedMark,
+module.exports = {init, waitForInit, dumpMarks, getAllMarks, verifyMark,
                   getMarkForLine, getMarksForFile, saveGlobalMarks,
                   delMarkForLine, deleteMark, deleteAllMarks,
                   getGlobalMark,  putGlobalMark, saveMarkStorage,
-                  newMark, removeTokenFromMark, getMarkTokenRange};
+                  newMark, removeTokenFromMark, getMarkTokenRange,
+                  deleteAllMarksFromFile};
 
 
 

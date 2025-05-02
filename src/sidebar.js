@@ -245,7 +245,7 @@ async function jumpToPrevNextItem(fwd) {
   let ptr = itemClickHistoryPtr + (fwd ? 1 : -1);
   ptr = Math.max(0, Math.min(ptr, itemClickHistory.length-1));
   let item = itemClickHistory[ptr];
-  while (!marks.verifiedMark(item?.mark)) {
+  while (!marks.verifyMark(item?.mark)) {
     itemClickHistory.splice(ptr, 1);
     if(itemClickHistory.length === 0) {
       itemClickHistoryPtr = 0;

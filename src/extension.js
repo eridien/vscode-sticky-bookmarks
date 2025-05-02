@@ -14,10 +14,10 @@ async function activate(context) {
     end('extension');
     return;
   }
-	const toggleGen2Cmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.toggleGen2Cmd',                 commands.toggleGen2Cmd);
 	const toggleGen1Cmd = vscode.commands.registerCommand(
      'sticky-bookmarks.toggleGen1Cmd',                 commands.toggleGen1Cmd);
+	const toggleGen2Cmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.toggleGen2Cmd',                 commands.toggleGen2Cmd);
 	const prevCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.prevCmd',                             commands.prevCmd);
 	const nextCmd = vscode.commands.registerCommand(
@@ -33,7 +33,7 @@ async function activate(context) {
  const refreshCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.refreshCmd',                       commands.refreshCmd);
 	const delMarksInFileCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.delMarksInFileCmd',                 commands.delMarksInFileCmd);
+     'sticky-bookmarks.delMarksInFileCmd',         commands.delMarksInFileCmd);
 	const deleteIconCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.deleteIconCmd', (item) => commands.deleteIconCmd(item));
   const itemClickCmd = vscode.commands.registerCommand(
@@ -54,7 +54,7 @@ async function activate(context) {
   await text.init(context);
   await marks.init(context);
   
-  utils.refreshFile();
+  // utils.refreshFile();
 
   treeView.onDidChangeVisibility(async event => {
     await commands.changedSidebarVisiblitiy(event.visible);
@@ -77,7 +77,7 @@ async function activate(context) {
     await commands.changedEditor(editor);
   });
   vscode.window.onDidChangeTextEditorSelection(async event => {
-    if (event?.textEditor?.document?.uri?.scheme !== 'file') return;
+    if (event.textEditor?.document.uri.scheme !== 'file') return;
     await commands.changedSelection(event);
   });
 

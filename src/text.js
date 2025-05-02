@@ -162,6 +162,9 @@ async function getLabel(mark) {
                'vscode.executeDocumentSymbolProvider', document.uri);
     if (!topSymbols || topSymbols.length == 0) {
       log('getLabel, No topSymbols found.', document.uri.path);
+
+      debugger;
+
       return labelWithLineNum(lineNumber, label);
     }
     let crumbStr = '';
@@ -299,6 +302,7 @@ async function toggle(gen) {
   const lineNumber = editor.selection.active.line;
   let mark = marks.getMarkForLine(document, lineNumber);
   if(mark) {
+    log('toggle: deleting mark', mark.fileRelUriPath, lineNumber);
     await marks.deleteMark(mark, true, true);
     return;
   }
@@ -427,9 +431,9 @@ async function runOnAllMarksInFile(document, markFunc) {
 }
 
 async function deleteMarkFromText(fsPath, lineNumber) {
-  const document = await vscode.workspace.openTextDocument(fsPath);
-  if(!document || lineNumber >= document.lineCount) return;
+  const document   = await vscode.workspace.openTextDocument(fsPath);
   const line       = document.lineAt(lineNumber);
+  if(!line) return;
   const lineText   = line.text;
   const languageId = document.languageId;
   const tokenRegx  = tokenRegEx(languageId, true);
@@ -443,16 +447,38 @@ async function deleteMarkFromText(fsPath, lineNumber) {
   }
 }
 
+let inRefreshFile         = false;
+let waitingForRefreshFile = false;
+
 async function refreshFile(document) {
-  // start('refreshFile');
+  async function exit() {
+    inRefreshFile = false;
+    if(waitingForRefreshFile) {
+      waitingForRefreshFile = false;
+      log('refreshFile, restarting missed call');
+      await refreshFile(document);
+    }
+  }
+  if(inRefreshFile) {
+    waitingForRefreshFile = true;
+    log('refreshFile, called while running, marked as waiting');
+    return;
+  }
+  start('refreshFile');
+  inRefreshFile         = true;
+  waitingForRefreshFile = false;
   if(!document) {
     const editor = vscode.window.activeTextEditor;
-    if (!editor) return;
+    if (!editor) { 
+      end('refreshFile, no active editor');
+      await exit(); return; }
     document = editor.document;
   }
   const tokens     = getTokensInFile(document);
   const fileMarks  = marks.getMarksForFile(document.uri.fsPath);
-  if(tokens.length == 0 && fileMarks.length == 0) return;
+  if(tokens.length == 0 && fileMarks.length == 0) { 
+      end('refreshFile, no marks or tokens');
+      await exit(); return; }
   fileMarks.sort((a, b) => a.lineNumber - b.lineNumber);
   // scan file from bottom to top
   let tokenObj = tokens   .pop();
@@ -462,26 +488,37 @@ async function refreshFile(document) {
     const markLineNum  = mark    ?.lineNumber ?? -1;
     if(tokenLineNum == markLineNum) {
       // mark points to token
-      mark.gen   = 2;
-      mark.token = tokenObj.token;
-      tokenObj   = tokens   .pop();
-      mark       = fileMarks.pop();
+      if(mark.gen == 1) {
+        log('refreshFile, gen1 mark has token, changing to gen2', markLineNum);
+         mark.gen = 2;
+      }
+      if(mark.token !== tokenObj.token) {
+        log('refreshFile, mark has wrong token, fixing mark', markLineNum);
+        mark.token = tokenObj.token;
+      }
+      tokenObj = tokens   .pop();
+      mark     = fileMarks.pop();
       continue;
     }
     if(tokenLineNum < markLineNum) {
       // have mark with no token in line
-      if(mark.gen == 2) await marks.deleteMark(mark, false, false);
+      if(mark.gen == 2) {
+        log('refreshFile, gen2 mark with no token, deleting mark', markLineNum);
+        await marks.deleteMark(mark, false, false);
+      }
       mark = fileMarks.pop();
       continue;
     }
     // have token in line with no mark
+    log('refreshFile, token with no mark, adding mark', tokenLineNum);
     await marks.newMark(document, tokenLineNum, 2, tokenObj.token, false);
     tokenObj = tokens.pop();
   }
   await marks.saveMarkStorage();
   await utils.updateSide();
-  await marks.dumpMarks('refresh');
-  // end('refreshFile');
+  end('refreshFile');
+  await marks.dumpMarks('refreshFile');
+  await exit(); return;
 }
 
 module.exports = {init, getLabel, bookmarkItemClick, refreshMenu,

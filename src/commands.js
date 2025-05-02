@@ -72,7 +72,7 @@ async function delMarksInFileCmd() {
   const editor = vscode.window.activeTextEditor;
   if (editor) {
     await text.deleteAllTokensFromFile(editor.document);
-    await marks.deleteAllMarks();
+    await marks.deleteAllMarksFromFile(editor.document);
     utils.updateSide();
   }
 }

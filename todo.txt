@@ -2,7 +2,6 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-  pointers
   folderIndex and folderName missing in folder item
 
 todo 

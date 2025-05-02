@@ -323,12 +323,18 @@ async function toggle(gen) {
 
 async function scrollToPrevNext(fwd) {
   const editor = vscode.window.activeTextEditor;
-  if (!editor) {log('info', 'scrollToPrevNext, no active editor'); return; }
+  if (!editor) {log('scrollToPrevNext, no active editor'); return; }
   const document = editor.document;
-  if(document.lineCount < 2) return;
-  const languageId = document.languageId;
-  const regx       = tokenRegEx(languageId);
-  const lineCnt    = document.lineCount;
+  const lineCnt  = document.lineCount;
+  if(lineCnt < 2) return;
+  let tokens     = getTokensInFile(document);
+  let fileMarks  = marks.getMarksForFile(document.uri.fsPath);
+  if(tokens.length == 0 && fileMarks.length == 0) {
+    log('scrollToPrevNext, no bookmarks in file'); return;
+  }
+  tokens    = tokens   .map(tokenObj => tokenObj.lineNumber);
+  fileMarks = fileMarks.map(fileMark => fileMark.lineNumber);
+  fileMarks = tokens.concat(fileMarks);
   const startLnNum = editor.selection.active.line;
   let lineNumber;
   if(fwd) lineNumber = (startLnNum == lineCnt-1) ? 0
@@ -336,9 +342,7 @@ async function scrollToPrevNext(fwd) {
   else    lineNumber = (startLnNum == 0) ? lineCnt-1
                                       : startLnNum-1;
   while(lineNumber != startLnNum) {
-    let line = document.lineAt(lineNumber);
-    let lineText = line.text;
-    if(regx.test(lineText)) {
+    if(fileMarks.includes(lineNumber)) {
       await gotoAndDecorate(document, lineNumber);
       break;
     }

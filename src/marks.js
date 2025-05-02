@@ -193,7 +193,7 @@ async function newMark(document, lineNumber, gen, token, zero = true, save = tru
   mark.loc = document.uri.fsPath + '\x00' + 
              lineNumber.toString().padStart(6, '0');
   const wsFolder      = vscode.workspace.getWorkspaceFolder(document.uri);
-  mark.folderIndex    = 0;
+  mark.folderIndex    = wsFolder.index;
   mark.folderUriPath  = wsFolder?.uri.path;
   mark.folderFsPath   = wsFolder?.uri.fsPath;
   mark.fileFsPath     = document.uri.fsPath;

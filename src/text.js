@@ -447,38 +447,17 @@ async function deleteMarkFromText(fsPath, lineNumber) {
   }
 }
 
-let inRefreshFile         = false;
-let waitingForRefreshFile = false;
-
 async function refreshFile(document) {
-  async function exit() {
-    inRefreshFile = false;
-    if(waitingForRefreshFile) {
-      waitingForRefreshFile = false;
-      log('refreshFile, restarting missed call');
-      await refreshFile(document);
-    }
-  }
-  if(inRefreshFile) {
-    waitingForRefreshFile = true;
-    log('refreshFile, called while running, marked as waiting');
-    return;
-  }
   start('refreshFile');
-  inRefreshFile         = true;
-  waitingForRefreshFile = false;
   if(!document) {
     const editor = vscode.window.activeTextEditor;
-    if (!editor) { 
-      end('refreshFile, no active editor');
-      await exit(); return; }
+    if (!editor) { end('refreshFile, no active editor'); return; }
     document = editor.document;
   }
   const tokens     = getTokensInFile(document);
   const fileMarks  = marks.getMarksForFile(document.uri.fsPath);
   if(tokens.length == 0 && fileMarks.length == 0) { 
-      end('refreshFile, no marks or tokens');
-      await exit(); return; }
+      end('refreshFile, no marks or tokens'); return; }
   fileMarks.sort((a, b) => a.lineNumber - b.lineNumber);
   // scan file from bottom to top
   let tokenObj = tokens   .pop();
@@ -518,7 +497,6 @@ async function refreshFile(document) {
   await utils.updateSide();
   end('refreshFile');
   await marks.dumpMarks('refreshFile');
-  await exit(); return;
 }
 
 module.exports = {init, getLabel, bookmarkItemClick, refreshMenu,

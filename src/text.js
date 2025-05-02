@@ -368,7 +368,7 @@ function getTokensInFile(document) {
     const position   = document.positionAt(offset); 
     const lineNumber = position.line;
     const token      = match[0];
-    tokens.push({lineNumber, token});
+    tokens.push({position, lineNumber, token});
   }
   return tokens;
 }

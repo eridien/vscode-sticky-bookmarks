@@ -114,15 +114,9 @@ async function getItemTree() {
   marksArray.sort((a, b) => {
     if(a.folderIndex > b.folderIndex) return +1;
     if(a.folderIndex < b.folderIndex) return -1;
-    if(a.folderUriPath.toLowerCase() >
-       b.folderUriPath.toLowerCase()) return +1;
-    if(a.folderUriPath.toLowerCase() <
-       b.folderUriPath.toLowerCase()) return -1;
-    if(a.fileRelUriPath.toLowerCase() >
-       b.fileRelUriPath.toLowerCase()) return +1;
-    if(a.fileRelUriPath.toLowerCase() <
-       b.fileRelUriPath.toLowerCase()) return -1;
-    return (a.lineNumber - b.lineNumber);
+    if(a.loc.toLowerCase() > b.loc.toLowerCase()) return +1;
+    if(a.loc.toLowerCase() < b.loc.toLowerCase()) return -1;
+    return 0;
   });
   let bookmarks;
   let lastFolderUriPath = null, lastFileFsPath;

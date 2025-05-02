@@ -116,29 +116,34 @@ async function changedEditor(editor) {
     return;
   }
   await text.refreshFile(editor.document);
-  utils.updateSide();
 }
 
 async function changedVisEditors(editors) {
   for(const editor of editors)
     await text.refreshFile(editor.document);
-  utils.updateSide();
 }  
 
-const changedSelection = utils.debounce(async (event) => {
-  const {textEditor} = event;
-  if(textEditor.document.uri.scheme !== 'file') return;
+async function changedSelection(event) {
+  const {textEditor:editor, selections, kind} = event;
+  if(editor.document.uri.scheme !== 'file') return;
+  if(selections.length == 1 && kind === 2 && selections[0].isEmpty) {
+    const clickPos = selections[0].active;
+    const mark = marks.getMarkForLine(editor.document, clickPos.line);
+    if(mark && mark.gen === 2) {
+      const tokenRange = marks.getMarkTokenRange(mark);
+      if(tokenRange.contains(clickPos)) 
+        await marks.deleteMark(mark, true, false);
+    }
+  }
   text.clearDecoration();
-  await text.refreshFile(textEditor.document);
-  utils.updateSide(); 
-}, 200);
+  await text.refreshFile(editor.document);
+}
 
-const changedText = utils.debounce(async (event) => {
+async function changedText(event) {
   const {document} = event;
   text.clearDecoration();
   await text.refreshFile(event.document);
-  utils.updateSide(); 
-}, 200);
+}
 
 module.exports = { init, toggleGen2Cmd, toggleGen1Cmd, prevCmd, nextCmd, 
                    hideCmd, refreshCmd, expandCmd, delMarksInFileCmd, 

@@ -5,10 +5,9 @@ bugs
 
 todo 
   cmd to delete all marks in file
-  move hide to menu
   add plugin support, eolIsSafe for now
-  expand all in title menu (toggle folder)
   auto scroll
+    highlight function
     scroll to top for functions
     min top and bottom border lines
     don't scroll if mark visible in window
@@ -23,8 +22,6 @@ todo
 impossible?
   invisible tokens
   toggle collapsed/expanded on file item click
-  remove sidebar highlight when selection changes
-  click in token to remove mark
 
 not needed?
   command to go to last file on prev/next
@@ -54,13 +51,21 @@ settings
     gutter color
   show in scrollbar
     scrollbar color
+  highlight line options
+    none
+    blick fast
+    blink slow
+    fade fast
+    fade slow
+    persist
+  highlight function same options
 
 testing
   text dark theme: settings:  "window detect color"
   moving a project folder
   mark after an unclosed string
 
-why gen2
+features
   sticky
   smart sidebar
     pointers
@@ -68,5 +73,5 @@ why gen2
     breadcrumbs
     compressed code
   smart scrolling
-
-set workspace light/dark:  search settings for "window color"
+  small ...
+    click on token to delete

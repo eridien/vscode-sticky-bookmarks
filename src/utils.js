@@ -288,23 +288,6 @@ function getDocument(document) {
     return editor ? editor.document : undefined;
 }
 
-function debounce(fn, delay = 100) {
-  let timeout;
-  let pendingResolve;
-  return function (...args) {
-    return new Promise(resolve => {
-      clearTimeout(timeout);
-      if (pendingResolve) pendingResolve(undefined); // cancel previous
-      pendingResolve = resolve;
-      timeout = setTimeout(async () => {
-        const result = await fn.apply(this, args);
-        resolve(result);
-        pendingResolve = null;
-      }, delay);
-    });
-  };
-}
-
 function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)) }
 
 function invBase4ToNumber(str) {
@@ -440,7 +423,7 @@ function refreshFile(...args) {
 }
 
 module.exports = {
-  commentsByLang, debounce, deleteLine, deleteMarkFromText, fileExists, 
+  commentsByLang, deleteLine, deleteMarkFromText, fileExists, 
   getDocument, getFocusedWorkspaceFolder, getLog, 
   getPathsFromWorkspaceFolder, getTokenRegEx, getTokenRegExG, 
   getfileRelUriPath, init, initContext, insertLine, keywords, 

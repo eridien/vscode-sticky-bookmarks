@@ -51,7 +51,6 @@ async function activate(context) {
   await marks.init(context);
   
   utils.refreshFile();
-  utils.updateSide();
 
   treeView.onDidChangeVisibility(async event => {
     await commands.changedSidebarVisiblitiy(event.visible);

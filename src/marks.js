@@ -136,7 +136,6 @@ function putGlobalMark(token) {globalMarks[token] = token}
 function getGlobalMark(token) {return globalMarks[token]}
 
 function getMarkForLine(document, lineNumber) {
-  const fileFsPath = document.uri.fsPath;
   const loc = document.uri.fsPath + '\x00' + 
               lineNumber.toString().padStart(6, '0');
   return marksByLoc.get(loc);
@@ -145,6 +144,20 @@ function getMarkForLine(document, lineNumber) {
 function delMarkForLine(document, lineNumber) {
   const mark = getMarkForLine(document, lineNumber);
   if(mark) delete globalMarks[mark.token];
+}
+
+function getMarkTokenRange(mark) {
+  const document   = mark.document;
+  const lineNumber = mark.lineNumber;
+  const line       = document.lineAt(lineNumber).text;
+  const tokenOfs   = line.indexOf(mark.token);
+  if (tokenOfs === -1) {
+    log('err', 'getMarkTokenRange, token missing in line', 
+                     mark.fileRelUriPath, lineNumber, mark.token);
+    return null;
+  }
+  return new vscode.Range(lineNumber, tokenOfs, 
+                          lineNumber, tokenOfs + mark.token.length);
 }
 
 async function saveGlobalMarks() {
@@ -214,7 +227,7 @@ module.exports = {init, waitForInit, dumpMarks, getAllMarks,
                   getMarkForLine, getMarksForFile, saveGlobalMarks,
                   delMarkForLine, deleteMark, deleteAllMarks,
                   getGlobalMark,  putGlobalMark, saveMarkStorage,
-                  newMark, removeTokenFromMark};
+                  newMark, removeTokenFromMark, getMarkTokenRange};
 
 
 

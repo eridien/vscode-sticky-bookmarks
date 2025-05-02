@@ -80,24 +80,9 @@ async function eraseCmd(item) {
 
 }
 
-async function gotoCmd(item) {
-  log('gotoCmd');
-  await sidebar.goto(item);
-}
-
-async function clearAllSavedDataCmd() {
-  log('clearAllSavedDataCmd');
-
-  log('info', 'All Sticky Bookmarks data has been cleared.');
-}
-
-async function resetAllKeysCmd() {
-  log('resetAllKeysCmd');
-  for (const key of context.workspaceState.keys()) 
-    await context.workspaceState.update(key, undefined);
-  for (const key of context.globalState.keys()) 
-    await context.globalState.update(key, undefined);
-  log('info', 'Sticky Bookmarks keybindings reset.');
+async function itemClickCmd(item) {
+  log('itemClickCmd');
+  await sidebar.itemClick(item);
 }
 
 ////////////////////////////////  CALLBACKS  //////////////////////////////////
@@ -146,8 +131,7 @@ const changedText = utils.debounce(async (event) => {
 
 module.exports = { init, toggleGen2Cmd, toggleGen1Cmd, prevCmd, nextCmd, 
                    hideCmd, refreshCmd, expandCmd, deleteMenuCmd, 
-                   gotoCmd, nameCmd, eraseCmd, deleteIconCmd,
-                   clearAllSavedDataCmd, resetAllKeysCmd,
+                   itemClickCmd, nameCmd, eraseCmd, deleteIconCmd,
                    changedSidebarVisiblitiy, changedText,
                    changedDocument, changedEditor, 
                    changedVisEditors, changedSelection };

@@ -161,24 +161,19 @@ async function getLabel(mark) {
     const topSymbols = await vscode.commands.executeCommand(
                'vscode.executeDocumentSymbolProvider', document.uri);
     if (!topSymbols || topSymbols.length == 0) {
-      log('getLabel, No topSymbols found.');
+      log('getLabel, No topSymbols found.', document.uri.path);
       return labelWithLineNum(lineNumber, label);
     }
     let crumbStr = '';
     if(showBreadCrumbs) {
       const symbols = [{children: topSymbols}];
       const lineLen = document.lineAt(lineNumber).text.length;
-      const pos = new vscode.Position(
-                        lineNumber, Math.max(lineLen-1, 0));
+      const pos = new vscode.Position(lineNumber, Math.max(lineLen-1, 0));
       getSymbols(pos, symbols);
       symbols.shift();
-      if (!symbols.length) {
-        return labelWithLineNum(lineNumber, label);
-      }
+      if (!symbols.length) { return labelWithLineNum(lineNumber, label); }
       symbols.reverse();
-      for(const sym of symbols) {
-        crumbStr = `${sym.name} > ${crumbStr}`;
-      }
+      for(const sym of symbols) { crumbStr = `${sym.name} > ${crumbStr}`; }
       crumbStr = crumbStr.slice(0, -2);
       crumbStr = '● ' +  crumbStr + '●';
       crumbStr = labelWithLineNum(lineNumber, crumbStr);
@@ -188,6 +183,7 @@ async function getLabel(mark) {
   }
   catch (error) {
     log('err', 'getLabel error:', error.message);
+    return '<...>';
   }
 }
 
@@ -227,7 +223,7 @@ const clearDecoration = () => {
   tgtEditor = null;
 };
 
-async function bookmarkClick(item) {
+async function bookmarkItemClick(item) {
   const mark         = item.mark;
   const lineRange    = await gotoAndDecorate(mark.document, mark.lineNumber);
   const lineSel      = new vscode.Selection(lineRange.start, lineRange.end);
@@ -235,7 +231,7 @@ async function bookmarkClick(item) {
   // const tokenMatches = await getTokensInLine(lineText);
   const tokenMatches = [];
   if(tokenMatches.length === 0) {
-    log('bookmarkClick, no token in line', mark.lineNumber,
+    log('bookmarkItemClick, no token in line', mark.lineNumber,
         'of', mark.fileName, ', removing GlobalMark', mark.token);
     marks.deleteMark[mark];
     await marks.saveGlobalMarks();
@@ -249,7 +245,7 @@ async function bookmarkClick(item) {
     }
     const foundToken = tokenMatches[0][0];
     if(foundToken !== mark.token) {
-      log(`bookmarkClick, wrong token found in line ${mark.lineNumber} `+
+      log(`bookmarkItemClick, wrong token found in line ${mark.lineNumber} `+
       `of ${mark.fileName}, found: ${foundToken}, expected: ${mark.token}, `+
       `fixing GlobalMark`);
       await marks.replaceGlobalMark(mark.token, foundToken);
@@ -460,7 +456,7 @@ async function refreshFile(document) {
   // end('refreshFile');
 }
 
-module.exports = {init, getLabel, bookmarkClick, refreshMenu,
+module.exports = {init, getLabel, bookmarkItemClick, refreshMenu,
                   clearDecoration, justDecorated, updateGutter,
                   toggle, scrollToPrevNext, delMarkFromLineAndGlobal,    
                   clearFile, refreshFile, deleteMarkFromText, runOnAllMarksInFile

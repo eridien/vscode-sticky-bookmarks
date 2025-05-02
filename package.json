@@ -24,7 +24,7 @@
       },
       {
         "command": "sticky-bookmarks.toggleGen2Cmd",
-        "title": "Toggle Gen1 Bookmark On/Off",
+        "title": "Toggle Gen2 Bookmark On/Off",
         "category": "Sticky Bookmarks"
       },
       {
@@ -72,22 +72,12 @@
         "category": "Sticky Bookmarks: Remove Name From Bookmark"
       },
       {
-        "command": "sticky-bookmarks.gotoCmd",
+        "command": "sticky-bookmarks.clickCmd",
         "title": "Go To Bookmark",
         "category": "Sticky Bookmarks",
         "arguments": [
           "sidebar"
         ]
-      },
-      {
-        "command": "sticky-bookmarks.clearAllSavedDataCmd",
-        "title": "-- Do Not Use -- Internal Debug",
-        "category": "Sticky Bookmarks"
-      },
-      {
-        "command": "sticky-bookmarks.resetAllKeysCmd",
-        "title": "-- Do Not Use -- Internal Debug",
-        "category": "Sticky Bookmarks"
       }
     ],
     "keybindings": [
@@ -99,8 +89,8 @@
       },
       {
         "command": "sticky-bookmarks.toggleGen1Cmd",
-        "key": "ctrl+alt+shift+/",
-        "mac": "cmd+alt+shift+/",
+        "key": "ctrl+alt+shift+\\",
+        "mac": "cmd+alt+shift+\\",
         "when": "editorTextFocus"
       },
       {
@@ -122,8 +112,8 @@
       },
       {
         "command": "sticky-bookmarks.deleteIconCmd",
-        "key": "ctrl+shift+alt+\\",
-        "mac": "cmd+shift+alt+\\"
+        "key": "ctrl+shift+alt+p",
+        "mac": "cmd+shift+alt+p"
       }
     ],
     "viewsContainers": {

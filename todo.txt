@@ -2,7 +2,6 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-  folderIndex and folderName missing in folder item
 
 todo 
   move hide to menu

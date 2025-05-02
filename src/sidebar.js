@@ -58,7 +58,7 @@ async function getNewFolderItem(mark) {
   else
     item.iconPath = new vscode.ThemeIcon("chevron-down");
   item.command = {
-    command:   'sticky-bookmarks.gotoCmd',
+    command:   'sticky-bookmarks.itemClickCmd',
     title:     'Item Clicked',
     arguments: [item],
   }
@@ -78,7 +78,7 @@ async function getNewFileItem(mark, children) {
                        folderFsPath, folderUriPath,
                        fileFsPath, fileRelUriPath});
   item.command = {
-    command:   'sticky-bookmarks.gotoCmd',
+    command:   'sticky-bookmarks.itemClickCmd',
     title:     'Item Clicked',
     arguments: [item],
   }
@@ -92,7 +92,7 @@ async function getNewMarkItem(mark) {
   Object.assign(item, {id:getUniqueIdStr(), type:'bookmark', 
                                           contextValue:'bookmark', mark});
   item.command = {
-    command: 'sticky-bookmarks.gotoCmd',
+    command: 'sticky-bookmarks.itemClickCmd',
     title:   'Item Clicked',
     arguments: [item],
   }
@@ -216,28 +216,31 @@ async function getItemTree() {
   return itemTree;
 }
 
-async function goto(item) {
-  log('goto');
+function toggleFolder(item, forceClose = false, forceOpen = false) {
+  log('toggleFolder');
+  const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
+  if(folderItem) {
+    const folderFsPath = folderItem.folderFsPath;
+    const open = forceOpen || (!forceClose && closedFolders.has(folderFsPath));
+    if(open) closedFolders.delete(folderFsPath);
+    else     closedFolders.add(folderFsPath);
+    utils.updateSide();
+  }
+}
+
+async function itemClick(item) {
+  log('itemClick');
   if(item === undefined) {
     item = treeView.selection[0];
     if (!item) { log('info err', 'No Bookmark Selected To Go To'); return; }
   }
   text.clearDecoration();
   switch(item.type) {
-    case 'folder': 
-      const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
-      if(folderItem) {
-        if(closedFolders.has(folderItem.folderFsPath))
-           closedFolders.delete(folderItem.folderFsPath);
-        else
-           closedFolders.add(folderItem.folderFsPath);
-        utils.updateSide();
-      }
-      break;
+    case 'folder': toggleFolder(item); break;
     case 'file':
       await vscode.window.showTextDocument(item.document, {preview: false});
       break;
-    case 'bookmark': await text.bookmarkClick(item); break;
+    case 'bookmark': await text.bookmarkItemClick(item); break;
   }
 }
 
@@ -260,5 +263,5 @@ class SidebarProvider {
   }
 }
 
-module.exports = {SidebarProvider, init, setBusy, goto};
+module.exports = {SidebarProvider, init, setBusy, itemClick};
 

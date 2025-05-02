@@ -32,16 +32,12 @@ async function activate(context) {
      'sticky-bookmarks.deleteMenuCmd',                 commands.deleteMenuCmd);
 	const deleteIconCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.deleteIconCmd', (item) => commands.deleteIconCmd(item));
-  const gotoCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.gotoCmd',              (item) => commands.gotoCmd(item));
+  const itemClickCmd = vscode.commands.registerCommand(
+    'sticky-bookmarks.itemClickCmd',    (item) => commands.itemClickCmd(item));
   const eraseCmd = vscode.commands.registerCommand(
     'sticky-bookmarks.eraseCmd',            (item) => commands.eraseCmd(item));
 	const nameCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.nameCmd',             (item) => commands.nameCmd(item));
-  const clearAllSavedDataCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.clearAllSavedDataCmd',   commands.clearAllSavedDataCmd);
-  const resetAllKeysCmd = vscode.commands.registerCommand(
-    'sticky-bookmarks.resetAllKeysCmd',              commands.resetAllKeysCmd);
 
   const sidebarProvider = new sidebar.SidebarProvider();
   const treeView = vscode.window.createTreeView('sidebarView', {
@@ -84,8 +80,7 @@ async function activate(context) {
 
   context.subscriptions.push(toggleGen2Cmd, toggleGen1Cmd, prevCmd, nextCmd,
                              hideCmd, refreshCmd, expandCmd, deleteMenuCmd,
-                             deleteIconCmd, gotoCmd, nameCmd, eraseCmd, 
-                             clearAllSavedDataCmd, resetAllKeysCmd);
+                             deleteIconCmd, itemClickCmd, nameCmd, eraseCmd );
     
   end('activating extension');
 }

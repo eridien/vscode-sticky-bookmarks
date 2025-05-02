@@ -20,10 +20,10 @@ function init(commandsIn, sidebarIn, sidebarProviderIn,
 }
 
 function updateSide() {
-  start('updateSide');
+  // start('updateSide');
   sidebarProvider._onDidChangeTreeData.fire();
   text.updateGutter();
-  end('updateSide');
+  // end('updateSide');
 }
 
 const timers = {};
@@ -196,26 +196,6 @@ function getPathsFromWorkspaceFolder(folder) {
   return wsPaths;
 }
 
-function getPathsFromDoc(doc) {
-  if(!doc) return null;
-  const uri         = doc.uri;
-  const fileFsPath  = uri.fsPath;
-  const fileName    = path.basename(fileFsPath);
-  const fileUriPath = uri.path;
-  const filePaths   = {fileFsPath, fileName, fileUriPath};
-  const wsFolder    = vscode.workspace.getWorkspaceFolder(uri);
-  filePaths.inWorkspace = !!wsFolder;
-  if(!filePaths.inWorkspace) return filePaths;
-  else {
-    const wsPaths           = getPathsFromWorkspaceFolder(wsFolder);
-    const folderUriPath     = wsPaths.folderUriPath;
-    const fileRelUriPath    = fileUriPath.slice( folderUriPath.length + 1);
-    const relFilePaths      = {fileRelUriPath};
-    Object.assign(filePaths, wsPaths, relFilePaths);
-    return filePaths;
-  }
-}
-
 function getfileRelUriPath(document) {
   if(!document) return null;
   const uri         = document.uri;
@@ -224,11 +204,6 @@ function getfileRelUriPath(document) {
   if(!folder) return null;
   const folderUriPath = folder.uri.path;
   return fileUriPath.slice( folderUriPath.length + 1);
-}
-
-async function getFileLineDisplay(document, lineNumber) {
-  const {fileRelUriPath} = getPathsFromDoc(document);
-  return `File: ${fileRelUriPath}, Line: ${lineNumber.padStart(3, ' ')}`;
 }
 
 async function loadStickyBookmarksJson() {
@@ -378,6 +353,7 @@ function tokenToDigits(token) {
 }
 
 function tokenToStr(token) {
+  if(!token) return '';
   return token.replaceAll('\u200B', '0')
               .replaceAll('\u200C', '1')
               .replaceAll('\u200D', '2')
@@ -464,13 +440,11 @@ function refreshFile(...args) {
 }
 
 module.exports = {
-  initContext, init, getLog, loadStickyBookmarksJson,
-  commentsByLang, keywords, fileExists, numberToInvBase4,
-  tokenToDigits, getTokenRegEx, getTokenRegExG,
-  deleteLine, insertLine, replaceLine, debounce, sleep,
-  getPathsFromWorkspaceFolder, getPathsFromDoc, getfileRelUriPath,
-  getFocusedWorkspaceFolder, updateSide, 
-  tokenToStr, getDocument, runOnAllFolders,
-  deleteMarkFromText, setBusy, refreshFile
+  commentsByLang, debounce, deleteLine, deleteMarkFromText, fileExists, 
+  getDocument, getFocusedWorkspaceFolder, getLog, 
+  getPathsFromWorkspaceFolder, getTokenRegEx, getTokenRegExG, 
+  getfileRelUriPath, init, initContext, insertLine, keywords, 
+  loadStickyBookmarksJson, numberToInvBase4, refreshFile, replaceLine, 
+  runOnAllFolders, setBusy, sleep, tokenToDigits, tokenToStr, updateSide
 }
 

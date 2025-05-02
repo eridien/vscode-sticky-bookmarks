@@ -2,10 +2,10 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-  gutter not cleared when mark toggled off
+  pointers
   
 todo 
-  support gen1 marks
+  move hide to menu
   add plugin support, eolIsSafe for now
   expand all in title menu (toggle folder)
   auto scroll
@@ -18,9 +18,7 @@ todo
     don't delete named marks so names preserved
     delete named tokens when X menu used
   settings
-
-???
-
+  track gen1 marks with edits
 
 impossible?
   invisible tokens

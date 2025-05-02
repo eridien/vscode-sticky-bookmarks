@@ -62,7 +62,7 @@ function tokenRegEx(languageId, eol = true, global = false) {
 }
 
 function updateGutter() {
-  start('updateGutter');
+  // start('updateGutter');
   const editor = vscode.window.activeTextEditor;
   if (!editor) return;
   const fsPath = editor.document.uri.fsPath;
@@ -77,10 +77,10 @@ function updateGutter() {
       case 2: gen2DecRanges.push({range}); break;
     }
   }
-  log('gen1DecRanges', gen1DecRanges);
+  // log('gen1DecRanges', gen1DecRanges);
   editor.setDecorations(gutterDecGen1, gen1DecRanges);
   editor.setDecorations(gutterDecGen2, gen2DecRanges);
-  end('updateGutter');
+  // end('updateGutter');
 }
 
 function isKeyWord(languageId, word) {
@@ -416,7 +416,7 @@ async function deleteMarkFromText(fsPath, lineNumber) {
 }
 
 async function refreshFile(document) {
-  start('refreshFile');
+  // start('refreshFile');
   if(!document) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return;
@@ -453,7 +453,7 @@ async function refreshFile(document) {
   await marks.saveMarkStorage();
   await utils.updateSide();
   await marks.dumpMarks('refresh');
-  end('refreshFile');
+  // end('refreshFile');
 }
 
 module.exports = {init, getLabel, bookmarkClick, refreshMenu,

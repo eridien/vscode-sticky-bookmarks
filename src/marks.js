@@ -23,7 +23,7 @@ async function addMarkToStorage(mark, save = true) {
     markSetByToken.set(mark.token, tokenMarkSet);
   }
   tokenMarkSet.add(mark);
-  let fileMarkSet = markSetByFsPath.get(mark.fsPath);
+  let fileMarkSet = markSetByFsPath.get(mark.fileFsPath);
   if (!fileMarkSet) {
     fileMarkSet = new Set();
     markSetByFsPath.set(mark.document.uri.fsPath, fileMarkSet);
@@ -46,6 +46,7 @@ async function loadMarkStorage() {
 } 
 
 async function saveMarkStorage() {
+  // log('saveMarkStorage', [...marksByLoc.values()]);
   await context.workspaceState.update('marks', [...marksByLoc.values()]);
 }
 
@@ -57,11 +58,15 @@ function getMarksForFile(fileFsPath) {
   return [];  
 }
 
+function getAllMarks() { 
+  return [...marksByLoc.values()]; 
+}
+
 function deleteMarkFromFileSet(mark) {
-  let fileMarkSet = markSetByFsPath.get(mark.fsPath);
+  let fileMarkSet = markSetByFsPath.get(mark.fileFsPath);
   if (fileMarkSet) {
     fileMarkSet.delete(mark);
-    if (fileMarkSet.size === 0) markSetByFsPath.delete(mark.fsPath);
+    if (fileMarkSet.size === 0) markSetByFsPath.delete(mark.fileFsPath);
   }
 }
 
@@ -122,7 +127,6 @@ function waitForInit() {
 
 function putGlobalMark(token) {globalMarks[token] = token}
 function getGlobalMark(token) {return globalMarks[token]}
-function getGlobalMarks()     {return globalMarks}
 
 function getMarkForLine(document, lineNumber) {
   const fileFsPath = document.uri.fsPath;
@@ -165,7 +169,7 @@ function dumpMarks(caller, list, dump) {
   else {
     let str = "";
     for(const mark of marks) {
-      str += mark.lineNumber.toString().padStart(3, ' ') + ' ' +
+      str += mark.lineNumber.toString().padStart(3, ' ') + 
              utils.tokenToStr(mark.token) +  ' ';
     }
     log(caller, str);
@@ -180,21 +184,27 @@ function getToken(document, zero = true) {
        + commRgt;
 }
 
-async function newMark(document, lineNumber, gen, token, save = true) {
-  token ??= getToken(document);
-  const mark = {document, lineNumber, gen, token};
+async function newMark(document, lineNumber, gen, token, zero = true, save = true) {
+  const mark         = {document, lineNumber, gen};
+  if(gen == 2) {
+    token ??= getToken(document, zero);
+    mark.token = token;
+  }
   mark.loc = document.uri.fsPath + '\x00' + 
              lineNumber.toString().padStart(6, '0');
-  mark.fsPath         = document.uri.fsPath;
+  const wsFolder      = vscode.workspace.getWorkspaceFolder(document.uri);
+  mark.folderUriPath  = wsFolder?.uri.path;
+  mark.folderFsPath   = wsFolder?.uri.fsPath;
+  mark.fileFsPath     = document.uri.fsPath;
   mark.fileRelUriPath = await utils.getfileRelUriPath(document);
   await addMarkToStorage(mark, save);
   return mark;
 }
 
 
-module.exports = {init, waitForInit, dumpMarks, 
+module.exports = {init, waitForInit, dumpMarks, getAllMarks,
                   getMarksForFile, saveGlobalMarks, saveMarkStorage,
-                  getGlobalMarks, getMarkForLine, delMarkForLine,
+                  getMarkForLine, delMarkForLine,
                   getGlobalMark,  putGlobalMark, deleteMark,
                   newMark, removeTokenFromMark};
 

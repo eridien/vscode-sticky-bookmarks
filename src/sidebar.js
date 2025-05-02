@@ -109,7 +109,7 @@ async function getItemTree() {
     return [];
   }
   const rootItems   = [];
-  const marksArray  = Object.values(marks.getGlobalMarks());
+  const marksArray  = Object.values(marks.getAllMarks());
   marksArray.sort((a, b) => {
     if(a.folderIndex > b.folderIndex) return +1;
     if(a.folderIndex < b.folderIndex) return -1;
@@ -127,10 +127,8 @@ async function getItemTree() {
   let lastFolderUriPath = null, lastFileFsPath;
   for(const mark of marksArray) {
     if(closedFolders.has(mark.folderFsPath)) continue;
-    if(!mark.inWorkspace || 
-       !await utils.fileExists(mark.folderFsPath)) {
-       log('Folder not in workspace, '+
-           'deleting globalMark:', mark.token, mark.folderName);
+    if(!await utils.fileExists(mark.folderFsPath)) {
+       log('err','Folder not in workspace:', mark.folderFsPath);
       marks.deleteMark[mark];
       await marks.saveGlobalMarks();
       continue;
@@ -151,11 +149,8 @@ async function getItemTree() {
            {folderIndex:index, folderName:name, 
             folderFsPath:uri.fsPath, folderUriPath:uri.path}));
       }
-      if(!wsFolder) {
-        log('Folder missing, '+
-            'deleting globalMark:', mark.token, mark.folderName);
-        marks.deleteMark[mark];
-        await marks.saveGlobalMarks();
+      if(!wsFolder) { 
+        log('err', 'Folder missing: ', mark.folderFsPath);
         continue;
       }
       lastFileFsPath = null;

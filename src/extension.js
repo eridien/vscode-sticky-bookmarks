@@ -15,13 +15,17 @@ async function activate(context) {
     return;
   }
 	const toggleGen2Cmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.toggleGen2Cmd',                         commands.toggleGen2Cmd);
+     'sticky-bookmarks.toggleGen2Cmd',                 commands.toggleGen2Cmd);
 	const toggleGen1Cmd = vscode.commands.registerCommand(
      'sticky-bookmarks.toggleGen1Cmd',                 commands.toggleGen1Cmd);
 	const prevCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.prevCmd',                             commands.prevCmd);
 	const nextCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.nextCmd',                             commands.nextCmd);
+	const prevItemCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.prevItemCmd',                     commands.prevItemCmd);
+	const nextItemCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.nextItemCmd',                     commands.nextItemCmd);
  	const hideCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.hideCmd',                             commands.hideCmd);
  const expandCmd = vscode.commands.registerCommand(
@@ -77,9 +81,11 @@ async function activate(context) {
     await commands.changedSelection(event);
   });
 
-  context.subscriptions.push(toggleGen2Cmd, toggleGen1Cmd, prevCmd, nextCmd,
-                             hideCmd, refreshCmd, expandCmd, delMarksInFileCmd,
-                             deleteIconCmd, itemClickCmd, nameCmd, eraseCmd );
+  context.subscriptions.push(toggleGen1Cmd, toggleGen2Cmd,
+                             prevCmd, nextCmd, prevItemCmd, nextItemCmd,
+                             hideCmd, refreshCmd, expandCmd, 
+                             itemClickCmd, nameCmd,
+                             delMarksInFileCmd, deleteIconCmd, eraseCmd );
     
   end('activating extension');
 }

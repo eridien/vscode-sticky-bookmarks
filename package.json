@@ -38,6 +38,16 @@
         "category": "Sticky Bookmarks"
       },
       {
+        "command": "sticky-bookmarks.prevItemCmd",
+        "title": "Go To Previous History",
+        "category": "Sticky Bookmarks"
+      },
+      {
+        "command": "sticky-bookmarks.nextItemCmd",
+        "title": "Go To Next History",
+        "category": "Sticky Bookmarks"
+      },
+      {
         "command": "sticky-bookmarks.hideCmd",
         "title": "Hide All In Workspace",
         "category": "Sticky Bookmarks"
@@ -103,6 +113,18 @@
         "command": "sticky-bookmarks.nextCmd",
         "key": "ctrl+alt+]",
         "mac": "cmd+alt+]",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "sticky-bookmarks.prevItemCmd",
+        "key": "ctrl+alt+shift+[",
+        "mac": "cmd+alt+shift+[",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "sticky-bookmarks.nextItemCmd",
+        "key": "ctrl+alt+shift+]",
+        "mac": "cmd+alt+shift+]",
         "when": "editorTextFocus"
       },
       {

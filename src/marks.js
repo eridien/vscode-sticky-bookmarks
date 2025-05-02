@@ -160,6 +160,18 @@ function getMarkTokenRange(mark) {
                           lineNumber, tokenOfs + mark.token.length);
 }
 
+function verifiedMark(mark) {
+  if(!mark) return false;
+  const document   = mark.document;
+  const lineNumber = mark.lineNumber;
+  if(getMarkForLine(document, lineNumber) === undefined) return false;
+  if(mark.gen === 1) return true;
+  let line;
+  try { line = document.lineAt(lineNumber).text }
+  catch (_) { return false }
+  return (line.indexOf(mark.token) !== -1);
+}
+
 async function saveGlobalMarks() {
   await context.workspaceState.update('globalMarks', globalMarks);
   utils.updateSide();
@@ -223,7 +235,7 @@ async function newMark(document, lineNumber, gen, token, zero = true, save = tru
 }
 
 
-module.exports = {init, waitForInit, dumpMarks, getAllMarks,
+module.exports = {init, waitForInit, dumpMarks, getAllMarks, verifiedMark,
                   getMarkForLine, getMarksForFile, saveGlobalMarks,
                   delMarkForLine, deleteMark, deleteAllMarks,
                   getGlobalMark,  putGlobalMark, saveMarkStorage,

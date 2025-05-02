@@ -36,6 +36,16 @@ async function nextCmd() {
   await text.scrollToPrevNext(true);
 }
 
+async function prevItemCmd() {
+  log('prevItemCmd');
+  await sidebar.jumpToPrevNextItem(false);
+}
+
+async function nextItemCmd() {
+  log('nextItemCmd');
+  await sidebar.jumpToPrevNextItem(true);
+}
+
 async function hideCmd() {
   log('hideCmd');
   utils.updateSide();
@@ -126,7 +136,8 @@ async function changedVisEditors(editors) {
 async function changedSelection(event) {
   const {textEditor:editor, selections, kind} = event;
   if(editor.document.uri.scheme !== 'file') return;
-  if(selections.length == 1 && kind === 2 && selections[0].isEmpty) {
+  if(selections.length == 1 && selections[0].isEmpty &&
+        kind === vscode.TextEditorSelectionChangeKind.Mouse) {
     const clickPos = selections[0].active;
     const mark = marks.getMarkForLine(editor.document, clickPos.line);
     if(mark && mark.gen === 2) {
@@ -145,7 +156,8 @@ async function changedText(event) {
   await text.refreshFile(event.document);
 }
 
-module.exports = { init, toggleGen2Cmd, toggleGen1Cmd, prevCmd, nextCmd, 
+module.exports = { init, toggleGen2Cmd, toggleGen1Cmd, 
+                   prevCmd, nextCmd, prevItemCmd, nextItemCmd, 
                    hideCmd, refreshCmd, expandCmd, delMarksInFileCmd, 
                    itemClickCmd, nameCmd, eraseCmd, deleteIconCmd,
                    changedSidebarVisiblitiy, changedText,

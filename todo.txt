@@ -4,6 +4,7 @@ vsce package
 bugs
 
 todo 
+  cmd to delete all marks in file
   move hide to menu
   add plugin support, eolIsSafe for now
   expand all in title menu (toggle folder)

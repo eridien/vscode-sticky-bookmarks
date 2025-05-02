@@ -15,6 +15,13 @@ let marksByLoc      = new Map();
 let markSetByToken  = new Map();
 let markSetByFsPath = new Map();
 
+async function deleteAllMarks() {
+  marksByLoc     .clear();
+  markSetByToken .clear();
+  markSetByFsPath.clear();
+  await saveMarkStorage();
+}
+
 async function addMarkToStorage(mark, save = true) {
   marksByLoc.set(mark.loc, mark);
   let tokenMarkSet = markSetByToken.get(mark.token);
@@ -204,9 +211,9 @@ async function newMark(document, lineNumber, gen, token, zero = true, save = tru
 
 
 module.exports = {init, waitForInit, dumpMarks, getAllMarks,
-                  getMarksForFile, saveGlobalMarks, saveMarkStorage,
-                  getMarkForLine, delMarkForLine,
-                  getGlobalMark,  putGlobalMark, deleteMark,
+                  getMarkForLine, getMarksForFile, saveGlobalMarks,
+                  delMarkForLine, deleteMark, deleteAllMarks,
+                  getGlobalMark,  putGlobalMark, saveMarkStorage,
                   newMark, removeTokenFromMark};
 
 

@@ -380,6 +380,34 @@ async function refreshMenu() {
   end('refreshMenu');
 }
 
+async function replaceAllTextInDocument(document, newText) {
+  const edit = new vscode.WorkspaceEdit();
+  const fullRange = new vscode.Range(
+    document.positionAt(0),
+    document.positionAt(document.getText().length)
+  );
+  edit.replace(document.uri, fullRange, newText);
+  await vscode.workspace.applyEdit(edit);
+}
+
+async function deleteAllTokensFromFile(document) {
+  const docText  = document.getText();
+  const regexG   = tokenRegEx(document.languageId, false, true);
+  const matches  = [...docText.matchAll(regexG)];
+  if(matches.length == 0) return;
+  matches.reverse();
+  let newText    = '';
+  let lastOffset = docText.length;
+  for (const match of matches) {
+    const offset = match.index;
+    const token  = match[0];
+    newText = docText.slice(offset + token.length, lastOffset) + newText;
+    lastOffset = offset;
+  }
+  newText = docText.slice(0, lastOffset) + newText;
+  await replaceAllTextInDocument(document, newText);
+}
+
 async function runOnAllMarksInFile(document, markFunc) {
   const docText  = document.getText();
   const regexG   = tokenRegEx(document.languageId, false, true);
@@ -459,7 +487,8 @@ async function refreshFile(document) {
 module.exports = {init, getLabel, bookmarkItemClick, refreshMenu,
                   clearDecoration, justDecorated, updateGutter,
                   toggle, scrollToPrevNext, delMarkFromLineAndGlobal,    
-                  clearFile, refreshFile, deleteMarkFromText, runOnAllMarksInFile
+                  clearFile, refreshFile, deleteMarkFromText,
+                  runOnAllMarksInFile, deleteAllTokensFromFile
                   };
 
 

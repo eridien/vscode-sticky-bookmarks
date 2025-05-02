@@ -52,8 +52,8 @@
         "category": "Sticky Bookmarks"
       },
       {
-        "command": "sticky-bookmarks.deleteMenuCmd",
-        "title": "Delete All Bookmarks In Workspace",
+        "command": "sticky-bookmarks.delMarksInFileCmd",
+        "title": "Delete All Bookmarks In File",
         "category": "Sticky Bookmarks"
       },
       {
@@ -139,7 +139,7 @@
         {
           "command": "sticky-bookmarks.hideCmd",
           "when": "view == sidebarView",
-          "group": "navigation@1",
+          "group": "help@1",
           "arguments": [
             "title"
           ]
@@ -147,17 +147,17 @@
         {
           "command": "sticky-bookmarks.expandCmd",
           "when": "view == sidebarView",
-          "group": "help@1"
+          "group": "help@2"
         },
         {
           "command": "sticky-bookmarks.refreshCmd",
           "when": "view == sidebarView",
-          "group": "help@2"
+          "group": "help@3"
         },
         {
-          "command": "sticky-bookmarks.deleteMenuCmd",
+          "command": "sticky-bookmarks.delMarksInFileCmd",
           "when": "view == sidebarView",
-          "group": "help@3"
+          "group": "help@4"
         }
       ],
       "view/item/context": [

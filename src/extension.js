@@ -28,8 +28,8 @@ async function activate(context) {
      'sticky-bookmarks.expandCmd',                         commands.expandCmd);
  const refreshCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.refreshCmd',                       commands.refreshCmd);
-	const deleteMenuCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.deleteMenuCmd',                 commands.deleteMenuCmd);
+	const delMarksInFileCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.delMarksInFileCmd',                 commands.delMarksInFileCmd);
 	const deleteIconCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.deleteIconCmd', (item) => commands.deleteIconCmd(item));
   const itemClickCmd = vscode.commands.registerCommand(
@@ -79,7 +79,7 @@ async function activate(context) {
   });
 
   context.subscriptions.push(toggleGen2Cmd, toggleGen1Cmd, prevCmd, nextCmd,
-                             hideCmd, refreshCmd, expandCmd, deleteMenuCmd,
+                             hideCmd, refreshCmd, expandCmd, delMarksInFileCmd,
                              deleteIconCmd, itemClickCmd, nameCmd, eraseCmd );
     
   end('activating extension');

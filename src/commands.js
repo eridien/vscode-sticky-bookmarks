@@ -48,7 +48,7 @@ async function expandCmd() {
     const folderFsPath  = wsFolder.uri.fsPath;
     await sidebar.toggleFolder(folderFsPath, true, false);
     setTimeout( async ()=> { 
-          await sidebar.toggleFolder(folderFsPath, false,  true) }, 100);
+          await sidebar.toggleFolder(folderFsPath, false,  true) }, 20);
   }
 }
 
@@ -57,9 +57,14 @@ async function refreshCmd() {
   await text.refreshMenu();
 }
 
-async function deleteMenuCmd() {
-  log('deleteMenuCmd');
-
+async function delMarksInFileCmd() {
+  log('delMarksInFileCmd');
+  const editor = vscode.window.activeTextEditor;
+  if (editor) {
+    await text.deleteAllTokensFromFile(editor.document);
+    await marks.deleteAllMarks();
+    utils.updateSide();
+  }
 }
 
 async function deleteIconCmd(item) {
@@ -136,7 +141,7 @@ const changedText = utils.debounce(async (event) => {
 }, 200);
 
 module.exports = { init, toggleGen2Cmd, toggleGen1Cmd, prevCmd, nextCmd, 
-                   hideCmd, refreshCmd, expandCmd, deleteMenuCmd, 
+                   hideCmd, refreshCmd, expandCmd, delMarksInFileCmd, 
                    itemClickCmd, nameCmd, eraseCmd, deleteIconCmd,
                    changedSidebarVisiblitiy, changedText,
                    changedDocument, changedEditor, 

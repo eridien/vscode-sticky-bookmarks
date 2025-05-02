@@ -45,7 +45,8 @@ let uniqueItemIdNum = 0;
 function getUniqueIdStr() { return (++uniqueItemIdNum).toString(); }
 
 async function getNewFolderItem(mark) {
-  const {folderIndex, folderName, folderFsPath, folderUriPath} = mark;
+  const folderName = mark.folderUriPath.split('/').pop();
+  const {folderIndex, folderFsPath, folderUriPath} = mark;
   const id    = getUniqueIdStr();
   const label = '📂 ' + folderName;
   const item  = new vscode.TreeItem(
@@ -63,19 +64,19 @@ async function getNewFolderItem(mark) {
   }
   
   return item;
-}
+}     
 
 async function getNewFileItem(mark, children) { 
   const label =  '📄 ' + mark.fileRelUriPath;
-  const {folderIndex, folderName,  document, fileName, 
-         folderFsPath, folderUriPath,
-         fileFsPath,   fileUriPath, fileRelUriPath} = mark;
+  const {document, folderFsPath, folderUriPath, 
+                   fileFsPath, fileRelUriPath} = mark;
   const item = new vscode.TreeItem(label,
                    vscode.TreeItemCollapsibleState.Expanded);
   item.id = getUniqueIdStr();
-  Object.assign(item, {type:'file', contextValue:'file', document, children, 
-                       folderIndex, folderName, folderFsPath, folderUriPath,
-                       fileName,    fileFsPath, fileUriPath,  fileRelUriPath});
+  Object.assign(item, {type:'file', contextValue:'file', 
+                       document, children, 
+                       folderFsPath, folderUriPath,
+                       fileFsPath, fileRelUriPath});
   item.command = {
     command:   'sticky-bookmarks.gotoCmd',
     title:     'Item Clicked',
@@ -165,15 +166,15 @@ async function getItemTree() {
   const editor = vscode.window.activeTextEditor;
   if (editor) {
     const document          = editor.document;
-    const editorFileUriPath = document.uri.path;
-    const editorLine        = editor.selection.active.line;
+    const editorFileFsPath = document.uri.fsPath;
+    const editorLine       = editor.selection.active.line;
     if(showPointers) {
       let haveDown  = null;
       let haveExact = null;
       let haveUp    = null;
       for(const item of rootItems) {
         if(item.type === 'file' &&
-           item.fileUriPath === editorFileUriPath    &&
+           item.fileFsPath === editorFileFsPath         &&
            item.children && item.children.length > 0 &&
            !closedFolders.has(item.folderUriPath)) {
           for (const bookmarkItem of item.children) {

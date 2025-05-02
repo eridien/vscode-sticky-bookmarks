@@ -2,8 +2,8 @@ const vscode = require('vscode');
 const utils  = require('./utils.js');
 const {log, start, end} = utils.getLog('mark');
 
-const DONT_LOAD_MARKS_ON_START = true;
-// const DONT_LOAD_MARKS_ON_START = false;
+// const DONT_LOAD_MARKS_ON_START = true;
+const DONT_LOAD_MARKS_ON_START = false;
 
 let globalMarks = {};
 
@@ -193,6 +193,7 @@ async function newMark(document, lineNumber, gen, token, zero = true, save = tru
   mark.loc = document.uri.fsPath + '\x00' + 
              lineNumber.toString().padStart(6, '0');
   const wsFolder      = vscode.workspace.getWorkspaceFolder(document.uri);
+  mark.folderIndex    = 0;
   mark.folderUriPath  = wsFolder?.uri.path;
   mark.folderFsPath   = wsFolder?.uri.fsPath;
   mark.fileFsPath     = document.uri.fsPath;

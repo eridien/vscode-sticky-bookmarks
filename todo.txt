@@ -3,7 +3,8 @@ vsce package
 
 bugs
   pointers
-  
+  folderIndex and folderName missing in folder item
+
 todo 
   move hide to menu
   add plugin support, eolIsSafe for now

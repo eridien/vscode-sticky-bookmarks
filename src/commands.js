@@ -43,7 +43,13 @@ async function hideCmd() {
 
 async function expandCmd() {
   log('expandCmd');
-
+  const allWsFolders = vscode.workspace.workspaceFolders;
+  for(const wsFolder of allWsFolders) {
+    const folderFsPath  = wsFolder.uri.fsPath;
+    await sidebar.toggleFolder(folderFsPath, true, false);
+    setTimeout( async ()=> { 
+          await sidebar.toggleFolder(folderFsPath, false,  true) }, 100);
+  }
 }
 
 async function refreshCmd() {

@@ -216,16 +216,12 @@ async function getItemTree() {
   return itemTree;
 }
 
-function toggleFolder(item, forceClose = false, forceOpen = false) {
+function toggleFolder(folderFsPath, forceClose = false, forceOpen = false) {
   log('toggleFolder');
-  const folderItem = itemTree.find(rootItem => rootItem.id === item.id);
-  if(folderItem) {
-    const folderFsPath = folderItem.folderFsPath;
-    const open = forceOpen || (!forceClose && closedFolders.has(folderFsPath));
-    if(open) closedFolders.delete(folderFsPath);
-    else     closedFolders.add(folderFsPath);
-    utils.updateSide();
-  }
+  const open = forceOpen || (!forceClose && closedFolders.has(folderFsPath));
+  if(open) closedFolders.delete(folderFsPath);
+  else     closedFolders.add(folderFsPath);
+  utils.updateSide();
 }
 
 async function itemClick(item) {
@@ -236,7 +232,7 @@ async function itemClick(item) {
   }
   text.clearDecoration();
   switch(item.type) {
-    case 'folder': toggleFolder(item); break;
+    case 'folder': toggleFolder(item.folderFsPath); break;
     case 'file':
       await vscode.window.showTextDocument(item.document, {preview: false});
       break;
@@ -263,5 +259,5 @@ class SidebarProvider {
   }
 }
 
-module.exports = {SidebarProvider, init, setBusy, itemClick};
+module.exports = {SidebarProvider, init, toggleFolder, setBusy, itemClick};
 

@@ -6,8 +6,11 @@ bugs
   getlabel series.vue no symbols
      text: getLabel, No topSymbols found series.vue
   keyword console not removed (srvr.js 13)
+  delMarksInFileCmd:  verifyMark, token missing, gutter uncleared
 
 todo 
+  move gutter icon to right
+  strip return results from runAll...
   sort folders by name or recently used
   cmd to delete all marks in file
   add plugin support, eolIsSafe for now
@@ -67,10 +70,11 @@ settings
   highlight function same options
 
 testing
-  find missing awaits from util redirects
-  test dark theme "window color"
+  dark theme "window color"
+  multiple folders, no folders
   moving a project folder
   mark after an unclosed string
+  check missing awaits from util redirects
 
 features
   sticky

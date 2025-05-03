@@ -196,14 +196,13 @@ function getPathsFromWorkspaceFolder(folder) {
   return wsPaths;
 }
 
-function getfileRelUriPath(document) {
-  if(!document) return null;
+function getFileRelUriPath(document) {
+  if(!document) return '';
   const uri         = document.uri;
   const fileUriPath = uri.path;
   const folder      = vscode.workspace.getWorkspaceFolder(uri);
-  if(!folder) return null;
-  const folderUriPath = folder.uri.path;
-  return fileUriPath.slice( folderUriPath.length + 1);
+  if(!folder) return fileUriPath;
+  return fileUriPath.slice(folder.uri.path.length + 1);
 }
 
 async function loadStickyBookmarksJson() {
@@ -378,7 +377,6 @@ async function runOnFilesInFolder(folder, fileFunc, markFunc) {
 }
 
 async function runOnAllFolders(folderFunc, fileFunc, markFunc) {
-
   async function doOneFolder(folder) {
     const folderRes = [folder];
     if (folderFunc) folderRes.push(await folderFunc(folder));
@@ -387,10 +385,6 @@ async function runOnAllFolders(folderFunc, fileFunc, markFunc) {
        folderRes.push(await runOnFilesInFolder(folder, fileFunc, markFunc));
     return folderRes;
   }
-
-  // foldersRes = [[folder obj, folderFunc res,
-  //                [[document, fileFunc res, 
-  //                     [[mark, markFunc res], [mark, markFunc res] ...
   let folders = vscode.workspace.workspaceFolders;
   if (!folders || folders.length === 0) {
     log('info', 'No Folders found in workspace'); 
@@ -426,8 +420,9 @@ module.exports = {
   commentsByLang, deleteLine, deleteMarkFromText, fileExists, 
   getDocument, getFocusedWorkspaceFolder, getLog, 
   getPathsFromWorkspaceFolder, getTokenRegEx, getTokenRegExG, 
-  getfileRelUriPath, init, initContext, insertLine, keywords, 
+  getFileRelUriPath, init, initContext, insertLine, keywords, 
   loadStickyBookmarksJson, numberToInvBase4, refreshFile, replaceLine, 
-  runOnAllFolders, setBusy, sleep, tokenToDigits, tokenToStr, updateSide
+  runOnAllFolders, runOnFilesInFolder,
+  setBusy, sleep, tokenToDigits, tokenToStr, updateSide
 }
 

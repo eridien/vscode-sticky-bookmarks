@@ -25,12 +25,15 @@ async function deleteAllMarks() {
   await saveMarkStorage();
 }
 
-async function deleteAllMarksFromFile(document) {
+
+async function deleteAllMarksFromFile(document, save = true) {
   const fileMarks = getMarksForFile(document.uri.fsPath);
+  if(fileMarks.length === 0) return;
+  log('deleteAllMarksFromFile', utils.getFileRelUriPath(document));
   for (const mark of fileMarks)
     await deleteMark(mark, false, false);
   await saveMarkStorage();
-  utils.updateSide(); 
+  if(save) utils.updateSide(); 
 }
 
 async function addMarkToStorage(mark, save = true) {
@@ -109,7 +112,7 @@ async function deleteMark(mark, save = true, update = true) {
   await utils.deleteMarkFromText(fileFsPath, +lineNumber);
   if(save)   await saveMarkStorage();
   if(update) utils.updateSide(); 
-  dumpMarks('deleteMark');
+  // dumpMarks('deleteMark');
 }
 
 async function deleteMarksFromFile(fsPath) {
@@ -252,7 +255,7 @@ async function newMark(document, lineNumber, gen, token, zero = true, save = tru
   mark.folderUriPath  = wsFolder?.uri.path;
   mark.folderFsPath   = wsFolder?.uri.fsPath;
   mark.fileFsPath     = document.uri.fsPath;
-  mark.fileRelUriPath = await utils.getfileRelUriPath(document);
+  mark.fileRelUriPath = await utils.getFileRelUriPath(document);
   await addMarkToStorage(mark, save);
   return mark;
 }

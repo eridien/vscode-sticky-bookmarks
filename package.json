@@ -175,11 +175,6 @@
           "command": "sticky-bookmarks.refreshCmd",
           "when": "view == sidebarView",
           "group": "help@3"
-        },
-        {
-          "command": "sticky-bookmarks.delMarksInFileCmd",
-          "when": "view == sidebarView",
-          "group": "help@4"
         }
       ],
       "view/item/context": [

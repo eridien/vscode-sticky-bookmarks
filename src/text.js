@@ -227,34 +227,9 @@ const clearDecoration = () => {
 };
 
 async function bookmarkItemClick(item) {
-  const mark         = item.mark;
-  const lineRange    = await gotoAndDecorate(mark.document, mark.lineNumber);
-  const lineSel      = new vscode.Selection(lineRange.start, lineRange.end);
-  const lineText     = tgtEditor.document.getText(lineSel);
-  // const tokenMatches = await getTokensInLine(lineText);
-  const tokenMatches = [];
-  if(tokenMatches.length === 0) {
-    log('bookmarkItemClick, no token in line', mark.lineNumber,
-        'of', mark.fileName, ', removing GlobalMark', mark.token);
-    marks.deleteMark[mark];
-    await marks.saveGlobalMarks();
-  }
-  else {
-    while(tokenMatches.length > 1 && tokenMatches[0][0] !== mark.token) {
-      const foundToken = tokenMatches[0][0];
-      marks.deleteMark[foundToken];
-      await marks.saveGlobalMarks();
-      tokenMatches.shift();
-    }
-    const foundToken = tokenMatches[0][0];
-    if(foundToken !== mark.token) {
-      log(`bookmarkItemClick, wrong token found in line ${mark.lineNumber} `+
-      `of ${mark.fileName}, found: ${foundToken}, expected: ${mark.token}, `+
-      `fixing GlobalMark`);
-      await marks.replaceGlobalMark(mark.token, foundToken);
-    }
-  }
-  return;
+  const mark = item.mark;
+  if(!marks.verifyMark(mark)) { log('info', 'Bookmark Missing'); return; }
+  await gotoAndDecorate(mark.document, mark.lineNumber);
 }
 
 async function replaceLineInDocument(document, lineNumber, newText) {
@@ -337,10 +312,8 @@ async function scrollToPrevNext(fwd) {
   fileMarks = tokens.concat(fileMarks);
   const startLnNum = editor.selection.active.line;
   let lineNumber;
-  if(fwd) lineNumber = (startLnNum == lineCnt-1) ? 0
-                                      : startLnNum+1;
-  else    lineNumber = (startLnNum == 0) ? lineCnt-1
-                                      : startLnNum-1;
+  if(fwd) lineNumber = (startLnNum == lineCnt-1) ? 0 : startLnNum+1;
+  else    lineNumber = (startLnNum == 0) ? lineCnt-1 : startLnNum-1;
   while(lineNumber != startLnNum) {
     if(fileMarks.includes(lineNumber)) {
       await gotoAndDecorate(document, lineNumber);
@@ -448,7 +421,7 @@ async function deleteMarkFromText(fsPath, lineNumber) {
 }
 
 async function refreshFile(document) {
-  start('refreshFile');
+  // log('refreshFile');
   if(!document) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) { end('refreshFile, no active editor'); return; }
@@ -456,8 +429,7 @@ async function refreshFile(document) {
   }
   const tokens     = getTokensInFile(document);
   const fileMarks  = marks.getMarksForFile(document.uri.fsPath);
-  if(tokens.length == 0 && fileMarks.length == 0) { 
-      end('refreshFile, no marks or tokens'); return; }
+  if(tokens.length == 0 && fileMarks.length == 0) return;
   fileMarks.sort((a, b) => a.lineNumber - b.lineNumber);
   // scan file from bottom to top
   let tokenObj = tokens   .pop();
@@ -495,7 +467,6 @@ async function refreshFile(document) {
   }
   await marks.saveMarkStorage();
   await utils.updateSide();
-  end('refreshFile');
   await marks.dumpMarks('refreshFile');
 }
 

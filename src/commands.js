@@ -67,28 +67,32 @@ async function refreshCmd() {
   await text.refreshMenu();
 }
 
-async function delMarksInFileCmd() {
+async function delMarksInFileCmd(document) {
   log('delMarksInFileCmd');
-  const editor = vscode.window.activeTextEditor;
-  if (editor) {
-    await text.deleteAllTokensFromFile(editor.document);
-    await marks.deleteAllMarksFromFile(editor.document);
-    utils.updateSide();
+  if(!document) {
+    const editor = vscode.window.activeTextEditor;
+    if(!editor) return;
+    document = editor.document;
   }
+  await text.deleteAllTokensFromFile(document);
+  await marks.deleteAllMarksFromFile(document);
 }
 
 async function deleteIconCmd(item) {
   log('deleteIconCmd');
   if(item === undefined) {
     item = treeView.selection[0];
-    if (!item) { log('info err', 'No Bookmark Selected For Deletion'); return; }
+    if (!item) { log('info err', 'No Bookmark Selected'); return; }
   }
-  // switch (item.type) {
-  //   case 'folder':   await utils.runOnAllFilesInFolder(hideCmd); break;
-  //   case 'file':     await utils.runOnAllFilesInFolder(hideCmd); break;
-  //   case 'bookmark': await text.delMarkFromLineAndGlobal(
-  //                       item.mark.document, item.mark.lineNumber); break;
-  // }
+  switch (item.type) {
+    case 'folder':
+      const folderUri  = vscode.Uri.file(item.folderFsPath);
+      const fakeFolder = {uri:folderUri};
+      await utils.runOnFilesInFolder(fakeFolder, marks.deleteAllMarksFromFile);
+      break;
+    case 'file':     await delMarksInFileCmd(item.document); break;
+    case 'bookmark': await marks.deleteMark(item.mark);      break;
+  }
 }
 
 async function nameCmd(item) {

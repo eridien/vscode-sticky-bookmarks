@@ -2,13 +2,18 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-  deleteicon broken
   getlabel series.vue no symbols
      text: getLabel, No topSymbols found series.vue
-  keyword console not removed (srvr.js 13)
-  delMarksInFileCmd:  verifyMark, token missing, gutter uncleared
+  keyword not removed (console, const, srvr.js 13)
+  undo of token deletion shows no gutter
+  add mark should open folder item
+
 
 todo 
+  groups
+    one name for group
+    toggle on in multiple selections makes group
+    group num stored in token
   move gutter icon to right
   strip return results from runAll...
   sort folders by name or recently used

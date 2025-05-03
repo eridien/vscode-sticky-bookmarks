@@ -168,8 +168,9 @@ function getMarkTokenRange(mark) {
                      mark.fileRelUriPath, lineNumber, mark.token);
     return null;
   }
-  return new vscode.Range(lineNumber, tokenOfs, 
-                          lineNumber, tokenOfs + mark.token.length);
+  // don't include the first and last chars
+  return new vscode.Range(lineNumber, tokenOfs+1, 
+                          lineNumber, tokenOfs + mark.token.length-1);
 }
 
 function verifyMark(mark) {

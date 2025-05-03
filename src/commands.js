@@ -146,7 +146,7 @@ async function changedSelection(event) {
     const mark = marks.getMarkForLine(editor.document, clickPos.line);
     if(mark && mark.gen === 2) {
       const tokenRange = marks.getMarkTokenRange(mark);
-      if(tokenRange.contains(clickPos)) 
+      if(tokenRange?.contains(clickPos)) 
         await marks.deleteMark(mark, true, false);
     }
   }

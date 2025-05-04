@@ -218,9 +218,6 @@ function toggleFolder(folderFsPath, forceClose = false, forceOpen = false) {
   utils.updateSide();
 }
 
-const itemClickHistory  = [];
-let itemClickHistoryPtr = 0;
-
 async function itemClick(item) {
   log('itemClick');
   if(item === undefined) {
@@ -233,30 +230,8 @@ async function itemClick(item) {
     case 'file':
       await vscode.window.showTextDocument(item.document, {preview: false});
       break;
-    case 'bookmark': 
-      itemClickHistory.push(item);
-      itemClickHistoryPtr = itemClickHistory.length-1;
-      await text.bookmarkItemClick(item); 
-      break;
+    case 'bookmark': await text.bookmarkItemClick(item); break;
   }
-}
-
-async function jumpToPrevNextItem(fwd) {
-  let ptr = itemClickHistoryPtr + (fwd ? 1 : -1);
-  ptr = Math.max(0, Math.min(ptr, itemClickHistory.length-1));
-  let item = itemClickHistory[ptr];
-  while (!marks.verifyMark(item?.mark)) {
-    itemClickHistory.splice(ptr, 1);
-    if(itemClickHistory.length === 0) {
-      itemClickHistoryPtr = 0;
-      return;
-    }
-    if(!fwd) ptr--;
-    ptr = Math.max(0, Math.min(ptr, itemClickHistory.length-1));
-    item = itemClickHistory[ptr];
-  }
-  itemClickHistoryPtr = ptr;
-  await text.bookmarkItemClick(item); 
 }
 
 class SidebarProvider {
@@ -279,5 +254,5 @@ class SidebarProvider {
 }
 
 module.exports = {SidebarProvider, init, toggleFolder, setBusy, 
-                  itemClick, jumpToPrevNextItem};
+                  itemClick};
 

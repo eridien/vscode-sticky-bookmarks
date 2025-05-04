@@ -14,44 +14,69 @@ function init(contextIn, treeViewIn) {
 
 ////////////////////////////////  COMMANDS  ///////////////////////////////////
 
-async function toggleGen1Cmd() {
-  log('toggleGen1Cmd');
-  await text.toggle(1);
-  await text.refreshFile();
+async function prevCmd(item) {
+  log('prevCmd');
+  await text.scrollToPrevNext(false);
 }
 
-async function toggleGen2Cmd() {
+async function nextCmd(item) {
+  log('nextCmd');
+  await text.scrollToPrevNext(true);
+}
+
+async function toggleGen2Cmd(item) {
   log('toggleGen2Cmd');
   await text.toggle(2);
   await text.refreshFile();
 }
 
-async function prevCmd() {
-  log('prevCmd');
-  await text.scrollToPrevNext(false);
+async function toggleGen1Cmd(item) {
+  log('toggleGen1Cmd');
+  await text.toggle(1);
+  await text.refreshFile();
 }
 
-async function nextCmd() {
-  log('nextCmd');
-  await text.scrollToPrevNext(true);
+
+async function prevGlobalCmd(item) {
+  log('prevGlobalCmd');
 }
 
-async function prevItemCmd() {
-  log('prevItemCmd');
-  await sidebar.jumpToPrevNextItem(false);
+async function nextGlobalCmd(item) {
+  log('nextGlobalCmd');
 }
 
-async function nextItemCmd() {
-  log('nextItemCmd');
-  await sidebar.jumpToPrevNextItem(true);
+async function toggleGen2GlobalCmd(item) {
+  log('toggleGen2GlobalCmd');
 }
 
-async function hideCmd() {
+async function toggleGen1GlobalCmd(item) {
+  log('toggleGen1GlobalCmd');
+}
+
+
+async function delMarksInFileCmd(item) {
+  log('delMarksInFileCmd');
+  if(!document) {
+    const editor = vscode.window.activeTextEditor;
+    if(!editor) return;
+    document = editor.document;
+  }
+  await text.deleteAllTokensFromFile(document);
+  await marks.deleteAllMarksFromFile(document);
+}
+
+async function delMarksInFolderCmd(item) {
+  log('delMarksInFolderCmd');
+
+}
+
+async function hideCmd(item) {
   log('hideCmd');
   utils.updateSide();
 }
 
-async function expandCmd() {
+
+async function expandCmd(item) {
   log('expandCmd');
   const allWsFolders = vscode.workspace.workspaceFolders;
   for(const wsFolder of allWsFolders) {
@@ -62,20 +87,31 @@ async function expandCmd() {
   }
 }
 
-async function refreshCmd() {
+async function refreshCmd(item) {
   log('refreshCmd');
   await text.refreshMenu();
 }
 
-async function delMarksInFileCmd(document) {
-  log('delMarksInFileCmd');
-  if(!document) {
-    const editor = vscode.window.activeTextEditor;
-    if(!editor) return;
-    document = editor.document;
-  }
-  await text.deleteAllTokensFromFile(document);
-  await marks.deleteAllMarksFromFile(document);
+
+async function itemClickCmd(item) {
+  log('itemClickCmd');
+  await sidebar.itemClick(item);
+}
+
+async function moveFolderUpCmd(item) {
+  log('moveFolderUpCmd');
+}
+
+async function moveFolderDownCmd(item) {
+  log('moveFolderDownCmd');
+}
+
+async function eraseCmd(item) {
+  log('eraseCmd');
+}
+
+async function nameCmd(item) {
+  log('nameCmd');
 }
 
 async function deleteIconCmd(item) {
@@ -93,21 +129,6 @@ async function deleteIconCmd(item) {
     case 'file':     await delMarksInFileCmd(item.document); break;
     case 'bookmark': await marks.deleteMark(item.mark);      break;
   }
-}
-
-async function nameCmd(item) {
-  log('nameCmd');
-
-}
-
-async function eraseCmd(item) {
-  log('eraseCmd');
-
-}
-
-async function itemClickCmd(item) {
-  log('itemClickCmd');
-  await sidebar.itemClick(item);
 }
 
 ////////////////////////////////  CALLBACKS  //////////////////////////////////
@@ -160,11 +181,14 @@ async function changedText(event) {
   await text.refreshFile(event.document);
 }
 
-module.exports = { init, toggleGen2Cmd, toggleGen1Cmd, 
-                   prevCmd, nextCmd, prevItemCmd, nextItemCmd, 
-                   hideCmd, refreshCmd, expandCmd, delMarksInFileCmd, 
-                   itemClickCmd, nameCmd, eraseCmd, deleteIconCmd,
-                   changedSidebarVisiblitiy, changedText,
+module.exports = { init, 
+                   prevCmd, nextCmd, toggleGen2Cmd, toggleGen1Cmd, 
+                   prevGlobalCmd, nextGlobalCmd, 
+                   toggleGen2GlobalCmd, toggleGen1GlobalCmd,
+                   delMarksInFileCmd, delMarksInFolderCmd, hideCmd, 
+                   expandCmd, refreshCmd, itemClickCmd, 
+                   moveFolderUpCmd, moveFolderDownCmd, eraseCmd, nameCmd, 
+                   deleteIconCmd, changedSidebarVisiblitiy, changedText,
                    changedDocument, changedEditor, 
                    changedVisEditors, changedSelection };
 

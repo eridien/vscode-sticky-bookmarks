@@ -64,13 +64,11 @@ async function activate(context) {
     treeDataProvider: sidebarProvider,
   });
 
-  commands.init(context, treeView);
-  await sidebar.init(treeView);
-  utils.init(commands, sidebar, sidebarProvider, text, marks, settings);
-  await text.init(context);
-  await marks.init(context);
-  
-  // utils.refreshFile();
+  await commands.init(context, treeView);
+  await sidebar .init(treeView);
+  await utils   .init(commands, sidebar, sidebarProvider, text, marks, settings);
+  await text    .init(context);
+  await marks   .init(context);
 
   treeView.onDidChangeVisibility(async event => {
     await commands.changedSidebarVisiblitiy(event.visible);
@@ -97,11 +95,14 @@ async function activate(context) {
     await commands.changedSelection(event);
   });
 
-  context.subscriptions.push(toggleGen1Cmd, toggleGen2Cmd,
-                             prevCmd, nextCmd, prevItemCmd, nextItemCmd,
-                             hideCmd, refreshCmd, expandCmd, 
-                             itemClickCmd, nameCmd,
-                             delMarksInFileCmd, deleteIconCmd, eraseCmd );
+  context.subscriptions.push(
+                prevCmd, nextCmd, toggleGen2Cmd, toggleGen1Cmd, 
+                prevGlobalCmd, nextGlobalCmd, 
+                toggleGen2GlobalCmd, toggleGen1GlobalCmd,
+                delMarksInFileCmd, delMarksInFolderCmd, hideCmd, 
+                expandCmd, refreshCmd, itemClickCmd, 
+                moveFolderUpCmd, moveFolderDownCmd, eraseCmd, nameCmd,
+                deleteIconCmd );
     
   end('activating extension');
 }

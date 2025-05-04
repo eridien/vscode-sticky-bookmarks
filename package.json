@@ -2,7 +2,7 @@
   "name": "sticky-bookmarks",
   "displayName": "Sticky Bookmarks",
   "publisher": "eridien",
-  "description": "Lock bookmarks to code using navigation tokens.",
+  "description": "Lock bookmarks to code using tokens.",
   "version": "0.2.1",
   "type": "commonjs",
   "engines": {
@@ -85,22 +85,21 @@
         "arguments": [ "sidebar" ]
       },{
         "command": "sticky-bookmarks.moveFolderUpCmd",
-        "title": "▲",
+        "title": "↑",
         "category": "Sticky Bookmarks: Move Folder Up"
       },{
         "command": "sticky-bookmarks.moveFolderDownCmd",
-        "title": "▼",
+        "title": "↓",
         "category": "Sticky Bookmarks: Move Folder Down"
       },{
         "command": "sticky-bookmarks.eraseCmd",
-        "title": "👁️",
+        "title": "⌦",
         "category": "Sticky Bookmarks: Remove Name From Bookmark"
       },{
         "command": "sticky-bookmarks.nameCmd",
         "title": "🖉",
         "category": "Sticky Bookmarks: Add Name To Bookmark"
-      },
-      {
+      },{
         "command": "sticky-bookmarks.deleteIconCmd",
         "title": "⨉",
         "category": "Sticky Bookmarks: Delete Bookmark"
@@ -143,13 +142,13 @@
         "when": "editorTextFocus"
       },{
         "command": "sticky-bookmarks.toggleGen2GlobalCmd",
-        "key": "ctrl+alt+/",
-        "mac": "cmd+alt+/",
+        "key": "ctrl+alt+\\",
+        "mac": "cmd+alt+\\",
         "when": "editorTextFocus"
       },{
         "command": "sticky-bookmarks.toggleGen1GlobalCmd",
-        "key": "ctrl+alt+shift+/",
-        "mac": "cmd+alt+shift+/",
+        "key": "ctrl+alt+shift+\\",
+        "mac": "cmd+alt+shift+\\",
         "when": "editorTextFocus"
       }, 
       
@@ -211,16 +210,15 @@
           "command": "sticky-bookmarks.moveFolderUpCmd",
           "when": "view == sidebarView && viewItem == folder",
           "group": "inline@1"
-        }{
+        },{
           "command": "sticky-bookmarks.moveFolderDownCmd",
           "when": "view == sidebarView && viewItem == folder",
           "group": "inline@1"
-        }{
+        },{
           "command": "sticky-bookmarks.eraseCmd",
           "when": "view == sidebarView && viewItem == bookmark",
           "group": "inline@1"
-        },
-        {
+        },{
           "command": "sticky-bookmarks.nameCmd",
           "when": "view == sidebarView && viewItem == bookmark",
           "group": "inline@2"

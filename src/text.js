@@ -87,8 +87,9 @@ function isKeyWord(languageId, word) {
 }
 
 async function getCompText(mark) {
-  let   {document, lineNumber, languageId} = mark;
-  const tokenRegx = tokenRegEx(languageId);
+  let   {document, lineNumber} = mark;
+  const languageId = document.languageId;
+  const tokenRegx  = tokenRegEx(languageId);
   const [commLft, commRgt] = utils.commentsByLang(languageId);
   const regxEmptyComm = (commRgt !== '') 
              ? new RegExp(`\\s*${commLft}\\s*?${commRgt}\\s*`, 'g')

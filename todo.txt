@@ -4,7 +4,6 @@ vsce package
 bugs
   getlabel series.vue no symbols
      text: getLabel, No topSymbols found series.vue
-  keyword not removed (console, const, srvr.js 13)
 
 todo 
   add all disposables to context.subscriptions

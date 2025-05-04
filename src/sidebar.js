@@ -62,7 +62,6 @@ async function getNewFolderItem(mark) {
     title:     'Item Clicked',
     arguments: [item],
   }
-  
   return item;
 }     
 
@@ -124,8 +123,7 @@ async function getItemTree() {
     if(closedFolders.has(mark.folderFsPath)) continue;
     if(!await utils.fileExists(mark.folderFsPath)) {
        log('err','Folder not in workspace:', mark.folderFsPath);
-      marks.deleteMark[mark];
-      await marks.saveGlobalMarks();
+      await marks.deleteMark(mark);
       continue;
     }
     const markFolderUriPath = mark.folderUriPath;

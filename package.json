@@ -208,11 +208,11 @@
       "view/item/context": [
         {
           "command": "sticky-bookmarks.moveFolderUpCmd",
-          "when": "view == sidebarView && viewItem == folder",
+          "when": "view == sidebarView && viewItem == file",
           "group": "inline@1"
         },{
           "command": "sticky-bookmarks.moveFolderDownCmd",
-          "when": "view == sidebarView && viewItem == folder",
+          "when": "view == sidebarView && viewItem == file",
           "group": "inline@1"
         },{
           "command": "sticky-bookmarks.eraseCmd",

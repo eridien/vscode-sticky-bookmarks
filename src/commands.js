@@ -54,7 +54,7 @@ async function toggleGen1GlobalCmd(item) {
 }
 
 
-async function delMarksInFileCmd(item) {
+async function delMarksInFileCmd(document) {
   log('delMarksInFileCmd');
   if(!document) {
     const editor = vscode.window.activeTextEditor;
@@ -139,7 +139,6 @@ async function changedSidebarVisiblitiy(visible) {
     utils.updateSide();
   }
   sidebarIsVisible = visible;
-  utils.updateSide(); 
 }
 
 async function changedDocument() {
@@ -147,9 +146,7 @@ async function changedDocument() {
 }
 
 async function changedEditor(editor) {
-  if(!editor || !editor.document) {
-    return;
-  }
+  if(!editor || !editor.document) return;
   await text.refreshFile(editor.document);
 }
 
@@ -176,7 +173,6 @@ async function changedSelection(event) {
 }
 
 async function changedText(event) {
-  const {document} = event;
   text.clearDecoration();
   await text.refreshFile(event.document);
 }

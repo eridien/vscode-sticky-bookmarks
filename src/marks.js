@@ -2,36 +2,25 @@ const vscode = require('vscode');
 const utils  = require('./utils.js');
 const {log, start, end} = utils.getLog('mark');
 
-// const DONT_LOAD_MARKS_ON_START = true;
-const DONT_LOAD_MARKS_ON_START = false;
+// const LOAD_MARKS_ON_START = true;
+const LOAD_MARKS_ON_START = false;
 
 const VERIFY_MARKS_IN_DUMP = true;
 // const VERIFY_MARKS_IN_DUMP = false;
 
-let globalMarks = {};
-
 let context;
 let initFinished = false;
 
-// marksByLoc holds all global marks
+// marksByLoc holds all marks
 let marksByLoc      = new Map(); 
 let markSetByToken  = new Map();
 let markSetByFsPath = new Map();
-
-async function deleteAllMarks() {
-  marksByLoc     .clear();
-  markSetByToken .clear();
-  markSetByFsPath.clear();
-  await saveMarkStorage();
-}
-
 
 async function deleteAllMarksFromFile(document, save = true) {
   const fileMarks = getMarksForFile(document.uri.fsPath);
   if(fileMarks.length === 0) return;
   log('deleteAllMarksFromFile', utils.getFileRelUriPath(document));
-  for (const mark of fileMarks)
-    await deleteMark(mark, false, false);
+  for (const mark of fileMarks) await deleteMark(mark, false, false);
   await saveMarkStorage();
   if(save) utils.updateSide(); 
 }
@@ -54,7 +43,7 @@ async function addMarkToStorage(mark, save = true) {
 }
 
 async function loadMarkStorage() {
-  if(DONT_LOAD_MARKS_ON_START) {
+  if(!LOAD_MARKS_ON_START) {
     await saveMarkStorage()
     return;
   }
@@ -67,7 +56,6 @@ async function loadMarkStorage() {
 } 
 
 async function saveMarkStorage() {
-  // log('saveMarkStorage', [...marksByLoc.values()]);
   await context.workspaceState.update('marks', [...marksByLoc.values()]);
 }
 
@@ -98,29 +86,15 @@ function deleteMarkFromTokenSet(mark) {
   }
 }
 
-async function removeTokenFromMark(mark, save = true) {  
-  deleteMarkFromTokenSet(mark);
-  delete mark.token;
-  if (save) await saveMarkStorage();
-}
-
 async function deleteMark(mark, save = true, update = true) {
   marksByLoc.delete(mark.loc);
   await deleteMarkFromFileSet(mark);  
   await deleteMarkFromTokenSet(mark);  
   const [fileFsPath, lineNumber] = mark.loc.split('\x00');
-  await utils.deleteMarkFromText(fileFsPath, +lineNumber);
+  await utils.deleteMarkFromLine(fileFsPath, +lineNumber);
   if(save)   await saveMarkStorage();
   if(update) utils.updateSide(); 
   // dumpMarks('deleteMark');
-}
-
-async function deleteMarksFromFile(fsPath) {
-  const markSet = markSetByFsPath.get(fsPath);
-  if (markSet) {
-    for (const mark of markSet) await deleteMark(mark, false);
-  }
-  await saveMarkStorage();
 }
 
 async function init(contextIn) {
@@ -144,18 +118,10 @@ function waitForInit() {
   });
 }
 
-function putGlobalMark(token) {globalMarks[token] = token}
-function getGlobalMark(token) {return globalMarks[token]}
-
 function getMarkForLine(document, lineNumber) {
   const loc = document.uri.fsPath + '\x00' + 
               lineNumber.toString().padStart(6, '0');
   return marksByLoc.get(loc);
-}
-
-function delMarkForLine(document, lineNumber) {
-  const mark = getMarkForLine(document, lineNumber);
-  if(mark) delete globalMarks[mark.token];
 }
 
 function getMarkTokenRange(mark) {
@@ -178,29 +144,25 @@ function verifyMark(mark) {
   const document   = mark.document;
   const lineNumber = mark.lineNumber;
   if(getMarkForLine(document, lineNumber) === undefined) {
-    log('err', 'verifyMark, mark missing', mark.fileRelUriPath, lineNumber);
-    return false;
-  }
-  if(mark.gen === 1) return true;
-  let line;
-  try { line = document.lineAt(lineNumber).text }
-  catch (_) {
-    log('err', 'verifyMark, document.lineAt() err:', 
+    log('err', 'verifyMark, mark missing from storage', 
                 mark.fileRelUriPath, lineNumber);
     return false;
   }
+  let line;
+  try { line = document.lineAt(lineNumber).text }
+  catch (_) {
+    log('err', 
+       'verifyMark, linenumber is out of range or document is not valid',
+        mark.fileRelUriPath, lineNumber);
+    return false;
+  }
+  if(mark.gen === 1) return true;
   const idx = line.indexOf(mark.token);
   if(idx === -1) {
-    log('verifyMark, token missing', mark.fileRelUriPath, lineNumber);
+    log('verifyMark, token missing from line', mark.fileRelUriPath, lineNumber);
     return false;
   }
   return true;
-}
-
-async function saveGlobalMarks() {
-  await context.workspaceState.update('globalMarks', globalMarks);
-  utils.updateSide();
-  dumpMarks('saveGlobalMarks');
 }
 
 function dumpMarks(caller, list, dump) {
@@ -243,8 +205,9 @@ function getToken(document, zero = true) {
        + commRgt;
 }
 
-async function newMark(document, lineNumber, gen, token, zero = true, save = true) {
-  const mark         = {document, lineNumber, gen};
+async function newMark(document, lineNumber, gen, token, 
+                                             zero = true, save = true) {
+  const mark = {document, lineNumber, gen};
   if(gen == 2) {
     token ??= getToken(document, zero);
     mark.token = token;
@@ -261,13 +224,10 @@ async function newMark(document, lineNumber, gen, token, zero = true, save = tru
   return mark;
 }
 
-
 module.exports = {init, waitForInit, dumpMarks, getAllMarks, verifyMark,
-                  getMarkForLine, getMarksForFile, saveGlobalMarks,
-                  delMarkForLine, deleteMark, deleteAllMarks,
-                  getGlobalMark,  putGlobalMark, saveMarkStorage,
-                  newMark, removeTokenFromMark, getMarkTokenRange,
-                  deleteAllMarksFromFile};
+                  getMarkForLine, getMarksForFile,deleteAllMarksFromFile,
+                  deleteMark, saveMarkStorage, newMark, getMarkTokenRange,
+                  };
 
 
 

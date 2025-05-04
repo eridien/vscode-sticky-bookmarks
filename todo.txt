@@ -5,10 +5,11 @@ bugs
   getlabel series.vue no symbols
      text: getLabel, No topSymbols found series.vue
   keyword not removed (console, const, srvr.js 13)
-  undo of token deletion shows no gutter
-  add mark should always open folder item
 
 todo 
+  add all disposables to context.subscriptions
+    onDidChangeActiveTextEditor
+    decorations
   support tokens inline
   menu
     hide all
@@ -78,6 +79,7 @@ settings
     same as line
 
 testing
+  no folders in workspace
   dark theme "window color"
   multiple folders, no folders
   moving a project folder

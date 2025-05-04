@@ -27,7 +27,7 @@ function init(contextIn) {
                   context.extensionPath, 'images', 'mark-icon-drk1.svg'));
   gutDecDrk2Uri = vscode.Uri.file(path.join(
                   context.extensionPath, 'images', 'mark-icon-drk2.svg'));
-  loadtGutterDecs();
+  loadGutterDecs();
 }
 
 function getGutterDec(gen) {
@@ -38,7 +38,7 @@ function getGutterDec(gen) {
   });
 };
 
-function loadtGutterDecs() {
+function loadGutterDecs() {
   gutterDecGen1 = getGutterDec(1);
   gutterDecGen2 = getGutterDec(2);
 }
@@ -48,7 +48,7 @@ vscode.window.onDidChangeActiveColorTheme((event) => {
     gutterDecGen1.dispose();
     gutterDecGen2.dispose();
   }
-  loadtGutterDecs();
+  loadGutterDecs();
 });
 
 const keywordSetsByLang = {};
@@ -77,10 +77,8 @@ function updateGutter() {
       case 2: gen2DecRanges.push({range}); break;
     }
   }
-  // log('gen1DecRanges', gen1DecRanges);
   editor.setDecorations(gutterDecGen1, gen1DecRanges);
   editor.setDecorations(gutterDecGen2, gen2DecRanges);
-  // end('updateGutter');
 }
 
 function isKeyWord(languageId, word) {
@@ -147,7 +145,7 @@ function getSymbols(pos, symbols) {
   }
 }
 
-function labelWithLineNum(lineNumber, label) {
+function prefixLabelWithLineNum(lineNumber, label) {
   if(showLineNumbers) 
     return `${(lineNumber + 1).toString().padStart(3, ' ')}  ${label}`;
   return label;
@@ -165,7 +163,7 @@ async function getLabel(mark) {
 
       debugger;
 
-      return labelWithLineNum(lineNumber, label);
+      return prefixLabelWithLineNum(lineNumber, label);
     }
     let crumbStr = '';
     if(showBreadCrumbs) {
@@ -174,12 +172,12 @@ async function getLabel(mark) {
       const pos = new vscode.Position(lineNumber, Math.max(lineLen-1, 0));
       getSymbols(pos, symbols);
       symbols.shift();
-      if (!symbols.length) { return labelWithLineNum(lineNumber, label); }
+      if (!symbols.length) { return prefixLabelWithLineNum(lineNumber, label); }
       symbols.reverse();
       for(const sym of symbols) { crumbStr = `${sym.name} > ${crumbStr}`; }
       crumbStr = crumbStr.slice(0, -2);
       crumbStr = '● ' +  crumbStr + '●';
-      crumbStr = labelWithLineNum(lineNumber, crumbStr);
+      crumbStr = prefixLabelWithLineNum(lineNumber, crumbStr);
     }
     if(showCodeWhenCrumbs && crumbStr.length > 0) return crumbStr + compText;
     return crumbStr;
@@ -230,43 +228,6 @@ async function bookmarkItemClick(item) {
   const mark = item.mark;
   if(!marks.verifyMark(mark)) { log('info', 'Bookmark Missing'); return; }
   await gotoAndDecorate(mark.document, mark.lineNumber);
-}
-
-async function replaceLineInDocument(document, lineNumber, newText) {
-  if (lineNumber < 0 || lineNumber >= document.lineCount) return;
-  const uri  = document.uri;
-  const edit = new vscode.WorkspaceEdit();
-  const line = document.lineAt(lineNumber);
-  edit.replace(uri, line.range, newText);
-  await vscode.workspace.applyEdit(edit);
-}
-
-async function addTokenToLine(document, lineNumber, token) {
-  if (lineNumber < 0 || lineNumber >= document.lineCount) return;
-  const line      = document.lineAt(lineNumber);
-  const lineText  = line.text;
-  const edit      = new vscode.WorkspaceEdit();
-  edit.replace(document.uri, line.range, lineText + token);
-  await vscode.workspace.applyEdit(edit);
-}
-
-async function delMarkFromLineAndGlobal(document, lineNumber, lineText) {
-  const languageId = document.languageId;
-  const line       = document.lineAt(lineNumber);
-  if(line) {
-    lineText ??= line.text;
-    const tokenMatches = tokenRegEx(languageId, false).exec(lineText);
-    if(tokenMatches) {
-      const token      = tokenMatches[0];
-      const end        = line.range.end;
-      const newEndPos  = end.translate(0, -token.length);
-      const tokenRange = new vscode.Range(newEndPos, end);
-      const edit       = new vscode.WorkspaceEdit();
-      edit.delete(document.uri, tokenRange);
-      await vscode.workspace.applyEdit(edit);
-    }
-  }
-  marks.delMarkForLine(document, lineNumber);
 }
 
 async function toggle(gen) {
@@ -324,21 +285,10 @@ async function scrollToPrevNext(fwd) {
   }
 }
 
-async function clearFile(document, saveMarks = true) {
-  // let haveDel = false;
-  // await runOnAllTokensInDoc(document, true, false, async (params) => {
-  //   const {position} = params;
-  //   await delMarkFromLineAndGlobal(document, position.line, false);
-  //   haveDel = true;
-  // });
-  // if(haveDel && saveMarks) await marks.saveGlobalMarks();
-}
-
 function getTokensInFile(document) {
   const docText  = document.getText();
   const regexG   = tokenRegEx(document.languageId, false, true);
   const matches  = [...docText.matchAll(regexG)];
-  if(matches.length == 0) return [];
   const tokens = [];
   for (const match of matches) {
     const offset     = match.index;
@@ -351,7 +301,6 @@ function getTokensInFile(document) {
 }
 
 async function refreshMenu() {
-  log('refreshMenu');
   start('refreshMenu');
   await utils.runOnAllFolders(null, refreshFile);
   end('refreshMenu');
@@ -385,25 +334,7 @@ async function deleteAllTokensFromFile(document) {
   await replaceAllTextInDocument(document, newText);
 }
 
-async function runOnAllMarksInFile(document, markFunc) {
-  const docText  = document.getText();
-  const regexG   = tokenRegEx(document.languageId, false, true);
-  const matches  = [...docText.matchAll(regexG)];
-  if(matches.length == 0) return;
-  matches.reverse();
-  const funcRes = [];
-  for (const match of matches) {
-    const offset     = match.index;
-    const position   = document.positionAt(offset); 
-    const lineNumber = position.line;
-    const lineText   = document.lineAt(lineNumber);
-    const token      = match[0];
-    funcRes.push(await markFunc({document, lineNumber, lineText, token}));
-  }
-  return funcRes;
-}
-
-async function deleteMarkFromText(fsPath, lineNumber) {
+async function deleteMarkFromLine(fsPath, lineNumber) {
   const document   = await vscode.workspace.openTextDocument(fsPath);
   const line       = document.lineAt(lineNumber);
   if(!line) return;
@@ -424,7 +355,7 @@ async function refreshFile(document) {
   // log('refreshFile');
   if(!document) {
     const editor = vscode.window.activeTextEditor;
-    if (!editor) { end('refreshFile, no active editor'); return; }
+    if (!editor) { log('refreshFile, no active editor'); return; }
     document = editor.document;
   }
   const tokens     = getTokensInFile(document);
@@ -470,10 +401,25 @@ async function refreshFile(document) {
   await marks.dumpMarks('refreshFile');
 }
 
+async function runOnAllMarksInFile(document, markFunc) {
+  const docText  = document.getText();
+  const regexG   = tokenRegEx(document.languageId, false, true);
+  const matches  = [...docText.matchAll(regexG)];
+  matches.reverse();
+  for (const match of matches) {
+    const offset     = match.index;
+    const position   = document.positionAt(offset); 
+    const lineNumber = position.line;
+    const lineText   = document.lineAt(lineNumber);
+    const token      = match[0];
+    await markFunc({document, lineNumber, lineText, token});
+  }
+}
+
 module.exports = {init, getLabel, bookmarkItemClick, refreshMenu,
                   clearDecoration, justDecorated, updateGutter,
-                  toggle, scrollToPrevNext, delMarkFromLineAndGlobal,    
-                  clearFile, refreshFile, deleteMarkFromText,
+                  toggle, scrollToPrevNext,    
+                  refreshFile, deleteMarkFromLine,
                   runOnAllMarksInFile, deleteAllTokensFromFile
                   };
 

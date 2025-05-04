@@ -53,12 +53,36 @@ vscode.window.onDidChangeActiveColorTheme((event) => {
 
 const keywordSetsByLang = {};
 
-function tokenRegEx(languageId, eol = true, global = false) {
+// groups 1: <!--   2: 0123   3: -->   4: garbage  5: \n
+
+function tokenRegEx(languageId, global = false) {
   const [commLft, commRgt] = utils.commentsByLang(languageId);
-  const regxStr = `${commLft}([\\u200B\\u200C\\u200D\\u2060]+\\.`+
-                  `${eol ? '$' : ''})${commRgt}`;
+  // const regxStr = `${commLft}([\\u200B\\u200C\\u200D\\u2060]+\\.`+
+  //                 `${eol ? '$' : ''})${commRgt}`;
+  const regxStr = `(${commLft})([\\u200B\\u200C\\u200D\\u2060]+)\\.`+
+                  `(${commRgt})?(.*?)(?=\\r?\n|$)`
   if(global) return new RegExp(regxStr, 'g');
   else       return new RegExp(regxStr);
+}
+
+function tokenRegexExec(languageId, text, global = false) {
+  const groups = tokenRegEx(languageId, global).exec(text);
+  if(!groups) return null;
+  return{token: groups[1] + groups[2] + '.' +groups[3],
+         trail: groups[4], index: groups.index, 
+         commLft:group[1], commRgt:group[3]};
+}
+
+function tokenRegexMatchAll(languageId, text) {
+  const matches = [...text.matchAll(tokenRegEx(languageId, true))];
+  const res = [];
+  for(const match of matches) {
+    const groups = match.groups;
+    res.push({token: groups[1] + groups[2] + '.' +groups[3],
+              trail: groups[4],  index: groups.index, 
+              commLft:groups[1], commRgt:groups[3]});
+  }
+  return res;
 }
 
 function updateGutter() {
@@ -288,14 +312,13 @@ async function scrollToPrevNext(fwd) {
 
 function getTokensInFile(document) {
   const docText  = document.getText();
-  const regexG   = tokenRegEx(document.languageId, false, true);
-  const matches  = [...docText.matchAll(regexG)];
+  const matchAll = tokenRegexMatchAll(document.languageId, docText);
   const tokens = [];
-  for (const match of matches) {
+  for (const match of matchAll) {
     const offset     = match.index;
     const position   = document.positionAt(offset); 
     const lineNumber = position.line;
-    const token      = match[0];
+    const token      = match.token;
     tokens.push({position, lineNumber, token});
   }
   return tokens;
@@ -319,23 +342,23 @@ async function replaceAllTextInDocument(document, newText) {
 
 async function deleteAllTokensFromFile(document) {
   const docText  = document.getText();
-  const regexG   = tokenRegEx(document.languageId, false, true);
-  const matches  = [...docText.matchAll(regexG)];
-  if(matches.length == 0) return;
-  matches.reverse();
+  const matchAll = tokenRegexMatchAll(document.languageId, docText);
+  if(matchAll.length == 0) return;
+  matchAll.reverse();
   let newText    = '';
   let lastOffset = docText.length;
-  for (const match of matches) {
+  for (const match of matchAll) {
     const offset = match.index;
-    const token  = match[0];
+    const token  = match.token;
     newText = docText.slice(offset + token.length, lastOffset) + newText;
     lastOffset = offset;
   }
   newText = docText.slice(0, lastOffset) + newText;
   await replaceAllTextInDocument(document, newText);
 }
+  const matches = tokenRegexMatchAll(languageId, lineText);
 
-async function deleteMarkFromLine(fsPath, lineNumber) {
+async function deleteMarksFromLine(fsPath, lineNumber) {
   const document   = await vscode.workspace.openTextDocument(fsPath);
   const line       = document.lineAt(lineNumber);
   if(!line) return;
@@ -404,15 +427,14 @@ async function refreshFile(document) {
 
 async function runOnAllMarksInFile(document, markFunc) {
   const docText  = document.getText();
-  const regexG   = tokenRegEx(document.languageId, false, true);
-  const matches  = [...docText.matchAll(regexG)];
-  matches.reverse();
-  for (const match of matches) {
+  const matchAll = tokenRegexMatchAll(document.languageId, docText);
+  matchAll.reverse();
+  for (const match of matchAll) {
     const offset     = match.index;
     const position   = document.positionAt(offset); 
     const lineNumber = position.line;
     const lineText   = document.lineAt(lineNumber);
-    const token      = match[0];
+    const token      = match.token;
     await markFunc({document, lineNumber, lineText, token});
   }
 }
@@ -420,7 +442,7 @@ async function runOnAllMarksInFile(document, markFunc) {
 module.exports = {init, getLabel, bookmarkItemClick, refreshMenu,
                   clearDecoration, justDecorated, updateGutter,
                   toggle, scrollToPrevNext,    
-                  refreshFile, deleteMarkFromLine,
+                  refreshFile, deleteMarksFromLine,
                   runOnAllMarksInFile, deleteAllTokensFromFile
                   };
 

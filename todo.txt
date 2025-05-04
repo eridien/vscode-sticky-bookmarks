@@ -6,9 +6,6 @@ bugs
      text: getLabel, No topSymbols found series.vue
 
 todo 
-  add all disposables to context.subscriptions
-    onDidChangeActiveTextEditor
-    decorations
   support tokens inline
   menu
     hide all
@@ -38,7 +35,10 @@ todo
     delete named tokens when X menu used
   settings
   track gen1 marks with edits
-  
+  add all disposables to context.subscriptions
+    onDidChangeActiveTextEditor
+    decorations
+
 impossible?
   toggle collapsed/expanded on file item click
 
@@ -84,6 +84,7 @@ testing
   moving a project folder
   mark after an unclosed string
   check missing awaits from util redirects
+  remove "debugger"
 
 features
   sticky

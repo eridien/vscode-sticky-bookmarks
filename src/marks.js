@@ -91,7 +91,7 @@ async function deleteMark(mark, save = true, update = true) {
   await deleteMarkFromFileSet(mark);  
   await deleteMarkFromTokenSet(mark);  
   const [fileFsPath, lineNumber] = mark.loc.split('\x00');
-  await utils.deleteMarkFromLine(fileFsPath, +lineNumber);
+  await utils.deleteMarksFromLine(fileFsPath, +lineNumber);
   if(save)   await saveMarkStorage();
   if(update) utils.updateSide(); 
   // dumpMarks('deleteMark');

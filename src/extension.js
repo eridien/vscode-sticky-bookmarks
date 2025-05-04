@@ -14,34 +14,50 @@ async function activate(context) {
     end('extension');
     return;
   }
-	const toggleGen1Cmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.toggleGen1Cmd',                 commands.toggleGen1Cmd);
-	const toggleGen2Cmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.toggleGen2Cmd',                 commands.toggleGen2Cmd);
 	const prevCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.prevCmd',                             commands.prevCmd);
 	const nextCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.nextCmd',                             commands.nextCmd);
-	const prevItemCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.prevItemCmd',                     commands.prevItemCmd);
-	const nextItemCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.nextItemCmd',                     commands.nextItemCmd);
+	const toggleGen2Cmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.toggleGen2Cmd',                 commands.toggleGen2Cmd);
+	const toggleGen1Cmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.toggleGen1Cmd',                 commands.toggleGen1Cmd);
+     
+	const prevGlobalCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.prevGlobalCmd',                  commands.prevGlobalCmd);
+	const nextGlobalCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.nextGlobalCmd',                 commands.nextGlobalCmd);
+	const toggleGen2GlobalCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.toggleGen2GlobalCmd',     commands.toggleGen2GlobalCmd);
+	const toggleGen1GlobalCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.toggleGen1GlobalCmd',     commands.toggleGen1GlobalCmd);
+
+	const delMarksInFileCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.delMarksInFileCmd',         commands.delMarksInFileCmd);
+	const delMarksInFolderCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.delMarksInFolderCmd',     commands.delMarksInFolderCmd);
  	const hideCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.hideCmd',                             commands.hideCmd);
+
  const expandCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.expandCmd',                         commands.expandCmd);
  const refreshCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.refreshCmd',                       commands.refreshCmd);
-	const delMarksInFileCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.delMarksInFileCmd',         commands.delMarksInFileCmd);
-	const deleteIconCmd = vscode.commands.registerCommand(
-     'sticky-bookmarks.deleteIconCmd', (item) => commands.deleteIconCmd(item));
+
   const itemClickCmd = vscode.commands.registerCommand(
     'sticky-bookmarks.itemClickCmd',    (item) => commands.itemClickCmd(item));
-  const eraseCmd = vscode.commands.registerCommand(
+  const moveFolderUpCmd = vscode.commands.registerCommand(
+    'sticky-bookmarks.moveFolderUpCmd', 
+                                     (item) => commands.moveFolderUpCmd(item));
+  const moveFolderDownCmd = vscode.commands.registerCommand(
+    'sticky-bookmarks.moveFolderDownCmd',    
+                                   (item) => commands.moveFolderDownCmd(item));
+   const eraseCmd = vscode.commands.registerCommand(
     'sticky-bookmarks.eraseCmd',            (item) => commands.eraseCmd(item));
 	const nameCmd = vscode.commands.registerCommand(
      'sticky-bookmarks.nameCmd',             (item) => commands.nameCmd(item));
+	const deleteIconCmd = vscode.commands.registerCommand(
+     'sticky-bookmarks.deleteIconCmd', (item) => commands.deleteIconCmd(item));
 
   const sidebarProvider = new sidebar.SidebarProvider();
   const treeView = vscode.window.createTreeView('sidebarView', {

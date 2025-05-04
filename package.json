@@ -18,125 +18,159 @@
   "contributes": {
     "commands": [
       {
+        "command": "sticky-bookmarks.prevCmd",
+        "title": "Go To Previous Bookmark",
+        "category": "Sticky Bookmarks"
+      },{
+        "command": "sticky-bookmarks.nextCmd",
+        "title": "Go To Next Bookmark",
+        "category": "Sticky Bookmarks"
+      },{
+        "command": "sticky-bookmarks.toggleGen2Cmd",
+        "title": "Toggle Gen2 Bookmark On/Off",
+        "category": "Sticky Bookmarks"
+      },{
         "command": "sticky-bookmarks.toggleGen1Cmd",
         "title": "Toggle Gen1 Bookmark On/Off",
         "category": "Sticky Bookmarks"
       },
+      
       {
-        "command": "sticky-bookmarks.toggleGen2Cmd",
-        "title": "Toggle Gen2 Bookmark On/Off",
+        "command": "sticky-bookmarks.prevGlobalCmd",
+        "title": "Go To Previous Global Bookmark",
+        "category": "Sticky Bookmarks"
+      },{
+        "command": "sticky-bookmarks.nextGlobalCmd",
+        "title": "Go To Next Global Bookmark",
         "category": "Sticky Bookmarks"
       },
-      {
-        "command": "sticky-bookmarks.prevCmd",
-        "title": "Go To Previous Bookmark",
+       {
+        "command": "sticky-bookmarks.toggleGen2GlobalCmd",
+        "title": "Toggle Gen2 Global Bookmark On/Off",
+        "category": "Sticky Bookmarks"
+      },{
+        "command": "sticky-bookmarks.toggleGen1GlobalCmd",
+        "title": "Toggle Gen1 Global Bookmark On/Off",
         "category": "Sticky Bookmarks"
       },
-      {
-        "command": "sticky-bookmarks.nextCmd",
-        "title": "Go To Next Bookmark",
-        "category": "Sticky Bookmarks"
-      },
-      {
-        "command": "sticky-bookmarks.prevItemCmd",
-        "title": "Go To Previous History",
-        "category": "Sticky Bookmarks"
-      },
-      {
-        "command": "sticky-bookmarks.nextItemCmd",
-        "title": "Go To Next History",
-        "category": "Sticky Bookmarks"
-      },
-      {
-        "command": "sticky-bookmarks.hideCmd",
-        "title": "Hide All In Workspace",
-        "category": "Sticky Bookmarks"
-      },
-      {
-        "command": "sticky-bookmarks.expandCmd",
-        "title": "Expand All",
-        "category": "Sticky Bookmarks"
-      }, {
-        "command": "sticky-bookmarks.refreshCmd",
-        "title": "Refresh Sidebar",
-        "category": "Sticky Bookmarks"
-      },
+
       {
         "command": "sticky-bookmarks.delMarksInFileCmd",
         "title": "Delete All Bookmarks In File",
         "category": "Sticky Bookmarks"
+      },{
+        "command": "sticky-bookmarks.delMarksInFolderCmd",
+        "title": "Delete All Bookmarks In Folder",
+        "category": "Sticky Bookmarks"
+      },{
+        "command": "sticky-bookmarks.hideCmd",
+        "title": "Hide All Bookmarks In Folder",
+        "category": "Sticky Bookmarks"
       },
+      
       {
-        "command": "sticky-bookmarks.deleteIconCmd",
-        "title": "❌",
-        "category": "Sticky Bookmarks: Delete Bookmark"
+        "command": "sticky-bookmarks.expandCmd",
+        "title": "Expand All Items",
+        "category": "Sticky Bookmarks"
+      },{
+        "command": "sticky-bookmarks.refreshCmd",
+        "title": "Refresh Sidebar",
+        "category": "Sticky Bookmarks"
       },
+      
       {
+        "command": "sticky-bookmarks.itemClickCmd",
+        "title": "Go To Bookmark",
+        "category": "Sticky Bookmarks",
+        "arguments": [ "sidebar" ]
+      },{
+        "command": "sticky-bookmarks.moveFolderUpCmd",
+        "title": "▲",
+        "category": "Sticky Bookmarks: Move Folder Up"
+      },{
+        "command": "sticky-bookmarks.moveFolderDownCmd",
+        "title": "▼",
+        "category": "Sticky Bookmarks: Move Folder Down"
+      },{
+        "command": "sticky-bookmarks.eraseCmd",
+        "title": "👁️",
+        "category": "Sticky Bookmarks: Remove Name From Bookmark"
+      },{
         "command": "sticky-bookmarks.nameCmd",
         "title": "🖉",
         "category": "Sticky Bookmarks: Add Name To Bookmark"
       },
       {
-        "command": "sticky-bookmarks.eraseCmd",
-        "title": "∅",
-        "category": "Sticky Bookmarks: Remove Name From Bookmark"
-      },
-      {
-        "command": "sticky-bookmarks.clickCmd",
-        "title": "Go To Bookmark",
-        "category": "Sticky Bookmarks",
-        "arguments": [
-          "sidebar"
-        ]
+        "command": "sticky-bookmarks.deleteIconCmd",
+        "title": "⨉",
+        "category": "Sticky Bookmarks: Delete Bookmark"
       }
     ],
+
+
     "keybindings": [
       {
-        "command": "sticky-bookmarks.toggleGen2Cmd",
-        "key": "ctrl+alt+\\",
-        "mac": "cmd+alt+\\",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "sticky-bookmarks.toggleGen1Cmd",
-        "key": "ctrl+alt+shift+\\",
-        "mac": "cmd+alt+shift+\\",
-        "when": "editorTextFocus"
-      },
-      {
         "command": "sticky-bookmarks.prevCmd",
+        "key": "ctrl+alt+,",
+        "mac": "cmd+alt+,",
+        "when": "editorTextFocus"
+      },{
+        "command": "sticky-bookmarks.nextCmd",
+        "key": "ctrl+alt+.",
+        "mac": "cmd+alt+.",
+        "when": "editorTextFocus"
+      },{
+        "command": "sticky-bookmarks.toggleGen2Cmd",
+        "key": "ctrl+alt+/",
+        "mac": "cmd+alt+/",
+        "when": "editorTextFocus"
+      },{
+        "command": "sticky-bookmarks.toggleGen1Cmd",
+        "key": "ctrl+alt+shift+/",
+        "mac": "cmd+alt+shift+/",
+        "when": "editorTextFocus"
+      },
+      
+      {
+        "command": "sticky-bookmarks.prevGlobalCmd",
         "key": "ctrl+alt+[",
         "mac": "cmd+alt+[",
         "when": "editorTextFocus"
-      },
-      {
-        "command": "sticky-bookmarks.nextCmd",
+      },{
+        "command": "sticky-bookmarks.nextGlobalCmd",
         "key": "ctrl+alt+]",
         "mac": "cmd+alt+]",
         "when": "editorTextFocus"
-      },
-      {
-        "command": "sticky-bookmarks.prevItemCmd",
-        "key": "ctrl+alt+shift+[",
-        "mac": "cmd+alt+shift+[",
+      },{
+        "command": "sticky-bookmarks.toggleGen2GlobalCmd",
+        "key": "ctrl+alt+/",
+        "mac": "cmd+alt+/",
         "when": "editorTextFocus"
-      },
-      {
-        "command": "sticky-bookmarks.nextItemCmd",
-        "key": "ctrl+alt+shift+]",
-        "mac": "cmd+alt+shift+]",
+      },{
+        "command": "sticky-bookmarks.toggleGen1GlobalCmd",
+        "key": "ctrl+alt+shift+/",
+        "mac": "cmd+alt+shift+/",
         "when": "editorTextFocus"
-      },
+      }, 
+      
       {
+        "command": "sticky-bookmarks.delMarksInFileCmd",
+        "key": "ctrl+alt+;",
+        "mac": "cmd+alt+;",
+        "when": "editorTextFocus"
+      },{
+        "command": "sticky-bookmarks.delMarksInFolderCmd",
+        "key": "ctrl+alt+shift+;",
+        "mac": "cmd+alt+shift+;",
+        "when": "editorTextFocus"
+      },{
         "command": "sticky-bookmarks.hideCmd",
-        "key": "ctrl+alt+p",
-        "mac": "cmd+alt+p"
-      },
-      {
-        "command": "sticky-bookmarks.deleteIconCmd",
-        "key": "ctrl+shift+alt+p",
-        "mac": "cmd+shift+alt+p"
+        "key": "ctrl+alt+'",
+        "mac": "cmd+alt+'",
+        "when": "editorTextFocus"
       }
+
+
     ],
     "viewsContainers": {
       "activitybar": [
@@ -156,29 +190,32 @@
         }
       ]
     },
+
+
     "menus": {
       "view/title": [
         {
-          "command": "sticky-bookmarks.hideCmd",
-          "when": "view == sidebarView",
-          "group": "help@1",
-          "arguments": [
-            "title"
-          ]
-        },
-        {
           "command": "sticky-bookmarks.expandCmd",
           "when": "view == sidebarView",
-          "group": "help@2"
+          "group": "help@1"
         },
         {
           "command": "sticky-bookmarks.refreshCmd",
           "when": "view == sidebarView",
-          "group": "help@3"
+          "group": "help23"
         }
       ],
+
       "view/item/context": [
         {
+          "command": "sticky-bookmarks.moveFolderUpCmd",
+          "when": "view == sidebarView && viewItem == folder",
+          "group": "inline@1"
+        }{
+          "command": "sticky-bookmarks.moveFolderDownCmd",
+          "when": "view == sidebarView && viewItem == folder",
+          "group": "inline@1"
+        }{
           "command": "sticky-bookmarks.eraseCmd",
           "when": "view == sidebarView && viewItem == bookmark",
           "group": "inline@1"

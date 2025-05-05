@@ -332,7 +332,8 @@ async function deleteAllTokensInFile(document) {
   const fsPath     = document.uri.fsPath;
   const docText    = document.getText();
   const groups     = /\r?\n/.exec(docText);
-  const lineEnding = groups??[0];
+  let lineEnding = null;
+  if(groups) lineEnding = groups[0];
   let lines;
   if(!lineEnding) lines = [docText];
   else            lines = docText.split(lineEnding);

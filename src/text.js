@@ -307,7 +307,7 @@ async function refreshMenu() {
   end('refreshMenu');
 }
 
-async function deleteTokensFromLineText(regexG, commLft, lineText) {
+async function deleteTokensFromLineText(regexG, commLft, commRgt, lineText) {
   const matches  = [...lineText.matchAll(regexG)];
   if(matches.length == 0) return null;
   matches.reverse();
@@ -318,10 +318,11 @@ async function deleteTokensFromLineText(regexG, commLft, lineText) {
     const token = match[0];
     const lftTokenOfs = match.index;
     const rgtTokenOfs = lftTokenOfs + token.length;
-    const after       = lineText.slice(rgtTokenOfs, lastOfs);
-    if(after.length > 0) {
-      keepComment = true;
-      newText = after + newText;
+    let   beforeText = lineText.slice(0, lftTokenOfs);
+    const afterText  = lineText.slice(rgtTokenOfs, lastOfs);    
+    if(afterText.length > 0) {
+      keepComment ||= (commRgt === '' && beforeText.indexOf(commLft) === -1);
+      newText = afterText + newText;
     }
     lastOfs = lftTokenOfs;
   }
@@ -342,10 +343,11 @@ async function deleteAllTokensInFile(document) {
                            0, 0, lastLineNumber, lines[lastLineNumber].length);
   let chgd = false;
   const regexG    = tokenRegEx(document.languageId, false, true);
-  const [commLft] = utils.commentsByLang(document.languageId);
+  const [commLft, commRgt] = utils.commentsByLang(document.languageId);
   for(let lineNumber = 0; lineNumber < lines.length; lineNumber++) {
     const lineText = lines[lineNumber];
-    const newLine = await deleteTokensFromLineText(regexG, commLft, lineText);
+    const newLine = await deleteTokensFromLineText(
+                                           regexG, commLft, commRgt, lineText);
     if(newLine !== null) {
       chgd = true;
       lines[lineNumber] = newLine;

@@ -4,8 +4,10 @@ vsce package
 bugs
   getlabel series.vue no symbols
      text: getLabel, No topSymbols found series.vue
+  undo token doesn't restore icon
 
 todo 
+  include char pos in loc and mark
   support tokens inline
   menu
     hide all

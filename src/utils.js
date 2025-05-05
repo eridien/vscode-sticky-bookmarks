@@ -350,6 +350,27 @@ function getTokenRegExG() {
   return new RegExp("[\\u200B\\u200C\\u200D\\u2060]+\\.", 'g');
 }
 
+async function deleteOneTokenFromLine(fsPath, lineNumber, token) {
+  const document = await vscode.workspace.openTextDocument(fsPath);
+  const line     = document.lineAt(lineNumber);
+  if(!line) return;
+  const lineText   = line.text;
+  const lineLength = lineText.length;
+  const lftOfs     = lineText.indexOf(token);
+  if(lftOfs === -1) return;
+  const rgtOfs     = lftOfs + token.length;
+  let   beforeText = lineText.slice(0, lftOfs);
+  let   afterText  = lineText.slice(rgtOfs);
+  if(afterText.length > 0) {
+    const [commLft, commRgt] = commentsByLang(document.languageId);
+    if(commRgt === '' && beforeText.indexOf(commLft) === -1)
+      afterText = commLft + afterText;
+  }
+  const edit = new vscode.WorkspaceEdit();
+  edit.replace(document.uri, line.range, beforeText + afterText);
+  await vscode.workspace.applyEdit(edit);
+}
+
 async function runOnFilesInFolder(folder, fileFunc, markFunc) { 
   async function doOneFile(document) {
     if(fileFunc) await fileFunc(document);
@@ -400,20 +421,18 @@ async function runOnAllFolders(folderFunc, fileFunc, markFunc) {
 ///////////////////  BACK REFERENCES -- CHECK AWAITS //////////////
 
 function setBusy(...args)         { return sidebar.setBusy(...args); }
-function getOrDelAllTokensInLine(...args) 
-                                  { return text.getOrDelAllTokensInLine(...args); }
 function refreshFile(...args)     { return text.refreshFile(...args); }
 function updateGutter(...args)    { return text.updateGutter(...args); }
 function runOnAllMarksInFile(...args) 
                                   { return text.runOnAllMarksInFile(...args); }
 
 module.exports = {
-  commentsByLang, deleteLine, getOrDelAllTokensInLine, fileExists, 
+  commentsByLang, deleteLine, fileExists, 
   getDocument, getFocusedWorkspaceFolder, getLog, 
   getPathsFromWorkspaceFolder, getTokenRegEx, getTokenRegExG, 
   getFileRelUriPath, init, initContext, insertLine, keywords, 
   loadStickyBookmarksJson, numberToInvBase4, refreshFile, replaceLine, 
-  runOnAllFolders, runOnFilesInFolder,
+  runOnAllFolders, runOnFilesInFolder, deleteOneTokenFromLine,
   setBusy, sleep, tokenToDigits, tokenToStr, updateSide
 }
 

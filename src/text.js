@@ -287,18 +287,18 @@ async function scrollToPrevNext(fwd) {
 }
 
 function getTokenObjsInFile(document) {
-  const docText  = document.getText();
-  const regexG   = tokenRegEx(document.languageId, false, true);
-  const matches  = [...docText.matchAll(regexG)];
-  const tokens = [];
+  const docText   = document.getText();
+  const regexG    = tokenRegEx(document.languageId, false, true);
+  const matches   = [...docText.matchAll(regexG)];
+  const tokenObjs = [];
   for (const match of matches) {
     const offset     = match.index;
     const position   = document.positionAt(offset); 
     const lineNumber = position.line;
     const token      = match[0];
-    tokens.push({position, lineNumber, token});
+    tokenObjs.push({position, lineNumber, token});
   }
-  return tokens;
+  return tokenObjs;
 }
 
 async function refreshMenu() {
@@ -307,77 +307,55 @@ async function refreshMenu() {
   end('refreshMenu');
 }
 
-async function replaceAllTextInDocument(document, newText) {
-  const edit = new vscode.WorkspaceEdit();
-  const fullRange = new vscode.Range(
-    document.positionAt(0),
-    document.positionAt(document.getText().length)
-  );
-  edit.replace(document.uri, fullRange, newText);
-  await vscode.workspace.applyEdit(edit);
+async function deleteTokensFromLineText(regexG, commLft, lineText) {
+  const matches  = [...lineText.matchAll(regexG)];
+  if(matches.length == 0) return null;
+  matches.reverse();
+  let   newText     = '';
+  let   keepComment = false;
+  let   lastOfs     = lineText.length;
+  for(const match of matches) {
+    const token = match[0];
+    const lftTokenOfs = match.index;
+    const rgtTokenOfs = lftTokenOfs + token.length;
+    const after       = lineText.slice(rgtTokenOfs, lastOfs);
+    if(after.length > 0) {
+      keepComment = true;
+      newText = after + newText;
+    }
+    lastOfs = lftTokenOfs;
+  }
+  return lineText.slice(0, lastOfs) + (keepComment ? commLft : '') + newText;
 }
 
 async function deleteAllTokensInFile(document) {
-  const docText  = document.getText();
-  const lines = docText.split(/\r?\n/);
-  const regexG   = tokenRegEx(document.languageId, false, true);
-  const matches  = [...docText.matchAll(regexG)];
-  if(matches.length == 0) return;
-  matches.reverse();
-  let newText    = '';
-  let lastOffset = docText.length;
-  for (const match of matches) {
-    const offset = match.index;
-    const token  = match[0];
-    newText = docText.slice(offset + token.length, lastOffset) + newText;
-    lastOffset = offset;
-  }
-  newText = docText.slice(0, lastOffset) + newText;
-  await replaceAllTextInDocument(document, newText);
-}
-
-// return tokens
-async function getOrDelAllTokensInLine(fsPath, lineNumber, del = false) {
-  const document = await vscode.workspace.openTextDocument(fsPath);
-  const line     = document.lineAt(lineNumber);
-  if(!line) return;
-  const lineText   = line.text;
-  const lineLength = lineText.length;
-  const languageId = document.languageId;
-  const regexG     = tokenRegEx(languageId, false, true);
-  const matches  = [...lineText.matchAll(regexG)];
-  if(matches.length == 0) return [];
-  matches.reverse();
-  let   commLft     = '';
-  let   newText     = '';
-  const tokens      = [];
-  let   keepComment = false;
-  let   lastOfs     = lineLength;
-  for(const match of matches) {
-    const token = match[0];
-    tokens.unshift(token);
-    if(del) {
-      commLft       = match[1];
-      const lftOfs  = match.index;
-      const rgtOfs  = lftOfs + token.length;
-      const after   = lineText.slice(rgtOfs, lastOfs);
-      if(after.length > 0) keepComment = true;
-      newText += after;
-      lastOfs = lftOfs;
+  const fsPath     = document.uri.fsPath;
+  const docText    = document.getText();
+  const groups     = /\r?\n/.exec(docText);
+  const lineEnding = groups??[0];
+  let lines;
+  if(!lineEnding) lines = [docText];
+  else            lines = docText.split(lineEnding);
+  const lastLineNumber = lines.length - 1;
+  const docRange = new vscode.Range(
+                           0, 0, lastLineNumber, lines[lastLineNumber].length);
+  let chgd = false;
+  const regexG    = tokenRegEx(document.languageId, false, true);
+  const [commLft] = utils.commentsByLang(document.languageId);
+  for(let lineNumber = 0; lineNumber < lines.length; lineNumber++) {
+    const lineText = lines[lineNumber];
+    const newLine = await deleteTokensFromLineText(regexG, commLft, lineText);
+    if(newLine !== null) {
+      chgd = true;
+      lines[lineNumber] = newLine;
     }
   }
-  if(del) {
-    newText = lineText.slice(0, lastOfs)  + 
-             (keepComment ? commLft : '') + newText;
-    if(newText.length != lineLength) {
-      const edit = new vscode.WorkspaceEdit();
-      edit.replace(document.uri, line.range, newText);
-      await vscode.workspace.applyEdit(edit);
-    }
-  }
-  return tokens;
+  if(!chgd) return;
+  const newText = lineEnding ? lines.join(lineEnding) : lines[0];
+  const edit = new vscode.WorkspaceEdit();
+  edit.replace(document.uri, docRange, newText);
+  await vscode.workspace.applyEdit(edit);
 }
-
 
 async function refreshFile(document) {
   // log('refreshFile');
@@ -447,8 +425,7 @@ async function runOnAllMarksInFile(document, markFunc) {
 module.exports = {init, getLabel, bookmarkItemClick, refreshMenu,
                   clearDecoration, justDecorated, updateGutter,
                   toggle, scrollToPrevNext,    
-                  refreshFile, getOrDelAllTokensInLine,
-                  runOnAllMarksInFile, deleteAllTokensInFile
+                  refreshFile, runOnAllMarksInFile, deleteAllTokensInFile
                   };
 
 

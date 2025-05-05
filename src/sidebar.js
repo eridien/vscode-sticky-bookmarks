@@ -113,8 +113,8 @@ async function getItemTree() {
   marksArray.sort((a, b) => {
     if(a.folderIndex > b.folderIndex) return +1;
     if(a.folderIndex < b.folderIndex) return -1;
-    if(a.loc.toLowerCase() > b.loc.toLowerCase()) return +1;
-    if(a.loc.toLowerCase() < b.loc.toLowerCase()) return -1;
+    if(a.location.toLowerCase() > b.location.toLowerCase()) return +1;
+    if(a.location.toLowerCase() < b.location.toLowerCase()) return -1;
     return 0;
   });
   let bookmarks;

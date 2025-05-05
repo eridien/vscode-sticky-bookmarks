@@ -61,7 +61,7 @@ async function delMarksInFileCmd(document) {
     if(!editor) return;
     document = editor.document;
   }
-  await text.deleteAllTokensFromFile(document);
+  await text.deleteAllTokensInFile(document);
   await marks.deleteAllMarksFromFile(document);
 }
 

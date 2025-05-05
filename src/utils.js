@@ -400,15 +400,15 @@ async function runOnAllFolders(folderFunc, fileFunc, markFunc) {
 ///////////////////  BACK REFERENCES -- CHECK AWAITS //////////////
 
 function setBusy(...args)         { return sidebar.setBusy(...args); }
-function deleteMarksFromLine(...args) 
-                                  { return text.deleteMarksFromLine(...args); }
+function getOrDelAllTokensInLine(...args) 
+                                  { return text.getOrDelAllTokensInLine(...args); }
 function refreshFile(...args)     { return text.refreshFile(...args); }
 function updateGutter(...args)    { return text.updateGutter(...args); }
 function runOnAllMarksInFile(...args) 
                                   { return text.runOnAllMarksInFile(...args); }
 
 module.exports = {
-  commentsByLang, deleteLine, deleteMarksFromLine, fileExists, 
+  commentsByLang, deleteLine, getOrDelAllTokensInLine, fileExists, 
   getDocument, getFocusedWorkspaceFolder, getLog, 
   getPathsFromWorkspaceFolder, getTokenRegEx, getTokenRegExG, 
   getFileRelUriPath, init, initContext, insertLine, keywords, 

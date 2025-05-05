@@ -17,7 +17,7 @@ let markSetByToken  = new Map();
 let markSetByFsPath = new Map();
 
 async function deleteAllMarksFromFile(document, save = true) {
-  const fileMarks = getMarksForFile(document.uri.fsPath);
+  const fileMarks = getMarksInFile(document.uri.fsPath);
   if(fileMarks.length === 0) return;
   log('deleteAllMarksFromFile', utils.getFileRelUriPath(document));
   for (const mark of fileMarks) await deleteMark(mark, false, false);
@@ -59,7 +59,7 @@ async function saveMarkStorage() {
   await context.workspaceState.update('marks', [...marksByLoc.values()]);
 }
 
-function getMarksForFile(fileFsPath) {
+function getMarksInFile(fileFsPath) {
   const fileMarkSet = markSetByFsPath.get(fileFsPath);
   if (fileMarkSet) return Array.from(fileMarkSet);
   return [];  
@@ -91,7 +91,7 @@ async function deleteMark(mark, save = true, update = true) {
   await deleteMarkFromFileSet(mark);  
   await deleteMarkFromTokenSet(mark);  
   const [fileFsPath, lineNumber] = mark.loc.split('\x00');
-  await utils.deleteMarksFromLine(fileFsPath, +lineNumber);
+  await utils.getOrDelAllTokensInLine(fileFsPath, +lineNumber);
   if(save)   await saveMarkStorage();
   if(update) utils.updateSide(); 
   // dumpMarks('deleteMark');
@@ -225,7 +225,7 @@ async function newMark(document, lineNumber, gen, token,
 }
 
 module.exports = {init, waitForInit, dumpMarks, getAllMarks, verifyMark,
-                  getMarkForLine, getMarksForFile,deleteAllMarksFromFile,
+                  getMarkForLine, getMarksInFile,deleteAllMarksFromFile,
                   deleteMark, saveMarkStorage, newMark, getMarkTokenRange,
                   };
 

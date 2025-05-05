@@ -237,16 +237,35 @@ async function toggle(gen) {
   const document = editor.document;
   if(document.lineCount == 0) return;
   const lineNumber = editor.selection.active.line;
-  let mark = marks.getMarkForLine(document, lineNumber);
-  if(mark) {
-    log('toggle: deleting mark', mark.fileRelUriPath, lineNumber);
-    await marks.deleteMark(mark, true, true);
+  let marks = marks.getMarksInLine(document, lineNumber);
+
+
+
+
+  if(marks.length == 0) {
+    const tokens = getTokensInLine(document, lineNumber);
+    for(const mark of marks) {
+      log('toggle: deleting mark', mark.fileRelUriPath, lineNumber);
+      await marks.deleteMark(mark, true, true);
+    }
     return;
   }
-  mark ??= await marks.newMark(document, lineNumber, gen);
-  if(gen == 2) {
-    let lineText = document.lineAt(lineNumber).text + mark.token;
-    await utils.replaceLine(document, lineNumber, lineText);
+
+
+
+
+  if(gen == 1) {
+    const mark = new marks.Mark({document, lineNumber, gen});
+    await marks.addMarkToStorage(mark);
+  }
+  else {
+    let lineText = document.lineAt(lineNumber).text;
+    let token    = marks.getToken(document, true);
+    const mark = new marks.Mark({document, gen, token, range: new vscode.Range(
+                                 lineNumber, lineText.length, 
+                                 lineNumber, lineText.length + token.length)});
+    await marks.addMarkToStorage(mark);
+    await utils.replaceLine(document, lineNumber, lineText + token);
   }
   if(openSideBarOnNewMark)  {
     await vscode.commands.executeCommand(
@@ -284,6 +303,19 @@ async function scrollToPrevNext(fwd) {
     lineNumber = fwd ? ((lineNumber == lineCnt-1) ? 0 : lineNumber+1)
                      : ((lineNumber == 0) ? lineCnt-1 : lineNumber-1);
   }
+}
+
+function getTokensInLine(document, lineNumber) {
+  const lineText = document.lineAt(lineNumber).text;
+  const regexG   = tokenRegEx(document.languageId, false, true);
+  const matches  = [...lineText.matchAll(regexG)];
+  return matches.map(match => {
+    return {
+      tokenStr: match[0],
+      range: new vscode.Range(lineNumber, match.index,
+                              lineNumber, match.index + match[0].length)
+    };
+  });
 }
 
 function getTokenObjsInFile(document) {

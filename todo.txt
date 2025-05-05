@@ -1,7 +1,7 @@
 npm install -g @vscode/vsce
 vsce package
 
-mark.xxx => mark.xxx()  (mark\.\w+?\b(?!\s*[\(=]))  => $1()
+mark.xxx => mark.xxx()  (mark\.\w+?\b(?!\s*[\(=])) => $1()
 mark.yyy = zzz          (mark\.\w+?\b\s*?=)
 
 bugs

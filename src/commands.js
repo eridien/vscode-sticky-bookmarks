@@ -161,11 +161,13 @@ async function changedSelection(event) {
   if(selections.length == 1 && selections[0].isEmpty &&
         kind === vscode.TextEditorSelectionChangeKind.Mouse) {
     const clickPos = selections[0].active;
-    const mark = marks.getMarkForLine(editor.document, clickPos.line);
-    if(mark && mark.gen === 2) {
-      const tokenRange = marks.getMarkTokenRange(mark);
-      if(tokenRange?.contains(clickPos)) 
-        await marks.deleteMark(mark, true, false);
+    const tokens = text.getTokensInLine(editor.document, clickPos.line);
+    for (const token of tokens) {
+      if(token.range.contains(clickPos)) {
+        const mark = text.getMarkByTokenRange(editor.document, token.range);
+        if (mark) await marks.deleteMark(mark);
+        break;
+      }
     }
   }
   text.clearDecoration();

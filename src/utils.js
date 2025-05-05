@@ -350,7 +350,7 @@ function getTokenRegExG() {
   return new RegExp("[\\u200B\\u200C\\u200D\\u2060]+\\.", 'g');
 }
 
-async function deleteOneTokenFromLine(fsPath, lineNumber, token) {
+async function deleteTokenFromLine(fsPath, lineNumber, token) {
   const document = await vscode.workspace.openTextDocument(fsPath);
   const line     = document.lineAt(lineNumber);
   if(!line) return;
@@ -432,7 +432,7 @@ module.exports = {
   getPathsFromWorkspaceFolder, getTokenRegEx, getTokenRegExG, 
   getFileRelUriPath, init, initContext, insertLine, keywords, 
   loadStickyBookmarksJson, numberToInvBase4, refreshFile, replaceLine, 
-  runOnAllFolders, runOnFilesInFolder, deleteOneTokenFromLine,
+  runOnAllFolders, runOnFilesInFolder, deleteTokenFromLine,
   setBusy, sleep, tokenToDigits, tokenToStr, updateSide
 }
 

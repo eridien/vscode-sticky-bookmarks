@@ -314,20 +314,21 @@ function getToken(document, zero = true) {
        + commRgt;
 }
 
-async function newMark(document, lineNumber, 
-                       gen, token, zero = true, save = true) {
-  const mark = new Mark({document, lineNumber, gen});
-  if(gen == 2) {
-    token ??= getToken(document, zero);
-    mark.token = token;
-  }
-  await addMarkToStorage(mark, save);
-  return mark;
+async function addGen2MarkToLine(document, lineNumber, token, save = false) {
+  token ??= getToken(document);
+  let lineText = document.lineAt(lineNumber).text;
+  const mark   = new Mark({gen:2, document, lineNumber, token,
+                                lftChrOfs: lineText.length,
+                                rgtChrOfs: lineText.length + token.length});
+  await utils.replaceLine(document, lineNumber, lineText + token);
+  await addMarkToStorage(mark);
+  if(save) await saveMarkStorage();
 }
 
 module.exports = {init, Mark, waitForInit, dumpMarks, getAllMarks, verifyMark,
                   getMarksFromLine, getMarksInFile, deleteAllMarksFromFile,
-                  deleteMark, saveMarkStorage, newMark, getToken};
+                  deleteMark, saveMarkStorage, addMarkToStorage, 
+                  getToken, addGen2MarkToLine };
 
 
 

@@ -228,7 +228,7 @@ const clearDecoration = () => {
 async function bookmarkItemClick(item) {
   const mark = item.mark;
   if(!marks.verifyMark(mark)) { log('info', 'Bookmark Missing'); return; }
-  await gotoAndDecorate(mark.document, mark.lineNumber);
+  await gotoAndDecorate(mark.document(), mark.lineNumber());
 }
 
 async function toggle(gen) {
@@ -236,36 +236,22 @@ async function toggle(gen) {
   if(!editor) {log('info', 'No active editor.'); return;}
   const document = editor.document;
   if(document.lineCount == 0) return;
+  await refreshFile(document);
   const lineNumber = editor.selection.active.line;
-  let marks = marks.getMarksInLine(document, lineNumber);
-
-
-
-
-  if(marks.length == 0) {
-    const tokens = getTokensInLine(document, lineNumber);
-    for(const mark of marks) {
-      log('toggle: deleting mark', mark.fileRelUriPath, lineNumber);
-      await marks.deleteMark(mark, true, true);
+  let lineMarks = marks.getMarksFromLine(document, lineNumber);
+  if(lineMarks.length > 0) {
+    for(const mark of lineMarks) {
+      log('toggle: deleting mark', mark.fileRelUriPath(), lineNumber);
+      await marks.deleteMark(mark);
     }
     return;
   }
-
-
-
-
   if(gen == 1) {
     const mark = new marks.Mark({document, lineNumber, gen});
     await marks.addMarkToStorage(mark);
   }
   else {
-    let lineText = document.lineAt(lineNumber).text;
-    let token    = marks.getToken(document, true);
-    const mark = new marks.Mark({document, gen, token, range: new vscode.Range(
-                                 lineNumber, lineText.length, 
-                                 lineNumber, lineText.length + token.length)});
-    await marks.addMarkToStorage(mark);
-    await utils.replaceLine(document, lineNumber, lineText + token);
+    await marks.addGen2MarkToLine(document, lineNumber, true);
   }
   if(openSideBarOnNewMark)  {
     await vscode.commands.executeCommand(
@@ -402,39 +388,49 @@ async function refreshFile(document) {
   const tokenObjs = getTokenObjsInFile(document);
   const fileMarks = marks.getMarksInFile(document.uri.fsPath);
   if(tokenObjs.length == 0 && fileMarks.length == 0) return;
-  fileMarks.sort((a, b) => a.lineNumber - b.lineNumber);
+  fileMarks.sort((a, b) => {
+    if(a.lineNumber() > b.lineNumber()) return +1;
+    if(a.lineNumber() < b.lineNumber()) return -1;
+    if(a.lftChrOfs()  > b.lftChrOfs())  return +1;
+    if(a.lftChrOfs()  < b.lftChrOfs())  return -1;
+    return 0;
+  });
   // scan file from bottom to top
   let tokenObj = tokenObjs.pop();
   let mark     = fileMarks.pop();
   while(tokenObj || mark) {
     const tokenLineNum = tokenObj?.lineNumber ?? -1;
-    const markLineNum  = mark    ?.lineNumber ?? -1;
-    if(tokenLineNum == markLineNum) {
-      // mark points to token
-      if(mark.gen == 1) {
-        log('refreshFile, gen1 mark has token, changing to gen2', markLineNum);
-         mark.gen = 2;
+    const tokenChrOfs  = tokenObj?.position.character;
+    const markLineNum  = mark?.lineNumber ?? -1;
+    const markChrOfs   = mark?.lftChrOfs  ??  0;;
+    if(tokenLineNum == markLineNum && tokenChrOfs == markChrOfs) {
+      if(mark.gen() == 1 && tokenObj?.token) {
+        log('refreshFile, gen1 mark has token, changing to gen2', 
+             mark.fileRelUriPath(), markLineNum);
+        await marks.deleteMark(mark, false, false);
+        await marks.addGen2MarkToLine(document, tokenLineNum, tokenObj.token);
       }
-      if(mark.token !== tokenObj.token) {
-        log('refreshFile, mark has wrong token, fixing mark', markLineNum);
-        mark.token = tokenObj.token;
+      else if(mark.token() !== tokenObj.token) {
+        log('refreshFile, mark has wrong token, fixing mark', 
+             mark.fileRelUriPath(), markLineNum);
+        await marks.deleteMark(mark, false, false);
+        await marks.addGen2MarkToLine(document, tokenLineNum, tokenObj.token);
       }
       tokenObj = tokenObjs.pop();
       mark     = fileMarks.pop();
       continue;
     }
     if(tokenLineNum < markLineNum) {
-      // have mark with no token in line
-      if(mark.gen == 2) {
-        log('refreshFile, gen2 mark with no token, deleting mark', markLineNum);
+      if(mark.gen() == 2) {
+        log('refreshFile, gen2 mark with no token, deleting mark', 
+             mark.fileRelUriPath(), markLineNum);
         await marks.deleteMark(mark, false, false);
       }
       mark = fileMarks.pop();
       continue;
     }
-    // have token in line with no mark
     log('refreshFile, token with no mark, adding mark', tokenLineNum);
-    await marks.newMark(document, tokenLineNum, 2, tokenObj.token, false);
+    await marks.addGen2MarkToLine(document, tokenLineNum, tokenObj.token);
     tokenObj = tokenObjs.pop();
   }
   await marks.saveMarkStorage();

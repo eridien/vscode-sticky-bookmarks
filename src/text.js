@@ -221,7 +221,7 @@ async function gotoAndDecorate(document, lineNumber) {
 }
 
 const clearDecoration = () => {
-  if(!tgtEditor || justDecorated) return;
+  if(!tgtEditor || !tgtDecorationType || justDecorated) return;
   tgtEditor.setDecorations(tgtDecorationType, []);
   tgtDecorationType.dispose();
   tgtFocusListener.dispose();
@@ -234,7 +234,7 @@ async function bookmarkItemClick(item) {
     log('info', 'Bookmark Missing'); 
     return;
   }
-  await gotoAndDecorate(mark.document(), mark.lineNumber());
+  await gotoAndDecorate(await marks.getDocument(mark), mark.lineNumber());
 }
 
 async function toggle(gen) {
@@ -242,7 +242,6 @@ async function toggle(gen) {
   if(!editor) {log('info', 'No active editor.'); return;}
   const document = editor.document;
   if(document.lineCount == 0) return;
-  // await refreshFile(document);
   const lineNumber = editor.selection.active.line;
   let lineMarks = marks.getMarksFromLine(document, lineNumber);
   if(lineMarks.length > 0) {
@@ -393,6 +392,8 @@ async function refreshFile(document) {
   }
   const tokenObjs = getTokenObjsInFile(document);
   const fileMarks = marks.getMarksInFile(document.uri.fsPath);
+  log('refreshFile, tokenObjs:', tokenObjs.length,
+                   'fileMarks:', fileMarks.length);
   if(tokenObjs.length == 0 && fileMarks.length == 0) return;
   fileMarks.sort((a, b) => {
     if(a.lineNumber() > b.lineNumber()) return +1;

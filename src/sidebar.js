@@ -232,7 +232,7 @@ async function itemClick(item) {
   switch(item.type) {
     case 'folder': toggleFolder(item.mark.folderFsPath()); break;
     case 'file':
-      await vscode.window.showTextDocument(item.mark.document(), 
+      await vscode.window.showTextDocument(marks.document(item.mark),
                                            {preview: false});
       break;
     case 'bookmark': await text.bookmarkItemClick(item); break;

@@ -23,7 +23,6 @@ async function init(contextIn) {
 
 class Mark {
   constructor(p) {
-    if (typeof p === 'string') p = JSON.parse(p);
     const o = {};
     if(p.gen === undefined)
             throw new Error('Mark constructor: missing gen');
@@ -40,12 +39,12 @@ class Mark {
     o._lineNumber = p.lineNumber ?? p.linNum ?? p.line ?? pos()?.line;
     if(o._gen == 2) {
       o._lftChrOfs = p.lftChrOfs ?? pos()?.character;
-      o._rgtChrOfs = p.rgtChrOfs ?? o._lftChrOfs + (o._token.length ?? 0);
+      o._rgtChrOfs = p.rgtChrOfs ?? o._lftChrOfs + o._token.length;
     }
     else {o._lftChrOfs = o._rgtChrOfs = 0; }
     if(o._fileFsPath === undefined || o._lineNumber === undefined || 
-          (o._gen == 2 ? (o._lftChrOfs=== undefined || 
-                          o._rgtChrOfs === NaN) : false)) {
+          (o._gen == 2 ? (o._lftChrOfs === undefined || 
+                ! (typeof o._rgtChrOfs === 'number')) : false)) {
       throw new Error('Mark constructor: missing param');
     }
     Object.assign(this, o);
@@ -69,7 +68,7 @@ class Mark {
                         vscode.workspace.getWorkspaceFolder(this.fileUri()) }
   folderIdx()      { return this._folderIdx ??=  this.wsFolder().index  }
   folderUri()      { return this._folderUri ??= 
-                                vscode.Uri.file(this.wsFolder().uri)   }
+                                vscode.Uri.file(this.fileFsPath()) }
   folderFsPath()   { return this._folderFsPath ??= 
                               vscode.Uri.file(this.folderUri().fsPath) }
   folderUriPath()  { return this._folderUriPath ??= 
@@ -85,11 +84,11 @@ class Mark {
                                        this._lftChrOfs,  this._rgtChrOfs ) }
   locStrLc()       { return this._locStrLc ??= this.locStr().toLowerCase() }
 
-  toString() {
-    return JSON.stringify({fileFsPath: this._fileFsPath, token: this._token, 
-                           lineNumber: this._lineNumber,   gen: this._gen,
-                           lftChrOfs:  this._lftChrOfs, 
-                           rgtChrOfs:  this._rgtChrOfs});
+  toObj() {
+    return {fileFsPath: this._fileFsPath, token: this._token, 
+            lineNumber: this._lineNumber,   gen: this._gen,
+            lftChrOfs:  this._lftChrOfs, 
+            rgtChrOfs:  this._rgtChrOfs};
   }
 }
 
@@ -129,17 +128,17 @@ async function loadMarkStorage() {
     await saveMarkStorage();
     return;
   }
-  const markStrs = context.workspaceState.get('marks', []);
-  for (const markStr of markStrs) {
-    const mark = new Mark(markStr);
+  const marks = context.workspaceState.get('marks', []);
+  for (const markObj of marks) {
+    const mark = new Mark(markObj);
     await addMarkToStorage(mark, false);
   }
 }
 
 async function saveMarkStorage() {
-  const markStrings =  [...marksByLocStr.values()]
-                          .map(mark => mark.toString());
-  await context.workspaceState.update('marks', markStrings);
+  const markObjects =  [...marksByLocStr.values()]
+                          .map(mark => mark.toObj());
+  await context.workspaceState.update('marks', markObjects);
 }
 
 async function getMarkByTokenRange(document, range) {

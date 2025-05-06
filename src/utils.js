@@ -377,7 +377,7 @@ async function runOnAllFolders(folderFunc, fileFunc, markFunc) {
     log('info', 'No Folders found in workspace'); 
     return; 
   }
-  await setBusy(true);
+  setBusy(true);
   const editor = vscode.window.activeTextEditor;
   if(editor) {
     const folder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
@@ -388,7 +388,7 @@ async function runOnAllFolders(folderFunc, fileFunc, markFunc) {
     }
   }
   for (const folder of folders) await doOneFolder(folder);
-  await setBusy(false);
+  setBusy(false);
 }
 
 ///////////////////  BACK REFERENCES -- CHECK AWAITS //////////////

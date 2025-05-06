@@ -251,7 +251,7 @@ async function toggle(gen) {
     await marks.addMarkToStorage(mark);
   }
   else {
-    await marks.addGen2MarkToLine(document, lineNumber, true);
+    await marks.addGen2MarkToLine(document, lineNumber);
   }
   if(openSideBarOnNewMark)  {
     await vscode.commands.executeCommand(
@@ -408,13 +408,15 @@ async function refreshFile(document) {
         log('refreshFile, gen1 mark has token, changing to gen2', 
              mark.fileRelUriPath(), markLineNum);
         await marks.deleteMark(mark, false, false);
-        await marks.addGen2MarkToLine(document, tokenLineNum, tokenObj.token);
+        await marks.addGen2MarkForToken(
+                           document, tokenObj.position, tokenObj.token);
       }
       else if(mark.token() !== tokenObj.token) {
         log('refreshFile, mark has wrong token, fixing mark', 
              mark.fileRelUriPath(), markLineNum);
         await marks.deleteMark(mark, false, false);
-        await marks.addGen2MarkToLine(document, tokenLineNum, tokenObj.token);
+        await marks.addGen2MarkForToken(
+                            document, tokenObj.position, tokenObj.token);
       }
       tokenObj = tokenObjs.pop();
       mark     = fileMarks.pop();
@@ -430,7 +432,7 @@ async function refreshFile(document) {
       continue;
     }
     log('refreshFile, token with no mark, adding mark', tokenLineNum);
-    await marks.addGen2MarkToLine(document, tokenLineNum, tokenObj.token);
+    await marks.addGen2MarkForToken(document, tokenObj.position, tokenObj.token);
     tokenObj = tokenObjs.pop();
   }
   await marks.saveMarkStorage();

@@ -47,82 +47,86 @@ class Mark {
       }
       params = obj;
     }
-    Object.assign(this, params);
-    if(this.gen === undefined)
+    const obj = {};
+    if(params.gen === undefined)
       throw new Error('Mark constructor: missing gen');
-    if(this.gen == 2 && this.token === undefined)
+    obj._gen = params.gen;
+    if(params._gen == 2 && params.token === undefined)
       throw new Error('Mark constructor: missing token');
+    obj._token = params.token;
     const haveFile = fileKeys.some(
-                     key => Object.prototype.hasOwnProperty.call(params, key));
+                    key => Object.prototype.hasOwnProperty.call(params, key));
     const haveLine = lineKeys.some(
-                     key => Object.prototype.hasOwnProperty.call(params, key));
+                    key => Object.prototype.hasOwnProperty.call(params, key));
     const haveLftChr = lftChrKeys.some(
-                     key => Object.prototype.hasOwnProperty.call(params, key));
+                    key => Object.prototype.hasOwnProperty.call(params, key));
     const haveRgtChr = rgtChrKeys.some(
-                     key => Object.prototype.hasOwnProperty.call(params, key)) ||
-                           (haveLftChr && (params.token !== undefined));
-    if(!haveFile || !haveLine || this.gen === undefined ||
-                    (this.gen == 2 ? (!haveLftChr || !haveRgtChr) : false)) {
+                    key => Object.prototype.hasOwnProperty.call(params, key)) 
+                              || (haveLftChr && (params.token !== undefined));
+    if(!haveFile || !haveLine || 
+                    (params.gen == 2 ? (!haveLftChr || !haveRgtChr) : false)) {
       throw new Error('Mark constructor: missing params');
-    }
+    }//Activating extension 'eridien.sticky-bookmarks' failed: Invalid arguments.
     const position  = params.pos ?? params.position ?? params.range?.start ?? 
                       params.location?.range?.start ?? params.loc?.range?.start;
-    this.fileFsPath = params.fsPath ?? params.document?.uri?.fsPath ?? params.doc?.uri?.fsPath ?? 
+    obj._fileFsPath = params.fsPath ?? params.document?.uri?.fsPath ?? params.doc?.uri?.fsPath ?? 
                       params.fileFsPath ?? params.uri?.fsPath ?? params.fileUri?.fsPath ??
                       params.location?.uri?.fsPath ?? params.loc?.uri?.fsPath;
-    this.lineNumber = params.lineNumber ?? params.linNum ?? params.line ?? position?.line;
-    if(this.gen == 2) {
-      this.lftChrOfs = params.lftChrOfs ?? position?.character;
-      this.rgtChrOfs = params.rgtChrOfs ?? this.lftChrOfs + (params.token?.length ?? 0);
+    obj._lineNumber = params.lineNumber ?? params.linNum ?? params.line ?? position?.line;
+    if(obj._gen == 2) {
+      obj._lftChrOfs = params.lftChrOfs ?? position?.character;
+      obj._rgtChrOfs = params.rgtChrOfs ?? obj._lftChrOfs + (params.token?.length ?? 0);
     }
     else {
-      this.lftChrOfs = 0;
-      this.rgtChrOfs = 0;
+      obj._lftChrOfs = 0;
+      obj._rgtChrOfs = 0;
     }
+    Object.assign(this, obj);
   }
-  fileFsPath()     { return this.fileFsPath }
-  lineNumber()     { return this.lineNumber }
-  lftChrOfs()      { return this.lftChrOfs  }
-  rgtChrOfs()      { return this.rgtChrOfs  }
-  token()          { return this.token      }
-  gen()            { return this.gen        }
+  fileFsPath()     { return this._fileFsPath }
+  lineNumber()     { return this._lineNumber }
+  lftChrOfs()      { return this._lftChrOfs  }
+  rgtChrOfs()      { return this._rgtChrOfs  }
+  token()          { return this._token      }
+  gen()            { return this._gen        }
 
-  range()          {return this.range ??=
-                            new vscode.range(this.lineNumber, this.lftChrOfs,
-                                             this.lineNumber, this.rgtChrOfs) }
-  fileUri()        { return this.fileUri ??= 
-                         vscode.Uri.file(this.fileFsPath) };
-  fileFsPath()     { return this.fileFsPath  ??= this.fileUri().fsPath }
-  fileUriPath()    { return this.fileUriPath ??= this.fileUri().path }
+  range()          {return this._range ??=
+                            new vscode.range(this._lineNumber, this._lftChrOfs,
+                                             this._lineNumber, this._rgtChrOfs) }
+  fileUri()        { return this._fileUri ??= 
+                         vscode.Uri.file(this._fileFsPath) };
+  fileFsPath()     { return this._fileFsPath  ??= this.fileUri().fsPath }
+  fileUriPath()    { return this._fileUriPath ??= this.fileUri().path }
 
-  wsFolder()       { return this.wsFolder ??= 
-                          vscode.workspace.getWorkspaceFolder(this.fileUri()) }
-  folderIdx()      { return this.folderIdx ??= this.wsFolder().index; }
-  folderUri()      { return this.folderUri ??= 
-                          vscode.Uri.file(this.wsFolder().uri) }
-  folderFsPath()   { return this.folderFsPath ??= 
-                         vscode.Uri.file(this.folderUri().fsPath) }
-  folderUriPath()  { return this.folderUriPath ??= 
-                         vscode.Uri.file(this.folderUri().path) }
+  wsFolder()       { return this._wsFolder ??= 
+                        vscode.workspace.getWorkspaceFolder(this.fileUri()) }
+  folderIdx()      { return this._folderIdx ??=  this.wsFolder().index  }
+  folderUri()      { return this._folderUri ??= 
+                                vscode.Uri.file(this.wsFolder().uri)   }
+  folderFsPath()   { return this._folderFsPath ??= 
+                              vscode.Uri.file(this.folderUri().fsPath) }
+  folderUriPath()  { return this._folderUriPath ??= 
+                               vscode.Uri.file(this.folderUri().path)  }
+  folderName()     { return this._folderName ??= this.wsFolder().name; }
 
-  fileRelUriPath() { return this.fileRelUriPath ??= 
+  fileRelUriPath() { return this._fileRelUriPath ??= 
                       this.fileUriPath().slice(this.folderUriPath().length+1) }
-  languageId()     { return this.languageId ??=
+  languageId()     { return this._languageId ??=
                              vscode.workspace.getLanguageMode(this.fileUri()) }
-  locStr()         { return  this.locStr ??= 
-                             getLocStr(this.fileFsPath, this.lineNumber, 
-                                       this.lftChrOfs,  this.rgtChrOfs ) }
-  locStrLc()       { return this.locStrLc ??= this.locStr().toLowerCase() }
+  locStr()         { return  this._locStr ??= 
+                             getLocStr(this._fileFsPath, this._lineNumber, 
+                                       this._lftChrOfs,  this._rgtChrOfs ) }
+  locStrLc()       { return this._locStrLc ??= this.locStr().toLowerCase() }
 
   toString() {
-    return `{ fileFsPath: ${this.fileFsPath}, lineNumber: ${this.lineNumber}, lftChrOfs: ${this.lftChrOfs}, rgtChrOfs: ${this.rgtChrOfs}, token: ${this.token}, gen: ${this.gen} }`;
+    return `{ fileFsPath: ${this._fileFsPath}, lineNumber: ${this._lineNumber}, lftChrOfs: ${this._lftChrOfs}, rgtChrOfs: ${this._rgtChrOfs}, token: ${this._token}, gen: ${this._gen} }`;
   }
 }
 
 function getLocStr(fileFsPath, lineNumber, lftChrOfs, rgtChrOfs) {
-  return fileFsPath + '\x00' + lineNumber.padStart(6, '0') + 
-                      '\x00' + lftChrOfs .padStart(6, '0') + 
-                      '\x00' + rgtChrOfs .padStart(6, '0');
+  return fileFsPath + '\x00' + lineNumber.toString().padStart(6, '0') + 
+                      '\x00' + lftChrOfs .toString().padStart(6, '0') + 
+                      '\x00' + rgtChrOfs .toString().padStart(6, '0');
 }
 
 async function getDocument(mark) { 
@@ -314,7 +318,7 @@ function getToken(document, zero = true) {
        + commRgt;
 }
 
-async function addGen2MarkToLine(document, lineNumber, token, save = false) {
+async function addGen2MarkToLine(document, lineNumber, token, save = true) {
   token ??= getToken(document);
   let lineText = document.lineAt(lineNumber).text;
   const mark   = new Mark({gen:2, document, lineNumber, token,
@@ -325,10 +329,16 @@ async function addGen2MarkToLine(document, lineNumber, token, save = false) {
   if(save) await saveMarkStorage();
 }
 
+async function addGen2MarkForToken(document, position, token, save = true) {
+  const mark = new Mark({gen:2, document, position, token});
+  await addMarkToStorage(mark);
+  if(save) await saveMarkStorage();
+}
+
 module.exports = {init, Mark, waitForInit, dumpMarks, getAllMarks, verifyMark,
                   getMarksFromLine, getMarksInFile, deleteAllMarksFromFile,
                   deleteMark, saveMarkStorage, addMarkToStorage, 
-                  getToken, addGen2MarkToLine };
+                  getToken, addGen2MarkToLine, addGen2MarkForToken };
 
 
 

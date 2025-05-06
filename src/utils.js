@@ -281,12 +281,6 @@ async function replaceLine(document, lineNumber, lineText, update = true) {
   if(update) updateSide(); 
 }
 
-function getDocument(document) {
-    if (document) return document;
-    const editor = vscode.window.activeTextEditor;
-    return editor ? editor.document : undefined;
-}
-
 function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)) }
 
 function invBase4ToNumber(str) {
@@ -350,27 +344,6 @@ function getTokenRegExG() {
   return new RegExp("[\\u200B\\u200C\\u200D\\u2060]+\\.", 'g');
 }
 
-async function deleteTokenFromLine(fsPath, lineNumber, token) {
-  const document = await vscode.workspace.openTextDocument(fsPath);
-  const line     = document.lineAt(lineNumber);
-  if(!line) return;
-  const lineText   = line.text;
-  const lineLength = lineText.length;
-  const lftOfs     = lineText.indexOf(token);
-  if(lftOfs === -1) return;
-  const rgtOfs     = lftOfs + token.length;
-  let   beforeText = lineText.slice(0, lftOfs);
-  let   afterText  = lineText.slice(rgtOfs);
-  if(afterText.length > 0) {
-    const [commLft, commRgt] = commentsByLang(document.languageId);
-    if(commRgt === '' && beforeText.indexOf(commLft) === -1)
-      afterText = commLft + afterText;
-  }
-  const edit = new vscode.WorkspaceEdit();
-  edit.replace(document.uri, line.range, beforeText + afterText);
-  await vscode.workspace.applyEdit(edit);
-}
-
 async function runOnFilesInFolder(folder, fileFunc, markFunc) { 
   async function doOneFile(document) {
     if(fileFunc) await fileFunc(document);
@@ -428,11 +401,11 @@ function runOnAllMarksInFile(...args)
 
 module.exports = {
   commentsByLang, deleteLine, fileExists, 
-  getDocument, getFocusedWorkspaceFolder, getLog, 
+  getFocusedWorkspaceFolder, getLog, 
   getPathsFromWorkspaceFolder, getTokenRegEx, getTokenRegExG, 
   getFileRelUriPath, init, initContext, insertLine, keywords, 
   loadStickyBookmarksJson, numberToInvBase4, refreshFile, replaceLine, 
-  runOnAllFolders, runOnFilesInFolder, deleteTokenFromLine,
+  runOnAllFolders, runOnFilesInFolder,
   setBusy, sleep, tokenToDigits, tokenToStr, updateSide
 }
 

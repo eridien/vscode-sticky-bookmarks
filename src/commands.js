@@ -163,8 +163,13 @@ async function changedSelection(event) {
     const clickPos = selections[0].active;
     const tokens = text.getTokensInLine(editor.document, clickPos.line);
     for (const token of tokens) {
-      if(token.range.contains(clickPos)) {
-        const mark = text.getMarkByTokenRange(editor.document, token.range);
+      const tokenRange = new vscode.Range(
+        token.range.start.line, token.range.start.character+1,
+        token.range.end.line,   token.range.end.character-1
+      );
+      if(tokenRange.contains(clickPos)) {
+        const mark = await marks.getMarkByTokenRange(
+                                           editor.document, token.range);
         if (mark) await marks.deleteMark(mark);
         break;
       }

@@ -21,67 +21,34 @@ async function init(contextIn) {
   end('init marks');
 }
 
-const fileKeys   = ["uri", "fileUri", "fsPath", "fileFsPath", 
-                    "doc", "document", "location", "loc"];
-const posKeys    = ["range", "location", "loc", "position", "pos"];
-const lineKeys   = posKeys.concat("lineNumber", "linNum", "line");
-const lftChrKeys = posKeys.concat("lftChrPos");
-const rgtChrKeys = posKeys.concat("rgtChrPos");
-
 class Mark {
-  constructor(params) {
-    if (typeof params === 'string' && params.startsWith('{') && params.endsWith('}')) {
-      const str = params.slice(1, -1).trim();
-      const parts = str.split(',').map(s => s.trim());
-      const obj = {};
-      for (const part of parts) {
-        const [k, v] = part.split(':').map(s => s.trim());
-        // Remove possible quotes from value
-        let val = v;
-        if (val && val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
-        if (k === 'lineNumber' || k === 'lftChrOfs' || k === 'rgtChrOfs' || k === 'gen') {
-          obj[k] = Number(val);
-        } else {
-          obj[k] = val === 'undefined' ? undefined : val;
-        }
-      }
-      params = obj;
+  constructor(p) {
+    if (typeof p === 'string') p = JSON.parse(p);
+    const o = {};
+    if(p.gen === undefined)
+            throw new Error('Mark constructor: missing gen');
+    o._gen = p.gen;
+    if(p._gen == 2 && p.token === undefined)
+            throw new Error('Mark constructor: missing token');
+    o._token = p.token;
+    function pos() { return p.position ?? p.pos ?? p.range?.start ?? 
+                            p.location?.range?.start ?? p.loc?.range?.start }
+    o._fileFsPath = p.fsPath ?? p.document?.uri?.fsPath ?? 
+                    p.doc?.uri?.fsPath ?? p.fileFsPath ?? p.uri?.fsPath ?? 
+                    p.fileUri?.fsPath ?? p.location?.uri?.fsPath ?? 
+                    p.loc?.uri?.fsPath;
+    o._lineNumber = p.lineNumber ?? p.linNum ?? p.line ?? pos()?.line;
+    if(o._gen == 2) {
+      o._lftChrOfs = p.lftChrOfs ?? pos()?.character;
+      o._rgtChrOfs = p.rgtChrOfs ?? o._lftChrOfs + (o._token.length ?? 0);
     }
-    const obj = {};
-    if(params.gen === undefined)
-      throw new Error('Mark constructor: missing gen');
-    obj._gen = params.gen;
-    if(params._gen == 2 && params.token === undefined)
-      throw new Error('Mark constructor: missing token');
-    obj._token = params.token;
-    const haveFile = fileKeys.some(
-                    key => Object.prototype.hasOwnProperty.call(params, key));
-    const haveLine = lineKeys.some(
-                    key => Object.prototype.hasOwnProperty.call(params, key));
-    const haveLftChr = lftChrKeys.some(
-                    key => Object.prototype.hasOwnProperty.call(params, key));
-    const haveRgtChr = rgtChrKeys.some(
-                    key => Object.prototype.hasOwnProperty.call(params, key)) 
-                              || (haveLftChr && (params.token !== undefined));
-    if(!haveFile || !haveLine || 
-                    (params.gen == 2 ? (!haveLftChr || !haveRgtChr) : false)) {
-      throw new Error('Mark constructor: missing params');
-    }//Activating extension 'eridien.sticky-bookmarks' failed: Invalid arguments.
-    const position  = params.pos ?? params.position ?? params.range?.start ?? 
-                      params.location?.range?.start ?? params.loc?.range?.start;
-    obj._fileFsPath = params.fsPath ?? params.document?.uri?.fsPath ?? params.doc?.uri?.fsPath ?? 
-                      params.fileFsPath ?? params.uri?.fsPath ?? params.fileUri?.fsPath ??
-                      params.location?.uri?.fsPath ?? params.loc?.uri?.fsPath;
-    obj._lineNumber = params.lineNumber ?? params.linNum ?? params.line ?? position?.line;
-    if(obj._gen == 2) {
-      obj._lftChrOfs = params.lftChrOfs ?? position?.character;
-      obj._rgtChrOfs = params.rgtChrOfs ?? obj._lftChrOfs + (params.token?.length ?? 0);
+    else {o._lftChrOfs = o._rgtChrOfs = 0; }
+    if(o._fileFsPath === undefined || o._lineNumber === undefined || 
+          (o._gen == 2 ? (o._lftChrOfs=== undefined || 
+                          o._rgtChrOfs === NaN) : false)) {
+      throw new Error('Mark constructor: missing param');
     }
-    else {
-      obj._lftChrOfs = 0;
-      obj._rgtChrOfs = 0;
-    }
-    Object.assign(this, obj);
+    Object.assign(this, o);
   }
   fileFsPath()     { return this._fileFsPath }
   lineNumber()     { return this._lineNumber }
@@ -91,7 +58,7 @@ class Mark {
   gen()            { return this._gen        }
 
   range()          {return this._range ??=
-                            new vscode.range(this._lineNumber, this._lftChrOfs,
+                            new vscode.Range(this._lineNumber, this._lftChrOfs,
                                              this._lineNumber, this._rgtChrOfs) }
   fileUri()        { return this._fileUri ??= 
                          vscode.Uri.file(this._fileFsPath) };
@@ -119,7 +86,10 @@ class Mark {
   locStrLc()       { return this._locStrLc ??= this.locStr().toLowerCase() }
 
   toString() {
-    return `{ fileFsPath: ${this._fileFsPath}, lineNumber: ${this._lineNumber}, lftChrOfs: ${this._lftChrOfs}, rgtChrOfs: ${this._rgtChrOfs}, token: ${this._token}, gen: ${this._gen} }`;
+    return JSON.stringify({fileFsPath: this._fileFsPath, token: this._token, 
+                           lineNumber: this._lineNumber,   gen: this._gen,
+                           lftChrOfs:  this._lftChrOfs, 
+                           rgtChrOfs:  this._rgtChrOfs});
   }
 }
 
@@ -159,9 +129,9 @@ async function loadMarkStorage() {
     await saveMarkStorage();
     return;
   }
-  const marks = context.workspaceState.get('marks', []);
-  for (const mark of marks) {
-    const mark = new Mark(mark);
+  const markStrs = context.workspaceState.get('marks', []);
+  for (const markStr of markStrs) {
+    const mark = new Mark(markStr);
     await addMarkToStorage(mark, false);
   }
 }
@@ -215,14 +185,37 @@ function deleteMarkFromTokenSet(mark) {
   }
 }
 
+async function deleteTokenFromLine(mark) {
+  const lineNumber = mark.lineNumber();
+  const token      = mark.token();
+  const document   = await getDocument(mark);
+  const line       = document.lineAt(lineNumber);
+  if(!line) return;
+  const lineText   = line.text;
+  const lineLength = lineText.length;
+  const lftOfs     = lineText.indexOf(token);
+  if(lftOfs === -1) return;
+  const rgtOfs     = lftOfs + token.length;
+  let   beforeText = lineText.slice(0, lftOfs);
+  let   afterText  = lineText.slice(rgtOfs);
+  if(afterText.length > 0) {
+    const [commLft, commRgt] = utils.commentsByLang(document.languageId);
+    if(commRgt === '' && beforeText.indexOf(commLft) === -1)
+      afterText = commLft + afterText;
+  }
+  const edit = new vscode.WorkspaceEdit();
+  edit.replace(document.uri, line.range, beforeText + afterText);
+  await vscode.workspace.applyEdit(edit);
+}
+
 async function deleteMark(mark, save = true, update = true) {
   marksByLocStr.delete(mark.locStr());
   await deleteMarkFromFileSet(mark);  
   await deleteMarkFromTokenSet(mark);  
-  await utils.deleteTokenFromLine(mark);
+  await deleteTokenFromLine(mark);
   if(save) await saveMarkStorage();
   if(update) utils.updateSide(); 
-  // dumpMarks('deleteMark');
+  //await dumpMarks('deleteMark');
 }
 
 async function deleteAllMarksFromFile(document, update = true) {
@@ -259,9 +252,9 @@ function getMarksFromLine(document, lineNumber, sort = false) {
   return lineMarks;
 }
 
-function verifyMark(mark) {
+async function verifyMark(mark) {
   if(!mark) return false;
-  const document   = mark.document();
+  const document   = await vscode.workspace.openTextDocument(mark.fileUri());
   const lineNumber = mark.lineNumber();
   const numLines   = document.lineCount;
   if(lineNumber < 0 || lineNumber >= numLines) {
@@ -278,7 +271,7 @@ function verifyMark(mark) {
   return true;
 }
 
-function dumpMarks(caller, list, dump) {
+async function dumpMarks(caller, list, dump) {
   caller = caller + ' marks: ';
   let marks = Array.from(marksByLocStr.values());
   if(marks.length === 0) {
@@ -292,7 +285,7 @@ function dumpMarks(caller, list, dump) {
       a.locStrLc() < b.locStrLc() ? -1 : 0));
     let str = "\n";
     for(const mark of marks) {
-      if(VERIFY_MARKS_IN_DUMP) verifyMark(mark);
+      if(VERIFY_MARKS_IN_DUMP) await verifyMark(mark);
       str += `${utils.tokenToStr(mark.token())} -> ${mark.fileRelUriPath()} ` +
              `${mark.lineNumber().toString().padStart(3, ' ')} `+
              `${mark.languageId()}\n`;
@@ -302,7 +295,7 @@ function dumpMarks(caller, list, dump) {
   else {
     let str = "";
     for(const mark of marks) {
-      if(VERIFY_MARKS_IN_DUMP) verifyMark(mark);
+      if(VERIFY_MARKS_IN_DUMP) await verifyMark(mark);
       str += mark.lineNumber().toString().padStart(3, ' ') + 
              utils.tokenToStr(mark.token()) +  ' ';
     }
@@ -336,8 +329,9 @@ async function addGen2MarkForToken(document, position, token, save = true) {
 }
 
 module.exports = {init, Mark, waitForInit, dumpMarks, getAllMarks, verifyMark,
-                  getMarksFromLine, getMarksInFile, deleteAllMarksFromFile,
-                  deleteMark, saveMarkStorage, addMarkToStorage, 
+                  getMarksFromLine, getMarksInFile, getMarkByTokenRange, 
+                  deleteAllMarksFromFile, deleteMark, getDocument,
+                  saveMarkStorage, addMarkToStorage, 
                   getToken, addGen2MarkToLine, addGen2MarkForToken };
 
 

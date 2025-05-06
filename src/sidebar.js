@@ -13,6 +13,25 @@ function init(treeViewIn) {
   treeView = treeViewIn;
 }
 
+class SidebarProvider {
+  constructor() {
+    this._onDidChangeTreeData = new vscode.EventEmitter();
+    this.onDidChangeTreeData  = this._onDidChangeTreeData.event;
+  }
+  getTreeItem(item) {
+    return item;
+  }
+
+  async getChildren(item) {
+    if (showingBusy) return [];
+    if(!item) {
+      await marks.waitForInit();
+      return await getItemTree();
+    }
+    return item.children ?? [];
+  }
+}
+
 let intervalId  = null;
 let timeoutId   = null;
 let showingBusy = false;
@@ -99,8 +118,8 @@ async function getNewMarkItem(mark) {
 let logIdx = 0;
 
 async function getItemTree() {
-  // start('getItemTree');
-  // log('getItemTree', logIdx++);
+  start('getItemTree');
+  log('getItemTree', logIdx++);
   const allWsFolders = vscode.workspace.workspaceFolders;
   if (!allWsFolders) {
     log('getItemTree, No folders in workspace');
@@ -190,7 +209,7 @@ async function getItemTree() {
     rootItems.push(await getNewFolderItem(wsFolder.name));
     wsFolder = allWsFolders.shift();
   }
-  // end('getItemTree');
+  end('getItemTree');
   itemTree = rootItems;
   return itemTree;
 }
@@ -217,25 +236,6 @@ async function itemClick(item) {
                                            {preview: false});
       break;
     case 'bookmark': await text.bookmarkItemClick(item); break;
-  }
-}
-
-class SidebarProvider {
-  constructor() {
-    this._onDidChangeTreeData = new vscode.EventEmitter();
-    this.onDidChangeTreeData  = this._onDidChangeTreeData.event;
-  }
-  getTreeItem(item) {
-    return item;
-  }
-
-  async getChildren(item) {
-    if (showingBusy) return [];
-    if(!item) {
-      await marks.waitForInit();
-      return await getItemTree();
-    }
-    return item.children ?? [];
   }
 }
 

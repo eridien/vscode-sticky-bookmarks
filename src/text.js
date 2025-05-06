@@ -70,7 +70,8 @@ function updateGutter() {
   const gen2DecRanges = [];
   const marksInFile   = marks.getMarksInFile(fsPath);
   for(const mark of marksInFile) {
-    const {gen, lineNumber} = mark;
+    const gen        = mark.gen();
+    const lineNumber = mark.lineNumber();
     const range = new vscode.Range(lineNumber, 0, lineNumber, 0);
     switch(gen) {
       case 1: gen1DecRanges.push({range}); break;
@@ -87,7 +88,8 @@ function isKeyWord(languageId, word) {
 }
 
 async function getCompText(mark) {
-  let   {document, lineNumber} = mark;
+  let   lineNumber = mark.lineNumber();
+  let   document   = await marks.getDocument(mark);
   const languageId = document.languageId;
   const tokenRegxG = tokenRegEx(languageId,false,true);
   const [commLft, commRgt] = utils.commentsByLang(languageId);
@@ -154,8 +156,9 @@ function prefixLabelWithLineNum(lineNumber, label) {
 
 async function getLabel(mark) {
   try {
-    const {document, lineNumber} = mark;
-    const compText = await getCompText(mark);
+    const document   = marks.getDocument(mark);
+    const lineNumber = mark.lineNumber();
+    const compText   = await getCompText(mark);
     let label = compText;
     const topSymbols = await vscode.commands.executeCommand(
                'vscode.executeDocumentSymbolProvider', document.uri);
@@ -227,7 +230,10 @@ const clearDecoration = () => {
 
 async function bookmarkItemClick(item) {
   const mark = item.mark;
-  if(!marks.verifyMark(mark)) { log('info', 'Bookmark Missing'); return; }
+  if(! await marks.verifyMark(mark)) {
+    log('info', 'Bookmark Missing'); 
+    return;
+  }
   await gotoAndDecorate(mark.document(), mark.lineNumber());
 }
 
@@ -260,7 +266,7 @@ async function toggle(gen) {
     await vscode.commands.executeCommand(
                           'workbench.action.focusActiveEditorGroup');
   }
-  marks.dumpMarks('toggle');
+  await marks.dumpMarks('toggle');
 }
 
 async function scrollToPrevNext(fwd) {
@@ -401,8 +407,8 @@ async function refreshFile(document) {
   while(tokenObj || mark) {
     const tokenLineNum = tokenObj?.lineNumber ?? -1;
     const tokenChrOfs  = tokenObj?.position.character;
-    const markLineNum  = mark?.lineNumber ?? -1;
-    const markChrOfs   = mark?.lftChrOfs  ??  0;;
+    const markLineNum  = mark?.lineNumber() ?? -1;
+    const markChrOfs   = mark?.lftChrOfs()  ??  0;;
     if(tokenLineNum == markLineNum && tokenChrOfs == markChrOfs) {
       if(mark.gen() == 1 && tokenObj?.token) {
         log('refreshFile, gen1 mark has token, changing to gen2', 
@@ -457,7 +463,7 @@ async function runOnAllMarksInFile(document, markFunc) {
 
 module.exports = {init, getLabel, bookmarkItemClick, refreshMenu,
                   clearDecoration, justDecorated, updateGutter,
-                  toggle, scrollToPrevNext,    
+                  toggle, scrollToPrevNext, getTokensInLine,
                   refreshFile, runOnAllMarksInFile, deleteAllTokensInFile
                   };
 

@@ -156,7 +156,7 @@ function prefixLabelWithLineNum(lineNumber, label) {
 
 async function getLabel(mark) {
   try {
-    const document   = marks.getDocument(mark);
+    const document   = await marks.getDocument(mark);
     const lineNumber = mark.lineNumber();
     const compText   = await getCompText(mark);
     let label = compText;
@@ -242,7 +242,7 @@ async function toggle(gen) {
   if(!editor) {log('info', 'No active editor.'); return;}
   const document = editor.document;
   if(document.lineCount == 0) return;
-  await refreshFile(document);
+  // await refreshFile(document);
   const lineNumber = editor.selection.active.line;
   let lineMarks = marks.getMarksFromLine(document, lineNumber);
   if(lineMarks.length > 0) {
@@ -385,7 +385,7 @@ async function deleteAllTokensInFile(document) {
 }
 
 async function refreshFile(document) {
-  // log('refreshFile');
+  log('refreshFile');
   if(!document) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) { log('refreshFile, no active editor'); return; }

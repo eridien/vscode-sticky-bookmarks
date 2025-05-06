@@ -66,15 +66,11 @@ class Mark {
 
   wsFolder()       { return this._wsFolder ??= 
                         vscode.workspace.getWorkspaceFolder(this.fileUri()) }
-  folderIdx()      { return this._folderIdx ??=  this.wsFolder().index  }
-  folderUri()      { return this._folderUri ??= 
-                                vscode.Uri.file(this.fileFsPath()) }
-  folderFsPath()   { return this._folderFsPath ??= 
-                              vscode.Uri.file(this.folderUri().fsPath) }
-  folderUriPath()  { return this._folderUriPath ??= 
-                               vscode.Uri.file(this.folderUri().path)  }
-  folderName()     { return this._folderName ??= this.wsFolder().name; }
-
+  folderIdx()      { return this._folderIdx      ??= this.wsFolder().index  }
+  folderUri()      { return this._folderUri      ??= this.wsFolder().uri }  
+  folderName()     { return this._folderName     ??= this.wsFolder().name; }
+  folderFsPath()   { return this._folderFsPath   ??= this.folderUri().fsPath }
+  folderUriPath()  { return this._folderUriPath  ??= this.folderUri().path }
   fileRelUriPath() { return this._fileRelUriPath ??= 
                       this.fileUriPath().slice(this.folderUriPath().length+1) }
   languageId()     { return this._languageId ??=
@@ -311,14 +307,16 @@ function getToken(document, zero = true) {
 }
 
 async function addGen2MarkToLine(document, lineNumber, token, save = true) {
+  start('addGen2MarkToLine', lineNumber);
   token ??= getToken(document);
   let lineText = document.lineAt(lineNumber).text;
-  const mark   = new Mark({gen:2, document, lineNumber, token,
-                                lftChrOfs: lineText.length,
-                                rgtChrOfs: lineText.length + token.length});
-  await utils.replaceLine(document, lineNumber, lineText + token);
+  const mark = new Mark({gen:2, document, lineNumber, token,
+                         lftChrOfs: lineText.length,
+                         rgtChrOfs: lineText.length + token.length});
   await addMarkToStorage(mark);
+  await utils.replaceLine(document, lineNumber, lineText + token);
   if(save) await saveMarkStorage();
+  end('addGen2MarkToLine', lineNumber);
 }
 
 async function addGen2MarkForToken(document, position, token, save = true) {

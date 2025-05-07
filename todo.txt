@@ -2,7 +2,7 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-  mark on function-closing brace doesn't show crumbs
+  file & folder del broken
 
 todo 
   automatically switch gen2 to gen1 based on language/files

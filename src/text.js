@@ -141,7 +141,12 @@ async function getCompText(mark) {
 function getSymbols(pos, symbols) {
   const parent = symbols[symbols.length - 1];
   for(const child of parent.children) {
-    if(child.range.contains(pos)) {
+    const lftPos = new vscode.Position(pos.line, 0);
+    const rgtPos = new vscode.Position(pos.line+1, 0);
+    if(child.range.start.line > pos.line) return symbols;
+    if(child.range.contains(lftPos) || 
+       child.range.contains(pos)    || 
+       child.range.contains(rgtPos)) {
       symbols.push(child);
       return getSymbols(pos, symbols);
     }

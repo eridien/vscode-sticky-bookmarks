@@ -323,6 +323,7 @@ async function addGen2MarkForToken(document, position, token, save = true) {
   const mark = new Mark({gen:2, document, position, token});
   await addMarkToStorage(mark);
   if(save) await saveMarkStorage();
+  return mark;
 }
 
 module.exports = {init, Mark, waitForInit, dumpMarks, getAllMarks, verifyMark,

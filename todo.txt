@@ -1,16 +1,10 @@
 npm install -g @vscode/vsce
 vsce package
 
-mark.xxx => mark.xxx()  (mark\.\w+?\b(?!\s*[\(=])) => $1()
-mark.yyy = zzz          (mark\.\w+?\b\s*?=)
-
 bugs
-  getlabel series.vue no symbols
-     text: getLabel, No topSymbols found series.vue
-  undo token doesn't restore icon
 
 todo 
-  include char pos in loc and mark
+  refresh should remove more than one bookmark
   support tokens inline
   menu
     hide all

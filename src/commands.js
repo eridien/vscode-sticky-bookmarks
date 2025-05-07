@@ -53,7 +53,6 @@ async function toggleGen1GlobalCmd(item) {
   log('toggleGen1GlobalCmd');
 }
 
-
 async function delMarksInFileCmd(document) {
   log('delMarksInFileCmd');
   if(!document) {
@@ -67,7 +66,12 @@ async function delMarksInFileCmd(document) {
 
 async function delMarksInFolderCmd(item) {
   log('delMarksInFolderCmd');
-
+  const editor = vscode.window.activeTextEditor;
+  if(!editor) return;
+  const wsFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+  await utils.runOnFilesInFolder(wsFolder, async (file) => {
+    await marks.deleteAllMarksFromFile(file);
+  });
 }
 
 async function hideCmd(item) {
@@ -91,7 +95,6 @@ async function refreshCmd(item) {
   log('refreshCmd');
   await text.refreshMenu();
 }
-
 
 async function itemClickCmd(item) {
   log('itemClickCmd');

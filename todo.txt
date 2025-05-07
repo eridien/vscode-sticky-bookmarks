@@ -2,10 +2,11 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-
+  only shows active folder in sidebar on load
+  sidebar loading is slow
+  
 todo 
-  shrink global to just next/prev
-  support tokens inline
+  use shift jump for selection
   menu
     hide all
       show banner
@@ -27,11 +28,24 @@ todo
     don't scroll if mark visible in window
   hide all marks, restore on any edit
   add names to marks
-    edit menu
-    don't delete named marks so names preserved
-    delete named tokens when X menu used
+    don't delete names except when X menu used
   settings
   track gen1 marks with edits
+
+from bookmarks extension
+  List all bookmarks
+    temp show
+    select from which folder
+  Remote Development
+  settings
+  count badge on the Bookmark icon on the Activity Bar
+  Toggle Labeled?
+  Select all lines that contains bookmarks
+  jump even if located outside the active file
+
+later ...
+  rename extension to bookmarks2
+  shrink global to just next/prev
   add all disposables to context.subscriptions
     onDidChangeActiveTextEditor
     decorations

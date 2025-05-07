@@ -68,18 +68,19 @@ async function getNewFolderItem(mark, wsFolder) {
   const label     = '📂 ' + (mark ? mark.folderName() : wsFolder.name);
   const item      = new vscode.TreeItem(
                        label, vscode.TreeItemCollapsibleState.None);
+  Object.assign(item, {id, type:'folder', contextValue:'folder', label});
   item.command = {
     command:   'sticky-bookmarks.itemClickCmd',
     title:     'Item Clicked',
     arguments: [item],
   }
-  Object.assign(item, {id, type:'folder', contextValue:'folder', label});
   if(!mark) {
     item.iconPath = new vscode.ThemeIcon("chevron-down");
     item.wsFolder = wsFolder;
     return item;
   }
-  item.mark = mark;
+  item.mark     = mark;
+  item.wsFolder = mark.wsFolder();
   if(closedFolders.has(mark.folderFsPath()))
     item.iconPath = new vscode.ThemeIcon("chevron-right");
   else

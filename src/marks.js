@@ -182,24 +182,15 @@ function deleteMarkFromTokenSet(mark) {
 
 async function deleteTokenFromLine(mark) {
   const lineNumber = mark.lineNumber();
-  const token      = mark.token();
   const document   = await getDocument(mark);
   const line       = document.lineAt(lineNumber);
-  if(!line) return;
-  const lineText   = line.text;
-  const lineLength = lineText.length;
-  const lftOfs     = lineText.indexOf(token);
-  if(lftOfs === -1) return;
-  const rgtOfs     = lftOfs + token.length;
-  let   beforeText = lineText.slice(0, lftOfs);
-  let   afterText  = lineText.slice(rgtOfs);
-  if(afterText.length > 0) {
-    const [commLft, commRgt] = utils.commentsByLang(document.languageId);
-    if(commRgt === '' && beforeText.indexOf(commLft) === -1)
-      afterText = commLft + afterText;
-  }
+  if(!line || !await verifyMark(mark)) return;
+  const lftChrOfs  = mark.lftChrOfs();
+  const rgtChrOfs  = mark.rgtChrOfs();
+  let lineText     = line.text;
+  lineText = lineText.slice(0, lftChrOfs) + lineText.slice(rgtChrOfs);
   const edit = new vscode.WorkspaceEdit();
-  edit.replace(document.uri, line.range, beforeText + afterText);
+  edit.replace(document.uri, line.range, lineText);
   await vscode.workspace.applyEdit(edit);
 }
 

@@ -2,9 +2,9 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
+  chkMarkCountInLine deletes 2 of 2 marks
 
 todo 
-  refresh should remove more than one bookmark
   support tokens inline
   menu
     hide all

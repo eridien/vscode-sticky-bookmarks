@@ -383,12 +383,11 @@ async function deleteAllTokensInFile(document) {
   await vscode.workspace.applyEdit(edit);
 }
 
-let lastLine = null;
-let marksInLine = [];
+let lastLine            = null;
+let marksInLine         = [];
 
 async function chkMarkCountInLine(lineNumber, markIn) {
   if(lastLine && lineNumber !== lastLine) {
-    lastLine = lineNumber;
     if(marksInLine.length > 1) {
       let gen1Marks = [];
       let gen2Marks = [];
@@ -399,13 +398,13 @@ async function chkMarkCountInLine(lineNumber, markIn) {
       if(gen2Marks.length > 0) {
         for(const mark of gen1Marks) {
           log('chkMarkCountInLine, deleting gen1 mark', 
-                            mark.fileRelUriPath(), lineNumber);
+                            mark.fileRelUriPath(), mark.lineNumber());
           await marks.deleteMark(mark);
         }
         gen2Marks.shift();
         for(const mark of gen2Marks) {
-          log('chkMarkCountInLine, deleting gen2 mark', 
-                            mark.fileRelUriPath(), lineNumber);
+          log('chkMarkCountInLine, deleting gen2 mark',
+                            mark.fileRelUriPath(), mark.lineNumber());
           await marks.deleteMark(mark);
         }
       }
@@ -413,36 +412,55 @@ async function chkMarkCountInLine(lineNumber, markIn) {
         gen1Marks.shift();
         for(const mark of gen1Marks) {
           log('chkMarkCountInLine, deleting gen1 mark',
-                            mark.fileRelUriPath(), lineNumber);
+                            mark.fileRelUriPath(), mark.lineNumber());
           await marks.deleteMark(mark);
         }
       }
     }
     marksInLine = [];
   }
-  marksInLine.push(markIn);
+  lastLine = lineNumber;
+  marksInLine.unshift(markIn);
 }
 
+let insideRefreshFile = false;
+let setTimeoutId = null;
 
 async function refreshFile(document) {
-  // log('refreshFile');
+  if(insideRefreshFile) {
+    log('refreshFile, already inside refreshFile');
+    if(setTimeoutId) return;
+    setTimeoutId = setTimeout(async () => {
+      setTimeoutId = null;
+      await refreshFile(document);
+    } , 10);
+    return;
+  }
+  insideRefreshFile = true;
+  log('starting refreshFile');
   lastLine = null;
   marksInLine = [];
   if(!document) {
     const editor = vscode.window.activeTextEditor;
-    if (!editor) { log('refreshFile, no active editor'); return; }
+    if (!editor) { log('refreshFile, no active editor'); 
+      insideRefreshFile = false; 
+      log('end1 refreshFile');
+      return;
+    }
     document = editor.document;
   }
   const tokenObjs = getTokenObjsInFile(document);
   const fileMarks = marks.getMarksInFile(document.uri.fsPath);
   log('refreshFile, tokenObjs:', tokenObjs.length,
                    'fileMarks:', fileMarks.length);
-  if(tokenObjs.length == 0 && fileMarks.length == 0) return;
+  if(tokenObjs.length == 0 && fileMarks.length == 0) {
+    insideRefreshFile = false;
+    log('end2 refreshFile');
+    return;
+  }
   fileMarks.sort((a, b) => {
-    if(a.lineNumber() > b.lineNumber()) return +1;
-    if(a.lineNumber() < b.lineNumber()) return -1;
-    if(a.lftChrOfs()  > b.lftChrOfs())  return +1;
-    if(a.lftChrOfs()  < b.lftChrOfs())  return -1;
+    if(a.locStrLc() > b.locStrLc()) return +1;
+    if(a.locStrLc() < b.locStrLc()) return -1;
     return 0;
   });
   // scan file from bottom to top
@@ -490,10 +508,13 @@ async function refreshFile(document) {
     await chkMarkCountInLine(tokenLineNum, newMark);
     tokenObj = tokenObjs.pop();
   }
+  log('end3 refreshFile');
   await chkMarkCountInLine();
   await marks.saveMarkStorage();
   await utils.updateSide();
   await marks.dumpMarks('refreshFile');
+  insideRefreshFile = false; 
+  log('end4 refreshFile');
 }
 
 async function runOnAllMarksInFile(document, markFunc) {

@@ -2,24 +2,17 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-  only shows active folder in sidebar on load
-  sidebar loading is slow
-  
+  mark on function-closing brace doesn't show crumbs
+
 todo 
-  use shift jump for selection
   menu
     hide all
-      show banner
-      red gutter icons
-    refresh
     label options in menu
       pointers          on/off
       line numbers      on/off
       text after names  on/off
       breadcrumbs       off/all/last only
       text compression  none/light/medium/maximum
-  improve label appearance
-  sort folders by name or recently used or manual
   add plugin support, eolIsSafe for now
   auto scroll
     highlight function
@@ -27,23 +20,29 @@ todo
     min top and bottom border lines
     don't scroll if mark visible in window
   hide all marks, restore on any edit
+    show banner
+    red gutter icons
   add names to marks
     don't delete names except when X menu used
   settings
   track gen1 marks with edits
 
-from bookmarks extension
-  List all bookmarks
-    temp show
-    select from which folder
-  Remote Development
-  settings
-  count badge on the Bookmark icon on the Activity Bar
-  Toggle Labeled?
-  Select all lines that contains bookmarks
-  jump even if located outside the active file
+not needed?
+  sidebar loading is slow
+  sort folders by name or recently used or manual
+  improve label appearance
+  selections
+    use shift jump keys
+    function
+  undo
+  automatic suggestions based on visits
+    count visits in each symbol block
+    show in sidebar with question mark
+    click on sidebar to accept and create bookmark
+    limit suggestions (setting)
 
 later ...
+  README
   rename extension to bookmarks2
   shrink global to just next/prev
   add all disposables to context.subscriptions
@@ -52,17 +51,6 @@ later ...
 
 impossible?
   toggle collapsed/expanded on file item click
-
-not needed?
-  selections?
-    commands like gen1
-    function
-  undo
-  automatic suggestions based on visits
-    count visits in each symbol block
-    show in sidebar with question mark
-    click on sidebar to accept and create bookmark
-    limit suggestions (setting)
 
 settings
   -- SIMPLIFY --
@@ -99,12 +87,24 @@ testing
 
 features
   sticky
-  prev/next sidebar item
   smart sidebar
     pointers
     line numbers
     breadcrumbs
     compressed code
   smart scrolling
+  simpler selection
   small ...
     click on token to delete
+  
+in bookmarks extension
+  List all bookmarks
+    temp show
+    select from which folder
+  Remote Development
+  settings
+  count badge on the Bookmark icon on the Activity Bar
+  Toggle Labeled?
+  Select all lines that contains bookmarks
+  jump even if located outside the active file
+

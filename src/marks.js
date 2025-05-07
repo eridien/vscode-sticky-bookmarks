@@ -16,7 +16,7 @@ async function init(contextIn) {
   context = contextIn;
   await loadMarkStorage();
   initFinished = true;
-  await utils.refreshFile();
+  await utils.refreshAllLoadedDocs();
   await dumpMarks('marks init');
   end('init marks');
 }

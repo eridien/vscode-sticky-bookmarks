@@ -344,6 +344,20 @@ function getTokenRegExG() {
   return new RegExp("[\\u200B\\u200C\\u200D\\u2060]+\\.", 'g');
 }
 
+async function refreshAllLoadedDocs() {
+  const allTabs = vscode.window.tabGroups.all.flatMap(group => group.tabs);
+  for (const tab of allTabs) {
+    if (tab.input && tab.input.uri && tab.input.uri.scheme === 'file') {
+      try {
+        const doc = await vscode.workspace.openTextDocument(tab.input.uri);
+        await text.refreshFile(doc);
+      } catch (e) {
+        log('errmsg', e, 'refreshAllTabs, Could not open tab:' + tab.input.uri.path);
+      }
+    }
+  }
+}
+
 async function runOnFilesInFolder(folder, fileFunc, markFunc) { 
   async function doOneFile(document) {
     if(fileFunc) await fileFunc(document);
@@ -405,7 +419,7 @@ module.exports = {
   getPathsFromWorkspaceFolder, getTokenRegEx, getTokenRegExG, 
   getFileRelUriPath, init, initContext, insertLine, keywords, 
   loadStickyBookmarksJson, numberToInvBase4, refreshFile, replaceLine, 
-  runOnAllFolders, runOnFilesInFolder,
+  runOnAllFolders, runOnFilesInFolder, refreshAllLoadedDocs,
   setBusy, sleep, tokenToDigits, tokenToStr, updateSide
 }
 

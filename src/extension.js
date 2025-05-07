@@ -80,9 +80,6 @@ async function activate(context) {
   vscode.workspace.onDidChangeTextDocument(async event => {
     const document = event.document;
     if (event?.document?.uri?.scheme !== 'file') { 
-      // ignore virtual/extension docs like output channel write
-      // must use console.log here or we get an infinite loop
-      // console.log('Ignored non-file changeTextDocument', uri.path);
       return;
     }
     await commands.changedDocument(document);

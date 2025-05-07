@@ -154,9 +154,12 @@ async function changedEditor(editor) {
 }
 
 async function changedVisEditors(editors) {
-  for(const editor of editors)
+  for(const editor of editors) {
+    if(editor.document.uri.scheme !== 'file') continue;
+    // log('changedVisEditors', editor.document.fileName);
     await text.refreshFile(editor.document);
-}  
+  }
+}
 
 async function changedSelection(event) {
   const {textEditor:editor, selections, kind} = event;

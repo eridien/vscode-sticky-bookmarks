@@ -437,7 +437,7 @@ async function refreshFile(document) {
     return;
   }
   insideRefreshFile = true;
-  log('starting refreshFile');
+  // log('starting refreshFile:', document.uri.path);
   lastLine = null;
   marksInLine = [];
   if(!document) {
@@ -534,8 +534,8 @@ async function runOnAllMarksInFile(document, markFunc) {
 
 module.exports = {init, getLabel, bookmarkItemClick, refreshMenu,
                   clearDecoration, justDecorated, updateGutter,
-                  toggle, scrollToPrevNext, getTokensInLine,
-                  refreshFile, runOnAllMarksInFile, deleteAllTokensInFile
-                  };
+                  toggle, scrollToPrevNext, getTokensInLine, 
+                  refreshFile, runOnAllMarksInFile, 
+                  deleteAllTokensInFile };
 
 

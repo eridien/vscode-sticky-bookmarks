@@ -2,7 +2,7 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-  chkMarkCountInLine deletes 2 of 2 marks
+  folder toggle broken
 
 todo 
   support tokens inline

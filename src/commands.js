@@ -12,10 +12,6 @@ function init(contextIn, treeViewIn) {
   treeView = treeViewIn;
 }
 
-async function getHiddenFolder() {
-  return hiddenFolder;
-}
-
 ////////////////////////////////  COMMANDS  ///////////////////////////////////
 
 async function prevCmd(item) {
@@ -76,6 +72,15 @@ async function delMarksInFolderCmd(item) {
   await utils.runOnFilesInFolder(wsFolder, async (file) => {
     await marks.deleteAllMarksFromFile(file);
   });
+}
+
+function getHiddenFolder() {//​.
+  return hiddenFolder;
+}
+
+function clrHiddenFolder() {
+  hiddenFolder = null;
+  utils.updateSide();
 }
 
 async function hideCmd(item) {//​.
@@ -158,22 +163,26 @@ async function deleteIconCmd(item) {
 let sidebarIsVisible = false;
 
 async function changedSidebarVisiblitiy(visible) {
+  log('changedSidebarVisiblitiy');
   if(visible && !sidebarIsVisible) {
     utils.updateSide();
   }
   sidebarIsVisible = visible;
 }
 
-async function changedDocument() {
+async function changedDocument() {//​.
+  log('changedDocument');
   utils.updateSide();
 }
 
 async function changedEditor(editor) {
   if(!editor || !editor.document) return;
+  log('changedEditor');
   await text.refreshFile(editor.document);
 }
 
 async function changedVisEditors(editors) {
+  log('changedVisEditors');
   for(const editor of editors) {
     if(editor.document.uri.scheme !== 'file') continue;
     // log('changedVisEditors', editor.document.fileName);
@@ -181,7 +190,9 @@ async function changedVisEditors(editors) {
   }
 }
 
-async function changedSelection(event) {
+async function changedSelection(event) {//​.
+  log('changedSelection');
+  // clrHiddenFolder();
   const {textEditor:editor, selections, kind} = event;
   if(editor.document.uri.scheme !== 'file') return;
   if(selections.length == 1 && selections[0].isEmpty &&
@@ -206,13 +217,14 @@ async function changedSelection(event) {
 }
 
 async function changedText(event) {
+  log('changedText');
   text.clearDecoration();
   await text.refreshFile(event.document);
 }
 
 module.exports = { init, 
                    prevCmd, nextCmd, toggleGen2Cmd, toggleGen1Cmd, 
-                   prevGlobalCmd, nextGlobalCmd, 
+                   prevGlobalCmd, nextGlobalCmd, clrHiddenFolder,
                    toggleGen2GlobalCmd, toggleGen1GlobalCmd,
                    delMarksInFileCmd, delMarksInFolderCmd, hideCmd, 
                    expandCmd, refreshCmd, itemClickCmd, 

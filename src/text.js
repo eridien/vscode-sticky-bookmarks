@@ -63,6 +63,7 @@ const keywordSetsByLang = {};
 
 function updateGutter() {//​.
   // start('updateGutter');
+  if(utils.getHiddenFolder()) return;
   const editor = vscode.window.activeTextEditor;
   if (!editor) return;
   const fsPath = editor.document.uri.fsPath;

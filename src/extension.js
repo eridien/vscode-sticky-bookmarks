@@ -5,6 +5,7 @@ const text     = require('./text.js');
 const marks    = require('./marks.js');
 const settings = null;
 const utils    = require('./utils.js');
+const {log} = require('console');
 const {start, end} = utils.getLog('extn');
 
 async function activate(context) {
@@ -77,6 +78,19 @@ async function activate(context) {
     // console.log('Currently visible editors:', editors);
     await commands.changedVisEditors(editors);
   });
+
+  if (typeof vscode.workspace.onWillChangeTextDocument === 'function') {
+    vscode.workspace.onWillChangeTextDocument((event) => {
+      if(!event)  {
+        log('onWillChangeTextDocument: no event');
+        return;
+      }
+      log('onWillChangeTextDocument', event);
+    });
+  } else {
+    log('onWillChangeTextDocument is not available in this environment.');
+  }
+
   vscode.workspace.onDidChangeTextDocument(async event => {
     const document = event.document;
     if (event?.document?.uri?.scheme !== 'file') { 

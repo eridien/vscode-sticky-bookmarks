@@ -21,6 +21,7 @@ function init(commandsIn, sidebarIn, sidebarProviderIn,
 
 function updateSide() {
   // start('updateSide');
+  if(getHiddenFolder()) return;
   sidebarProvider._onDidChangeTreeData.fire();
   updateGutter();
   // end('updateSide');
@@ -411,6 +412,7 @@ async function runOnAllFolders(folderFunc, fileFunc, markFunc) {
 ///////////////////  BACK REFERENCES -- CHECK AWAITS //////////////
 
 function getHiddenFolder(...args) { return cmds.getHiddenFolder(...args); }
+function clrHiddenFolder(...args) { return cmds.clrHiddenFolder(...args); }
 function setBusy(...args)         { return sidebar.setBusy(...args); }
 function refreshFile(...args)     { return text.refreshFile(...args); }
 function updateGutter(...args)    { return text.updateGutter(...args); }

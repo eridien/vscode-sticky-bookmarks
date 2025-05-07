@@ -78,13 +78,13 @@ settings
     same as line
 
 testing
-  no folders in workspace
+  no folders in workspace and multiple
   dark theme "window color"
-  multiple folders, no folders
   moving a project folder
   mark after an unclosed string
   check missing awaits from util redirects
   remove "debugger"
+  remove "no marks loaded"
 
 features
   sticky

@@ -2,8 +2,12 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
+  when hidden, clicking on bookmark item removes all marks
 
 todo 
+  hide all marks, restore on any edit
+    show banner
+    red gutter icons
   automatically switch gen2 to gen1 based on language/files
   menu
     hide all
@@ -19,9 +23,6 @@ todo
     scroll to top for functions
     min top and bottom border lines
     don't scroll if mark visible in window
-  hide all marks, restore on any edit
-    show banner
-    red gutter icons
   add names to marks
     don't delete names except when X menu used
   settings

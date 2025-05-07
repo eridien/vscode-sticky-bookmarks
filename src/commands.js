@@ -5,11 +5,15 @@ const marks             = require('./marks.js');
 const utils             = require('./utils.js');
 const {log, start, end} = utils.getLog('cmds');
 
-let context, treeView;
+let context, treeView, hiddenFolder = null;
 
 function init(contextIn, treeViewIn) {
   context  = contextIn;
   treeView = treeViewIn;
+}
+
+async function getHiddenFolder() {
+  return hiddenFolder;
 }
 
 ////////////////////////////////  COMMANDS  ///////////////////////////////////
@@ -74,11 +78,28 @@ async function delMarksInFolderCmd(item) {
   });
 }
 
-async function hideCmd(item) {
+async function hideCmd(item) {//​.
   log('hideCmd');
+  let wsFolder = null;
+  const editor = vscode.window.activeTextEditor;
+  if(editor) {
+    wsFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+  }
+  if(!wsFolder) {
+    const wsFolders = vscode.workspace.workspaceFolders;
+    wsFolder = wsFolders && wsFolders.length > 0 
+                          ? wsFolders[0] : undefined;
+  }
+  if(!wsFolder) {
+    log('info', 'No workspace folder to hide');
+    return;
+  }
+  hiddenFolder = wsFolder;
+  await utils.runOnFilesInFolder(wsFolder, async (doc) => {
+    await text.deleteAllTokensInFile(doc);
+  });
   utils.updateSide();
 }
-
 
 async function expandCmd(item) {
   log('expandCmd');
@@ -117,7 +138,7 @@ async function nameCmd(item) {
   log('nameCmd');
 }
 
-async function deleteIconCmd(item) {//​.
+async function deleteIconCmd(item) {
   log('deleteIconCmd');
   if(item === undefined) {
     item = treeView.selection[0];
@@ -197,6 +218,6 @@ module.exports = { init,
                    expandCmd, refreshCmd, itemClickCmd, 
                    moveFolderUpCmd, moveFolderDownCmd, eraseCmd, nameCmd, 
                    deleteIconCmd, changedSidebarVisiblitiy, changedText,
-                   changedDocument, changedEditor, 
+                   changedDocument, changedEditor, getHiddenFolder,
                    changedVisEditors, changedSelection };
 

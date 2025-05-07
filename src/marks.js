@@ -193,7 +193,7 @@ async function deleteTokenFromLine(mark) {
   await vscode.workspace.applyEdit(edit);
 }
 
-async function deleteMark(mark, save = true, update = true) {
+async function deleteMark(mark, save = true, update = true) {//​.
   marksByLocStr.delete(mark.locStr());
   await deleteMarkFromFileSet(mark);  
   await deleteMarkFromTokenSet(mark);  
@@ -203,7 +203,7 @@ async function deleteMark(mark, save = true, update = true) {
   //await dumpMarks('deleteMark');
 }
 
-async function deleteAllMarksFromFile(document, update = true) {
+async function deleteAllMarksFromFile(document, update = true) {//​.
   const fileMarks = getMarksInFile(document.uri.fsPath);
   if(fileMarks.length === 0) return;
   log('deleteAllMarksFromFile', utils.getFileRelUriPath(document));
@@ -247,7 +247,7 @@ async function verifyMark(mark) {
                 mark.fileRelUriPath(), lineNumber);
     return false;
   }
-  if(mark.gen() === 1) return true;
+  if(mark.gen() === 1 || await utils.getHiddenFolder()) return true;
   if(document.getText(mark.range()) != mark.token()) {
     log('err', 'verifyMark, token missing from line',
                 mark.fileRelUriPath(), lineNumber);

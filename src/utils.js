@@ -346,7 +346,7 @@ function getTokenRegExG() {
   return new RegExp("[\\u200B\\u200C\\u200D\\u2060]+\\.", 'g');
 }
 
-async function refreshAllLoadedDocs() {
+async function refreshAllLoadedDocs() {//​.
   const allTabs = vscode.window.tabGroups.all.flatMap(group => group.tabs);
   for (const tab of allTabs) {
     if (tab.input && tab.input.uri && tab.input.uri.scheme === 'file') {
@@ -360,8 +360,9 @@ async function refreshAllLoadedDocs() {
   }
 }
 
-async function runOnFilesInFolder(folder, fileFunc, markFunc) { 
+async function runOnFilesInFolder(folder, fileFunc, markFunc) { //​.
   async function doOneFile(document) {
+    if(document.uri.scheme !== 'file') return;
     if(fileFunc) await fileFunc(document);
     if(markFunc) await runOnAllMarksInFile(document, markFunc);
   }
@@ -409,6 +410,7 @@ async function runOnAllFolders(folderFunc, fileFunc, markFunc) {
 
 ///////////////////  BACK REFERENCES -- CHECK AWAITS //////////////
 
+function getHiddenFolder(...args) { return cmds.getHiddenFolder(...args); }
 function setBusy(...args)         { return sidebar.setBusy(...args); }
 function refreshFile(...args)     { return text.refreshFile(...args); }
 function updateGutter(...args)    { return text.updateGutter(...args); }
@@ -417,7 +419,7 @@ function runOnAllMarksInFile(...args)
 
 module.exports = {
   commentsByLang, deleteLine, fileExists, 
-  getFocusedWorkspaceFolder, getLog, 
+  getFocusedWorkspaceFolder, getLog, getHiddenFolder,
   getPathsFromWorkspaceFolder, getTokenRegEx, getTokenRegExG, 
   getFileRelUriPath, init, initContext, insertLine, keywords, 
   loadStickyBookmarksJson, numberToInvBase4, refreshFile, replaceLine, 

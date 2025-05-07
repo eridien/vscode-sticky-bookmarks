@@ -61,7 +61,7 @@ vscode.window.onDidChangeActiveColorTheme((event) => {
 
 const keywordSetsByLang = {};
 
-function updateGutter() {
+function updateGutter() {//​.
   // start('updateGutter');
   const editor = vscode.window.activeTextEditor;
   if (!editor) return;
@@ -236,7 +236,7 @@ const clearDecoration = () => {
 async function bookmarkItemClick(item) {
   const mark = item.mark;
   if(! await marks.verifyMark(mark)) {
-    log('info', 'Bookmark Missing'); 
+    log('Bookmark Missing'); 
     return;
   }
   await gotoAndDecorate(await marks.getDocument(mark), mark.lineNumber());
@@ -357,7 +357,7 @@ async function deleteTokensFromLineText(regexG, commLft, commRgt, lineText) {
   return lineText.slice(0, lastOfs) + (keepComment ? commLft : '') + newText;
 }
 
-async function deleteAllTokensInFile(document) {
+async function deleteAllTokensInFile(document) {//​.
   const fsPath     = document.uri.fsPath;
   const docText    = document.getText();
   const groups     = /\r?\n/.exec(docText);
@@ -431,7 +431,7 @@ async function chkMarkCountInLine(lineNumber, markIn) {
 let insideRefreshFile = false;
 let setTimeoutId = null;
 
-async function refreshFile(document) {
+async function refreshFile(document) {//​.
   if(insideRefreshFile) {
     // log('refreshFile, already inside refreshFile');
     if(setTimeoutId) return;
@@ -454,8 +454,14 @@ async function refreshFile(document) {
     }
     document = editor.document;
   }
-  const tokenObjs = getTokenObjsInFile(document);
-  const fileMarks = marks.getMarksInFile(document.uri.fsPath);
+  const hiddenFolder = await utils.getHiddenFolder();//​.
+  if(hiddenFolder && document.uri.fsPath.startsWith(
+                 hiddenFolder.uri.fsPath + path.sep)) {
+    insideRefreshFile = false;
+    return;
+  }
+  const tokenObjs  = getTokenObjsInFile(document);
+  const fileMarks  = marks.getMarksInFile(document.uri.fsPath);
   // log('refreshFile, tokenObjs:', tokenObjs.length,
   //                  'fileMarks:', fileMarks.length);
   if(tokenObjs.length == 0 && fileMarks.length == 0) {

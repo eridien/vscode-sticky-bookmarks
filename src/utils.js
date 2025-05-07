@@ -39,14 +39,15 @@ function keywords() {
 }
 
 function getLog(module) {
-  const start = function(name) {
+  const start = function(name, hide) {
     const startTime = Date.now();
     timers[name]    = startTime;
-    const line      = `${module}: ${name} started`;
+    if(hide) return;
+    const line = `${module}: ${name} started`;
     outputChannel.appendLine(line);
     console.log(line);
   }
-  const end = function(name) {
+  const end = function(name, onlySlow = true) {
     if(!timers[name]) {
       const line = `${module}: ${name} ended`;
       outputChannel.appendLine(line);
@@ -55,7 +56,8 @@ function getLog(module) {
     }
     const endTime  = Date.now();
     const duration = endTime - timers[name];
-    const line     = `${module}: ${name} ended, ${timeInSecs(duration)}s`;
+    if(onlySlow && duration < 100) return;
+    const line = `${module}: ${name} ended, ${timeInSecs(duration)}s`;
     outputChannel.appendLine(line);
     console.log(line);
   }
@@ -73,7 +75,7 @@ function getLog(module) {
     if(errFlag || infoFlag || nomodFlag || errMsgFlag) args = args.slice(1);
     let errMsg;
     if(errMsgFlag) {
-      errMsg  = args[0]?.message;
+      errMsg  = args[0]?.message + ' -> ';
       args    = args.slice(1); 
       errFlag = true;
     }

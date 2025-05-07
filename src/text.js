@@ -265,7 +265,7 @@ async function toggle(gen) {
     await vscode.commands.executeCommand(
                           'workbench.action.focusActiveEditorGroup');
   }
-  await marks.dumpMarks('toggle');
+  // await marks.dumpMarks('toggle');
 }
 
 async function scrollToPrevNext(fwd) {
@@ -428,7 +428,7 @@ let setTimeoutId = null;
 
 async function refreshFile(document) {
   if(insideRefreshFile) {
-    log('refreshFile, already inside refreshFile');
+    // log('refreshFile, already inside refreshFile');
     if(setTimeoutId) return;
     setTimeoutId = setTimeout(async () => {
       setTimeoutId = null;
@@ -442,20 +442,19 @@ async function refreshFile(document) {
   marksInLine = [];
   if(!document) {
     const editor = vscode.window.activeTextEditor;
-    if (!editor) { log('refreshFile, no active editor'); 
+    if (!editor) { 
+      log('refreshFile, no active editor'); 
       insideRefreshFile = false; 
-      log('end1 refreshFile');
       return;
     }
     document = editor.document;
   }
   const tokenObjs = getTokenObjsInFile(document);
   const fileMarks = marks.getMarksInFile(document.uri.fsPath);
-  log('refreshFile, tokenObjs:', tokenObjs.length,
-                   'fileMarks:', fileMarks.length);
+  // log('refreshFile, tokenObjs:', tokenObjs.length,
+  //                  'fileMarks:', fileMarks.length);
   if(tokenObjs.length == 0 && fileMarks.length == 0) {
     insideRefreshFile = false;
-    log('end2 refreshFile');
     return;
   }
   fileMarks.sort((a, b) => {
@@ -482,7 +481,7 @@ async function refreshFile(document) {
       }
       else if(mark.token() !== tokenObj.token) {
         log('refreshFile, mark has wrong token, fixing mark', 
-             mark.fileRelUriPath(), markLineNum);
+             mark.fileRelUriPath(), mark.fileRelUriPath(), tokenLineNum);
         await marks.deleteMark(mark, false, false);
         const newMark = await marks.addGen2MarkForToken(
                             document, tokenObj.position, tokenObj.token);
@@ -496,25 +495,25 @@ async function refreshFile(document) {
     if(tokenLineNum < markLineNum) {
       if(mark.gen() == 2) {
         log('refreshFile, gen2 mark with no token, deleting mark', 
-             mark.fileRelUriPath(), markLineNum);
+             mark.fileRelUriPath(), mark.fileRelUriPath(), tokenLineNum);
         await marks.deleteMark(mark, false, false);
       }
       mark = fileMarks.pop();
       continue;
     }
-    log('refreshFile, token with no mark, adding mark', tokenLineNum);
     const newMark = await marks.addGen2MarkForToken(
                           document, tokenObj.position, tokenObj.token);
+    log('refreshFile, token with no mark, added mark', 
+                                     newMark.fileRelUriPath(), tokenLineNum);
     await chkMarkCountInLine(tokenLineNum, newMark);
     tokenObj = tokenObjs.pop();
   }
-  log('end3 refreshFile');
   await chkMarkCountInLine();
   await marks.saveMarkStorage();
   await utils.updateSide();
   await marks.dumpMarks('refreshFile');
   insideRefreshFile = false; 
-  log('end4 refreshFile');
+  // log('end refreshFile');
 }
 
 async function runOnAllMarksInFile(document, markFunc) {

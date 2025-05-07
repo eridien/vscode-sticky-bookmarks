@@ -97,7 +97,7 @@ async function refreshCmd(item) {
 }
 
 async function itemClickCmd(item) {
-  log('itemClickCmd');
+  // log('itemClickCmd');
   await sidebar.itemClick(item);
 }
 

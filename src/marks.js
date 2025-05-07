@@ -17,7 +17,6 @@ async function init(contextIn) {
   await loadMarkStorage();
   initFinished = true;
   await utils.refreshAllLoadedDocs();
-  await dumpMarks('marks init');
   end('init marks');
 }
 
@@ -282,8 +281,11 @@ async function dumpMarks(caller, list, dump) {
     let str = "";
     for(const mark of marks) {
       if(VERIFY_MARKS_IN_DUMP) await verifyMark(mark);
+      const tokenStr = utils.tokenToStr();
+      const tokenIsZero = tokenStr.length == 4 && 
+            tokenStr.slice(-2, -1) == '\u200B';
       str += mark.lineNumber().toString().padStart(3, ' ') + 
-             utils.tokenToStr(mark.token()) +  ' ';
+                               (tokenIsZero ? '' : utils.tokenToStr());
     }
     log(caller, str);
   }

@@ -119,7 +119,7 @@ async function getNewMarkItem(mark) {
 let logIdx = 0;
 
 async function getItemTree() {
-  // start('getItemTree');
+  start('getItemTree', true);
   // log('getItemTree', logIdx++);
   const allWsFolders = vscode.workspace.workspaceFolders;
   if (!allWsFolders) {
@@ -210,7 +210,7 @@ async function getItemTree() {
     rootItems.push(await getNewFolderItem(null, wsFolder));
     wsFolder = allWsFolders.shift();
   }
-  // end('getItemTree');
+  end('getItemTree');
   itemTree = rootItems;
   return itemTree;
 }

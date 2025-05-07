@@ -63,15 +63,20 @@ function setBusy(busy, blinking = false) {
 let uniqueItemIdNum = 0;
 function getUniqueIdStr() { return (++uniqueItemIdNum).toString(); }
 
-async function getNewFolderItem(mark) {
-  const markIsStr = (typeof mark === 'string');
+async function getNewFolderItem(mark, wsFolder) {
   const id        = getUniqueIdStr();
-  const label     = '📂 ' + (markIsStr ? mark : mark.folderName());
+  const label     = '📂 ' + (mark ? mark.folderName() : wsFolder.name);
   const item      = new vscode.TreeItem(
                        label, vscode.TreeItemCollapsibleState.None);
+  item.command = {
+    command:   'sticky-bookmarks.itemClickCmd',
+    title:     'Item Clicked',
+    arguments: [item],
+  }
   Object.assign(item, {id, type:'folder', contextValue:'folder', label});
-  if(markIsStr) {
+  if(!mark) {
     item.iconPath = new vscode.ThemeIcon("chevron-down");
+    item.wsFolder = wsFolder;
     return item;
   }
   item.mark = mark;
@@ -79,11 +84,6 @@ async function getNewFolderItem(mark) {
     item.iconPath = new vscode.ThemeIcon("chevron-right");
   else
     item.iconPath = new vscode.ThemeIcon("chevron-down");
-  item.command = {
-    command:   'sticky-bookmarks.itemClickCmd',
-    title:     'Item Clicked',
-    arguments: [item],
-  }
   return item;
 }     
 
@@ -144,7 +144,7 @@ async function getItemTree() {
       lastFolderUriPath =  mark.folderUriPath();
       let wsFolder = null;
       while(wsFolder = allWsFolders.shift()) {
-        if(wsFolder.uri.path ===  mark.folderUriPath()) {
+        if(wsFolder.uri.fsPath ===  mark.folderFsPath()) {
           rootItems.push(await getNewFolderItem(mark));
           break;
         }
@@ -206,7 +206,7 @@ async function getItemTree() {
   }
   let wsFolder = allWsFolders.shift();
   while(wsFolder) {
-    rootItems.push(await getNewFolderItem(wsFolder.name));
+    rootItems.push(await getNewFolderItem(null, wsFolder));
     wsFolder = allWsFolders.shift();
   }
   // end('getItemTree');
@@ -214,11 +214,16 @@ async function getItemTree() {
   return itemTree;
 }
 
-function toggleFolder(folderFsPath, forceClose = false, forceOpen = false) {
+function toggleFolder(item, forceClose = false, forceOpen = false) {
   log('toggleFolder');
-  const open = forceOpen || (!forceClose && closedFolders.has(folderFsPath));
-  if(open) closedFolders.delete(folderFsPath);
-  else     closedFolders.add(folderFsPath);
+  if(item.wsFolder)
+     closedFolders.delete(item.wsFolder.uri.fsPath);
+  else {
+    const folderFsPath = item.mark.folderFsPath();
+    const open = forceOpen || (!forceClose && closedFolders.has(folderFsPath));
+    if(open) closedFolders.delete(folderFsPath);
+    else     closedFolders.add(folderFsPath);
+  }
   utils.updateSide();
 }
 
@@ -230,7 +235,7 @@ async function itemClick(item) {
   }
   text.clearDecoration();
   switch(item.type) {
-    case 'folder': toggleFolder(item.mark.folderFsPath()); break;
+    case 'folder': toggleFolder(item); break;
     case 'file':
       await vscode.window.showTextDocument(marks.getDocument(item.mark),
                                            {preview: false});

@@ -2,9 +2,9 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-  folder toggle broken
 
 todo 
+  shrink global to just next/prev
   support tokens inline
   menu
     hide all
@@ -18,9 +18,7 @@ todo
       breadcrumbs       off/all/last only
       text compression  none/light/medium/maximum
   improve label appearance
-  strip return results from runAll...
   sort folders by name or recently used or manual
-  cmd to delete all marks in file
   add plugin support, eolIsSafe for now
   auto scroll
     highlight function

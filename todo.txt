@@ -5,6 +5,7 @@ bugs
   mark on function-closing brace doesn't show crumbs
 
 todo 
+  automatically switch gen2 to gen1 based on language/files
   menu
     hide all
     label options in menu

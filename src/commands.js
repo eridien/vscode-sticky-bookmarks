@@ -117,7 +117,7 @@ async function nameCmd(item) {
   log('nameCmd');
 }
 
-async function deleteIconCmd(item) {
+async function deleteIconCmd(item) {//​.
   log('deleteIconCmd');
   if(item === undefined) {
     item = treeView.selection[0];
@@ -125,8 +125,7 @@ async function deleteIconCmd(item) {
   }
   switch (item.type) {
     case 'folder':
-      const folderUri  = vscode.Uri.file(item.folderFsPath);
-      const fakeFolder = {uri:folderUri};
+      const fakeFolder = {uri:item.mark.folderUri()};
       await utils.runOnFilesInFolder(fakeFolder, marks.deleteAllMarksFromFile);
       break;
     case 'file':     await delMarksInFileCmd(item.document); break;

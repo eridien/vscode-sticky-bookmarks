@@ -136,14 +136,13 @@ async function deleteIconCmd(item) {
 let sidebarIsVisible = false;
 
 async function changedTextInDocument(event) {//​.
-  // log('changedDocument');
-  const {document, contentChanges} = event;
-  log('\nchangedTextInDocument', document.uri.fsPath, '\n');
-  for(const contentChange of contentChanges) {
-    const {range, rangeOffset, rangeLength, text} = contentChange;
-    log('text change', {range, rangeOffset, rangeLength, text});
-  }
-  utils.updateSide();
+  log('changedDocument');
+  // log('\nchangedTextInDocument', document.uri.fsPath, '\n');
+  // for(const contentChange of contentChanges) {
+  //   const {range, rangeOffset, rangeLength, text} = contentChange;
+  //   log('text change', {range, rangeOffset, rangeLength, text});
+  // }
+  if(utils.tokensHidden) await text.unhide(event);
 }
 
 async function changedSidebarVisiblitiy(visible) {

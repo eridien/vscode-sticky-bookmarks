@@ -247,7 +247,7 @@ async function verifyMark(mark) {
                 mark.fileRelUriPath(), lineNumber);
     return false;
   }
-  if(mark.gen() === 1 || await utils.hidingTokens()) return true;
+  if(mark.gen() === 1 || await utils.tokensHidden()) return true;
   if(document.getText(mark.range()) != mark.token()) {
     log('err', 'verifyMark, token missing from line',
                 mark.fileRelUriPath(), lineNumber);

@@ -21,7 +21,7 @@ function init(commandsIn, sidebarIn, sidebarProviderIn,
 
 function updateSide() {
   // start('updateSide');
-  if(hidingTokens()) return;
+  if(tokensHidden()) return;
   sidebarProvider._onDidChangeTreeData.fire();
   updateGutter();
   // end('updateSide');
@@ -361,7 +361,7 @@ async function refreshAllLoadedDocs() {
   }
 }
 
-async function runInAllWsFilesInOrder(fileFunc) {//​.
+async function runInAllWsFilesInOrder(fileFunc, data) {//​.
   start('runInAllWsFilesInOrder');
   const docsRemaining = new Set();
   const docsToHideOrdered = [];
@@ -391,7 +391,7 @@ async function runInAllWsFilesInOrder(fileFunc) {//​.
     }
   }
   const docs = docsToHideOrdered.concat([...docsRemaining]);
-  for(const doc of docsToHideOrdered) await fileFunc(doc);
+  for(const doc of docsToHideOrdered) await fileFunc(doc, data);
   end('runInAllWsFilesInOrder');
 }
 
@@ -445,7 +445,7 @@ async function runOnAllFolders(folderFunc, fileFunc, markFunc) {
 
 ///////////////////  BACK REFERENCES -- CHECK AWAITS //////////////
 
-function hidingTokens(...args)    { return text.hidingTokens(...args); }
+function tokensHidden(...args)    { return text.tokensHidden(...args); }
 function setBusy(...args)         { return sidebar.setBusy(...args); }
 function refreshFile(...args)     { return text.refreshFile(...args); }
 function updateGutter(...args)    { return text.updateGutter(...args); }
@@ -454,7 +454,7 @@ function runOnAllMarksInFile(...args)
 
 module.exports = {
   commentsByLang, deleteLine, fileExists, 
-  getFocusedWorkspaceFolder, getLog, hidingTokens,
+  getFocusedWorkspaceFolder, getLog, tokensHidden,
   getPathsFromWorkspaceFolder, getTokenRegEx, getTokenRegExG, 
   getFileRelUriPath, init, initContext, insertLine, keywords, 
   loadStickyBookmarksJson, numberToInvBase4, refreshFile, replaceLine, 

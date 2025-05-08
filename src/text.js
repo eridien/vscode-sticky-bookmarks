@@ -63,7 +63,7 @@ const keywordSetsByLang = {};
 
 function updateGutter() {
   // start('updateGutter');
-  if(utils.hidingTokens()) return;
+  if(tokensHidden) return;
   const editor = vscode.window.activeTextEditor;
   if (!editor) return;
   const fsPath = editor.document.uri.fsPath;
@@ -88,11 +88,13 @@ function isKeyWord(languageId, word) {
   return keywordSetsByLang[languageId].has(word);
 }
 
-let hiddenTokens = null;
+let hiddenTokens = null;//​.
 
-function hidingTokens() { return hiddenTokens !== null; }
+function tokensHidden() {
+  return hiddenTokens !== null;
+}
 
-async function hideOneFile(doc) {
+async function hideOneFile(doc) {//​.
   log('hideOneFile');
   const [commLft, commRgt] = utils.commentsByLang(doc.languageId);
   const regexG  = tokenRegEx(doc.languageId, false, true);
@@ -128,16 +130,42 @@ async function hideOneFile(doc) {
   await vscode.workspace.applyEdit(edit);
 }
 
-async function hideCmd(item) {//​.
-  log('hideCmd');
+async function hideCmd(item) {
+  if(hiddenTokens) {
+    await unhide();
+    return;
+  }
   hiddenTokens = new Map();
   await utils.runInAllWsFilesInOrder(hideOneFile);
 }
 
-async function unhide(editEvent) {//​.
+async function unhideOneFile(doc, event) {//​.
+  log('unhideOneFile');
+  const tokens = hiddenTokens.get(doc.uri.fsPath);
+  if(!tokens) return;
+  const {eventDoc, contentChanges} = event;
+  const isEventDoc = eventDoc && eventDoc.uri.fsPath === doc.uri.fsPath;
+  for(const token of tokens) {
+    const lineNum     = token[0];
+    const lftTokenOfs = token[1];
+    const rgtTokenOfs = token[2];
+    const tokenStr    = token[3];
+    const lineText    = doc.lineAt(lineNum).text;
+    const newLineText = lineText.slice(0, lftTokenOfs) + 
+                        tokenStr + lineText.slice(rgtTokenOfs);
+    const edit = new vscode.WorkspaceEdit();
+    edit.replace(doc.uri, doc.lineAt(lineNum).range, newLineText);
+    await vscode.workspace.applyEdit(edit);
+  }
+  hiddenTokens.delete(doc.uri.fsPath);
+}
+
+async function unhide(editEvent) {
   log('unhide');
-  hiddenTokens.clear();
-  utils.updateSide();
+  if(hiddenTokens == null) return;
+  await utils.runInAllWsFilesInOrder(unhideOneFile, editEvent);
+  hiddenTokens = null;
+  await refreshFile();
 }
 
 async function getCompText(mark) {
@@ -410,7 +438,7 @@ async function deleteTokensFromLineText(regexG, commLft, commRgt, lineText) {
   return lineText.slice(0, lastOfs) + (keepComment ? commLft : '') + newText;
 }
 
-async function deleteAllTokensInFile(document) {//​.
+async function deleteAllTokensInFile(document) {
   const fsPath     = document.uri.fsPath;
   const docText    = document.getText();
   const groups     = /\r?\n/.exec(docText);
@@ -507,7 +535,7 @@ async function refreshFile(document) {
     }
     document = editor.document;
   }
-  if(utils.hidingTokens()) {
+  if(tokensHidden) {
     insideRefreshFile = false;
     return;
   }
@@ -597,6 +625,6 @@ module.exports = {init, getLabel, bookmarkItemClick, refreshMenu,
                   clearDecoration, justDecorated, updateGutter,
                   toggle, scrollToPrevNext, getTokensInLine, 
                   refreshFile, runOnAllMarksInFile, hideCmd,
-                  deleteAllTokensInFile, hidingTokens };
+                  deleteAllTokensInFile, tokensHidden, unhide };
 
 

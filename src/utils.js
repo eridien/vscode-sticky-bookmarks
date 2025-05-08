@@ -21,7 +21,7 @@ function init(commandsIn, sidebarIn, sidebarProviderIn,
 
 function updateSide() {
   // start('updateSide');
-  if(tokensHidden()) return;
+  if(tokensAreHidden()) return;
   sidebarProvider._onDidChangeTreeData.fire();
   updateGutter();
   // end('updateSide');
@@ -445,7 +445,7 @@ async function runOnAllFolders(folderFunc, fileFunc, markFunc) {
 
 ///////////////////  BACK REFERENCES -- CHECK AWAITS //////////////
 
-function tokensHidden(...args)    { return text.tokensHidden(...args); }
+function tokensAreHidden(...args)    { return text.tokensAreHidden(...args); }
 function setBusy(...args)         { return sidebar.setBusy(...args); }
 function refreshFile(...args)     { return text.refreshFile(...args); }
 function updateGutter(...args)    { return text.updateGutter(...args); }
@@ -454,7 +454,7 @@ function runOnAllMarksInFile(...args)
 
 module.exports = {
   commentsByLang, deleteLine, fileExists, 
-  getFocusedWorkspaceFolder, getLog, tokensHidden,
+  getFocusedWorkspaceFolder, getLog, tokensAreHidden,
   getPathsFromWorkspaceFolder, getTokenRegEx, getTokenRegExG, 
   getFileRelUriPath, init, initContext, insertLine, keywords, 
   loadStickyBookmarksJson, numberToInvBase4, refreshFile, replaceLine, 

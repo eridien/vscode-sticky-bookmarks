@@ -247,7 +247,7 @@ async function verifyMark(mark) {
                 mark.fileRelUriPath(), lineNumber);
     return false;
   }
-  if(mark.gen() === 1 || await utils.tokensHidden()) return true;
+  if(mark.gen() === 1 || utils.tokensAreHidden()) return true;
   if(document.getText(mark.range()) != mark.token()) {
     log('err', 'verifyMark, token missing from line',
                 mark.fileRelUriPath(), lineNumber);
@@ -312,10 +312,9 @@ async function addGen2MarkToLine(document, lineNumber, token, save = true) {
   end('addGen2MarkToLine', lineNumber);
 }
 
-async function addGen2MarkForToken(document, position, token, save = true) {
+async function addGen2MarkForToken(document, position, token, save = true) {//​.
   const mark = new Mark({gen:2, document, position, token});
-  await addMarkToStorage(mark);
-  if(save) await saveMarkStorage();
+  await addMarkToStorage(mark, save);
   return mark;
 }
 

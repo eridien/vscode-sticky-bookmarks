@@ -142,7 +142,7 @@ async function changedTextInDocument(event) {//​.
   //   const {range, rangeOffset, rangeLength, text} = contentChange;
   //   log('text change', {range, rangeOffset, rangeLength, text});
   // }
-  if(utils.tokensHidden) await text.unhide(event);
+  if(utils.tokensAreHidden()) await text.unhide(event);
 }
 
 async function changedSidebarVisiblitiy(visible) {

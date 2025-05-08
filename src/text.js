@@ -63,7 +63,7 @@ const keywordSetsByLang = {};
 
 function updateGutter() {
   // start('updateGutter');
-  if(tokensHidden) return;
+  if(hiddenTokens) return;
   const editor = vscode.window.activeTextEditor;
   if (!editor) return;
   const fsPath = editor.document.uri.fsPath;
@@ -90,7 +90,7 @@ function isKeyWord(languageId, word) {
 
 let hiddenTokens = null;//​.
 
-function tokensHidden() {
+function tokensAreHidden() {
   return hiddenTokens !== null;
 }
 
@@ -130,21 +130,33 @@ async function hideOneFile(doc) {//​.
   await vscode.workspace.applyEdit(edit);
 }
 
-async function hideCmd(item) {
+let hidingTokens = false;
+
+async function hideCmd(item) {//​.
   if(hiddenTokens) {
     await unhide();
     return;
   }
+  hidingTokens = true;
   hiddenTokens = new Map();
   await utils.runInAllWsFilesInOrder(hideOneFile);
+  hidingTokens = false;
 }
 
 async function unhideOneFile(doc, event) {//​.
   log('unhideOneFile');
   const tokens = hiddenTokens.get(doc.uri.fsPath);
   if(!tokens) return;
-  const {eventDoc, contentChanges} = event;
-  const isEventDoc = eventDoc && eventDoc.uri.fsPath === doc.uri.fsPath;
+  let {eventDoc, contentChanges} = event;
+  if(!eventDoc || eventDoc.uri.fsPath !== doc.uri.fsPath) contentChanges = [];
+  let eol = '\n';
+  if (doc.eol === vscode.EndOfLine.CRLF) eol = '\r\n';
+  const docText = doc.getText();
+  let newDocText = '';
+  const lines = docText.split(eol);
+  for(let lineNum = 0; lineNum < lines.length; lineNum++) {
+    let lineText = lines[lineNum];
+  }
   for(const token of tokens) {
     const lineNum     = token[0];
     const lftTokenOfs = token[1];
@@ -160,12 +172,15 @@ async function unhideOneFile(doc, event) {//​.
   hiddenTokens.delete(doc.uri.fsPath);
 }
 
-async function unhide(editEvent) {
+  // const  { range, rangeOffset, rangeLength, text } = contentChanges[0];
+
+async function unhide(editEvent) {//​.
+  if(hiddenTokens == null || hidingTokens || 
+        editEvent.contentChanges.length === 0) return;
   log('unhide');
-  if(hiddenTokens == null) return;
   await utils.runInAllWsFilesInOrder(unhideOneFile, editEvent);
   hiddenTokens = null;
-  await refreshFile();
+  await utils.refreshAllLoadedDocs();
 }
 
 async function getCompText(mark) {
@@ -472,7 +487,7 @@ async function deleteAllTokensInFile(document) {
 let lastLine            = null;
 let marksInLine         = [];
 
-async function chkMarkCountInLine(lineNumber, markIn) {
+async function delMultipleMarksInLine(lineNumber, markIn) {
   if(lastLine && lineNumber !== lastLine) {
     if(marksInLine.length > 1) {
       let gen1Marks = [];
@@ -483,13 +498,13 @@ async function chkMarkCountInLine(lineNumber, markIn) {
       }
       if(gen2Marks.length > 0) {
         for(const mark of gen1Marks) {
-          log('chkMarkCountInLine, deleting gen1 mark', 
+          log('delMultipleMarksInLine, deleting gen1 mark', 
                             mark.fileRelUriPath(), mark.lineNumber());
           await marks.deleteMark(mark);
         }
         gen2Marks.shift();
         for(const mark of gen2Marks) {
-          log('chkMarkCountInLine, deleting gen2 mark',
+          log('delMultipleMarksInLine, deleting gen2 mark',
                             mark.fileRelUriPath(), mark.lineNumber());
           await marks.deleteMark(mark);
         }
@@ -497,7 +512,7 @@ async function chkMarkCountInLine(lineNumber, markIn) {
       else {
         gen1Marks.shift();
         for(const mark of gen1Marks) {
-          log('chkMarkCountInLine, deleting gen1 mark',
+          log('delMultipleMarksInLine, deleting gen1 mark',
                             mark.fileRelUriPath(), mark.lineNumber());
           await marks.deleteMark(mark);
         }
@@ -512,7 +527,8 @@ async function chkMarkCountInLine(lineNumber, markIn) {
 let insideRefreshFile = false;
 let setTimeoutId = null;
 
-async function refreshFile(document) {
+async function refreshFile(document) {//​.
+  if(hiddenTokens) return;
   if(insideRefreshFile) {
     // log('refreshFile, already inside refreshFile');
     if(setTimeoutId) return;
@@ -523,7 +539,6 @@ async function refreshFile(document) {
     return;
   }
   insideRefreshFile = true;
-  // log('starting refreshFile:', document.uri.path);
   lastLine = null;
   marksInLine = [];
   if(!document) {
@@ -535,10 +550,7 @@ async function refreshFile(document) {
     }
     document = editor.document;
   }
-  if(tokensHidden) {
-    insideRefreshFile = false;
-    return;
-  }
+  start('refreshFile ' + document.uri.path);
   const tokenObjs  = getTokenObjsInFile(document);
   const fileMarks  = marks.getMarksInFile(document.uri.fsPath);
   // log('refreshFile, tokenObjs:', tokenObjs.length,
@@ -567,7 +579,7 @@ async function refreshFile(document) {
         await marks.deleteMark(mark, false, false);
         const newMark = await marks.addGen2MarkForToken(
                            document, tokenObj.position, tokenObj.token);
-        await chkMarkCountInLine(tokenLineNum, newMark);
+        await delMultipleMarksInLine(tokenLineNum, newMark);
       }
       else if(mark.token() !== tokenObj.token) {
         log('refreshFile, mark has wrong token, fixing mark', 
@@ -575,9 +587,9 @@ async function refreshFile(document) {
         await marks.deleteMark(mark, false, false);
         const newMark = await marks.addGen2MarkForToken(
                             document, tokenObj.position, tokenObj.token);
-        await chkMarkCountInLine(tokenLineNum, newMark);
+        await delMultipleMarksInLine(tokenLineNum, newMark);
       }
-      else await chkMarkCountInLine(tokenLineNum, mark);
+      else await delMultipleMarksInLine(tokenLineNum, mark);
       tokenObj = tokenObjs.pop();
       mark     = fileMarks.pop();
       continue;
@@ -592,18 +604,18 @@ async function refreshFile(document) {
       continue;
     }
     const newMark = await marks.addGen2MarkForToken(
-                          document, tokenObj.position, tokenObj.token);
+                           document, tokenObj.position, tokenObj.token, false);
     log('refreshFile, token with no mark, added mark', 
                                      newMark.fileRelUriPath(), tokenLineNum);
-    await chkMarkCountInLine(tokenLineNum, newMark);
+    await delMultipleMarksInLine(tokenLineNum, newMark);
     tokenObj = tokenObjs.pop();
   }
-  await chkMarkCountInLine();
+  await delMultipleMarksInLine();
   await marks.saveMarkStorage();
   await utils.updateSide();
   await marks.dumpMarks('refreshFile');
   insideRefreshFile = false; 
-  // log('end refreshFile');
+  log('end refreshFile');
 }
 
 async function runOnAllMarksInFile(document, markFunc) {
@@ -625,6 +637,6 @@ module.exports = {init, getLabel, bookmarkItemClick, refreshMenu,
                   clearDecoration, justDecorated, updateGutter,
                   toggle, scrollToPrevNext, getTokensInLine, 
                   refreshFile, runOnAllMarksInFile, hideCmd,
-                  deleteAllTokensInFile, tokensHidden, unhide };
+                  deleteAllTokensInFile, tokensAreHidden, unhide };
 
 

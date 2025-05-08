@@ -160,8 +160,19 @@ async function deleteIconCmd(item) {
   }
 }
 
-////////////////////////////////  CALLBACKS  //////////////////////////////////
+////////////////////////////////  EVENTS  //////////////////////////////////
 let sidebarIsVisible = false;
+
+async function changedTextInDocument(event) {//​.
+  // log('changedDocument');
+  const {document, contentChanges} = event;
+  log('\nchangedTextInDocument', document.uri.fsPath, '\n');
+  for(const contentChange of contentChanges) {
+    const {range, rangeOffset, rangeLength, text} = contentChange;
+    log('text change', {range, rangeOffset, rangeLength, text});
+  }
+  utils.updateSide();
+}
 
 async function changedSidebarVisiblitiy(visible) {
   log('changedSidebarVisiblitiy');
@@ -169,11 +180,6 @@ async function changedSidebarVisiblitiy(visible) {
     utils.updateSide();
   }
   sidebarIsVisible = visible;
-}
-
-async function changedDocument() {//​.
-log('changedDocument');
-  utils.updateSide();
 }
 
 async function changedEditor(editor) {
@@ -217,12 +223,6 @@ async function changedSelection(event) {//​.
   await text.refreshFile(editor.document);
 }
 
-async function changedText(event) {
-  log('changedText');
-  text.clearDecoration();
-  await text.refreshFile(event.document);
-}
-
 module.exports = { init, 
                    prevCmd, nextCmd, toggleGen2Cmd, toggleGen1Cmd, 
                    prevGlobalCmd, nextGlobalCmd, clrHiddenFolder,
@@ -230,7 +230,7 @@ module.exports = { init,
                    delMarksInFileCmd, delMarksInFolderCmd, hideCmd, 
                    expandCmd, refreshCmd, itemClickCmd, 
                    moveFolderUpCmd, moveFolderDownCmd, eraseCmd, nameCmd, 
-                   deleteIconCmd, changedSidebarVisiblitiy, changedText,
-                   changedDocument, changedEditor, getHiddenFolder,
+                   deleteIconCmd, changedSidebarVisiblitiy, changedTextInDocument,
+                   changedTextInDocument, changedEditor, getHiddenFolder,
                    changedVisEditors, changedSelection };
 

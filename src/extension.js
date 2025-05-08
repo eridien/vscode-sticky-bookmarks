@@ -71,47 +71,21 @@ async function activate(context) {
   await text    .init(context);
   await marks   .init(context);
 
+  // use this to track edits...
+  vscode.workspace.onDidChangeTextDocument(async event => {
+    const document = event.document;
+    if (event?.document?.uri?.scheme !== 'file') { return }
+    await commands.changedTextInDocument(event);
+  });
+
   treeView.onDidChangeVisibility(async event => {
     await commands.changedSidebarVisiblitiy(event.visible);
   });
+
   vscode.window.onDidChangeVisibleTextEditors(async editors => {
-    // console.log('Currently visible editors:', editors);
     await commands.changedVisEditors(editors);
   });
 
-
-/*
-  vscode.workspace.onWillSaveTextDocument(event => {
-    // Create a WorkspaceEdit to fix something before save
-    const edit = new vscode.WorkspaceEdit();
-    // ... add edits to 'edit' ...
-    event.waitUntil(Promise.resolve(edit));
-  });
-
-async version ...
-  vscode.workspace.onWillSaveTextDocument(event => {
-    event.waitUntil(
-      someAsyncFunctionReturningEdit(event.document)
-    );
-  });
-
-*/
-
-  const typeCmdDisposable = vscode.commands.registerCommand('type', async (args) => {
-    setTimeout(() => {
-      commands.clrHiddenFolder();
-    }, 10);
-    await vscode.commands.executeCommand('default:type', args);
-    console.log('User typed:', args.text);
-  });
-
-  vscode.workspace.onDidChangeTextDocument(async event => {
-    const document = event.document;
-    if (event?.document?.uri?.scheme !== 'file') { 
-      return;
-    }
-    await commands.changedDocument(document);
-  });
   vscode.window.onDidChangeActiveTextEditor(async editor => {
     await commands.changedEditor(editor);
   });
@@ -122,7 +96,7 @@ async version ...
 
   context.subscriptions.push(
                 prevCmd, nextCmd, toggleGen2Cmd, toggleGen1Cmd, 
-                prevGlobalCmd, nextGlobalCmd, typeCmdDisposable,
+                prevGlobalCmd, nextGlobalCmd,
                 toggleGen2GlobalCmd, toggleGen1GlobalCmd,
                 delMarksInFileCmd, delMarksInFolderCmd, hideCmd, 
                 expandCmd, refreshCmd, itemClickCmd, 

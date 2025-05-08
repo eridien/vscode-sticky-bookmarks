@@ -43,6 +43,9 @@ not needed?
     limit suggestions (setting)
 
 later ...
+  check to use document.eol everywhere instead of \n
+    replace code somewhere that reads the file
+    vscode line edits use this
   README
   rename extension to bookmarks2
   shrink global to just next/prev

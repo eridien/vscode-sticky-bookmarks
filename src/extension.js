@@ -79,17 +79,31 @@ async function activate(context) {
     await commands.changedVisEditors(editors);
   });
 
-  if (typeof vscode.workspace.onWillChangeTextDocument === 'function') {
-    vscode.workspace.onWillChangeTextDocument((event) => {
-      if(!event)  {
-        log('onWillChangeTextDocument: no event');
-        return;
-      }
-      log('onWillChangeTextDocument', event);
-    });
-  } else {
-    log('onWillChangeTextDocument is not available in this environment.');
-  }
+
+/*
+  vscode.workspace.onWillSaveTextDocument(event => {
+    // Create a WorkspaceEdit to fix something before save
+    const edit = new vscode.WorkspaceEdit();
+    // ... add edits to 'edit' ...
+    event.waitUntil(Promise.resolve(edit));
+  });
+
+async version ...
+  vscode.workspace.onWillSaveTextDocument(event => {
+    event.waitUntil(
+      someAsyncFunctionReturningEdit(event.document)
+    );
+  });
+
+*/
+
+  const typeCmdDisposable = vscode.commands.registerCommand('type', async (args) => {
+    setTimeout(() => {
+      commands.clrHiddenFolder();
+    }, 10);
+    await vscode.commands.executeCommand('default:type', args);
+    console.log('User typed:', args.text);
+  });
 
   vscode.workspace.onDidChangeTextDocument(async event => {
     const document = event.document;
@@ -108,7 +122,7 @@ async function activate(context) {
 
   context.subscriptions.push(
                 prevCmd, nextCmd, toggleGen2Cmd, toggleGen1Cmd, 
-                prevGlobalCmd, nextGlobalCmd, 
+                prevGlobalCmd, nextGlobalCmd, typeCmdDisposable,
                 toggleGen2GlobalCmd, toggleGen1GlobalCmd,
                 delMarksInFileCmd, delMarksInFolderCmd, hideCmd, 
                 expandCmd, refreshCmd, itemClickCmd, 

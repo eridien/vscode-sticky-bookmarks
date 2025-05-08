@@ -78,8 +78,9 @@ function getHiddenFolder() {//​.
   return hiddenFolder;
 }
 
-function clrHiddenFolder() {
+function clrHiddenFolder() {//​.
   hiddenFolder = null;
+  log('clrHiddenFolder');
   utils.updateSide();
 }
 
@@ -171,7 +172,7 @@ async function changedSidebarVisiblitiy(visible) {
 }
 
 async function changedDocument() {//​.
-  log('changedDocument');
+log('changedDocument');
   utils.updateSide();
 }
 

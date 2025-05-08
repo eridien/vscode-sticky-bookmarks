@@ -381,14 +381,16 @@ async function runInAllWsFilesInOrder(fileFunc) {//​.
     }
   }
   addOneDoc(vscode.window.activeTextEditor?.document);
-  const allGroups = vscode.window.tabGroups.all;
-  if (allGroups && Array.isArray(allGroups)) {
-    const allTabs = allGroups.flatMap(group => group.tabs);
-    for (const tab of allTabs)
-      addOneDoc(vscode.workspace.textDocuments.find(
-                      doc => doc.uri.toString() === tab.input.uri.toString()));
+  for (const group of vscode.window.tabGroups.all) {
+    for (const tab of group.tabs) {
+      if (tab.input?.uri) {
+        addOneDoc( vscode.workspace.textDocuments.find(
+            doc => doc.uri.toString() === tab.input.uri.toString()
+        ));
+      }
+    }
   }
-  docsToHideOrdered.concat([...docsRemaining]);
+  const docs = docsToHideOrdered.concat([...docsRemaining]);
   for(const doc of docsToHideOrdered) await fileFunc(doc);
   end('runInAllWsFilesInOrder');
 }

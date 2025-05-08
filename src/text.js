@@ -98,14 +98,18 @@ async function hideOneFile(doc) {
   const regexG  = tokenRegEx(doc.languageId, false, true);
   const docText = doc.getText();
   if(!regexG.test(docText)) return;
-  const eol      = doc.eol;
+  let eol = '\n';
+  if (doc.eol === vscode.EndOfLine.CRLF) eol = '\r\n';
   const tokens   = [];
   let newDocText = '';
   const lines = docText.split(eol);
   for(let lineNum = 0; lineNum < lines.length; lineNum++) {
     let lineText = lines[lineNum];
     const groups = regexG.exec(lineText);
-    if(!groups) continue;
+    if(!groups) {
+      newDocText += lineText + eol;
+      continue;
+    }
     const token       = groups[0];
     const lftTokenOfs = groups.index;
     const rgtTokenOfs = lftTokenOfs + token.length;
@@ -135,7 +139,6 @@ async function unhide(editEvent) {//​.
   hiddenTokens.clear();
   utils.updateSide();
 }
-
 
 async function getCompText(mark) {
   let   lineNumber = mark.lineNumber();

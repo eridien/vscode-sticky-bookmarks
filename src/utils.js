@@ -3,7 +3,7 @@ const path   = require('path');
 const fs     = require('fs').promises;
 const {log, start, end}  = getLog('util');
 
-const includeFileGlobs = '**/*';
+const includeFileGlobs = '**/*.js';
 const excludeFileGlobs = '**/node_modules/**';
 
 let context, cmds, sidebar, sidebarProvider, text, marks, settings;
@@ -21,7 +21,7 @@ function init(commandsIn, sidebarIn, sidebarProviderIn,
 
 function updateSide() {
   // start('updateSide');
-  if(getHiddenFolder()) return;
+  if(hidingTokens()) return;
   sidebarProvider._onDidChangeTreeData.fire();
   updateGutter();
   // end('updateSide');
@@ -347,7 +347,7 @@ function getTokenRegExG() {
   return new RegExp("[\\u200B\\u200C\\u200D\\u2060]+\\.", 'g');
 }
 
-async function refreshAllLoadedDocs() {//​.
+async function refreshAllLoadedDocs() {
   const allTabs = vscode.window.tabGroups.all.flatMap(group => group.tabs);
   for (const tab of allTabs) {
     if (tab.input && tab.input.uri && tab.input.uri.scheme === 'file') {
@@ -359,6 +359,38 @@ async function refreshAllLoadedDocs() {//​.
       }
     }
   }
+}
+
+async function runInAllWsFilesInOrder(fileFunc) {//​.
+  start('runInAllWsFilesInOrder');
+  const docsRemaining = new Set();
+  const docsToHideOrdered = [];
+  function addOneDoc(doc) {
+    if(!doc || !docsRemaining.has(doc) || 
+                doc.uri.scheme !== 'file') return;
+    docsRemaining.delete(doc);
+    docsToHideOrdered.push(doc);
+  }
+  const wsFolders = vscode.workspace.workspaceFolders;
+  for(const wsFolder of wsFolders) {
+    const pattern = new vscode.RelativePattern(wsFolder.uri, includeFileGlobs);
+    let uris = await vscode.workspace.findFiles(pattern, excludeFileGlobs);
+    for(const uri of uris) {
+      if(uri.scheme !== 'file') continue;
+      docsRemaining.add(await vscode.workspace.openTextDocument(uri));
+    }
+  }
+  addOneDoc(vscode.window.activeTextEditor?.document);
+  const allGroups = vscode.window.tabGroups.all;
+  if (allGroups && Array.isArray(allGroups)) {
+    const allTabs = allGroups.flatMap(group => group.tabs);
+    for (const tab of allTabs)
+      addOneDoc(vscode.workspace.textDocuments.find(
+                      doc => doc.uri.toString() === tab.input.uri.toString()));
+  }
+  docsToHideOrdered.concat([...docsRemaining]);
+  for(const doc of docsToHideOrdered) await fileFunc(doc);
+  end('runInAllWsFilesInOrder');
 }
 
 async function runOnFilesInFolder(folder, fileFunc, markFunc) { //​.
@@ -411,8 +443,7 @@ async function runOnAllFolders(folderFunc, fileFunc, markFunc) {
 
 ///////////////////  BACK REFERENCES -- CHECK AWAITS //////////////
 
-function getHiddenFolder(...args) { return cmds.getHiddenFolder(...args); }
-function clrHiddenFolder(...args) { return cmds.clrHiddenFolder(...args); }
+function hidingTokens(...args)    { return text.hidingTokens(...args); }
 function setBusy(...args)         { return sidebar.setBusy(...args); }
 function refreshFile(...args)     { return text.refreshFile(...args); }
 function updateGutter(...args)    { return text.updateGutter(...args); }
@@ -421,11 +452,11 @@ function runOnAllMarksInFile(...args)
 
 module.exports = {
   commentsByLang, deleteLine, fileExists, 
-  getFocusedWorkspaceFolder, getLog, getHiddenFolder,
+  getFocusedWorkspaceFolder, getLog, hidingTokens,
   getPathsFromWorkspaceFolder, getTokenRegEx, getTokenRegExG, 
   getFileRelUriPath, init, initContext, insertLine, keywords, 
   loadStickyBookmarksJson, numberToInvBase4, refreshFile, replaceLine, 
   runOnAllFolders, runOnFilesInFolder, refreshAllLoadedDocs,
-  setBusy, sleep, tokenToDigits, tokenToStr, updateSide
-}
+  setBusy, sleep, tokenToDigits, tokenToStr, updateSide, 
+  runInAllWsFilesInOrder }
 

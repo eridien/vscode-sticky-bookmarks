@@ -2,9 +2,9 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-  when hidden, clicking on bookmark item removes all marks
 
 todo 
+  support untitled docs with document.uri.toString()
   hide all marks, restore on any edit
     show banner
     red gutter icons

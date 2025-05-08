@@ -61,9 +61,9 @@ vscode.window.onDidChangeActiveColorTheme((event) => {
 
 const keywordSetsByLang = {};
 
-function updateGutter() {//​.
+function updateGutter() {
   // start('updateGutter');
-  if(utils.getHiddenFolder()) return;
+  if(utils.hidingTokens()) return;
   const editor = vscode.window.activeTextEditor;
   if (!editor) return;
   const fsPath = editor.document.uri.fsPath;
@@ -87,6 +87,55 @@ function isKeyWord(languageId, word) {
   if(!keywordSetsByLang[languageId]) return false;
   return keywordSetsByLang[languageId].has(word);
 }
+
+let hiddenTokens = null;
+
+function hidingTokens() { return hiddenTokens !== null; }
+
+async function hideOneFile(doc) {
+  log('hideOneFile');
+  const [commLft, commRgt] = utils.commentsByLang(doc.languageId);
+  const regexG  = tokenRegEx(doc.languageId, false, true);
+  const docText = doc.getText();
+  if(!regexG.test(docText)) return;
+  const eol      = doc.eol;
+  const tokens   = [];
+  let newDocText = '';
+  const lines = docText.split(eol);
+  for(let lineNum = 0; lineNum < lines.length; lineNum++) {
+    let lineText = lines[lineNum];
+    const groups = regexG.exec(lineText);
+    if(!groups) continue;
+    const token       = groups[0];
+    const lftTokenOfs = groups.index;
+    const rgtTokenOfs = lftTokenOfs + token.length;
+    tokens.push([lineNum, lftTokenOfs, rgtTokenOfs, token]);
+    lineText    = lineText.slice(0, lftTokenOfs) + lineText.slice(rgtTokenOfs);
+    newDocText += lineText + eol;
+  }
+  newDocText = newDocText.slice(0, -eol.length);
+  hiddenTokens.set(doc.uri.fsPath, tokens);
+  const lastLine = doc.lineCount > 0 ? doc.lineCount - 1 : 0;
+  const lastChar = doc.lineCount > 0
+                 ? doc.lineAt(lastLine).range.end.character : 0;
+  const fullRange = new vscode.Range(0, 0, lastLine, lastChar);
+  const edit = new vscode.WorkspaceEdit();
+  edit.replace(doc.uri, fullRange, newDocText);
+  await vscode.workspace.applyEdit(edit);
+}
+
+async function hideCmd(item) {//​.
+  log('hideCmd');
+  hiddenTokens = new Map();
+  await utils.runInAllWsFilesInOrder(hideOneFile);
+}
+
+async function unhide(editEvent) {//​.
+  log('unhide');
+  hiddenTokens.clear();
+  utils.updateSide();
+}
+
 
 async function getCompText(mark) {
   let   lineNumber = mark.lineNumber();
@@ -432,7 +481,7 @@ async function chkMarkCountInLine(lineNumber, markIn) {
 let insideRefreshFile = false;
 let setTimeoutId = null;
 
-async function refreshFile(document) {//​.
+async function refreshFile(document) {
   if(insideRefreshFile) {
     // log('refreshFile, already inside refreshFile');
     if(setTimeoutId) return;
@@ -455,9 +504,7 @@ async function refreshFile(document) {//​.
     }
     document = editor.document;
   }
-  const hiddenFolder = await utils.getHiddenFolder();//​.
-  if(hiddenFolder && document.uri.fsPath.startsWith(
-                 hiddenFolder.uri.fsPath + path.sep)) {
+  if(utils.hidingTokens()) {
     insideRefreshFile = false;
     return;
   }
@@ -546,7 +593,7 @@ async function runOnAllMarksInFile(document, markFunc) {
 module.exports = {init, getLabel, bookmarkItemClick, refreshMenu,
                   clearDecoration, justDecorated, updateGutter,
                   toggle, scrollToPrevNext, getTokensInLine, 
-                  refreshFile, runOnAllMarksInFile, 
-                  deleteAllTokensInFile };
+                  refreshFile, runOnAllMarksInFile, hideCmd,
+                  deleteAllTokensInFile, hidingTokens };
 
 

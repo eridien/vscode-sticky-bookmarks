@@ -5,7 +5,7 @@ const marks             = require('./marks.js');
 const utils             = require('./utils.js');
 const {log, start, end} = utils.getLog('cmds');
 
-let context, treeView, hiddenFolder = null;
+let context, treeView;
 
 function init(contextIn, treeViewIn) {
   context  = contextIn;
@@ -74,37 +74,9 @@ async function delMarksInFolderCmd(item) {
   });
 }
 
-function getHiddenFolder() {//​.
-  return hiddenFolder;
-}
-
-function clrHiddenFolder() {//​.
-  hiddenFolder = null;
-  log('clrHiddenFolder');
-  utils.updateSide();
-}
-
 async function hideCmd(item) {//​.
   log('hideCmd');
-  let wsFolder = null;
-  const editor = vscode.window.activeTextEditor;
-  if(editor) {
-    wsFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
-  }
-  if(!wsFolder) {
-    const wsFolders = vscode.workspace.workspaceFolders;
-    wsFolder = wsFolders && wsFolders.length > 0 
-                          ? wsFolders[0] : undefined;
-  }
-  if(!wsFolder) {
-    log('info', 'No workspace folder to hide');
-    return;
-  }
-  hiddenFolder = wsFolder;
-  await utils.runOnFilesInFolder(wsFolder, async (doc) => {
-    await text.deleteAllTokensInFile(doc);
-  });
-  utils.updateSide();
+  await text.hideCmd();
 }
 
 async function expandCmd(item) {
@@ -199,7 +171,6 @@ async function changedVisEditors(editors) {
 
 async function changedSelection(event) {//​.
   log('changedSelection');
-  // clrHiddenFolder();
   const {textEditor:editor, selections, kind} = event;
   if(editor.document.uri.scheme !== 'file') return;
   if(selections.length == 1 && selections[0].isEmpty &&
@@ -225,12 +196,12 @@ async function changedSelection(event) {//​.
 
 module.exports = { init, 
                    prevCmd, nextCmd, toggleGen2Cmd, toggleGen1Cmd, 
-                   prevGlobalCmd, nextGlobalCmd, clrHiddenFolder,
+                   prevGlobalCmd, nextGlobalCmd,
                    toggleGen2GlobalCmd, toggleGen1GlobalCmd,
                    delMarksInFileCmd, delMarksInFolderCmd, hideCmd, 
                    expandCmd, refreshCmd, itemClickCmd, 
                    moveFolderUpCmd, moveFolderDownCmd, eraseCmd, nameCmd, 
                    deleteIconCmd, changedSidebarVisiblitiy, changedTextInDocument,
-                   changedTextInDocument, changedEditor, getHiddenFolder,
+                   changedTextInDocument, changedEditor,
                    changedVisEditors, changedSelection };
 

@@ -2,8 +2,11 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-
+  after hiding and tab change gutter is cleared
+  
 todo 
+  change file item labels to show filename first
+    how does other extension get small text?
   support untitled docs with document.uri.toString()
   hide all marks, restore on any edit
     show banner

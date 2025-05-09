@@ -137,11 +137,6 @@ let sidebarIsVisible = false;
 
 async function changedTextInDocument(event) {//​.
   log('changedDocument');
-  // log('\nchangedTextInDocument', document.uri.fsPath, '\n');
-  // for(const contentChange of contentChanges) {
-  //   const {range, rangeOffset, rangeLength, text} = contentChange;
-  //   log('text change', {range, rangeOffset, rangeLength, text});
-  // }
   if(utils.tokensAreHidden()) await text.unhide(event);
 }
 

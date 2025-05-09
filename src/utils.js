@@ -21,7 +21,7 @@ function init(commandsIn, sidebarIn, sidebarProviderIn,
 
 function updateSide() {
   // start('updateSide');
-  if(tokensAreHidden()) return;
+  // if(tokensAreHidden()) return;
   sidebarProvider._onDidChangeTreeData.fire();
   updateGutter();
   // end('updateSide');
@@ -395,7 +395,7 @@ async function runInAllWsFilesInOrder(fileFunc, data) {//​.
   end('runInAllWsFilesInOrder');
 }
 
-async function runOnFilesInFolder(folder, fileFunc, markFunc) { //​.
+async function runOnFilesInFolder(folder, fileFunc, markFunc) { 
   async function doOneFile(document) {
     if(document.uri.scheme !== 'file') return;
     if(fileFunc) await fileFunc(document);

@@ -90,12 +90,12 @@ function isKeyWord(languageId, word) {
 
 let docTextByDoc = new Map();
 
-function tokensAreHidden(doc) {//​.
+function tokensAreHidden(doc) {
   return docTextByDoc.size !== 0 &&  
        (!doc || docTextByDoc[doc] !== undefined);
 }
 
-async function hideOneFile(doc) {//​.
+async function hideOneFile(doc) {
   log('hideOneFile');
   const [commLft, commRgt] = utils.commentsByLang(doc.languageId);
   const regexG  = tokenRegEx(doc.languageId, false, true);
@@ -123,19 +123,40 @@ async function hideOneFile(doc) {//​.
   await refreshFile(doc);
 }
 
+let statusBarItem = null;
+
+function createStatusBarItem() {
+  statusBarItem = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right, 100
+  );
+  statusBarItem.text = "Bookmark tokens are hidden";
+  statusBarItem.backgroundColor = 
+    new vscode.ThemeColor('statusBarItem.warningBackground');
+  statusBarItem.show();
+  context.subscriptions.push(statusBarItem);
+}
+
+function disposeStatusBarItem() {
+  if (statusBarItem) {
+    statusBarItem.dispose();
+    statusBarItem = null;
+  }
+}
+
 let hidingTokens = false;
 
-async function hideCmd() {//​.
+async function hideCmd() {
   if(tokensAreHidden()) {
     await unhide();
     return;
   }
+  createStatusBarItem();
   hidingTokens = true;
   await utils.runInAllWsFilesInOrder(hideOneFile);
   hidingTokens = false;
 }
 
-async function unhideOneFile(doc, event) {//​.
+async function unhideOneFile(doc, event) {
   log('unhideOneFile');
   let docText = docTextByDoc.get(doc);
   if(docText === undefined) return;
@@ -158,10 +179,11 @@ async function unhideOneFile(doc, event) {//​.
 
 let inUnHide = false;
 
-async function unhide(editEvent) {//​.
+async function unhide(editEvent) {
   if(inUnHide || hidingTokens ||
               (editEvent && editEvent.contentChanges.length === 0)) return;
   log('unhide');
+  disposeStatusBarItem()
   inUnHide = true;
   await utils.runInAllWsFilesInOrder(unhideOneFile, editEvent);
   inUnHide = false;
@@ -512,7 +534,7 @@ async function delMultipleMarksInLine(lineNumber, markIn) {
 let insideRefreshFile = false;
 let setTimeoutId = null;
 
-async function refreshFile(document) {//​.
+async function refreshFile(document) {
   if(insideRefreshFile) {
     // log('refreshFile, already inside refreshFile');
     if(setTimeoutId) return;
@@ -599,7 +621,7 @@ async function refreshFile(document) {//​.
   await utils.updateSide();
   await marks.dumpMarks('refreshFile');
   insideRefreshFile = false; 
-  // log('end refreshFile');//​.
+  // log('end refreshFile');
 }
 
 async function runOnAllMarksInFile(document, markFunc) {

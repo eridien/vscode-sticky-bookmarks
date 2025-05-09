@@ -361,7 +361,7 @@ async function refreshAllLoadedDocs() {
   }
 }
 
-async function runInAllWsFilesInOrder(fileFunc, data) {//​.
+async function runInAllWsFilesInOrder(fileFunc, data) {
   start('runInAllWsFilesInOrder');
   const docsRemaining = new Set();
   const docsToHideOrdered = [];

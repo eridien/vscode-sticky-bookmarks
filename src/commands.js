@@ -74,7 +74,7 @@ async function delMarksInFolderCmd(item) {
   });
 }
 
-async function hideCmd(item) {//​.
+async function hideCmd(item) {
   log('hideCmd');
   await text.hideCmd();
 }
@@ -135,7 +135,7 @@ async function deleteIconCmd(item) {
 ////////////////////////////////  EVENTS  //////////////////////////////////
 let sidebarIsVisible = false;
 
-async function changedTextInDocument(event) {//​.
+async function changedTextInDocument(event) {
   // log('changedDocument');
   if(utils.tokensAreHidden()) await text.unhide(event);
 }
@@ -163,7 +163,7 @@ async function changedVisEditors(editors) {
   }
 }
 
-async function changedSelection(event) {//​.
+async function changedSelection(event) {
   // log('changedSelection');
   const {textEditor:editor, selections, kind} = event;
   if(editor.document.uri.scheme !== 'file') return;

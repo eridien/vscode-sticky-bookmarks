@@ -60,11 +60,10 @@ vscode.window.onDidChangeActiveColorTheme((event) => {
 });
 
 const keywordSetsByLang = {};
-let   hiddenTokens = null;
 
 function updateGutter() {
   // start('updateGutter');
-  // if(hiddenTokens) return;
+  // if(tokensAreHidden()) return;
   const editor = vscode.window.activeTextEditor;
   if (!editor) return;
   const fsPath = editor.document.uri.fsPath;
@@ -89,8 +88,10 @@ function isKeyWord(languageId, word) {
   return keywordSetsByLang[languageId].has(word);
 }
 
+let hiddenTokens = null;//​.
+
 function tokensAreHidden() {
-  return hiddenTokens !== null;
+  return hiddenTokens !== null && hiddenTokens.size > 0;
 }
 
 async function hideOneFile(doc) {//​.
@@ -114,7 +115,7 @@ async function hideOneFile(doc) {//​.
     const token       = groups[0];
     const lftTokenOfs = groups.index;
     const rgtTokenOfs = lftTokenOfs + token.length;
-    tokens.push([lineNum, lftTokenOfs, rgtTokenOfs, token]);
+    tokens.push([lineNum, lftTokenOfs, token]);
     lineText    = lineText.slice(0, lftTokenOfs) + lineText.slice(rgtTokenOfs);
     newDocText += lineText + eol;
   }
@@ -131,8 +132,8 @@ async function hideOneFile(doc) {//​.
 
 let hidingTokens = false;
 
-async function hideCmd() {
-  if(hiddenTokens) {
+async function hideCmd() {//​.
+  if(tokensAreHidden()) {
     await unhide();
     return;
   }
@@ -142,86 +143,73 @@ async function hideCmd() {
   hidingTokens = false;
 }
 
+// FIX:  multiple changes in file
+// FIX:  multiple changes in line
+
 async function unhideOneFile(doc, event) {//​.
   log('unhideOneFile');
   let tokens = hiddenTokens?.get(doc.uri.fsPath);
   if(!tokens) return;
-  const eventDoc     = event?.document;
-  let contentChanges = event?.contentChanges;
-  if(!eventDoc || eventDoc.uri.fsPath !== doc.uri.fsPath) contentChanges = [];
-  let eol = '\n';
-  if (doc.eol === vscode.EndOfLine.CRLF) eol = '\r\n';
+  const eventDoc = event?.document;
+  let   changes  = event?.contentChanges;
+  if(!eventDoc || eventDoc.uri.fsPath !== doc.uri.fsPath) changes = [];
+  if(changes.length == 0 && tokens.length == 0) return;
+  let eol = (doc.eol === vscode.EndOfLine.CRLF) ? '\r\n' : '\n';
   const docText = doc.getText();
   let newDocText = '';
   const lines = docText.split(eol);
-  tokens = [...tokens];
-  let nextToken, nextTokenLineNum, nextLftTokenOfs, nextRgtTokenOfs, nextTokenStr;
+  const docTextLineCount = lines.length;
+  const docTextCharCount = docText[docTextLineCount-1].length;
+  if(docTextLineCount == 1 && docTextCharCount == 0) return;
+
+  let nextToken, nextTokenLineNum, nextLftTokenOfs, nextTokenStr;
   function getNextToken() {
-    nextToken = tokens.shift();
+    nextToken = tokens.pop();
     if(!nextToken) return;
-    [nextTokenLineNum, nextLftTokenOfs, 
-                       nextRgtTokenOfs, nextTokenStr] = nextToken;
-  }
-  let nextContentChange, nextChgRange, nextChgStartLineNum, nextChgEndLineNum;
-  function getNextContentChange() {
-    nextContentChange = contentChanges.shift();
-    if(!nextContentChange) return;
-    nextChgRange        = nextContentChange.range;
-    nextChgStartLineNum = nextChgRange.start.line;
-    nextChgEndLineNum   = nextChgRange.end.line + 
-                          nextChgRange.end.character == 0 ? -1 : 0;
+    [nextTokenLineNum, nextLftTokenOfs, nextTokenStr] = nextToken;
   }
   getNextToken();
-  getNextContentChange();
-  for(let lineNum = 0; lineNum < lines.length; lineNum++) {
+
+  let nextChange, nextChgStartLineNum, nextChgEndLineNum;
+  function getNextChange() {
+    nextChange = changes.shift();
+    if(!nextChange) return;
+    const nextChgRange  = nextChange.range;
+    nextChgStartLineNum = nextChgRange.start.line;
+    nextChgEndLineNum   = nextChgStartLineNum + 
+                          nextChange.text.split(eol).length -
+                         (nextChgRange.end.line - nextChgStartLineNum) - 1;
+  }
+  getNextChange();
+
+  let inChgRange = false;
+  for(let lineNum = lines.length-1; lineNum >= 0; lineNum--) {
     let lineText  = lines[lineNum];
-    if(!nextToken && !nextContentChange) {
-      newDocText += lineText + eol;
+    if(!nextToken) {
+      newDocText = lineText + eol + newDocText;
       continue;
     }
-    let tokenInLine = false;
-    if(lineNum == nextTokenLineNum) {
-      lftTokenOfs = nextToken[1];
-      rgtTokenOfs = nextToken[2];
-      tokenStr    = nextToken[3];
-      tokenInLine = true;
-      nextToken         = tokens.shift();
-      nextTokenLineNum  = nextToken?.[0] ?? 1e9;
+    let tokenInLine = (nextToken  && nextTokenLineNum == lineNum);
+    if(nextChange && lineNum == nextChgEndLineNum) inChgRange = true;
+    if(!tokenInLine && !inChgRange) {
+      newDocText = lineText + eol + newDocText;
+      continue;
     }
-    let chgStartLineNum;
-    let chgEndLineNum;
-    if(tokenInLine && nextChgRange 
-                   && lineNum >= nextChgRange.start.line 
-                   && lineNum <= nextChgRange.end.line) {
-
-      if(nextChgRange.end.character == 0) {
-        newDocText += lineText.slice(0, nextChgRange.start.character) + eol;
-        continue;
-      }
+    if(tokenInLine && inChgRange) {
+      newDocText = lineText.slice(0, nextLftTokenOfs) + nextTokenStr +
+                   lineText.slice(nextLftTokenOfs) + eol + newDocText;
     }
-
-    if(lineNum == nextChgLineNum) {
-      chgRange = nextContentChange.range;
-      rgtTokenOfs = nextContentChange.range.end.character;
-      chgText     = nextContentChange.text;
-      inChgRange = true;
-
-      nextContentChange = contentChanges.shift();
-      nextChgLineNum    = nextContentChange?.range.start.line ?? 1e9;
+    if(tokenInLine) getNextToken();
+    if(nextChange && lineNum == nextChgStartLineNum) {
+      inChgRange = false;
+      getNextChange();
     }
   }
-  for(const token of tokens) {
-    const lineNum     = token[0];
-    const lftTokenOfs = token[1];
-    const rgtTokenOfs = token[2];
-    const tokenStr    = token[3];
-    const lineText    = doc.lineAt(lineNum).text;
-    const newLineText = lineText.slice(0, lftTokenOfs) + 
-                        tokenStr + lineText.slice(rgtTokenOfs);
-    const edit = new vscode.WorkspaceEdit();
-    edit.replace(doc.uri, doc.lineAt(lineNum).range, newLineText);
-    await vscode.workspace.applyEdit(edit);
-  }
+  newDocText = newDocText.slice(0, -eol.length);
+  const fullRange = new vscode.Range(0, 0, docTextLineCount-1, docTextCharCount);
+  const edit = new vscode.WorkspaceEdit();
+  edit.replace(doc.uri, fullRange, newDocText);
+  await vscode.workspace.applyEdit(edit);
   hiddenTokens.delete(doc.uri.fsPath);
 }
 
@@ -230,7 +218,7 @@ async function unhideOneFile(doc, event) {//​.
 let inUnHide = false;
 
 async function unhide(editEvent) {//​.
-  if(inUnHide || hiddenTokens == null || hidingTokens ||
+  if(inUnHide || tokensAreHidden() || hidingTokens ||
               (editEvent && editEvent.contentChanges.length === 0))
     return;
   inUnHide = true;
@@ -652,7 +640,7 @@ async function refreshFile(document) {//​.
       continue;
     }
     if(tokenLineNum < markLineNum) {
-      if(mark.gen() == 2 && !hiddenTokens) {
+      if(mark.gen() == 2 && !tokensAreHidden()) {
         log('refreshFile, gen2 mark with no token, deleting mark', 
              mark.fileRelUriPath(), mark.fileRelUriPath(), tokenLineNum);
         await marks.deleteMark(mark, false, false);

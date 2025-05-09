@@ -3,7 +3,7 @@ vsce package
 
 bugs
   after hiding and tab change gutter is cleared
-  
+
 todo 
   change file item labels to show filename first
     how does other extension get small text?
@@ -45,6 +45,17 @@ not needed?
     click on sidebar to accept and create bookmark
     limit suggestions (setting)
 
+testing
+  hide/unhide empty file
+  unhide with 2 changes in one line
+  no folders in workspace and multiple
+  dark theme "window color"
+  moving a project folder
+  mark after an unclosed string
+  check missing awaits from util redirects
+  remove "debugger"
+  remove "no marks loaded"
+
 later ...
   check to use document.eol everywhere instead of \n
     replace code somewhere that reads the file
@@ -82,15 +93,6 @@ settings
     persist
   function highlight options 
     same as line
-
-testing
-  no folders in workspace and multiple
-  dark theme "window color"
-  moving a project folder
-  mark after an unclosed string
-  check missing awaits from util redirects
-  remove "debugger"
-  remove "no marks loaded"
 
 features
   sticky

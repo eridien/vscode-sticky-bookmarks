@@ -72,36 +72,40 @@ async function activate(context) {
   await marks   .init(context);
 
   // use this to track edits...
-  vscode.workspace.onDidChangeTextDocument(async event => {
+  const textDocumentDisposable = vscode.workspace.onDidChangeTextDocument(async event => {
     const document = event.document;
-    if (event?.document?.uri?.scheme !== 'file') { return }
+    if (event?.document?.uri?.scheme !== 'file') { return; }
     await commands.changedTextInDocument(event);
   });
 
-  treeView.onDidChangeVisibility(async event => {
+  const visibilityDisposable = treeView.onDidChangeVisibility(async event => {
     await commands.changedSidebarVisiblitiy(event.visible);
   });
 
-  vscode.window.onDidChangeVisibleTextEditors(async editors => {
+  const visibleEditorsDisposable = vscode.window.onDidChangeVisibleTextEditors(async editors => {
     await commands.changedVisEditors(editors);
   });
 
-  vscode.window.onDidChangeActiveTextEditor(async editor => {
+  const activeEditorDisposable = vscode.window.onDidChangeActiveTextEditor(async editor => {
     await commands.changedEditor(editor);
   });
-  vscode.window.onDidChangeTextEditorSelection(async event => {
+
+  const selectionDisposable = vscode.window.onDidChangeTextEditorSelection(async event => {
     if (event.textEditor?.document.uri.scheme !== 'file') return;
     await commands.changedSelection(event);
   });
 
   context.subscriptions.push(
                 prevCmd, nextCmd, toggleGen2Cmd, toggleGen1Cmd, 
-                prevGlobalCmd, nextGlobalCmd,
+                prevGlobalCmd, nextGlobalCmd, deleteIconCmd,
                 toggleGen2GlobalCmd, toggleGen1GlobalCmd,
                 delMarksInFileCmd, delMarksInFolderCmd, hideCmd, 
                 expandCmd, refreshCmd, itemClickCmd, 
                 moveFolderUpCmd, moveFolderDownCmd, eraseCmd, nameCmd,
-                deleteIconCmd );
+
+                textDocumentDisposable, visibilityDisposable, 
+                visibleEditorsDisposable, activeEditorDisposable,
+                selectionDisposable );
     
   end('activating extension');
 }

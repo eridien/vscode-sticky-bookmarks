@@ -2,7 +2,15 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-  
+  hide sometimes only hides first token
+    let theTvdbToken = null;
+    //​.
+    //​.
+    const getToken = async () => {//​.
+      function foo() {//​.
+        function bar() {
+
+
 todo 
   change file item labels to show filename first
     how does other extension get small text?

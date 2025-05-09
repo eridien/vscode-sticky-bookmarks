@@ -7,7 +7,7 @@ const {log, start, end}  = utils.getLog('text');
 const showLineNumbers      = true;
 const showBreadCrumbs      = true;
 const showCodeWhenCrumbs   = true;
-const openSideBarOnNewMark = true;
+const openSideBarOnNewMark = false;
 const maxLinesInCompText   = 6;
 
 let context;
@@ -126,6 +126,7 @@ async function hideOneFile(doc) {
 let statusBarItem = null;
 
 function createStatusBarItem() {
+  if(statusBarItem) return;
   statusBarItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right, 100
   );
@@ -137,10 +138,9 @@ function createStatusBarItem() {
 }
 
 function disposeStatusBarItem() {
-  if (statusBarItem) {
-    statusBarItem.dispose();
-    statusBarItem = null;
-  }
+  if (!statusBarItem) return;
+  statusBarItem.dispose();
+  statusBarItem = null;
 }
 
 let hidingTokens = false;

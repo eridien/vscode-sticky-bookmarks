@@ -88,10 +88,11 @@ function isKeyWord(languageId, word) {
   return keywordSetsByLang[languageId].has(word);
 }
 
-let hiddenTokens = null;//​.
+let docTextByDoc = new Map();
 
-function tokensAreHidden() {
-  return hiddenTokens !== null && hiddenTokens.size > 0;
+function tokensAreHidden(doc) {//​.
+  return docTextByDoc.size !== 0 &&  
+       (!doc || docTextByDoc[doc] !== undefined);
 }
 
 async function hideOneFile(doc) {//​.
@@ -100,34 +101,26 @@ async function hideOneFile(doc) {//​.
   const regexG  = tokenRegEx(doc.languageId, false, true);
   const docText = doc.getText();
   if(!regexG.test(docText)) return;
-  let eol = '\n';
-  if (doc.eol === vscode.EndOfLine.CRLF) eol = '\r\n';
-  const tokens   = [];
-  let newDocText = '';
-  const lines = docText.split(eol);
+  docTextByDoc.set(doc, docText);
+  const eol = (doc.eol === vscode.EndOfLine.CRLF) ? '\r\n' : '\n';
+  const lines = docText.split(/\r?\n/);
   for(let lineNum = 0; lineNum < lines.length; lineNum++) {
     let lineText = lines[lineNum];
     const groups = regexG.exec(lineText);
-    if(!groups) {
-      newDocText += lineText + eol;
-      continue;
-    }
+    if(!groups) continue;
     const token       = groups[0];
     const lftTokenOfs = groups.index;
     const rgtTokenOfs = lftTokenOfs + token.length;
-    tokens.push([lineNum, lftTokenOfs, token]);
-    lineText    = lineText.slice(0, lftTokenOfs) + lineText.slice(rgtTokenOfs);
-    newDocText += lineText + eol;
+    lines[lineNum]    = lineText.slice(0, lftTokenOfs) + lineText.slice(rgtTokenOfs);
   }
-  newDocText = newDocText.slice(0, -eol.length);
-  hiddenTokens.set(doc.uri.fsPath, tokens);
   const lastLine = doc.lineCount > 0 ? doc.lineCount - 1 : 0;
   const lastChar = doc.lineCount > 0
                  ? doc.lineAt(lastLine).range.end.character : 0;
   const fullRange = new vscode.Range(0, 0, lastLine, lastChar);
   const edit = new vscode.WorkspaceEdit();
-  edit.replace(doc.uri, fullRange, newDocText);
+  edit.replace(doc.uri, fullRange, lines.join(eol));
   await vscode.workspace.applyEdit(edit);
+  await refreshFile(doc);
 }
 
 let hidingTokens = false;
@@ -138,96 +131,40 @@ async function hideCmd() {//​.
     return;
   }
   hidingTokens = true;
-  hiddenTokens = new Map();
   await utils.runInAllWsFilesInOrder(hideOneFile);
   hidingTokens = false;
 }
 
-// FIX:  multiple changes in file
-//       go fwd and keep track of line ofs
-// FIX:  multiple changes in line
-//       go by linenum and charpos
-
 async function unhideOneFile(doc, event) {//​.
   log('unhideOneFile');
-  let tokens = hiddenTokens?.get(doc.uri.fsPath);
-  if(!tokens) return;
-  const eventDoc = event?.document;
-  let   changes  = event?.contentChanges;
-  if(!eventDoc || eventDoc.uri.fsPath !== doc.uri.fsPath) changes = [];
-  if(changes.length == 0 && tokens.length == 0) return;
-  let eol = (doc.eol === vscode.EndOfLine.CRLF) ? '\r\n' : '\n';
-  const docText = doc.getText();
-  let newDocText = '';
-  const lines = docText.split(eol);
-  const docTextLineCount = lines.length;
-  const docTextCharCount = docText[docTextLineCount-1].length;
-  if(docTextLineCount == 1 && docTextCharCount == 0) return;
-
-  let nextToken, nextTokenLineNum, nextLftTokenOfs, nextTokenStr;
-  function getNextToken() {
-    nextToken = tokens.pop();
-    if(!nextToken) return;
-    [nextTokenLineNum, nextLftTokenOfs, nextTokenStr] = nextToken;
-  }
-  getNextToken();
-
-  let nextChange, nextChgStartLineNum, nextChgEndLineNum;
-  function getNextChange() {
-    nextChange = changes.shift();
-    if(!nextChange) return;
-    const nextChgRange  = nextChange.range;
-    nextChgStartLineNum = nextChgRange.start.line;
-    nextChgEndLineNum   = nextChgStartLineNum + 
-                          nextChange.text.split(eol).length -
-                         (nextChgRange.end.line - nextChgStartLineNum) - 1;
-  }
-  getNextChange();
-
-  let inChgRange = false;
-  for(let lineNum = lines.length-1; lineNum >= 0; lineNum--) {
-    let lineText  = lines[lineNum];
-    if(!nextToken) {
-      newDocText = lineText + eol + newDocText;
-      continue;
-    }
-    let tokenInLine = (nextToken  && nextTokenLineNum == lineNum);
-    if(nextChange && lineNum == nextChgEndLineNum) inChgRange = true;
-    if(!tokenInLine && !inChgRange) {
-      newDocText = lineText + eol + newDocText;
-      continue;
-    }
-    if(tokenInLine && inChgRange) {
-      newDocText = lineText.slice(0, nextLftTokenOfs) + nextTokenStr +
-                   lineText.slice(nextLftTokenOfs) + eol + newDocText;
-    }
-    if(tokenInLine) getNextToken();
-    if(nextChange && lineNum == nextChgStartLineNum) {
-      inChgRange = false;
-      getNextChange();
+  let docText = docTextByDoc.get(doc);
+  if(docText === undefined) return;
+  docTextByDoc.delete(doc);
+  const lastLine  = doc.lineAt(doc.lineCount - 1);
+  const fullRange = new vscode.Range(0, 0, lastLine.lineNumber, 
+                                           lastLine.range.end.character);
+  const edit1 = new vscode.WorkspaceEdit();
+  edit1.replace(doc.uri, fullRange, docText);
+  await vscode.workspace.applyEdit(edit1);
+  if(event) {
+    for(const change of event.contentChanges) {
+      const edit2 = new vscode.WorkspaceEdit();
+      edit2.replace(doc.uri, change.range, change.text);
+      await vscode.workspace.applyEdit(edit2);
     }
   }
-  newDocText = newDocText.slice(0, -eol.length);
-  const fullRange = new vscode.Range(0, 0, docTextLineCount-1, docTextCharCount);
-  const edit = new vscode.WorkspaceEdit();
-  edit.replace(doc.uri, fullRange, newDocText);
-  await vscode.workspace.applyEdit(edit);
-  hiddenTokens.delete(doc.uri.fsPath);
+  await refreshFile(doc);
 }
-
-  // const  { range, rangeOffset, rangeLength, text } = contentChanges[0];
 
 let inUnHide = false;
 
 async function unhide(editEvent) {//​.
-  if(inUnHide || tokensAreHidden() || hidingTokens ||
-              (editEvent && editEvent.contentChanges.length === 0))
-    return;
-  inUnHide = true;
+  if(inUnHide || hidingTokens ||
+              (editEvent && editEvent.contentChanges.length === 0)) return;
   log('unhide');
+  inUnHide = true;
   await utils.runInAllWsFilesInOrder(unhideOneFile, editEvent);
-  hiddenTokens = null;
-  inUnHide     = false;
+  inUnHide = false;
   await utils.refreshAllLoadedDocs();
 }
 

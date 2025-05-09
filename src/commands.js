@@ -136,7 +136,7 @@ async function deleteIconCmd(item) {
 let sidebarIsVisible = false;
 
 async function changedTextInDocument(event) {//​.
-  log('changedDocument');
+  // log('changedDocument');
   if(utils.tokensAreHidden()) await text.unhide(event);
 }
 
@@ -150,12 +150,12 @@ async function changedSidebarVisiblitiy(visible) {
 
 async function changedEditor(editor) {
   if(!editor || !editor.document) return;
-  log('changedEditor');
+  // log('changedEditor');
   await text.refreshFile(editor.document);
 }
 
 async function changedVisEditors(editors) {
-  log('changedVisEditors');
+  // log('changedVisEditors');
   for(const editor of editors) {
     if(editor.document.uri.scheme !== 'file') continue;
     // log('changedVisEditors', editor.document.fileName);
@@ -164,7 +164,7 @@ async function changedVisEditors(editors) {
 }
 
 async function changedSelection(event) {//​.
-  log('changedSelection');
+  // log('changedSelection');
   const {textEditor:editor, selections, kind} = event;
   if(editor.document.uri.scheme !== 'file') return;
   if(selections.length == 1 && selections[0].isEmpty &&

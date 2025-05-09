@@ -229,7 +229,7 @@ function toggleFolder(item, forceClose = false, forceOpen = false) {
 }
 
 async function itemClick(item) {
-  log('itemClick');
+  // log('itemClick');
   if(item === undefined) {
     item = treeView.selection[0];
     if (!item) { log('info err', 'No Bookmark Selected'); return; }

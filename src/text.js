@@ -93,7 +93,7 @@ function tokensAreHidden() {
   return hiddenTokens !== null;
 }
 
-async function hideOneFile(doc) {
+async function hideOneFile(doc) {//​.
   log('hideOneFile');
   const [commLft, commRgt] = utils.commentsByLang(doc.languageId);
   const regexG  = tokenRegEx(doc.languageId, false, true);
@@ -142,9 +142,9 @@ async function hideCmd() {
   hidingTokens = false;
 }
 
-async function unhideOneFile(doc, event) {
+async function unhideOneFile(doc, event) {//​.
   log('unhideOneFile');
-  const tokens = hiddenTokens?.get(doc.uri.fsPath);
+  let tokens = hiddenTokens?.get(doc.uri.fsPath);
   if(!tokens) return;
   const eventDoc     = event?.document;
   let contentChanges = event?.contentChanges;
@@ -154,8 +154,61 @@ async function unhideOneFile(doc, event) {
   const docText = doc.getText();
   let newDocText = '';
   const lines = docText.split(eol);
+  tokens = [...tokens];
+  let nextToken, nextTokenLineNum, nextLftTokenOfs, nextRgtTokenOfs, nextTokenStr;
+  function getNextToken() {
+    nextToken = tokens.shift();
+    if(!nextToken) return;
+    [nextTokenLineNum, nextLftTokenOfs, 
+                       nextRgtTokenOfs, nextTokenStr] = nextToken;
+  }
+  let nextContentChange, nextChgRange, nextChgStartLineNum, nextChgEndLineNum;
+  function getNextContentChange() {
+    nextContentChange = contentChanges.shift();
+    if(!nextContentChange) return;
+    nextChgRange        = nextContentChange.range;
+    nextChgStartLineNum = nextChgRange.start.line;
+    nextChgEndLineNum   = nextChgRange.end.line + 
+                          nextChgRange.end.character == 0 ? -1 : 0;
+  }
+  getNextToken();
+  getNextContentChange();
   for(let lineNum = 0; lineNum < lines.length; lineNum++) {
-    let lineText = lines[lineNum];
+    let lineText  = lines[lineNum];
+    if(!nextToken && !nextContentChange) {
+      newDocText += lineText + eol;
+      continue;
+    }
+    let tokenInLine = false;
+    if(lineNum == nextTokenLineNum) {
+      lftTokenOfs = nextToken[1];
+      rgtTokenOfs = nextToken[2];
+      tokenStr    = nextToken[3];
+      tokenInLine = true;
+      nextToken         = tokens.shift();
+      nextTokenLineNum  = nextToken?.[0] ?? 1e9;
+    }
+    let chgStartLineNum;
+    let chgEndLineNum;
+    if(tokenInLine && nextChgRange 
+                   && lineNum >= nextChgRange.start.line 
+                   && lineNum <= nextChgRange.end.line) {
+
+      if(nextChgRange.end.character == 0) {
+        newDocText += lineText.slice(0, nextChgRange.start.character) + eol;
+        continue;
+      }
+    }
+
+    if(lineNum == nextChgLineNum) {
+      chgRange = nextContentChange.range;
+      rgtTokenOfs = nextContentChange.range.end.character;
+      chgText     = nextContentChange.text;
+      inChgRange = true;
+
+      nextContentChange = contentChanges.shift();
+      nextChgLineNum    = nextContentChange?.range.start.line ?? 1e9;
+    }
   }
   for(const token of tokens) {
     const lineNum     = token[0];
@@ -176,10 +229,9 @@ async function unhideOneFile(doc, event) {
 
 let inUnHide = false;
 
-async function unhide(editEvent) {
-  if(inUnHide) return;
-  if(hiddenTokens == null || hidingTokens ||
-              (editEvent && editEvent.contentChanges.length === 0)) 
+async function unhide(editEvent) {//​.
+  if(inUnHide || hiddenTokens == null || hidingTokens ||
+              (editEvent && editEvent.contentChanges.length === 0))
     return;
   inUnHide = true;
   log('unhide');
@@ -533,7 +585,7 @@ async function delMultipleMarksInLine(lineNumber, markIn) {
 let insideRefreshFile = false;
 let setTimeoutId = null;
 
-async function refreshFile(document) {
+async function refreshFile(document) {//​.
   if(insideRefreshFile) {
     // log('refreshFile, already inside refreshFile');
     if(setTimeoutId) return;
@@ -555,7 +607,7 @@ async function refreshFile(document) {
     }
     document = editor.document;
   }
-  start('refreshFile ' + document.uri.path);
+  start('refreshFile ' + document.uri.path, true);
   const tokenObjs  = getTokenObjsInFile(document);
   const fileMarks  = marks.getMarksInFile(document.uri.fsPath);
   // log('refreshFile, tokenObjs:', tokenObjs.length,
@@ -620,7 +672,7 @@ async function refreshFile(document) {
   await utils.updateSide();
   await marks.dumpMarks('refreshFile');
   insideRefreshFile = false; 
-  log('end refreshFile');
+  // log('end refreshFile');//​.
 }
 
 async function runOnAllMarksInFile(document, markFunc) {

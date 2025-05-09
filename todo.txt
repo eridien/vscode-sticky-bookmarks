@@ -2,7 +2,6 @@ npm install -g @vscode/vsce
 vsce package
 
 bugs
-  after hiding and tab change gutter is cleared
 
 todo 
   change file item labels to show filename first

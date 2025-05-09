@@ -144,7 +144,9 @@ async function hideCmd() {//​.
 }
 
 // FIX:  multiple changes in file
+//       go fwd and keep track of line ofs
 // FIX:  multiple changes in line
+//       go by linenum and charpos
 
 async function unhideOneFile(doc, event) {//​.
   log('unhideOneFile');

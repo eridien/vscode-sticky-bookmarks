@@ -10,8 +10,9 @@ bugs
       function foo() {//​.
         function bar() {
 
-
 todo 
+  remove breadcrumbs from comp text
+  reverse breadcrumbs
   persist docTextByDoc
   change file item labels to show filename first
     how does other extension get small text?

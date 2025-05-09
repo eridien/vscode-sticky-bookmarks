@@ -102,7 +102,6 @@ async function hideOneFile(doc) {
   const docText = doc.getText();
   if(!regexG.test(docText)) return;
   docTextByDoc.set(doc, docText);
-  const eol = (doc.eol === vscode.EndOfLine.CRLF) ? '\r\n' : '\n';
   const lines = docText.split(/\r?\n/);
   for(let lineNum = 0; lineNum < lines.length; lineNum++) {
     let lineText = lines[lineNum];
@@ -118,6 +117,7 @@ async function hideOneFile(doc) {
                  ? doc.lineAt(lastLine).range.end.character : 0;
   const fullRange = new vscode.Range(0, 0, lastLine, lastChar);
   const edit = new vscode.WorkspaceEdit();
+  const eol  = (doc.eol === vscode.EndOfLine.CRLF) ? '\r\n' : '\n';
   edit.replace(doc.uri, fullRange, lines.join(eol));
   await vscode.workspace.applyEdit(edit);
   await refreshFile(doc);

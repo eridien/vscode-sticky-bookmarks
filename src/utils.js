@@ -445,7 +445,7 @@ async function runOnAllFolders(folderFunc, fileFunc, markFunc) {
 
 ///////////////////  BACK REFERENCES -- CHECK AWAITS //////////////
 
-function tokensAreHidden(...args)    { return text.tokensAreHidden(...args); }
+function tokensAreHidden(...args) { return text.tokensAreHidden(...args); }
 function setBusy(...args)         { return sidebar.setBusy(...args); }
 function refreshFile(...args)     { return text.refreshFile(...args); }
 function updateGutter(...args)    { return text.updateGutter(...args); }

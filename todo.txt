@@ -7,9 +7,6 @@ todo
   change file item labels to show filename first
     how does other extension get small text?
   support untitled docs with document.uri.toString()
-  hide all marks, restore on any edit
-    show banner
-    red gutter icons
   automatically switch gen2 to gen1 based on language/files
   menu
     hide all

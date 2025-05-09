@@ -12,6 +12,7 @@ bugs
 
 
 todo 
+  persist docTextByDoc
   change file item labels to show filename first
     how does other extension get small text?
   support untitled docs with document.uri.toString()

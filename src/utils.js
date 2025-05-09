@@ -3,12 +3,6 @@ const path   = require('path');
 const fs     = require('fs').promises;
 const {log, start, end}  = getLog('util');
 
-const includeFileGlobs = '**/*.js';
-const excludeFileGlobs = '**/node_modules/**';
-
-let context, cmds, sidebar, sidebarProvider, text, marks, settings;
-
-function initContext(contextIn) { context = contextIn; }
 function init(commandsIn, sidebarIn, sidebarProviderIn, 
                           textIn, marksIn, settingsIn) {
   cmds     = commandsIn;
@@ -462,3 +456,4 @@ module.exports = {
   setBusy, sleep, tokenToDigits, tokenToStr, updateSide, 
   runInAllWsFilesInOrder }
 
+//​.

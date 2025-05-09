@@ -3,12 +3,6 @@ vsce package
 
 bugs
   hide sometimes only hides first token
-    let theTvdbToken = null;
-    //​.
-    //​.
-    const getToken = async () => {//​.
-      function foo() {//​.
-        function bar() {
 
 todo 
   remove breadcrumbs from comp text

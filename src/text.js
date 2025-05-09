@@ -4,12 +4,6 @@ const marks  = require('./marks.js');
 const utils  = require('./utils.js');
 const {log, start, end}  = utils.getLog('text');
 
-const showLineNumbers      = true;
-const showBreadCrumbs      = true;
-const showCodeWhenCrumbs   = true;
-const openSideBarOnNewMark = false;
-const maxLinesInCompText   = 6;
-
 let context;
 let gutDecLgt1Uri = null, gutDecDrk1Uri = null, gutterDecGen1 = null;
 let gutDecLgt2Uri = null, gutDecDrk2Uri = null, gutterDecGen2 = null;
@@ -95,30 +89,31 @@ function tokensAreHidden(doc) {
        (!doc || docTextByDoc[doc] !== undefined);
 }
 
-async function hideOneFile(doc) {
+async function hideOneFile(doc) {//​.
   log('hideOneFile');
-  const [commLft, commRgt] = utils.commentsByLang(doc.languageId);
   const regexG  = tokenRegEx(doc.languageId, false, true);
-  const docText = doc.getText();
+  let docText = doc.getText();
   if(!regexG.test(docText)) return;
   docTextByDoc.set(doc, docText);
-  const lines = docText.split(/\r?\n/);
-  for(let lineNum = 0; lineNum < lines.length; lineNum++) {
-    let lineText = lines[lineNum];
-    const groups = regexG.exec(lineText);
-    if(!groups) continue;
-    const token       = groups[0];
-    const lftTokenOfs = groups.index;
+  const iter = docText.matchAll(regexG);
+  const matches = [...iter];
+  matches.reverse();
+  let lastOfs = docText.length;
+  let newText = '';
+  for(const match of matches) {
+    const token = match[0];
+    const lftTokenOfs = match.index;
     const rgtTokenOfs = lftTokenOfs + token.length;
-    lines[lineNum]    = lineText.slice(0, lftTokenOfs) + lineText.slice(rgtTokenOfs);
+    newText = docText.slice(rgtTokenOfs, lastOfs) + newText;
+    lastOfs = lftTokenOfs;
   }
+  newText = docText.slice(0, lastOfs) + newText;
   const lastLine = doc.lineCount > 0 ? doc.lineCount - 1 : 0;
   const lastChar = doc.lineCount > 0
                  ? doc.lineAt(lastLine).range.end.character : 0;
   const fullRange = new vscode.Range(0, 0, lastLine, lastChar);
   const edit = new vscode.WorkspaceEdit();
-  const eol  = (doc.eol === vscode.EndOfLine.CRLF) ? '\r\n' : '\n';
-  edit.replace(doc.uri, fullRange, lines.join(eol));
+  edit.replace(doc.uri, fullRange, newText);
   await vscode.workspace.applyEdit(edit);
   await refreshFile(doc);
 }
@@ -336,7 +331,7 @@ const clearDecoration = () => {
   tgtEditor = null;
 };
 
-async function bookmarkItemClick(item) {
+async function bookmarkItemClick(item) {//​.
   const mark = item.mark;
   if(! await marks.verifyMark(mark)) {
     log('Bookmark Missing'); 
@@ -407,7 +402,8 @@ async function scrollToPrevNext(fwd) {
 function getTokensInLine(document, lineNumber) {
   const lineText = document.lineAt(lineNumber).text;
   const regexG   = tokenRegEx(document.languageId, false, true);
-  const matches  = [...lineText.matchAll(regexG)];
+  const iter     = lineText.matchAll(regexG);
+  const matches  = [...iter];
   return matches.map(match => {
     return {
       tokenStr: match[0],
@@ -418,9 +414,10 @@ function getTokensInLine(document, lineNumber) {
 }
 
 function getTokenObjsInFile(document) {
-  const docText   = document.getText();
-  const regexG    = tokenRegEx(document.languageId, false, true);
-  const matches   = [...docText.matchAll(regexG)];
+  const docText = document.getText();
+  const regexG  = tokenRegEx(document.languageId, false, true);
+  const iter    = docText.matchAll(regexG);
+  const matches = [...iter];
   const tokenObjs = [];
   for (const match of matches) {
     const offset     = match.index;
@@ -439,7 +436,8 @@ async function refreshMenu() {
 }
 
 async function deleteTokensFromLineText(regexG, commLft, commRgt, lineText) {
-  const matches  = [...lineText.matchAll(regexG)];
+  const iter    = lineText.matchAll(regexG);
+  const matches = [...iter];
   if(matches.length == 0) return null;
   matches.reverse();
   let   newText     = '';
@@ -534,7 +532,7 @@ async function delMultipleMarksInLine(lineNumber, markIn) {
 let insideRefreshFile = false;
 let setTimeoutId = null;
 
-async function refreshFile(document) {
+async function refreshFile(document) {//​.
   if(insideRefreshFile) {
     // log('refreshFile, already inside refreshFile');
     if(setTimeoutId) return;
@@ -627,7 +625,8 @@ async function refreshFile(document) {
 async function runOnAllMarksInFile(document, markFunc) {
   const docText  = document.getText();
   const regexG   = tokenRegEx(document.languageId, false, true);
-  const matches  = [...docText.matchAll(regexG)];
+  const iter     = docText.matchAll(regexG);
+  const matches  = [...iter];
   matches.reverse();
   for (const match of matches) {
     const offset     = match.index;
